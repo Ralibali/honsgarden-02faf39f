@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Calculator } from 'lucide-react';
 
 const monthlyEggs = [
   { month: 'Sep', eggs: 120 },
@@ -13,22 +14,29 @@ const monthlyEggs = [
 ];
 
 const henProduction = [
-  { name: 'Greta', eggs: 18 },
-  { name: 'Astrid', eggs: 22 },
-  { name: 'Saga', eggs: 15 },
-  { name: 'Freja', eggs: 20 },
-  { name: 'Sigrid', eggs: 12 },
-  { name: 'Elin', eggs: 19 },
+  { name: 'Brun Isa', eggs: 26 },
+  { name: 'Ölandshöna #3', eggs: 18 },
+  { name: 'Orusthöna', eggs: 15 },
+  { name: 'Ölandshöna', eggs: 15 },
+  { name: 'Ölandshöna #2', eggs: 14 },
+  { name: 'Dvärghöna', eggs: 8 },
 ];
 
 const breedData = [
-  { name: 'Barnevelder', value: 2, color: 'hsl(30, 50%, 45%)' },
-  { name: 'Sussex', value: 3, color: 'hsl(142, 50%, 38%)' },
-  { name: 'Leghorn', value: 2, color: 'hsl(38, 80%, 50%)' },
-  { name: 'Orpington', value: 3, color: 'hsl(0, 65%, 50%)' },
-  { name: 'Marans', value: 1, color: 'hsl(280, 40%, 50%)' },
-  { name: 'Araucana', value: 1, color: 'hsl(200, 50%, 50%)' },
+  { name: 'Ölandshöna', value: 3, color: 'hsl(142, 50%, 38%)' },
+  { name: 'Orusthöna', value: 1, color: 'hsl(30, 50%, 45%)' },
+  { name: 'Gammalsvensk Dvärghöna', value: 1, color: 'hsl(38, 80%, 50%)' },
+  { name: 'Isa Brown', value: 1, color: 'hsl(0, 65%, 50%)' },
 ];
+
+const costData = {
+  totalFeedCost: 965,
+  totalOtherCost: 450,
+  totalEggs: 850,
+  costPerEgg: 1.66,
+  revenuePerEgg: 3.53,
+  profitPerEgg: 1.87,
+};
 
 const tooltipStyle = {
   backgroundColor: 'hsl(40, 25%, 99%)',
@@ -65,6 +73,33 @@ export default function Statistics() {
         ))}
       </div>
 
+      {/* Cost per egg card */}
+      <Card className="bg-primary/5 border-primary/20 shadow-sm">
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Calculator className="h-5 w-5 text-primary" />
+            <h2 className="font-serif text-base text-primary">Kostnad per ägg</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div>
+              <p className="stat-number text-xl text-destructive">{costData.costPerEgg.toFixed(2)} kr</p>
+              <p className="data-label text-[10px] mt-1">Kostnad/ägg</p>
+            </div>
+            <div>
+              <p className="stat-number text-xl text-success">{costData.revenuePerEgg.toFixed(2)} kr</p>
+              <p className="data-label text-[10px] mt-1">Intäkt/ägg</p>
+            </div>
+            <div>
+              <p className="stat-number text-xl text-primary">{costData.profitPerEgg.toFixed(2)} kr</p>
+              <p className="data-label text-[10px] mt-1">Vinst/ägg</p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 text-center">
+            Baserat på {costData.totalEggs} ägg, {costData.totalFeedCost} kr foder och {costData.totalOtherCost} kr övriga kostnader
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {/* Monthly trend */}
         <Card className="bg-card border-border shadow-sm">
@@ -95,7 +130,7 @@ export default function Statistics() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={henProduction} layout="vertical">
                   <XAxis type="number" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="name" stroke={axisColor} fontSize={10} tickLine={false} axisLine={false} width={50} />
+                  <YAxis type="category" dataKey="name" stroke={axisColor} fontSize={10} tickLine={false} axisLine={false} width={80} />
                   <Tooltip contentStyle={tooltipStyle} />
                   <Bar dataKey="eggs" fill="hsl(142, 40%, 35%)" radius={[0, 4, 4, 0]} name="Ägg" />
                 </BarChart>
@@ -146,7 +181,7 @@ export default function Statistics() {
                     <div className="w-full bg-secondary rounded-full h-1.5">
                       <div
                         className="bg-primary rounded-full h-1.5 transition-all duration-500"
-                        style={{ width: `${(hen.eggs / 25) * 100}%` }}
+                        style={{ width: `${(hen.eggs / 30) * 100}%` }}
                       />
                     </div>
                   </div>

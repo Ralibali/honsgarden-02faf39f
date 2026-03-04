@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Shield, Download, Bird, TrendingUp, Zap, Star } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby } from 'lucide-react';
 
 const freeFeatures = [
   'Upp till 10 hönor',
@@ -16,18 +16,31 @@ const premiumFeatures = [
   'Smarta varningar & prognoser',
   'Vädervarningar & säsongstips',
   'Hälsologg & vaccinationer',
+  'Foderspårning & kostnad/ägg',
+  'Kläckningsräknare',
+  'Dagliga uppgifter & påminnelser',
+  'Fotoalbum för hönor',
+  'Kundregister & försäljning',
   'Exportera data (PDF/CSV)',
   'Prioriterad support',
   'Alla framtida funktioner',
 ];
 
 const highlights = [
+  { icon: Calculator, title: 'Kostnad per ägg', desc: 'Se exakt vad varje ägg kostar att producera – foder, veterinär och allt.' },
   { icon: TrendingUp, title: 'Smarta prognoser', desc: 'Se hur många ägg du kan förvänta dig nästa vecka baserat på dina data.' },
-  { icon: Bell, title: 'Tidiga varningar', desc: 'Få en signal direkt om en höna plötsligt slutar värpa.' },
+  { icon: Bell, title: 'Aldrig missa avmaskning', desc: 'Automatiska påminnelser för vaccination, avmaskning och veterinärbesök.' },
+  { icon: Baby, title: 'Kläckningsräknare', desc: '21-dagars nedräkning med milstolpar – perfekt för kläckmaskinen.' },
+  { icon: ClipboardCheck, title: 'Dagliga uppgifter', desc: 'Checklista som återställs varje morgon – missa aldrig att stänga luckan.' },
+  { icon: Camera, title: 'Fotoalbum', desc: 'Dokumentera dina hönor med bilder – se dem växa och utvecklas.' },
   { icon: BarChart3, title: 'Detaljerad statistik', desc: 'Jämför månader, se trender och hitta din bästa värpare.' },
   { icon: Download, title: 'Exportera rapporter', desc: 'Ladda ner dina rapporter som PDF eller CSV för bokföring.' },
-  { icon: Shield, title: 'Prioriterad support', desc: 'Snabb hjälp via e-post – vi svarar alltid på svenska.' },
-  { icon: Zap, title: 'Alla framtida funktioner', desc: 'Som Premium-medlem får du tillgång till allt nytt vi bygger.' },
+];
+
+const testimonials = [
+  { name: 'Anna-Lena', location: 'Dalarna', text: 'Sedan jag uppgraderade har jag koll på exakt vad varje ägg kostar. Fantastiskt!' },
+  { name: 'Per-Olof', location: 'Skåne', text: 'Kläckningsräknaren räddade min första kull – jag hade glömt sluta vända äggen utan den.' },
+  { name: 'Margareta', location: 'Gotland', text: 'Dagliga uppgifterna gör att barnen kan hjälpa till. De älskar att bocka av!' },
 ];
 
 export default function Premium() {
@@ -40,10 +53,10 @@ export default function Premium() {
           Premium
         </div>
         <h1 className="text-2xl sm:text-4xl font-serif text-foreground mb-3">
-          Få ut det mesta av din hönsgård
+          Din hönsgård förtjänar det bästa
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto">
-          Uppgradera till Premium och lås upp smarta verktyg som hjälper dig maximera äggproduktionen och spara tid.
+          Lås upp alla verktyg och ta full kontroll över din hönsgård – från ägg till ekonomi.
         </p>
       </div>
 
@@ -79,12 +92,9 @@ export default function Premium() {
             </div>
             <p className="text-muted-foreground text-sm mb-4">Allt du behöver – och lite till</p>
             
-            {/* Monthly price */}
             <div className="mb-2">
               <p className="stat-number text-3xl text-foreground">19 kr<span className="text-sm text-muted-foreground font-normal">/mån</span></p>
             </div>
-
-            {/* Yearly price with savings */}
             <div className="flex items-center gap-2 mb-6">
               <p className="text-sm text-muted-foreground">
                 eller <span className="font-semibold text-foreground">149 kr/år</span>
@@ -94,7 +104,7 @@ export default function Premium() {
               </span>
             </div>
 
-            <ul className="space-y-3 mb-6">
+            <ul className="space-y-2.5 mb-6">
               {premiumFeatures.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-foreground">
                   <Check className="h-4 w-4 text-primary shrink-0" />
@@ -103,7 +113,6 @@ export default function Premium() {
               ))}
             </ul>
 
-            {/* Two CTA buttons */}
             <div className="space-y-2">
               <Button className="w-full h-11 active:scale-95 transition-transform text-base font-medium">
                 Välj årsplan – 149 kr/år
@@ -128,10 +137,30 @@ export default function Premium() {
         </p>
       </div>
 
+      {/* Testimonials */}
+      <div>
+        <h2 className="font-serif text-xl sm:text-2xl text-foreground text-center mb-4">Vad säger våra användare?</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {testimonials.map((t) => (
+            <Card key={t.name} className="bg-card border-border shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1 mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-warning text-warning" />
+                  ))}
+                </div>
+                <p className="text-xs text-foreground italic mb-2">"{t.text}"</p>
+                <p className="text-[10px] text-muted-foreground font-medium">{t.name}, {t.location}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
       {/* Feature highlights */}
       <div>
         <h2 className="font-serif text-xl sm:text-2xl text-foreground text-center mb-6">
-          Vad ingår i Premium?
+          Allt som ingår i Premium
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {highlights.map((f) => (
@@ -150,7 +179,7 @@ export default function Premium() {
         </div>
       </div>
 
-      {/* FAQ-style reassurance */}
+      {/* No commitment */}
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="p-5 sm:p-6 text-center">
           <h3 className="font-serif text-lg text-foreground mb-2">Ingen bindningstid</h3>

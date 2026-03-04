@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb, ArrowRight, Sun, BookOpen, Leaf, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { DailySummaryModal } from '@/components/DailySummaryModal';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -156,6 +157,7 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+      <DailySummaryModal />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
