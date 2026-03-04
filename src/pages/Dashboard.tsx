@@ -1,171 +1,183 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Egg, Bird, TrendingUp, TrendingDown, Coins, Plus, CloudSun, AlertTriangle } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb, ArrowRight, Sun } from 'lucide-react';
 
-const weekData = [
-  { day: 'Mån', eggs: 4 },
-  { day: 'Tis', eggs: 6 },
-  { day: 'Ons', eggs: 5 },
-  { day: 'Tor', eggs: 7 },
-  { day: 'Fre', eggs: 3 },
-  { day: 'Lör', eggs: 8 },
-  { day: 'Sön', eggs: 6 },
-];
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 5) return 'God natt';
+  if (hour < 10) return 'God morgon';
+  if (hour < 13) return 'God förmiddag';
+  if (hour < 17) return 'God eftermiddag';
+  if (hour < 21) return 'God kväll';
+  return 'God natt';
+}
 
-const stats = [
-  { label: 'Ägg idag', value: '6', icon: Egg, trend: '+2', trendUp: true },
-  { label: 'Hönor', value: '12', icon: Bird, trend: '', trendUp: true },
-  { label: 'Denna månad', value: '142', icon: TrendingUp, trend: '+12%', trendUp: true },
-  { label: 'Netto', value: '1 240 kr', icon: Coins, trend: '-3%', trendUp: false },
-];
+function getFormattedDate() {
+  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
+  const months = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
+  const now = new Date();
+  return `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+}
 
 export default function Dashboard() {
+  const [eggsToday, setEggsToday] = useState(0);
+
+  const addEggs = (count: number) => {
+    setEggsToday((prev) => prev + count);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
-      {/* Welcome */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">God morgon! 🌅</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">Tisdag 4 mars, 2026</p>
+          <p className="text-xs sm:text-sm uppercase tracking-widest text-muted-foreground font-semibold">{getGreeting()}</p>
+          <h1 className="text-2xl sm:text-4xl font-serif text-foreground mt-1">Min Hönsgård</h1>
+          <p className="text-sm text-muted-foreground mt-1">{getFormattedDate()}</p>
         </div>
-        <Button className="gap-2 shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] active:scale-95 transition-transform w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          Logga ägg
-        </Button>
+        <div className="flex items-center gap-2 bg-card border border-border rounded-full px-3 py-1.5">
+          <Sun className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">5°</span>
+        </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.label} className="bg-card border-border hover:border-surface-highlight transition-all duration-300">
-            <CardContent className="p-3 sm:p-5">
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-                </div>
-                {stat.trend && (
-                  <span className={`text-[10px] sm:text-xs font-medium flex items-center gap-0.5 ${stat.trendUp ? 'text-success' : 'text-destructive'}`}>
-                    {stat.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {stat.trend}
-                  </span>
-                )}
-              </div>
-              <p className="stat-number text-xl sm:text-2xl text-foreground">{stat.value}</p>
-              <p className="data-label mt-1 text-[10px] sm:text-xs">{stat.label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Chart + Weather */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-        {/* Chart */}
-        <Card className="lg:col-span-2 bg-card border-border">
-          <CardHeader className="pb-2 px-4 sm:px-6">
-            <CardTitle className="text-base sm:text-lg font-serif">Äggproduktion denna vecka</CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 sm:px-6">
-            <div className="h-48 sm:h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weekData}>
-                  <defs>
-                    <linearGradient id="eggGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="day"
-                    stroke="hsl(215, 20%, 45%)"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="hsl(215, 20%, 45%)"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    width={30}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(217, 33%, 12%)',
-                      border: '1px solid hsl(217, 33%, 20%)',
-                      borderRadius: '8px',
-                      color: 'hsl(210, 40%, 98%)',
-                      fontSize: 13,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="eggs"
-                    stroke="hsl(38, 92%, 50%)"
-                    strokeWidth={2}
-                    fill="url(#eggGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+      {/* Stats bar */}
+      <Card className="bg-card/60 border-border backdrop-blur-sm">
+        <CardContent className="p-0">
+          <div className="flex items-center justify-around divide-x divide-border">
+            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
+              <Egg className="h-4 w-4 text-muted-foreground" />
+              <span className="font-bold text-foreground">28</span>
+              <span className="text-xs text-muted-foreground">igår</span>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
+              <Bird className="h-4 w-4 text-primary" />
+              <span className="font-bold text-foreground">6</span>
+              <span className="text-xs text-muted-foreground">hönor</span>
+            </div>
+            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              <span className="font-bold text-foreground">30</span>
+              <span className="text-xs text-muted-foreground">veckan</span>
+            </div>
+            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
+              <Coins className="h-4 w-4 text-primary" />
+              <span className="font-bold text-foreground">+1200</span>
+              <span className="text-xs text-muted-foreground">kr/mån</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Weather + Alerts */}
-        <div className="space-y-3 sm:space-y-4">
-          <Card className="bg-card border-border">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center gap-3 mb-3 sm:mb-4">
-                <CloudSun className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
-                <div>
-                  <p className="stat-number text-xl sm:text-2xl text-foreground">4°C</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Molnigt, Stockholm</p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Känns som 1°C · Luftfuktighet 78%
-              </p>
+      {/* Din hönsgård idag */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-lg">🐔</span>
+          <h2 className="text-lg font-serif text-primary">Din hönsgård idag</h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {/* Ägg/dag prognos - green */}
+          <Card className="border-0 bg-emerald-200/20 dark:bg-emerald-900/20" style={{ background: 'linear-gradient(135deg, hsla(142, 60%, 80%, 0.15), hsla(142, 60%, 70%, 0.08))' }}>
+            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
+              <Egg className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">7.1</p>
+              <p className="text-xs text-muted-foreground mt-1">ägg/dag prognos</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border border-l-4 border-l-warning">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                <p className="text-sm font-medium text-foreground">Tips</p>
-              </div>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Temperaturen sjunker ikväll. Se till att hönshuset är välisolerat och att vattnet inte fryser.
-              </p>
+          {/* Temperatur - blue */}
+          <Card className="border-0" style={{ background: 'linear-gradient(135deg, hsla(200, 60%, 80%, 0.15), hsla(200, 60%, 70%, 0.08))' }}>
+            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
+              <Thermometer className="h-8 w-8 text-destructive mb-2" />
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">10°</p>
+              <p className="text-xs text-muted-foreground mt-1">temperatur</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
-            <CardContent className="p-4 sm:p-5">
-              <p className="data-label mb-3">Topproducenter idag</p>
-              <div className="space-y-2.5">
-                {[
-                  { name: 'Greta', eggs: 2, breed: 'Barnevelder' },
-                  { name: 'Astrid', eggs: 2, breed: 'Sussex' },
-                  { name: 'Saga', eggs: 1, breed: 'Leghorn' },
-                ].map((hen) => (
-                  <div key={hen.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base sm:text-lg">🐔</span>
-                      <div>
-                        <p className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</p>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground">{hen.breed}</p>
-                      </div>
-                    </div>
-                    <span className="stat-number text-xs sm:text-sm text-primary">{hen.eggs} ägg</span>
-                  </div>
-                ))}
-              </div>
+          {/* Hälsoscore - warm */}
+          <Card className="border-0" style={{ background: 'linear-gradient(135deg, hsla(38, 60%, 80%, 0.15), hsla(38, 60%, 70%, 0.08))' }}>
+            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
+              <Heart className="h-8 w-8 text-success mb-2" />
+              <p className="text-2xl sm:text-3xl font-bold text-success">100/100</p>
+              <p className="text-xs text-muted-foreground mt-1">hälsoscore</p>
+            </CardContent>
+          </Card>
+
+          {/* Väder-tips - purple */}
+          <Card className="border-0" style={{ background: 'linear-gradient(135deg, hsla(280, 40%, 80%, 0.15), hsla(280, 40%, 70%, 0.08))' }}>
+            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
+              <Lightbulb className="h-8 w-8 text-warning mb-2" />
+              <p className="text-sm text-foreground font-medium">Bra väder för dina höns idag!</p>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Registrera ägg - quick add */}
+      <Card className="border-border bg-card">
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Egg className="h-5 w-5 text-muted-foreground" />
+              <span className="font-serif text-primary font-medium">Registrera ägg</span>
+            </div>
+            <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{eggsToday} idag</span>
+          </div>
+          <div className="flex items-center gap-3 justify-center">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-16 h-12 text-lg font-bold bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+              onClick={() => addEggs(1)}
+            >
+              +1
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-16 h-12 text-lg font-bold bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+              onClick={() => addEggs(2)}
+            >
+              +2
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-16 h-12 text-lg font-bold bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+              onClick={() => addEggs(3)}
+            >
+              +3
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-16 h-12 text-lg font-bold border-border text-muted-foreground hover:bg-secondary"
+              onClick={() => {
+                const custom = prompt('Antal ägg:');
+                if (custom && !isNaN(Number(custom))) addEggs(Number(custom));
+              }}
+            >
+              ...
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Registrera ägg - bottom bar */}
+      <Card className="bg-success/20 border-success/30 cursor-pointer hover:bg-success/25 transition-colors">
+        <CardContent className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Egg className="h-5 w-5 text-foreground" />
+            <div>
+              <p className="font-medium text-foreground">Registrera ägg</p>
+              <p className="text-xs text-muted-foreground">{eggsToday} ägg idag</p>
+            </div>
+          </div>
+          <ArrowRight className="h-5 w-5 text-foreground" />
+        </CardContent>
+      </Card>
     </div>
   );
 }
