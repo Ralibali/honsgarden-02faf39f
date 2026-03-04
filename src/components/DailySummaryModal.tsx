@@ -148,27 +148,36 @@ export function DailySummaryModal() {
                   </button>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
+                  {AFFILIATE_ENABLED ? (
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 h-10 text-sm font-medium gap-1.5"
+                        onClick={() => setStep('products')}
+                      >
+                        Produkttips
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-10 text-sm"
+                        onClick={handleClose}
+                      >
+                        Starta dagen 🐔
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
-                      className="flex-1 h-10 text-sm font-medium gap-1.5"
-                      onClick={() => setStep('products')}
-                    >
-                      Produkttips
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-10 text-sm"
+                      className="w-full h-10 text-sm font-medium"
                       onClick={handleClose}
                     >
                       Starta dagen 🐔
                     </Button>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {step === 'products' && (
+            {AFFILIATE_ENABLED && step === 'products' && (
               <div className="animate-fade-in">
                 <div className="relative bg-gradient-to-r from-accent/10 to-primary/10 px-5 pt-5 pb-3">
                   <button onClick={handleClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
