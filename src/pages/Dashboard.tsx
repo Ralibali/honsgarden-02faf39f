@@ -157,6 +157,7 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+      <DailySummaryModal />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
