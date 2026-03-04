@@ -20,6 +20,7 @@ import SettingsPage from "./pages/Settings";
 import Premium from "./pages/Premium";
 import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
