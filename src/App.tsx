@@ -49,6 +49,7 @@ const AppRoutes = () => (
         <Route path="settings" element={<SettingsPage />} />
         <Route path="premium" element={<Premium />} />
         <Route path="community" element={<Community />} />
+        <Route path="admin" element={<Admin />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
