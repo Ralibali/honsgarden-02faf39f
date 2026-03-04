@@ -171,7 +171,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border border-blue-200 bg-blue-50/50 shadow-sm">
+          <Card className="border border-ring/20 bg-ring/5 shadow-sm">
             <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
               <Thermometer className="h-8 w-8 text-destructive/70 mb-2" />
               <p className="text-2xl sm:text-3xl font-bold text-foreground">10°</p>
