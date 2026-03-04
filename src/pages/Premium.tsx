@@ -18,7 +18,7 @@ export default function Premium() {
           <Crown className="h-4 w-4" />
           Premium
         </div>
-        <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
+        <h1 className="text-2xl sm:text-4xl font-serif text-foreground mb-3">
           Uppgradera din hönsgård
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto">
@@ -28,8 +28,7 @@ export default function Premium() {
 
       {/* Pricing cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        {/* Free */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-5 sm:p-6">
             <h3 className="font-serif text-xl text-foreground mb-1">Gratis</h3>
             <p className="text-muted-foreground text-sm mb-4">Kom igång utan kostnad</p>
@@ -46,8 +45,7 @@ export default function Premium() {
           </CardContent>
         </Card>
 
-        {/* Premium */}
-        <Card className="bg-card border-primary/50 glow-amber relative overflow-hidden">
+        <Card className="bg-card border-primary/50 shadow-md relative overflow-hidden">
           <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-bl-lg">
             Populärast
           </div>
@@ -64,7 +62,7 @@ export default function Premium() {
                 </li>
               ))}
             </ul>
-            <Button className="w-full shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] active:scale-95 transition-transform">
+            <Button className="w-full active:scale-95 transition-transform">
               Starta gratis provperiod
             </Button>
           </CardContent>
@@ -74,7 +72,7 @@ export default function Premium() {
       {/* Features */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {features.map((f) => (
-          <Card key={f.title} className="bg-card border-border">
+          <Card key={f.title} className="bg-card border-border shadow-sm">
             <CardContent className="p-4 sm:p-5 flex items-start gap-4">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <f.icon className="h-5 w-5 text-primary" />

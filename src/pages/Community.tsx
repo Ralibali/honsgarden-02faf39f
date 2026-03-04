@@ -1,8 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Users, MessageCircle, Heart, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2 } from 'lucide-react';
 
 const posts = [
   {
@@ -37,15 +37,13 @@ const posts = [
 export default function Community() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif text-foreground">Community 🤝</h1>
-          <p className="text-muted-foreground mt-1">Dela tips och erfarenheter med andra hönsbönder</p>
-        </div>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Community 🤝</h1>
+        <p className="text-sm text-muted-foreground mt-1">Dela tips och erfarenheter med andra hönsbönder</p>
       </div>
 
       {/* New post */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-4">
           <div className="flex gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg shrink-0">
@@ -64,8 +62,8 @@ export default function Community() {
       {/* Posts */}
       <div className="space-y-4">
         {posts.map((post) => (
-          <Card key={post.id} className="bg-card border-border hover:border-surface-highlight transition-all duration-300">
-            <CardContent className="p-5">
+          <Card key={post.id} className="bg-card border-border shadow-sm hover:shadow-md transition-all duration-300">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
                   {post.avatar}

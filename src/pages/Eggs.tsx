@@ -29,7 +29,7 @@ export default function Eggs() {
       </div>
 
       {showForm && (
-        <Card className="bg-card border-border border-l-4 border-l-primary animate-fade-in">
+        <Card className="bg-card border-border border-l-4 border-l-primary animate-fade-in shadow-sm">
           <CardContent className="p-4 sm:p-6 space-y-4">
             <h3 className="font-serif text-base sm:text-lg text-foreground">Registrera ägg</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -57,7 +57,7 @@ export default function Eggs() {
           { label: 'Denna vecka', value: '39' },
           { label: 'Denna månad', value: '142' },
         ].map((s) => (
-          <Card key={s.label} className="bg-card border-border">
+          <Card key={s.label} className="bg-card border-border shadow-sm">
             <CardContent className="p-3 sm:p-4 text-center">
               <p className="stat-number text-xl sm:text-2xl text-foreground">{s.value}</p>
               <p className="data-label mt-1 text-[10px] sm:text-xs">{s.label}</p>
@@ -67,7 +67,7 @@ export default function Eggs() {
       </div>
 
       {/* Log list */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader className="px-4 sm:px-6">
           <CardTitle className="text-base sm:text-lg font-serif">Senaste registreringar</CardTitle>
         </CardHeader>
