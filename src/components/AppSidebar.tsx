@@ -1,5 +1,7 @@
-import { Home, Egg, Bird, Coins, BarChart3, Settings, ShieldCheck, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Sidebar,
   SidebarContent,
@@ -34,16 +36,20 @@ const secondaryNav = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <Sidebar collapsible="icon" className="hidden md:flex border-r border-sidebar-border">
       <SidebarContent className="pt-4">
-        {/* Logo */}
         <div className="px-4 pb-4 flex items-center gap-3">
           <span className="text-2xl">🥚</span>
-          {!collapsed && (
-            <h1 className="font-serif text-xl text-foreground">Hönsgården</h1>
-          )}
+          {!collapsed && <h1 className="font-serif text-xl text-foreground">Hönsgården</h1>}
         </div>
 
         <SidebarGroup>
@@ -53,12 +59,7 @@ export function AppSidebar() {
               {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === '/app'}
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200"
-                      activeClassName="bg-primary/15 text-primary font-medium"
-                    >
+                    <NavLink to={item.url} end={item.url === '/app'} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200" activeClassName="bg-primary/15 text-primary font-medium">
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
@@ -76,11 +77,7 @@ export function AppSidebar() {
               {secondaryNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200"
-                      activeClassName="bg-primary/15 text-primary font-medium"
-                    >
+                    <NavLink to={item.url} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200" activeClassName="bg-primary/15 text-primary font-medium">
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
@@ -95,12 +92,11 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 space-y-3">
         {!collapsed && (
           <>
-            <p className="text-[10px] text-muted-foreground">Build: 2026-03-04</p>
             <div>
-              <p className="text-sm font-medium text-foreground">Christoffer</p>
-              <p className="text-xs text-muted-foreground">info@auroramedia.se</p>
+              <p className="text-sm font-medium text-foreground">{user?.name || 'Användare'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
-            <Button variant="outline" size="sm" className="w-full gap-2 text-muted-foreground">
+            <Button variant="outline" size="sm" className="w-full gap-2 text-muted-foreground" onClick={handleLogout}>
               <LogOut className="h-3.5 w-3.5" />
               Logga ut
             </Button>

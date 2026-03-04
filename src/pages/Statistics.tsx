@@ -1,54 +1,39 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Calculator } from 'lucide-react';
-
-const monthlyEggs = [
-  { month: 'Sep', eggs: 120 },
-  { month: 'Okt', eggs: 145 },
-  { month: 'Nov', eggs: 132 },
-  { month: 'Dec', eggs: 98 },
-  { month: 'Jan', eggs: 85 },
-  { month: 'Feb', eggs: 128 },
-  { month: 'Mar', eggs: 142 },
-];
-
-const henProduction = [
-  { name: 'Brun Isa', eggs: 26 },
-  { name: 'Ölandshöna #3', eggs: 18 },
-  { name: 'Orusthöna', eggs: 15 },
-  { name: 'Ölandshöna', eggs: 15 },
-  { name: 'Ölandshöna #2', eggs: 14 },
-  { name: 'Dvärghöna', eggs: 8 },
-];
-
-const breedData = [
-  { name: 'Ölandshöna', value: 3, color: 'hsl(142, 50%, 38%)' },
-  { name: 'Orusthöna', value: 1, color: 'hsl(30, 50%, 45%)' },
-  { name: 'Gammalsvensk Dvärghöna', value: 1, color: 'hsl(38, 80%, 50%)' },
-  { name: 'Isa Brown', value: 1, color: 'hsl(0, 65%, 50%)' },
-];
-
-const costData = {
-  totalFeedCost: 965,
-  totalOtherCost: 450,
-  totalEggs: 850,
-  costPerEgg: 1.66,
-  revenuePerEgg: 3.53,
-  profitPerEgg: 1.87,
-};
-
-const tooltipStyle = {
-  backgroundColor: 'hsl(40, 25%, 99%)',
-  border: '1px solid hsl(35, 15%, 85%)',
-  borderRadius: '8px',
-  color: 'hsl(30, 10%, 15%)',
-  fontSize: 12,
-};
-
-const axisColor = 'hsl(30, 8%, 50%)';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Statistics() {
+  const { data: summary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['stats-summary'],
+    queryFn: () => api.getSummaryStats().catch(() => null),
+  });
+
+  const { data: insights } = useQuery({
+    queryKey: ['stats-insights'],
+    queryFn: () => api.getStatisticsInsights().catch(() => null),
+  });
+
+  const { data: feedStats } = useQuery({
+    queryKey: ['feed-stats-for-statistics'],
+    queryFn: () => api.getFeedStatistics().catch(() => null),
+  });
+
+  const { data: hens = [] } = useQuery({
+    queryKey: ['hens-for-stats'],
+    queryFn: () => api.getHens().catch(() => []),
+  });
+
+  const costPerEgg = feedStats?.cost_per_egg || 0;
+  const revenuePerEgg = insights?.revenue_per_egg || 0;
+  const profitPerEgg = revenuePerEgg - costPerEgg;
+
+  if (summaryLoading) {
+    return <div className="max-w-7xl mx-auto space-y-4 animate-fade-in"><Skeleton className="h-10 w-48" /><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-20" />)}</div></div>;
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div>
@@ -59,10 +44,10 @@ export default function Statistics() {
       {/* Summary row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: 'Totalt ägg', value: '1 982' },
-          { label: 'Snitt/dag', value: '5.8' },
-          { label: 'Bästa dag', value: '12' },
-          { label: 'Produktivitet', value: '72%' },
+          { label: 'Totalt ägg', value: summary?.total_eggs ?? '–' },
+          { label: 'Snitt/dag', value: summary?.avg_per_day != null ? Number(summary.avg_per_day).toFixed(1) : '–' },
+          { label: 'Bästa dag', value: summary?.best_day ?? '–' },
+          { label: 'Produktivitet', value: summary?.productivity != null ? `${Math.round(summary.productivity)}%` : '–' },
         ].map((s) => (
           <Card key={s.label} className="bg-card border-border shadow-sm">
             <CardContent className="p-3 sm:p-4 text-center">
@@ -74,123 +59,119 @@ export default function Statistics() {
       </div>
 
       {/* Cost per egg card */}
-      <Card className="bg-primary/5 border-primary/20 shadow-sm">
-        <CardContent className="p-4 sm:p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Calculator className="h-5 w-5 text-primary" />
-            <h2 className="font-serif text-base text-primary">Kostnad per ägg</h2>
-          </div>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div>
-              <p className="stat-number text-xl text-destructive">{costData.costPerEgg.toFixed(2)} kr</p>
-              <p className="data-label text-[10px] mt-1">Kostnad/ägg</p>
+      {(costPerEgg > 0 || revenuePerEgg > 0) && (
+        <Card className="bg-primary/5 border-primary/20 shadow-sm">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Calculator className="h-5 w-5 text-primary" />
+              <h2 className="font-serif text-base text-primary">Kostnad per ägg</h2>
             </div>
-            <div>
-              <p className="stat-number text-xl text-success">{costData.revenuePerEgg.toFixed(2)} kr</p>
-              <p className="data-label text-[10px] mt-1">Intäkt/ägg</p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="stat-number text-xl text-destructive">{costPerEgg.toFixed(2)} kr</p>
+                <p className="data-label text-[10px] mt-1">Kostnad/ägg</p>
+              </div>
+              <div>
+                <p className="stat-number text-xl text-success">{revenuePerEgg.toFixed(2)} kr</p>
+                <p className="data-label text-[10px] mt-1">Intäkt/ägg</p>
+              </div>
+              <div>
+                <p className={`stat-number text-xl ${profitPerEgg >= 0 ? 'text-primary' : 'text-destructive'}`}>{profitPerEgg.toFixed(2)} kr</p>
+                <p className="data-label text-[10px] mt-1">Vinst/ägg</p>
+              </div>
             </div>
-            <div>
-              <p className="stat-number text-xl text-primary">{costData.profitPerEgg.toFixed(2)} kr</p>
-              <p className="data-label text-[10px] mt-1">Vinst/ägg</p>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-3 text-center">
-            Baserat på {costData.totalEggs} ägg, {costData.totalFeedCost} kr foder och {costData.totalOtherCost} kr övriga kostnader
-          </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Hen production ranking */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-        {/* Monthly trend */}
         <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
-            <CardTitle className="font-serif text-base sm:text-lg">Månatlig trend</CardTitle>
+            <CardTitle className="font-serif text-base sm:text-lg">🏆 Topplista – Hönor</CardTitle>
           </CardHeader>
-          <CardContent className="px-2 sm:px-6">
-            <div className="h-48 sm:h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyEggs}>
-                  <XAxis dataKey="month" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} width={30} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Line type="monotone" dataKey="eggs" stroke="hsl(142, 40%, 35%)" strokeWidth={2} dot={{ fill: 'hsl(142, 40%, 35%)', r: 3 }} name="Ägg" />
-                </LineChart>
-              </ResponsiveContainer>
+          <CardContent className="px-4 sm:px-6">
+            <div className="space-y-3">
+              {hens.length > 0 ? (
+                [...hens]
+                  .sort((a: any, b: any) => (b.total_eggs || b.eggs_total || 0) - (a.total_eggs || a.eggs_total || 0))
+                  .slice(0, 6)
+                  .map((hen: any, i: number) => {
+                    const eggs = hen.total_eggs || hen.eggs_total || 0;
+                    return (
+                      <div key={hen._id || hen.id} className="flex items-center gap-2 sm:gap-3">
+                        <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground">
+                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</span>
+                            <span className="stat-number text-xs sm:text-sm text-primary">{eggs} ägg</span>
+                          </div>
+                          <div className="w-full bg-secondary rounded-full h-1.5">
+                            <div className="bg-primary rounded-full h-1.5 transition-all duration-500" style={{ width: `${Math.min(100, (eggs / Math.max(1, eggs)) * 100)}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Lägg till hönor för att se topplistan</p>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Per hen */}
-        <Card className="bg-card border-border shadow-sm">
-          <CardHeader className="px-4 sm:px-6">
-            <CardTitle className="font-serif text-base sm:text-lg">Produktion per höna (mars)</CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 sm:px-6">
-            <div className="h-48 sm:h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={henProduction} layout="vertical">
-                  <XAxis type="number" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="name" stroke={axisColor} fontSize={10} tickLine={false} axisLine={false} width={80} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="eggs" fill="hsl(142, 40%, 35%)" radius={[0, 4, 4, 0]} name="Ägg" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Breed pie */}
+        {/* Breed distribution */}
         <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
             <CardTitle className="font-serif text-base sm:text-lg">Rasfördelning</CardTitle>
           </CardHeader>
-          <CardContent className="px-2 sm:px-6">
-            <div className="h-52 sm:h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={breedData} cx="50%" cy="45%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
-                    {breedData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: axisColor }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Toplist */}
-        <Card className="bg-card border-border shadow-sm">
-          <CardHeader className="px-4 sm:px-6">
-            <CardTitle className="font-serif text-base sm:text-lg">🏆 Topplista – Mars</CardTitle>
-          </CardHeader>
           <CardContent className="px-4 sm:px-6">
-            <div className="space-y-3">
-              {[...henProduction].sort((a, b) => b.eggs - a.eggs).map((hen, i) => (
-                <div key={hen.name} className="flex items-center gap-2 sm:gap-3">
-                  <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground">
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</span>
-                      <span className="stat-number text-xs sm:text-sm text-primary">{hen.eggs} ägg</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-1.5">
-                      <div
-                        className="bg-primary rounded-full h-1.5 transition-all duration-500"
-                        style={{ width: `${(hen.eggs / 30) * 100}%` }}
-                      />
-                    </div>
+            {hens.length > 0 ? (
+              <div className="space-y-2">
+                {Object.entries(
+                  hens.reduce((acc: Record<string, number>, hen: any) => {
+                    const breed = hen.breed || hen.race || 'Okänd';
+                    acc[breed] = (acc[breed] || 0) + 1;
+                    return acc;
+                  }, {})
+                ).map(([breed, count]) => (
+                  <div key={breed} className="flex items-center justify-between text-sm">
+                    <span className="text-foreground">{breed}</span>
+                    <span className="stat-number text-muted-foreground">{count as number} st</span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">Ingen data</p>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Insights */}
+      {insights && (
+        <Card className="bg-card border-border shadow-sm">
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="font-serif text-base sm:text-lg">📈 Insikter</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 sm:px-6">
+            {insights.tips ? (
+              <ul className="space-y-2">
+                {(Array.isArray(insights.tips) ? insights.tips : [insights.tips]).map((tip: string, i: number) => (
+                  <li key={i} className="flex gap-2 items-start text-sm text-foreground">
+                    <span className="text-primary mt-1 shrink-0">•</span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Samla mer data för att se insikter</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

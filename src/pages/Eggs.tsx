@@ -2,18 +2,61 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Calendar, Egg as EggIcon } from 'lucide-react';
-
-const eggLog = [
-  { id: 1, date: '2026-03-04', count: 6, hens: ['Greta', 'Astrid', 'Saga'] },
-  { id: 2, date: '2026-03-03', count: 5, hens: ['Greta', 'Astrid'] },
-  { id: 3, date: '2026-03-02', count: 7, hens: ['Greta', 'Saga', 'Freja'] },
-  { id: 4, date: '2026-03-01', count: 4, hens: ['Astrid'] },
-  { id: 5, date: '2026-02-28', count: 8, hens: ['Greta', 'Astrid', 'Saga', 'Freja'] },
-];
+import { Plus, Calendar, Egg as EggIcon, Loader2, Trash2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Eggs() {
+  const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [count, setCount] = useState('');
+
+  const { data: eggs = [], isLoading } = useQuery({
+    queryKey: ['eggs'],
+    queryFn: () => api.getEggs(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: { date: string; count: number }) => api.createEggRecord(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eggs'] });
+      toast({ title: 'Ägg registrerade!' });
+      setShowForm(false);
+      setCount('');
+    },
+    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.deleteEggRecord(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['eggs'] });
+      toast({ title: 'Registrering borttagen' });
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!count || Number(count) <= 0) return;
+    createMutation.mutate({ date, count: Number(count) });
+  };
+
+  const todayEggs = eggs.filter((e: any) => e.date === new Date().toISOString().split('T')[0]).reduce((s: number, e: any) => s + (e.count || 0), 0);
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekEggs = eggs.filter((e: any) => new Date(e.date) >= weekAgo).reduce((s: number, e: any) => s + (e.count || 0), 0);
+  const monthEggs = eggs.filter((e: any) => new Date(e.date).getMonth() === new Date().getMonth()).reduce((s: number, e: any) => s + (e.count || 0), 0);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid grid-cols-3 gap-3">{[1,2,3].map(i => <Skeleton key={i} className="h-20" />)}</div>
+        <Skeleton className="h-60" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
@@ -35,27 +78,29 @@ export default function Eggs() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="data-label mb-1.5 block">Datum</label>
-                <Input type="date" defaultValue="2026-03-04" className="h-11" />
+                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-11" />
               </div>
               <div>
                 <label className="data-label mb-1.5 block">Antal ägg</label>
-                <Input type="number" placeholder="0" className="h-11" />
+                <Input type="number" placeholder="0" value={count} onChange={(e) => setCount(e.target.value)} className="h-11" />
               </div>
             </div>
             <div className="flex gap-2">
-              <Button className="active:scale-95 transition-transform">Spara</Button>
+              <Button onClick={handleSubmit} disabled={createMutation.isPending} className="active:scale-95 transition-transform">
+                {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                Spara
+              </Button>
               <Button variant="outline" onClick={() => setShowForm(false)}>Avbryt</Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Stats summary */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {[
-          { label: 'Idag', value: '6' },
-          { label: 'Denna vecka', value: '39' },
-          { label: 'Denna månad', value: '142' },
+          { label: 'Idag', value: todayEggs },
+          { label: 'Denna vecka', value: weekEggs },
+          { label: 'Denna månad', value: monthEggs },
         ].map((s) => (
           <Card key={s.label} className="bg-card border-border shadow-sm">
             <CardContent className="p-3 sm:p-4 text-center">
@@ -66,32 +111,40 @@ export default function Eggs() {
         ))}
       </div>
 
-      {/* Log list */}
       <Card className="bg-card border-border shadow-sm">
         <CardHeader className="px-4 sm:px-6">
           <CardTitle className="text-base sm:text-lg font-serif">Senaste registreringar</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-border">
-            {eggLog.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-secondary/50 transition-colors">
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <EggIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <p className="text-xs sm:text-sm text-muted-foreground">{entry.date}</p>
+            {eggs.slice(0, 20).map((entry: any) => {
+              const entryId = entry._id || entry.id;
+              return (
+                <div key={entryId} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <EggIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">
-                      {entry.hens.join(', ')}
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <p className="text-xs sm:text-sm text-muted-foreground">{entry.date}</p>
+                      </div>
+                      {entry.notes && <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{entry.notes}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="stat-number text-lg sm:text-xl text-foreground">{entry.count}</span>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground" onClick={() => deleteMutation.mutate(entryId)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-                <span className="stat-number text-lg sm:text-xl text-foreground ml-2">{entry.count}</span>
-              </div>
-            ))}
+              );
+            })}
+            {eggs.length === 0 && (
+              <div className="p-8 text-center text-muted-foreground text-sm">Inga ägg registrerade ännu</div>
+            )}
           </div>
         </CardContent>
       </Card>

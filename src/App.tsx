@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AppLayout from "./components/AppLayout";
@@ -22,32 +23,45 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><span className="text-muted-foreground">Laddar...</span></div>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+const AppRoutes = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route index element={<Dashboard />} />
+        <Route path="eggs" element={<Eggs />} />
+        <Route path="hens" element={<Hens />} />
+        <Route path="feed" element={<Feed />} />
+        <Route path="reminders" element={<Reminders />} />
+        <Route path="hatching" element={<Hatching />} />
+        <Route path="tasks" element={<DailyTasks />} />
+        <Route path="finance" element={<Finance />} />
+        <Route path="statistics" element={<Statistics />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="premium" element={<Premium />} />
+        <Route path="community" element={<Community />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </BrowserRouter>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/app" element={<AppLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="eggs" element={<Eggs />} />
-            <Route path="hens" element={<Hens />} />
-            <Route path="feed" element={<Feed />} />
-            <Route path="reminders" element={<Reminders />} />
-            <Route path="hatching" element={<Hatching />} />
-            <Route path="tasks" element={<DailyTasks />} />
-            <Route path="finance" element={<Finance />} />
-            <Route path="statistics" element={<Statistics />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="premium" element={<Premium />} />
-            <Route path="community" element={<Community />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
