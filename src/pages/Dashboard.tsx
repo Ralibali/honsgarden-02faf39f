@@ -187,7 +187,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border border-purple-200 bg-purple-50/50 shadow-sm">
+          <Card className="border border-accent/20 bg-accent/5 shadow-sm">
             <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
               <Lightbulb className="h-8 w-8 text-warning mb-2" />
               <p className="text-sm text-foreground font-medium">Bra väder för dina höns idag!</p>
