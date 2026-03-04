@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { DailySummaryModal } from '@/components/DailySummaryModal';
 import { PremiumUpsellBanner } from '@/components/AffiliateRecommendations';
 import AffiliateRecommendations from '@/components/AffiliateRecommendations';
+import { AFFILIATE_ENABLED } from '@/lib/featureFlags';
 
 function getGreeting() {
   const hour = new Date().getHours();
