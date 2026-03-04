@@ -1,10 +1,11 @@
-import { Home, Egg, Bird, Coins, BarChart3, Settings, ShieldCheck, LogOut } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, ShieldCheck, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -17,10 +18,17 @@ const mainNav = [
   { title: 'Hem', url: '/app', icon: Home },
   { title: 'Ägg', url: '/app/eggs', icon: Egg },
   { title: 'Hönor', url: '/app/hens', icon: Bird },
+  { title: 'Dagliga uppgifter', url: '/app/tasks', icon: ClipboardCheck },
+  { title: 'Foder', url: '/app/feed', icon: Package },
+  { title: 'Kläckning', url: '/app/hatching', icon: Baby },
+  { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
+];
+
+const secondaryNav = [
   { title: 'Ekonomi', url: '/app/finance', icon: Coins },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
+  { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
-  { title: 'Admin', url: '/app/admin', icon: ShieldCheck },
 ];
 
 export function AppSidebar() {
@@ -31,7 +39,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="hidden md:flex border-r border-sidebar-border">
       <SidebarContent className="pt-4">
         {/* Logo */}
-        <div className="px-4 pb-6 flex items-center gap-3">
+        <div className="px-4 pb-4 flex items-center gap-3">
           <span className="text-2xl">🥚</span>
           {!collapsed && (
             <h1 className="font-serif text-xl text-foreground">Hönsgården</h1>
@@ -39,6 +47,7 @@ export function AppSidebar() {
         </div>
 
         <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="text-[10px] text-muted-foreground uppercase tracking-widest px-4">Gården</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map((item) => (
@@ -51,7 +60,29 @@ export function AppSidebar() {
                       activeClassName="bg-primary/15 text-primary font-medium"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          {!collapsed && <SidebarGroupLabel className="text-[10px] text-muted-foreground uppercase tracking-widest px-4 mt-2">Verktyg</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {secondaryNav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200"
+                      activeClassName="bg-primary/15 text-primary font-medium"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

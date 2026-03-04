@@ -11,6 +11,10 @@ import Eggs from "./pages/Eggs";
 import Hens from "./pages/Hens";
 import Finance from "./pages/Finance";
 import Statistics from "./pages/Statistics";
+import Feed from "./pages/Feed";
+import Reminders from "./pages/Reminders";
+import Hatching from "./pages/Hatching";
+import DailyTasks from "./pages/DailyTasks";
 import SettingsPage from "./pages/Settings";
 import Premium from "./pages/Premium";
 import Community from "./pages/Community";
@@ -31,6 +35,10 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="eggs" element={<Eggs />} />
             <Route path="hens" element={<Hens />} />
+            <Route path="feed" element={<Feed />} />
+            <Route path="reminders" element={<Reminders />} />
+            <Route path="hatching" element={<Hatching />} />
+            <Route path="tasks" element={<DailyTasks />} />
             <Route path="finance" element={<Finance />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="settings" element={<SettingsPage />} />
