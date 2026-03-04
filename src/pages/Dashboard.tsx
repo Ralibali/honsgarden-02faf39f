@@ -393,6 +393,12 @@ export default function Dashboard() {
           </ul>
         </CardContent>
       </Card>
+
+      {/* Premium upsell */}
+      <PremiumUpsellBanner variant="full" />
+
+      {/* Affiliate recommendations */}
+      <AffiliateRecommendations />
     </div>
   );
 }
