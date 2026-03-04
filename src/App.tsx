@@ -20,6 +20,7 @@ import SettingsPage from "./pages/Settings";
 import Premium from "./pages/Premium";
 import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const AppRoutes = () => (
         <Route path="settings" element={<SettingsPage />} />
         <Route path="premium" element={<Premium />} />
         <Route path="community" element={<Community />} />
+        <Route path="admin" element={<Admin />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

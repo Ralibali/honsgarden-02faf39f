@@ -367,6 +367,39 @@ class ApiClient {
   async getAgdaInboxToday() {
     return this.request<any>('/agda/inbox/today');
   }
+
+  // Admin
+  async adminCheck() {
+    return this.request<any>('/admin/check');
+  }
+
+  async adminStats() {
+    return this.request<any>('/admin/stats');
+  }
+
+  async adminUsers() {
+    return this.request<any[]>('/admin/users');
+  }
+
+  async adminSubscriptions() {
+    return this.request<any[]>('/admin/subscriptions');
+  }
+
+  async adminFeedback() {
+    return this.request<any[]>('/admin/feedback');
+  }
+
+  async adminUpdateFeedbackStatus(feedbackId: string, data: any) {
+    return this.request<any>(`/admin/feedback/${feedbackId}`, { method: 'PUT', body: JSON.stringify(data) });
+  }
+
+  async adminDeleteUser(userId: string) {
+    return this.request<any>(`/admin/users/${userId}`, { method: 'DELETE' });
+  }
+
+  async adminUpdateSubscription(userId: string, data: any) {
+    return this.request<any>(`/admin/subscriptions/${userId}`, { method: 'PUT', body: JSON.stringify(data) });
+  }
 }
 
 export const api = new ApiClient();
