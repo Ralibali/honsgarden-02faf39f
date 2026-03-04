@@ -398,8 +398,12 @@ export default function Dashboard() {
       {/* Premium upsell */}
       <PremiumUpsellBanner variant="full" />
 
-      {/* Affiliate recommendations */}
-      <AffiliateRecommendations />
+      {AFFILIATE_ENABLED && (
+        <>
+          {/* Affiliate recommendations */}
+          <AffiliateRecommendations />
+        </>
+      )}
     </div>
   );
 }

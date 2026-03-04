@@ -5,6 +5,7 @@ import { Egg, Bird, TrendingUp, Heart, Sun, Loader2, Crown, ArrowRight, Sparkles
 import { api } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { AffiliateWidget } from '@/components/AffiliateRecommendations';
+import { AFFILIATE_ENABLED } from '@/lib/featureFlags';
 
 export function DailySummaryModal() {
   const [open, setOpen] = useState(false);
