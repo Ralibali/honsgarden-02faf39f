@@ -7,57 +7,55 @@
 
 @layer base {
   :root {
-    /* Nordic Noir - Scandi Rustic Dark */
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
+    /* Modern Lantlig — naturliga gröna & bruna toner */
+    --background: 40 20% 96%;
+    --foreground: 30 10% 15%;
 
-    --card: 217 33% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 40 25% 99%;
+    --card-foreground: 30 10% 15%;
 
-    --popover: 217 33% 12%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 40 25% 99%;
+    --popover-foreground: 30 10% 15%;
 
-    --primary: 38 92% 50%;
-    --primary-foreground: 222 47% 7%;
+    --primary: 142 40% 35%;
+    --primary-foreground: 40 20% 96%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 215 20% 65%;
+    --secondary: 35 20% 91%;
+    --secondary-foreground: 30 10% 35%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 35 15% 90%;
+    --muted-foreground: 30 8% 50%;
 
-    --accent: 38 92% 50%;
-    --accent-foreground: 222 47% 7%;
+    --accent: 30 50% 45%;
+    --accent-foreground: 40 20% 96%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 40 20% 96%;
 
-    --success: 142 71% 45%;
-    --success-foreground: 210 40% 98%;
+    --success: 142 50% 38%;
+    --success-foreground: 40 20% 96%;
 
-    --warning: 48 96% 53%;
-    --warning-foreground: 222 47% 7%;
+    --warning: 38 80% 50%;
+    --warning-foreground: 30 10% 15%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 38 92% 50%;
+    --border: 35 15% 85%;
+    --input: 35 15% 85%;
+    --ring: 142 40% 35%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 215 20% 65%;
-    --sidebar-primary: 38 92% 50%;
-    --sidebar-primary-foreground: 222 47% 7%;
-    --sidebar-accent: 217 33% 12%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 14%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-background: 35 20% 93%;
+    --sidebar-foreground: 30 8% 40%;
+    --sidebar-primary: 142 40% 35%;
+    --sidebar-primary-foreground: 40 20% 96%;
+    --sidebar-accent: 35 20% 88%;
+    --sidebar-accent-foreground: 30 10% 15%;
+    --sidebar-border: 35 15% 82%;
+    --sidebar-ring: 142 40% 35%;
 
     /* Custom tokens */
-    --surface: 222 47% 9%;
-    --surface-highlight: 217 33% 20%;
-    --glow-amber: 0 0 20px hsla(38, 92%, 50%, 0.15);
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --surface: 40 20% 94%;
+    --surface-highlight: 35 15% 80%;
   }
 }
 
@@ -77,7 +75,6 @@
   }
 }
 
-/* Noise texture overlay */
 @layer utilities {
   .noise-bg {
     position: relative;
@@ -86,7 +83,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    opacity: 0.03;
+    opacity: 0.025;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
@@ -94,10 +91,6 @@
 
   .glass {
     @apply backdrop-blur-md bg-card/80 border-border;
-  }
-
-  .glow-amber {
-    box-shadow: 0 0 20px hsla(38, 92%, 50%, 0.15);
   }
 
   .stat-number {
