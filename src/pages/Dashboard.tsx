@@ -176,28 +176,28 @@ export default function Dashboard() {
       </div>
 
       {/* Stats bar */}
-      <Card className="bg-card border-border shadow-sm">
+      <Card className="bg-card border-border shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex items-center justify-around divide-x divide-border">
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <Egg className="h-4 w-4 text-accent" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <Egg className="h-4 w-4 text-accent shrink-0" />
               <span className="font-bold text-foreground">28</span>
               <span className="text-xs text-muted-foreground">igår</span>
             </div>
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <Bird className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <Bird className="h-4 w-4 text-primary shrink-0" />
               <span className="font-bold text-foreground">6</span>
               <span className="text-xs text-muted-foreground">hönor</span>
             </div>
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
               <span className="font-bold text-foreground">30</span>
               <span className="text-xs text-muted-foreground">veckan</span>
             </div>
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <Coins className="h-4 w-4 text-accent" />
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <Coins className="h-4 w-4 text-accent shrink-0" />
               <span className="font-bold text-foreground">+1200</span>
-              <span className="text-xs text-muted-foreground">kr/mån</span>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">kr/mån</span>
             </div>
           </div>
         </CardContent>
