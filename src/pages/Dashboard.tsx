@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb, ArrowRight, Sun, BookOpen, Leaf, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { DailySummaryModal } from '@/components/DailySummaryModal';
+import { PremiumUpsellBanner } from '@/components/AffiliateRecommendations';
+import AffiliateRecommendations from '@/components/AffiliateRecommendations';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -391,6 +393,12 @@ export default function Dashboard() {
           </ul>
         </CardContent>
       </Card>
+
+      {/* Premium upsell */}
+      <PremiumUpsellBanner variant="full" />
+
+      {/* Affiliate recommendations */}
+      <AffiliateRecommendations />
     </div>
   );
 }
