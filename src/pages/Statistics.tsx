@@ -22,21 +22,23 @@ const henProduction = [
 ];
 
 const breedData = [
-  { name: 'Barnevelder', value: 2, color: 'hsl(38, 92%, 50%)' },
-  { name: 'Sussex', value: 3, color: 'hsl(142, 71%, 45%)' },
-  { name: 'Leghorn', value: 2, color: 'hsl(217, 91%, 60%)' },
-  { name: 'Orpington', value: 3, color: 'hsl(0, 84%, 60%)' },
-  { name: 'Marans', value: 1, color: 'hsl(280, 65%, 60%)' },
-  { name: 'Araucana', value: 1, color: 'hsl(48, 96%, 53%)' },
+  { name: 'Barnevelder', value: 2, color: 'hsl(30, 50%, 45%)' },
+  { name: 'Sussex', value: 3, color: 'hsl(142, 50%, 38%)' },
+  { name: 'Leghorn', value: 2, color: 'hsl(38, 80%, 50%)' },
+  { name: 'Orpington', value: 3, color: 'hsl(0, 65%, 50%)' },
+  { name: 'Marans', value: 1, color: 'hsl(280, 40%, 50%)' },
+  { name: 'Araucana', value: 1, color: 'hsl(200, 50%, 50%)' },
 ];
 
 const tooltipStyle = {
-  backgroundColor: 'hsl(217, 33%, 12%)',
-  border: '1px solid hsl(217, 33%, 20%)',
+  backgroundColor: 'hsl(40, 25%, 99%)',
+  border: '1px solid hsl(35, 15%, 85%)',
   borderRadius: '8px',
-  color: 'hsl(210, 40%, 98%)',
+  color: 'hsl(30, 10%, 15%)',
   fontSize: 12,
 };
+
+const axisColor = 'hsl(30, 8%, 50%)';
 
 export default function Statistics() {
   return (
@@ -54,7 +56,7 @@ export default function Statistics() {
           { label: 'Bästa dag', value: '12' },
           { label: 'Produktivitet', value: '72%' },
         ].map((s) => (
-          <Card key={s.label} className="bg-card border-border">
+          <Card key={s.label} className="bg-card border-border shadow-sm">
             <CardContent className="p-3 sm:p-4 text-center">
               <p className="stat-number text-xl sm:text-2xl text-foreground">{s.value}</p>
               <p className="data-label mt-1 text-[10px] sm:text-xs">{s.label}</p>
@@ -65,7 +67,7 @@ export default function Statistics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {/* Monthly trend */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
             <CardTitle className="font-serif text-base sm:text-lg">Månatlig trend</CardTitle>
           </CardHeader>
@@ -73,10 +75,10 @@ export default function Statistics() {
             <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyEggs}>
-                  <XAxis dataKey="month" stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} width={30} />
+                  <XAxis dataKey="month" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} width={30} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Line type="monotone" dataKey="eggs" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ fill: 'hsl(38, 92%, 50%)', r: 3 }} />
+                  <Line type="monotone" dataKey="eggs" stroke="hsl(142, 40%, 35%)" strokeWidth={2} dot={{ fill: 'hsl(142, 40%, 35%)', r: 3 }} name="Ägg" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -84,7 +86,7 @@ export default function Statistics() {
         </Card>
 
         {/* Per hen */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
             <CardTitle className="font-serif text-base sm:text-lg">Produktion per höna (mars)</CardTitle>
           </CardHeader>
@@ -92,10 +94,10 @@ export default function Statistics() {
             <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={henProduction} layout="vertical">
-                  <XAxis type="number" stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="name" stroke="hsl(215, 20%, 45%)" fontSize={10} tickLine={false} axisLine={false} width={50} />
+                  <XAxis type="number" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="name" stroke={axisColor} fontSize={10} tickLine={false} axisLine={false} width={50} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="eggs" fill="hsl(38, 92%, 50%)" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="eggs" fill="hsl(142, 40%, 35%)" radius={[0, 4, 4, 0]} name="Ägg" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -103,7 +105,7 @@ export default function Statistics() {
         </Card>
 
         {/* Breed pie */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
             <CardTitle className="font-serif text-base sm:text-lg">Rasfördelning</CardTitle>
           </CardHeader>
@@ -117,7 +119,7 @@ export default function Statistics() {
                     ))}
                   </Pie>
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: 'hsl(215, 20%, 65%)' }} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: axisColor }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -125,7 +127,7 @@ export default function Statistics() {
         </Card>
 
         {/* Toplist */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
             <CardTitle className="font-serif text-base sm:text-lg">🏆 Topplista – Mars</CardTitle>
           </CardHeader>

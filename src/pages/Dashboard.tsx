@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb, ArrowRight, Sun, ChevronLeft, ChevronRight, BookOpen, Leaf } from 'lucide-react';
+import { Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb, ArrowRight, Sun, BookOpen, Leaf, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -71,18 +72,50 @@ function getSeasonTips(): { title: string; tips: string[] } {
   };
 }
 
+// Fetch weather from Open-Meteo (free, no API key)
+async function fetchWeather() {
+  // Default: Stockholm area
+  const lat = 59.33;
+  const lon = 18.07;
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=Europe%2FStockholm`
+  );
+  if (!res.ok) throw new Error('Weather fetch failed');
+  return res.json();
+}
+
+function getWeatherDescription(code: number): string {
+  if (code === 0) return 'Klart';
+  if (code <= 3) return 'Molnigt';
+  if (code <= 48) return 'Dimmigt';
+  if (code <= 57) return 'Duggregn';
+  if (code <= 67) return 'Regn';
+  if (code <= 77) return 'Snö';
+  if (code <= 82) return 'Skurar';
+  if (code <= 86) return 'Snöbyar';
+  return 'Åska';
+}
+
+function getWeatherTip(temp: number, code: number): string {
+  if (temp < 0) return 'Kontrollera att vattnet inte fryser i hönshuset!';
+  if (temp < 5) return 'Kallt ute – se till att hönshuset är välisolerat.';
+  if (code >= 60 && code <= 67) return 'Regnigt väder – hönsen kanske stannar inne.';
+  if (code >= 70 && code <= 77) return 'Snöfall – håll ingången fri.';
+  if (temp > 25) return 'Varmt – extra vatten och skugga är viktigt!';
+  if (temp >= 10 && temp <= 20) return 'Bra väder för dina höns idag!';
+  return 'Lagom väder – bra dag för hönsen att vara ute.';
+}
+
 // Mock data for egg calendar
 function getMockEggData() {
   const data: Record<number, number> = {};
   const now = new Date();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  for (let d = 1; d <= Math.min(now.getDate(), daysInMonth); d++) {
+  for (let d = 1; d <= Math.min(now.getDate(), 31); d++) {
     data[d] = Math.floor(Math.random() * 8) + 1;
   }
   return data;
 }
 
-// Mock diary entries
 const diaryEntries = [
   { date: '4 mars', text: 'Greta verkar piggare idag, äter bra.', emoji: '🐔' },
   { date: '3 mars', text: 'Lagt till extra halm i boet. Kallt ute.', emoji: '🏠' },
@@ -98,8 +131,17 @@ export default function Dashboard() {
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-  // Adjust to Monday start (0=Mon...6=Sun)
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+  const { data: weatherData, isLoading: weatherLoading } = useQuery({
+    queryKey: ['weather'],
+    queryFn: fetchWeather,
+    staleTime: 30 * 60 * 1000, // 30 min
+    retry: 2,
+  });
+
+  const currentTemp = weatherData?.current?.temperature_2m;
+  const weatherCode = weatherData?.current?.weathercode ?? 0;
 
   const addEggs = (count: number) => {
     setEggsToday((prev) => prev + count);
@@ -123,7 +165,13 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-2 bg-card border border-border rounded-full px-3 py-1.5 shadow-sm">
           <Sun className="h-4 w-4 text-warning" />
-          <span className="text-sm font-medium text-foreground">5°</span>
+          {weatherLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          ) : (
+            <span className="text-sm font-medium text-foreground">
+              {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
+            </span>
+          )}
         </div>
       </div>
 
@@ -171,10 +219,16 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border border-ring/20 bg-ring/5 shadow-sm">
+          <Card className="border border-border bg-secondary/30 shadow-sm">
             <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
               <Thermometer className="h-8 w-8 text-destructive/70 mb-2" />
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">10°</p>
+              {weatherLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : (
+                <p className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground mt-1">temperatur</p>
             </CardContent>
           </Card>
@@ -190,7 +244,11 @@ export default function Dashboard() {
           <Card className="border border-accent/20 bg-accent/5 shadow-sm">
             <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
               <Lightbulb className="h-8 w-8 text-warning mb-2" />
-              <p className="text-sm text-foreground font-medium">Bra väder för dina höns idag!</p>
+              <p className="text-sm text-foreground font-medium">
+                {currentTemp != null
+                  ? getWeatherTip(currentTemp, weatherCode)
+                  : 'Bra väder för dina höns idag!'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -250,19 +308,15 @@ export default function Dashboard() {
       {/* Äggkalender */}
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-4 sm:p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-primary" />
-              <h2 className="font-serif text-primary font-medium">Äggkalender – {getMonthName(now.getMonth())}</h2>
-            </div>
+          <div className="flex items-center gap-2 mb-4">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            <h2 className="font-serif text-primary font-medium">Äggkalender – {getMonthName(now.getMonth())}</h2>
           </div>
-          {/* Weekday headers */}
           <div className="grid grid-cols-7 gap-1 mb-1">
             {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((d) => (
               <div key={d} className="text-[10px] text-center text-muted-foreground font-medium py-1">{d}</div>
             ))}
           </div>
-          {/* Days */}
           <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: startOffset }).map((_, i) => (
               <div key={`empty-${i}`} />

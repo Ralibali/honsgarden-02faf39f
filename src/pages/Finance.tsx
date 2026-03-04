@@ -22,6 +22,14 @@ const recentTransactions = [
   { id: 5, description: 'Äggförsäljning – 5 kartonger', amount: 300, type: 'income', date: '2026-02-27' },
 ];
 
+const tooltipStyle = {
+  backgroundColor: 'hsl(40, 25%, 99%)',
+  border: '1px solid hsl(35, 15%, 85%)',
+  borderRadius: '8px',
+  color: 'hsl(30, 10%, 15%)',
+  fontSize: 12,
+};
+
 export default function Finance() {
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
@@ -38,7 +46,7 @@ export default function Finance() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <Card className="bg-card border-border border-l-4 border-l-success">
+        <Card className="bg-card border-border border-l-4 border-l-success shadow-sm">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <ShoppingCart className="h-4 w-4 text-success" />
@@ -50,7 +58,7 @@ export default function Finance() {
             </span>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border border-l-4 border-l-destructive">
+        <Card className="bg-card border-border border-l-4 border-l-destructive shadow-sm">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <Minus className="h-4 w-4 text-destructive" />
@@ -62,7 +70,7 @@ export default function Finance() {
             </span>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border border-l-4 border-l-primary">
+        <Card className="bg-card border-border border-l-4 border-l-primary shadow-sm">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <Coins className="h-4 w-4 text-primary" />
@@ -77,7 +85,7 @@ export default function Finance() {
       </div>
 
       {/* Chart */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader className="px-4 sm:px-6">
           <CardTitle className="font-serif text-base sm:text-lg">Intäkter vs Kostnader</CardTitle>
         </CardHeader>
@@ -85,19 +93,11 @@ export default function Finance() {
           <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <XAxis dataKey="month" stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} width={35} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(217, 33%, 12%)',
-                    border: '1px solid hsl(217, 33%, 20%)',
-                    borderRadius: '8px',
-                    color: 'hsl(210, 40%, 98%)',
-                    fontSize: 12,
-                  }}
-                />
-                <Bar dataKey="income" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="costs" fill="hsl(0, 84%, 60%)" radius={[4, 4, 0, 0]} />
+                <XAxis dataKey="month" stroke="hsl(30, 8%, 50%)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(30, 8%, 50%)" fontSize={11} tickLine={false} axisLine={false} width={35} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Bar dataKey="income" fill="hsl(142, 50%, 38%)" radius={[4, 4, 0, 0]} name="Intäkter" />
+                <Bar dataKey="costs" fill="hsl(0, 65%, 50%)" radius={[4, 4, 0, 0]} name="Kostnader" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -105,7 +105,7 @@ export default function Finance() {
       </Card>
 
       {/* Transactions */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader className="px-4 sm:px-6">
           <CardTitle className="font-serif text-base sm:text-lg">Senaste transaktioner</CardTitle>
         </CardHeader>

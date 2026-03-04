@@ -10,12 +10,12 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-serif text-foreground">Inställningar ⚙️</h1>
-        <p className="text-muted-foreground mt-1">Hantera ditt konto och din hönsgård</p>
+        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Inställningar ⚙️</h1>
+        <p className="text-sm text-muted-foreground mt-1">Hantera ditt konto och din hönsgård</p>
       </div>
 
       {/* Profile */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
@@ -26,23 +26,23 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label className="text-muted-foreground">Namn</Label>
-              <Input defaultValue="Erik Andersson" className="mt-1.5 h-11" />
+              <Input defaultValue="Christoffer" className="mt-1.5 h-11" />
             </div>
             <div>
               <Label className="text-muted-foreground">E-post</Label>
-              <Input defaultValue="erik@honsgarden.se" className="mt-1.5 h-11" />
+              <Input defaultValue="info@auroramedia.se" className="mt-1.5 h-11" />
             </div>
           </div>
           <div>
             <Label className="text-muted-foreground">Gårdsnamn</Label>
-            <Input defaultValue="Erikssons Hönsgård" className="mt-1.5 h-11" />
+            <Input defaultValue="Hönsgården" className="mt-1.5 h-11" />
           </div>
           <Button className="active:scale-95 transition-transform">Spara ändringar</Button>
         </CardContent>
       </Card>
 
       {/* Notifications */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
@@ -67,7 +67,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Account */}
-      <Card className="bg-card border-border">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
