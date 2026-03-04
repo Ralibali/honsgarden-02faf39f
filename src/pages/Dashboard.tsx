@@ -176,28 +176,28 @@ export default function Dashboard() {
       </div>
 
       {/* Stats bar */}
-      <Card className="bg-card border-border shadow-sm">
+      <Card className="bg-card border-border shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex items-center justify-around divide-x divide-border">
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <Egg className="h-4 w-4 text-accent" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <Egg className="h-4 w-4 text-accent shrink-0" />
               <span className="font-bold text-foreground">28</span>
               <span className="text-xs text-muted-foreground">igår</span>
             </div>
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <Bird className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <Bird className="h-4 w-4 text-primary shrink-0" />
               <span className="font-bold text-foreground">6</span>
               <span className="text-xs text-muted-foreground">hönor</span>
             </div>
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
               <span className="font-bold text-foreground">30</span>
               <span className="text-xs text-muted-foreground">veckan</span>
             </div>
-            <div className="flex items-center gap-2 py-4 px-3 flex-1 justify-center">
-              <Coins className="h-4 w-4 text-accent" />
+            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
+              <Coins className="h-4 w-4 text-accent shrink-0" />
               <span className="font-bold text-foreground">+1200</span>
-              <span className="text-xs text-muted-foreground">kr/mån</span>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">kr/mån</span>
             </div>
           </div>
         </CardContent>
@@ -212,39 +212,39 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <Card className="border border-primary/20 bg-primary/5 shadow-sm">
-            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
-              <Egg className="h-8 w-8 text-primary/60 mb-2" />
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">7.1</p>
-              <p className="text-xs text-muted-foreground mt-1">ägg/dag prognos</p>
+            <CardContent className="p-4 sm:p-6 flex flex-col items-center justify-center text-center min-h-[120px]">
+              <Egg className="h-6 w-6 sm:h-8 sm:w-8 text-primary/60 mb-2" />
+              <p className="text-xl sm:text-3xl font-bold text-foreground">7.1</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">ägg/dag prognos</p>
             </CardContent>
           </Card>
 
           <Card className="border border-border bg-secondary/30 shadow-sm">
-            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
-              <Thermometer className="h-8 w-8 text-destructive/70 mb-2" />
+            <CardContent className="p-4 sm:p-6 flex flex-col items-center justify-center text-center min-h-[120px]">
+              <Thermometer className="h-6 w-6 sm:h-8 sm:w-8 text-destructive/70 mb-2" />
               {weatherLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               ) : (
-                <p className="text-2xl sm:text-3xl font-bold text-foreground">
+                <p className="text-xl sm:text-3xl font-bold text-foreground">
                   {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground mt-1">temperatur</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">temperatur</p>
             </CardContent>
           </Card>
 
           <Card className="border border-warning/20 bg-warning/5 shadow-sm">
-            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
-              <Heart className="h-8 w-8 text-success mb-2" />
-              <p className="text-2xl sm:text-3xl font-bold text-success">100/100</p>
-              <p className="text-xs text-muted-foreground mt-1">hälsoscore</p>
+            <CardContent className="p-4 sm:p-6 flex flex-col items-center justify-center text-center min-h-[120px]">
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-success mb-2" />
+              <p className="text-xl sm:text-3xl font-bold text-success">100/100</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">hälsoscore</p>
             </CardContent>
           </Card>
 
           <Card className="border border-accent/20 bg-accent/5 shadow-sm">
-            <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center">
-              <Lightbulb className="h-8 w-8 text-warning mb-2" />
-              <p className="text-sm text-foreground font-medium">
+            <CardContent className="p-4 sm:p-6 flex flex-col items-center justify-center text-center min-h-[120px]">
+              <Lightbulb className="h-6 w-6 sm:h-8 sm:w-8 text-warning mb-2" />
+              <p className="text-[11px] sm:text-sm text-foreground font-medium leading-snug">
                 {currentTemp != null
                   ? getWeatherTip(currentTemp, weatherCode)
                   : 'Bra väder för dina höns idag!'}

@@ -67,11 +67,20 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Young Serif', serif;
     @apply text-foreground tracking-tight leading-tight;
+  }
+
+  /* Fix iOS Safari overscroll */
+  html {
+    overflow-x: hidden;
   }
 }
 
