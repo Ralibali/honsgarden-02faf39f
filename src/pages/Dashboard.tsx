@@ -23,51 +23,51 @@ const stats = [
 
 export default function Dashboard() {
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       {/* Welcome */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-serif text-foreground">God morgon! 🌅</h1>
-          <p className="text-muted-foreground mt-1">Tisdag 4 mars, 2026</p>
+          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">God morgon! 🌅</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Tisdag 4 mars, 2026</p>
         </div>
-        <Button className="gap-2 shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] active:scale-95 transition-transform">
+        <Button className="gap-2 shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] active:scale-95 transition-transform w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Logga ägg
         </Button>
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((stat) => (
           <Card key={stat.label} className="bg-card border-border hover:border-surface-highlight transition-all duration-300">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon className="h-4 w-4 text-primary" />
+            <CardContent className="p-3 sm:p-5">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <stat.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 </div>
                 {stat.trend && (
-                  <span className={`text-xs font-medium flex items-center gap-1 ${stat.trendUp ? 'text-success' : 'text-destructive'}`}>
+                  <span className={`text-[10px] sm:text-xs font-medium flex items-center gap-0.5 ${stat.trendUp ? 'text-success' : 'text-destructive'}`}>
                     {stat.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                     {stat.trend}
                   </span>
                 )}
               </div>
-              <p className="stat-number text-2xl text-foreground">{stat.value}</p>
-              <p className="data-label mt-1">{stat.label}</p>
+              <p className="stat-number text-xl sm:text-2xl text-foreground">{stat.value}</p>
+              <p className="data-label mt-1 text-[10px] sm:text-xs">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Chart + Weather */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Chart */}
         <Card className="lg:col-span-2 bg-card border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-serif">Äggproduktion denna vecka</CardTitle>
+          <CardHeader className="pb-2 px-4 sm:px-6">
+            <CardTitle className="text-base sm:text-lg font-serif">Äggproduktion denna vecka</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64">
+          <CardContent className="px-2 sm:px-6">
+            <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={weekData}>
                   <defs>
@@ -79,15 +79,16 @@ export default function Dashboard() {
                   <XAxis
                     dataKey="day"
                     stroke="hsl(215, 20%, 45%)"
-                    fontSize={12}
+                    fontSize={11}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
                     stroke="hsl(215, 20%, 45%)"
-                    fontSize={12}
+                    fontSize={11}
                     tickLine={false}
                     axisLine={false}
+                    width={30}
                   />
                   <Tooltip
                     contentStyle={{
@@ -112,14 +113,14 @@ export default function Dashboard() {
         </Card>
 
         {/* Weather + Alerts */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <Card className="bg-card border-border">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <CloudSun className="h-8 w-8 text-primary" />
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <CloudSun className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
                 <div>
-                  <p className="stat-number text-2xl text-foreground">4°C</p>
-                  <p className="text-sm text-muted-foreground">Molnigt, Stockholm</p>
+                  <p className="stat-number text-xl sm:text-2xl text-foreground">4°C</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Molnigt, Stockholm</p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -129,19 +130,19 @@ export default function Dashboard() {
           </Card>
 
           <Card className="bg-card border-border border-l-4 border-l-warning">
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-4 w-4 text-warning" />
                 <p className="text-sm font-medium text-foreground">Tips</p>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Temperaturen sjunker ikväll. Se till att hönshuset är välisolerat och att vattnet inte fryser.
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-card border-border">
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               <p className="data-label mb-3">Topproducenter idag</p>
               <div className="space-y-2.5">
                 {[
@@ -151,13 +152,13 @@ export default function Dashboard() {
                 ].map((hen) => (
                   <div key={hen.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🐔</span>
+                      <span className="text-base sm:text-lg">🐔</span>
                       <div>
-                        <p className="text-sm font-medium text-foreground">{hen.name}</p>
-                        <p className="text-xs text-muted-foreground">{hen.breed}</p>
+                        <p className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{hen.breed}</p>
                       </div>
                     </div>
-                    <span className="stat-number text-sm text-primary">{hen.eggs} ägg</span>
+                    <span className="stat-number text-xs sm:text-sm text-primary">{hen.eggs} ägg</span>
                   </div>
                 ))}
               </div>

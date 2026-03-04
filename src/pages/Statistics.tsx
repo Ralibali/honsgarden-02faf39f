@@ -35,19 +35,19 @@ const tooltipStyle = {
   border: '1px solid hsl(217, 33%, 20%)',
   borderRadius: '8px',
   color: 'hsl(210, 40%, 98%)',
-  fontSize: 13,
+  fontSize: 12,
 };
 
 export default function Statistics() {
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-serif text-foreground">Statistik 📊</h1>
-        <p className="text-muted-foreground mt-1">Detaljerad analys av din hönsgård</p>
+        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Statistik 📊</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">Detaljerad analys av din hönsgård</p>
       </div>
 
       {/* Summary row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: 'Totalt ägg', value: '1 982' },
           { label: 'Snitt/dag', value: '5.8' },
@@ -55,28 +55,28 @@ export default function Statistics() {
           { label: 'Produktivitet', value: '72%' },
         ].map((s) => (
           <Card key={s.label} className="bg-card border-border">
-            <CardContent className="p-4 text-center">
-              <p className="stat-number text-2xl text-foreground">{s.value}</p>
-              <p className="data-label mt-1">{s.label}</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="stat-number text-xl sm:text-2xl text-foreground">{s.value}</p>
+              <p className="data-label mt-1 text-[10px] sm:text-xs">{s.label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {/* Monthly trend */}
         <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">Månatlig trend</CardTitle>
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="font-serif text-base sm:text-lg">Månatlig trend</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64">
+          <CardContent className="px-2 sm:px-6">
+            <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyEggs}>
-                  <XAxis dataKey="month" stroke="hsl(215, 20%, 45%)" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(215, 20%, 45%)" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="month" stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} width={30} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Line type="monotone" dataKey="eggs" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ fill: 'hsl(38, 92%, 50%)', r: 4 }} />
+                  <Line type="monotone" dataKey="eggs" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ fill: 'hsl(38, 92%, 50%)', r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -85,15 +85,15 @@ export default function Statistics() {
 
         {/* Per hen */}
         <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">Produktion per höna (mars)</CardTitle>
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="font-serif text-base sm:text-lg">Produktion per höna (mars)</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64">
+          <CardContent className="px-2 sm:px-6">
+            <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={henProduction} layout="vertical">
-                  <XAxis type="number" stroke="hsl(215, 20%, 45%)" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="name" stroke="hsl(215, 20%, 45%)" fontSize={12} tickLine={false} axisLine={false} width={60} />
+                  <XAxis type="number" stroke="hsl(215, 20%, 45%)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="name" stroke="hsl(215, 20%, 45%)" fontSize={10} tickLine={false} axisLine={false} width={50} />
                   <Tooltip contentStyle={tooltipStyle} />
                   <Bar dataKey="eggs" fill="hsl(38, 92%, 50%)" radius={[0, 4, 4, 0]} />
                 </BarChart>
@@ -104,20 +104,20 @@ export default function Statistics() {
 
         {/* Breed pie */}
         <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">Rasfördelning</CardTitle>
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="font-serif text-base sm:text-lg">Rasfördelning</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64">
+          <CardContent className="px-2 sm:px-6">
+            <div className="h-52 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={breedData} cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={3} dataKey="value">
+                  <Pie data={breedData} cx="50%" cy="45%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
                     {breedData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Legend wrapperStyle={{ fontSize: 12, color: 'hsl(215, 20%, 65%)' }} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: 'hsl(215, 20%, 65%)' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -126,20 +126,20 @@ export default function Statistics() {
 
         {/* Toplist */}
         <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">🏆 Topplista – Mars</CardTitle>
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="font-serif text-base sm:text-lg">🏆 Topplista – Mars</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <div className="space-y-3">
-              {henProduction.sort((a, b) => b.eggs - a.eggs).map((hen, i) => (
-                <div key={hen.name} className="flex items-center gap-3">
-                  <span className="stat-number text-lg w-6 text-center text-muted-foreground">
+              {[...henProduction].sort((a, b) => b.eggs - a.eggs).map((hen, i) => (
+                <div key={hen.name} className="flex items-center gap-2 sm:gap-3">
+                  <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground">
                     {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
                   </span>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-foreground">{hen.name}</span>
-                      <span className="stat-number text-sm text-primary">{hen.eggs} ägg</span>
+                      <span className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</span>
+                      <span className="stat-number text-xs sm:text-sm text-primary">{hen.eggs} ägg</span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-1.5">
                       <div
