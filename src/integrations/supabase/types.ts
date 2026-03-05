@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_rewards: {
+        Row: {
+          achievement_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chore_completions: {
         Row: {
           chore_id: string
@@ -399,6 +420,8 @@ export type Database = {
           id: string
           preferences: Json
           premium_expires_at: string | null
+          referral_code: string | null
+          referred_by: string | null
           subscription_status: string
           terms_accepted_at: string | null
           updated_at: string
@@ -411,6 +434,8 @@ export type Database = {
           id?: string
           preferences?: Json
           premium_expires_at?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           subscription_status?: string
           terms_accepted_at?: string | null
           updated_at?: string
@@ -423,10 +448,36 @@ export type Database = {
           id?: string
           preferences?: Json
           premium_expires_at?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           subscription_status?: string
           terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_user_id: string
+          rewarded: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_user_id: string
+          rewarded?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+          rewarded?: boolean
         }
         Relationships: []
       }
@@ -525,11 +576,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      grant_premium_days: {
+        Args: { _days: number; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      process_referral: {
+        Args: { _new_user_id: string; _referral_code: string }
         Returns: boolean
       }
     }
