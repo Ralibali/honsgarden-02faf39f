@@ -32,7 +32,7 @@ export function MobileNav() {
             className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-2 shadow-xl animate-fade-in-scale"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-4 gap-1">
               {moreItems.map((item) => (
                 <NavLink
                   key={item.url}
