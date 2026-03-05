@@ -8,6 +8,7 @@ interface UserProfile {
   name?: string;
   is_premium?: boolean;
   subscription_status?: string;
+  subscription_end?: string | null;
   [key: string]: any;
 }
 
