@@ -17,6 +17,8 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PremiumNudge } from '@/components/PremiumGate';
 import { useAuth } from '@/hooks/useAuth';
+import Achievements from '@/components/Achievements';
+import ShareCard from '@/components/ShareCard';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -546,6 +548,18 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Achievements */}
+      <Achievements eggs={eggs} hens={hens as any[]} streak={streak} />
+
+      {/* Share card */}
+      <ShareCard
+        weekEggs={weekEggs}
+        totalEggs={eggs.reduce((s: number, e: any) => s + (e.count || 0), 0)}
+        henCount={activeHens}
+        streak={streak}
+        userName={user?.name?.split(' ')[0]}
+      />
 
       {/* Diary dialog */}
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>
