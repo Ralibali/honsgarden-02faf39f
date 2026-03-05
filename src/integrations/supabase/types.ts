@@ -144,6 +144,7 @@ export type Database = {
           count: number
           created_at: string
           date: string
+          hen_id: string | null
           id: string
           notes: string | null
           user_id: string
@@ -152,6 +153,7 @@ export type Database = {
           count?: number
           created_at?: string
           date: string
+          hen_id?: string | null
           id?: string
           notes?: string | null
           user_id: string
@@ -160,11 +162,20 @@ export type Database = {
           count?: number
           created_at?: string
           date?: string
+          hen_id?: string | null
           id?: string
           notes?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "egg_logs_hen_id_fkey"
+            columns: ["hen_id"]
+            isOneToOne: false
+            referencedRelation: "hens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feed_records: {
         Row: {
@@ -388,6 +399,7 @@ export type Database = {
           id: string
           preferences: Json
           subscription_status: string
+          terms_accepted_at: string | null
           updated_at: string
           user_id: string
         }
@@ -398,6 +410,7 @@ export type Database = {
           id?: string
           preferences?: Json
           subscription_status?: string
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -408,6 +421,7 @@ export type Database = {
           id?: string
           preferences?: Json
           subscription_status?: string
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
         }
