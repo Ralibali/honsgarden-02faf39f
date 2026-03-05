@@ -187,6 +187,9 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Premium nudge */}
+      <PremiumNudge />
+
       {/* Egg quick-add */}
       <Card className="border-primary/15 overflow-hidden shadow-sm">
         <div className="h-1 bg-gradient-to-r from-primary/40 via-primary/20 to-accent/30" />
