@@ -4,6 +4,7 @@ import { Calculator } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PremiumGate } from '@/components/PremiumGate';
 
 export default function Statistics() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
