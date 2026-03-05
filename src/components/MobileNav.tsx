@@ -1,6 +1,8 @@
-import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, FileBarChart } from 'lucide-react';
+import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, FileBarChart, Shield } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const primaryItems = [
   { title: 'Hem', url: '/app', icon: Home },
@@ -23,6 +25,19 @@ const moreItems = [
 
 export function MobileNav() {
   const [showMore, setShowMore] = useState(false);
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => {
+      setIsAdmin(!!data);
+    });
+  }, [user?.id]);
+
+  const allMoreItems = isAdmin
+    ? [...moreItems, { title: 'Admin', url: '/app/admin', icon: Shield }]
+    : moreItems;
 
   return (
     <>
