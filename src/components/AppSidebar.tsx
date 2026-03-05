@@ -31,6 +31,7 @@ const secondaryNav = [
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
+  { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },
 ];
 
 export function AppSidebar() {
