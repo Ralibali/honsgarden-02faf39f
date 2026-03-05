@@ -22,9 +22,9 @@ export default function Statistics() {
     queryFn: () => api.getFeedStatistics().catch(() => null),
   });
 
-  const { data: hens = [] } = useQuery({
-    queryKey: ['hens-for-stats'],
-    queryFn: () => api.getHens().catch(() => []),
+  const { data: hensWithEggs = [] } = useQuery({
+    queryKey: ['hens-with-eggs'],
+    queryFn: () => api.getHensWithEggTotals().catch(() => []),
   });
 
   const costPerEgg = feedStats?.cost_per_egg || 0;
@@ -34,6 +34,12 @@ export default function Statistics() {
   if (summaryLoading) {
     return <div className="max-w-7xl mx-auto space-y-4 animate-fade-in"><Skeleton className="h-10 w-48" /><div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-20" />)}</div></div>;
   }
+
+  // Sort hens by total_eggs for ranking
+  const rankedHens = [...hensWithEggs]
+    .filter((h: any) => h.hen_type !== 'rooster')
+    .sort((a: any, b: any) => (b.total_eggs || 0) - (a.total_eggs || 0));
+  const maxEggs = rankedHens.length > 0 ? rankedHens[0]?.total_eggs || 1 : 1;
 
   return (
     <PremiumGate feature="Statistik" blur>
@@ -94,29 +100,26 @@ export default function Statistics() {
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
             <div className="space-y-3">
-              {hens.length > 0 ? (
-                [...hens]
-                  .sort((a: any, b: any) => (b.total_eggs || b.eggs_total || 0) - (a.total_eggs || a.eggs_total || 0))
-                  .slice(0, 6)
-                  .map((hen: any, i: number) => {
-                    const eggs = hen.total_eggs || hen.eggs_total || 0;
-                    return (
-                      <div key={hen._id || hen.id} className="flex items-center gap-2 sm:gap-3">
-                        <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground">
-                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</span>
-                            <span className="stat-number text-xs sm:text-sm text-primary">{eggs} ägg</span>
-                          </div>
-                          <div className="w-full bg-secondary rounded-full h-1.5">
-                            <div className="bg-primary rounded-full h-1.5 transition-all duration-500" style={{ width: `${Math.min(100, (eggs / Math.max(1, eggs)) * 100)}%` }} />
-                          </div>
+              {rankedHens.length > 0 ? (
+                rankedHens.slice(0, 6).map((hen: any, i: number) => {
+                  const eggs = hen.total_eggs || 0;
+                  return (
+                    <div key={hen.id} className="flex items-center gap-2 sm:gap-3">
+                      <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground">
+                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs sm:text-sm font-medium text-foreground">{hen.name}</span>
+                          <span className="stat-number text-xs sm:text-sm text-primary">{eggs} ägg</span>
+                        </div>
+                        <div className="w-full bg-secondary rounded-full h-1.5">
+                          <div className="bg-primary rounded-full h-1.5 transition-all duration-500" style={{ width: `${Math.min(100, (eggs / maxEggs) * 100)}%` }} />
                         </div>
                       </div>
-                    );
-                  })
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">Lägg till hönor för att se topplistan</p>
               )}
@@ -130,11 +133,11 @@ export default function Statistics() {
             <CardTitle className="font-serif text-base sm:text-lg">Rasfördelning</CardTitle>
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
-            {hens.length > 0 ? (
+            {hensWithEggs.length > 0 ? (
               <div className="space-y-2">
                 {Object.entries(
-                  hens.reduce((acc: Record<string, number>, hen: any) => {
-                    const breed = hen.breed || hen.race || 'Okänd';
+                  hensWithEggs.reduce((acc: Record<string, number>, hen: any) => {
+                    const breed = hen.breed || 'Okänd';
                     acc[breed] = (acc[breed] || 0) + 1;
                     return acc;
                   }, {})
@@ -153,24 +156,20 @@ export default function Statistics() {
       </div>
 
       {/* Insights */}
-      {insights && (
+      {insights && insights.tips && (
         <Card className="bg-card border-border shadow-sm">
           <CardHeader className="px-4 sm:px-6">
             <CardTitle className="font-serif text-base sm:text-lg">📈 Insikter</CardTitle>
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
-            {insights.tips ? (
-              <ul className="space-y-2">
-                {(Array.isArray(insights.tips) ? insights.tips : [insights.tips]).map((tip: string, i: number) => (
-                  <li key={i} className="flex gap-2 items-start text-sm text-foreground">
-                    <span className="text-primary mt-1 shrink-0">•</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground">Samla mer data för att se insikter</p>
-            )}
+            <ul className="space-y-2">
+              {(Array.isArray(insights.tips) ? insights.tips : [insights.tips]).map((tip: string, i: number) => (
+                <li key={i} className="flex gap-2 items-start text-sm text-foreground">
+                  <span className="text-primary mt-1 shrink-0">•</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}
