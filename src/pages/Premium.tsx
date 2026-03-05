@@ -160,7 +160,7 @@ export default function Premium() {
               disabled={!!loadingPlan || isPremium}
             >
               {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-              {isPremium ? 'Du har redan Premium' : 'Välj årsplan – 799 kr'}
+              {isPremium ? 'Du har redan Premium' : 'Välj årsplan – 149 kr'}
             </Button>
           </CardContent>
         </Card>

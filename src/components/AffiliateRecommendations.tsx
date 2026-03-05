@@ -238,7 +238,7 @@ export function PremiumUpsellBanner({ variant = 'compact' }: { variant?: 'compac
               <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">
                 ✓ 7 dagar gratis
               </span>
-              <span className="text-xs text-muted-foreground">sedan 99 kr/mån</span>
+              <span className="text-xs text-muted-foreground">sedan 19 kr/mån</span>
             </div>
             <Button
               onClick={() => navigate('/app/premium')}

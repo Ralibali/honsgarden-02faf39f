@@ -342,12 +342,12 @@ export default function Index() {
                 ))}
               </ul>
               <div className="flex items-baseline gap-2 mb-6">
-                <span className="stat-number text-4xl text-foreground">99 kr</span>
+                <span className="stat-number text-4xl text-foreground">19 kr</span>
                 <span className="text-muted-foreground">/mån</span>
                 <span className="text-muted-foreground mx-1">·</span>
-                <span className="stat-number text-4xl text-foreground">799 kr</span>
+                <span className="stat-number text-4xl text-foreground">149 kr</span>
                 <span className="text-muted-foreground">/år</span>
-                <span className="text-[10px] bg-success/10 text-success px-2 py-0.5 rounded-full font-semibold ml-2 uppercase tracking-wide">Spara 33%</span>
+                <span className="text-[10px] bg-success/10 text-success px-2 py-0.5 rounded-full font-semibold ml-2 uppercase tracking-wide">Spara 35%</span>
               </div>
               <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
                 <a href="/login?mode=register">
