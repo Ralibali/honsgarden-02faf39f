@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import heroFarm from '@/assets/hero-farm.jpg';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ type AuthMode = 'welcome' | 'login' | 'register' | 'forgot';
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login, register } = useAuth();
+  const { login, register, isAuthenticated, loading: authLoading } = useAuth();
 
   // Read mode from URL: /login?mode=register or /login?mode=login
   const initialMode = searchParams.get('mode');
@@ -26,12 +26,18 @@ export default function Login() {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/app', { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/app');
+      navigate('/app', { replace: true });
     } catch (err: any) {
       toast({ title: 'Inloggning misslyckades', description: err.message || 'Kontrollera e-post och lösenord.', variant: 'destructive' });
     } finally {
