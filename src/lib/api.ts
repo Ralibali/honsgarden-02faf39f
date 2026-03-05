@@ -696,7 +696,7 @@ export const api = {
   getTransactions, createTransaction, deleteTransaction,
   getHealthLogs, createHealthLog, getHenHealthLogs,
   submitFeedback,
-  getDailyChores, completeChore, uncompleteChore,
+  getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
   getCoopSettings, updateCoopSettings,
   getFlocks, createFlock, updateFlock, deleteFlock,
   getReminderSettings, updateReminderSettings,
