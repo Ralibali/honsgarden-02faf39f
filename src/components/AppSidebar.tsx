@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -56,23 +56,40 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="hidden md:flex border-r border-sidebar-border">
-      <SidebarContent className="pt-4">
-        <div className="px-4 pb-4 flex items-center gap-3">
-          <span className="text-2xl">🥚</span>
-          {!collapsed && <h1 className="font-serif text-xl text-foreground">Hönsgården</h1>}
+    <Sidebar collapsible="icon" className="hidden md:flex border-r border-sidebar-border bg-sidebar">
+      <SidebarContent className="pt-5">
+        {/* Brand */}
+        <div className="px-5 pb-6 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Feather className="h-5 w-5 text-primary" />
+          </div>
+          {!collapsed && (
+            <div>
+              <h1 className="font-serif text-lg text-foreground leading-none">Hönsgården</h1>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Din gårdsassistent</p>
+            </div>
+          )}
         </div>
 
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[10px] text-muted-foreground uppercase tracking-widest px-4">Gården</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel className="text-[10px] text-muted-foreground/70 uppercase tracking-[0.14em] px-5 mb-1 font-medium">
+              Gården
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === '/app'} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200" activeClassName="bg-primary/15 text-primary font-medium">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    <NavLink
+                      to={item.url}
+                      end={item.url === '/app'}
+                      className="flex items-center gap-3 px-5 py-2 mx-2 rounded-xl text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-all duration-200"
+                      activeClassName="bg-primary/12 text-primary font-medium shadow-sm"
+                    >
+                      <item.icon className="h-[18px] w-[18px] shrink-0" />
+                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -82,15 +99,23 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-[10px] text-muted-foreground uppercase tracking-widest px-4 mt-2">Verktyg</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel className="text-[10px] text-muted-foreground/70 uppercase tracking-[0.14em] px-5 mt-3 mb-1 font-medium">
+              Verktyg
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               {secondaryNav.filter(item => !(item as any).adminOnly || isAdmin).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200" activeClassName="bg-primary/15 text-primary font-medium">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    <NavLink
+                      to={item.url}
+                      className="flex items-center gap-3 px-5 py-2 mx-2 rounded-xl text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-all duration-200"
+                      activeClassName="bg-primary/12 text-primary font-medium shadow-sm"
+                    >
+                      <item.icon className="h-[18px] w-[18px] shrink-0" />
+                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -100,15 +125,20 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 space-y-3">
+      <SidebarFooter className="p-4 space-y-2 border-t border-sidebar-border">
         {!collapsed && (
           <>
-            <div>
-              <p className="text-sm font-medium text-foreground">{user?.name || 'Användare'}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <div className="px-1">
+              <p className="text-sm font-medium text-foreground truncate">{user?.name || 'Användare'}</p>
+              <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
             </div>
-            <Button variant="outline" size="sm" className="w-full gap-2 text-muted-foreground" onClick={handleLogout}>
-              <LogOut className="h-3.5 w-3.5" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2.5 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70 rounded-xl h-9"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
               Logga ut
             </Button>
           </>
