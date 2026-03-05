@@ -205,6 +205,36 @@ export default function Achievements({ eggs, hens, streak }: AchievementsProps) 
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
 
+  // Grant 7 days premium for newly unlocked achievements
+  useEffect(() => {
+    if (!user?.id) return;
+    const unlocked = achievements.filter(a => a.unlocked);
+    if (unlocked.length === 0) return;
+
+    const grantRewards = async () => {
+      // Fetch already rewarded achievements
+      const { data: existing } = await supabase
+        .from('achievement_rewards')
+        .select('achievement_id')
+        .eq('user_id', user.id);
+      
+      const alreadyRewarded = new Set((existing || []).map(r => r.achievement_id));
+
+      for (const achievement of unlocked) {
+        if (alreadyRewarded.has(achievement.id) || rewardedRef.current.has(achievement.id)) continue;
+        rewardedRef.current.add(achievement.id);
+
+        // Record reward and grant premium
+        const { error } = await supabase.from('achievement_rewards').insert({ user_id: user.id, achievement_id: achievement.id });
+        if (!error) {
+          await supabase.rpc('grant_premium_days', { _user_id: user.id, _days: 7 });
+          toast({ title: `🏆 ${achievement.title} – upplåst!`, description: 'Du har fått 7 dagars gratis Premium som belöning!' });
+        }
+      }
+    };
+    grantRewards();
+  }, [achievements, user?.id]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
