@@ -78,6 +78,7 @@ const AppRoutes = () => (
           <Route path="community" element={<Community />} />
           <Route path="admin" element={<Admin />} />
           <Route path="hens/:henId" element={<HenProfile />} />
+          <Route path="weekly-report" element={<WeeklyReport />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -31,6 +31,7 @@ const mainNav = [
 const secondaryNav = [
   { title: 'Ekonomi', url: '/app/finance', icon: Coins, premium: true },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
+  { title: 'Veckorapport', url: '/app/weekly-report', icon: FileBarChart },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
   { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },
