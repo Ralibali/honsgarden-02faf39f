@@ -146,13 +146,13 @@ export default function Premium() {
           </div>
           <CardContent className="p-6 pt-10">
             <h3 className="font-serif text-lg text-foreground mb-1">Årsplan</h3>
-            <p className="text-muted-foreground text-sm mb-5">Bästa värdet – bara 12 kr/mån</p>
+            <p className="text-muted-foreground text-sm mb-5">Bästa värdet – bara 66 kr/mån</p>
             <div className="mb-2">
-              <span className="text-4xl font-bold text-foreground">149</span>
+              <span className="text-4xl font-bold text-foreground">799</span>
               <span className="text-lg text-muted-foreground ml-1">kr/år</span>
             </div>
             <p className="text-xs text-muted-foreground mb-5">
-              <span className="line-through">228 kr</span> → du sparar 79 kr per år
+              <span className="line-through">1 188 kr</span> → du sparar 389 kr per år
             </p>
             <Button 
               className="w-full h-12 gap-2 active:scale-95 transition-transform text-base font-semibold shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"

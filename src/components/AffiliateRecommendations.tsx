@@ -215,7 +215,7 @@ export function PremiumUpsellBanner({ variant = 'compact' }: { variant?: 'compac
         </div>
         <div className="flex-1 text-left">
           <p className="text-xs font-semibold text-foreground">Lås upp hela potentialen</p>
-          <p className="text-[10px] text-muted-foreground">Premium från bara 19 kr/mån</p>
+          <p className="text-[10px] text-muted-foreground">Premium från bara 99 kr/mån</p>
         </div>
         <Sparkles className="h-4 w-4 text-warning group-hover:scale-110 transition-transform shrink-0" />
       </button>

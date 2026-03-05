@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import heroFarm from '@/assets/hero-farm.jpg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,13 +13,18 @@ type AuthMode = 'welcome' | 'login' | 'register' | 'forgot';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, register } = useAuth();
-  const [authMode, setAuthMode] = useState<AuthMode>('welcome');
+
+  // Read mode from URL: /login?mode=register or /login?mode=login
+  const initialMode = searchParams.get('mode');
+  const [authMode, setAuthMode] = useState<AuthMode>(
+    initialMode === 'register' ? 'register' : initialMode === 'login' ? 'login' : 'welcome'
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,10 +133,6 @@ export default function Login() {
                     <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-11" required />
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="rounded border-border" />
-                <Label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">Kom ihåg mig</Label>
               </div>
               <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
