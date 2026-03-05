@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Egg, Bird, CalendarDays, Coins, Thermometer, Lightbulb,
   ArrowRight, BookOpen, Loader2, Plus, TrendingUp, Sparkles, Feather,
@@ -67,6 +69,8 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryText, setDiaryText] = useState('');
+  const [customEggCount, setCustomEggCount] = useState('');
+  const [selectedHenId, setSelectedHenId] = useState<string>('all');
   const now = new Date();
 
   const { data: eggs = [] } = useQuery({ queryKey: ['eggs'], queryFn: () => api.getEggs(), staleTime: 60_000 });
@@ -76,8 +80,11 @@ export default function Dashboard() {
   const { data: weatherData, isLoading: weatherLoading } = useQuery({ queryKey: ['weather'], queryFn: fetchWeather, staleTime: 30 * 60 * 1000, retry: 2 });
   const { data: aiTip } = useQuery({ queryKey: ['daily-tip'], queryFn: () => api.getDailyTip(), staleTime: 60 * 60 * 1000, retry: 1 });
 
+  const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
+
   const eggMutation = useMutation({
-    mutationFn: (count: number) => api.createEggRecord({ date: now.toISOString().split('T')[0], count }),
+    mutationFn: ({ count, hen_id }: { count: number; hen_id?: string }) =>
+      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['eggs'] }); toast({ title: '🥚 Ägg registrerade!' }); },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
@@ -137,7 +144,10 @@ export default function Dashboard() {
       text: l.description,
     }));
 
-  const addEggs = (count: number) => eggMutation.mutate(count);
+  const addEggs = (count: number) => {
+    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
+    eggMutation.mutate({ count, hen_id });
+  };
 
   const stats = [
     { icon: Egg, value: yesterdayEggs, label: 'igår', color: 'text-accent', bg: 'bg-accent/8' },
@@ -194,7 +204,7 @@ export default function Dashboard() {
       <Card className="border-primary/15 overflow-hidden shadow-sm">
         <div className="h-1 bg-gradient-to-r from-primary/40 via-primary/20 to-accent/30" />
         <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Egg className="h-4 w-4 text-primary" />
@@ -205,6 +215,24 @@ export default function Dashboard() {
               {todayEggs} idag
             </span>
           </div>
+
+          {/* Hen selector */}
+          {activeHensList.length > 0 && (
+            <div className="mb-3">
+              <Select value={selectedHenId} onValueChange={setSelectedHenId}>
+                <SelectTrigger className="h-8 text-[11px] rounded-lg border-border/50">
+                  <SelectValue placeholder="Alla hönor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alla hönor (generellt)</SelectItem>
+                  {activeHensList.map((hen: any) => (
+                    <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 justify-center">
             {[1, 2, 3, 4, 5].map((n) => (
               <Button
@@ -218,17 +246,28 @@ export default function Dashboard() {
                 +{n}
               </Button>
             ))}
+          </div>
+
+          {/* Custom count inline input */}
+          <div className="flex items-center gap-2 mt-3">
+            <Input
+              type="number"
+              min="1"
+              placeholder="Valfritt antal"
+              value={customEggCount}
+              onChange={(e) => setCustomEggCount(e.target.value)}
+              className="h-9 text-sm rounded-xl flex-1"
+            />
             <Button
-              variant="outline"
               size="sm"
-              className="w-12 h-10 text-sm font-bold border-border/60 text-muted-foreground hover:bg-secondary rounded-xl"
+              className="h-9 px-4 rounded-xl text-sm"
+              disabled={!customEggCount || Number(customEggCount) <= 0 || eggMutation.isPending}
               onClick={() => {
-                const custom = prompt('Antal ägg:');
-                if (custom && !isNaN(Number(custom)) && Number(custom) > 0) addEggs(Number(custom));
+                const n = Number(customEggCount);
+                if (n > 0) { addEggs(n); setCustomEggCount(''); }
               }}
-              disabled={eggMutation.isPending}
             >
-              ···
+              Lägg till
             </Button>
           </div>
         </CardContent>

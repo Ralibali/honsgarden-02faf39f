@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { User, Bell, Shield, LogOut, Loader2, MessageSquare } from 'lucide-react';
+import { User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail, FileText, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,23 +17,23 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: coopSettings, isLoading: coopLoading } = useQuery({
+  const { data: coopSettings } = useQuery({
     queryKey: ['coop-settings'],
     queryFn: () => api.getCoopSettings(),
   });
 
-  const { data: reminderSettings, isLoading: reminderLoading } = useQuery({
+  const { data: reminderSettings } = useQuery({
     queryKey: ['reminder-settings'],
     queryFn: () => api.getReminderSettings(),
   });
 
-  const [name, setName] = useState('');
   const [coopName, setCoopName] = useState('');
   const [henCount, setHenCount] = useState('');
   const [location, setLocation] = useState('');
   const [morningReminder, setMorningReminder] = useState(true);
   const [eveningReminder, setEveningReminder] = useState(true);
   const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [supportMsg, setSupportMsg] = useState('');
 
   useEffect(() => {
     if (coopSettings) {
@@ -49,10 +49,6 @@ export default function SettingsPage() {
       setEveningReminder(reminderSettings.evening_reminder ?? true);
     }
   }, [reminderSettings]);
-
-  useEffect(() => {
-    if (user) setName(user.name || '');
-  }, [user]);
 
   const saveCoopMutation = useMutation({
     mutationFn: (data: any) => api.updateCoopSettings(data),
@@ -81,29 +77,18 @@ export default function SettingsPage() {
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
 
-  const handleSaveProfile = () => {
-    saveCoopMutation.mutate({
-      coop_name: coopName,
-      hen_count: Number(henCount) || 0,
-      location: location || null,
-    });
-  };
-
-  const handleSaveReminders = () => {
-    saveReminderMutation.mutate({
-      morning_reminder: morningReminder,
-      evening_reminder: eveningReminder,
-    });
-  };
+  const supportMutation = useMutation({
+    mutationFn: (data: any) => api.submitFeedback({ ...data, status: 'support' }),
+    onSuccess: () => {
+      toast({ title: 'Meddelande skickat! 📩', description: 'Vi svarar så snart vi kan.' });
+      setSupportMsg('');
+    },
+    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+  });
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
-  };
-
-  const handleFeedback = () => {
-    if (!feedbackMsg.trim()) return;
-    feedbackMutation.mutate({ message: feedbackMsg.trim() });
   };
 
   return (
@@ -114,7 +99,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile */}
-      <Card className="bg-card border-border shadow-sm">
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
@@ -125,24 +110,24 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label className="text-muted-foreground">E-post</Label>
-              <Input value={user?.email || ''} disabled className="mt-1.5 h-11 bg-muted/50" />
+              <Input value={user?.email || ''} disabled className="mt-1.5 h-11 bg-muted/50 rounded-xl" />
             </div>
             <div>
               <Label className="text-muted-foreground">Gårdsnamn</Label>
-              <Input value={coopName} onChange={(e) => setCoopName(e.target.value)} placeholder="Min hönsgård" className="mt-1.5 h-11" />
+              <Input value={coopName} onChange={(e) => setCoopName(e.target.value)} placeholder="Min hönsgård" className="mt-1.5 h-11 rounded-xl" />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label className="text-muted-foreground">Antal hönor</Label>
-              <Input type="number" value={henCount} onChange={(e) => setHenCount(e.target.value)} placeholder="0" className="mt-1.5 h-11" />
+              <Input type="number" value={henCount} onChange={(e) => setHenCount(e.target.value)} placeholder="0" className="mt-1.5 h-11 rounded-xl" />
             </div>
             <div>
               <Label className="text-muted-foreground">Plats</Label>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="T.ex. Linköping" className="mt-1.5 h-11" />
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="T.ex. Linköping" className="mt-1.5 h-11 rounded-xl" />
             </div>
           </div>
-          <Button onClick={handleSaveProfile} disabled={saveCoopMutation.isPending} className="active:scale-95 transition-transform">
+          <Button onClick={() => saveCoopMutation.mutate({ coop_name: coopName, hen_count: Number(henCount) || 0, location: location || null })} disabled={saveCoopMutation.isPending} className="rounded-xl">
             {saveCoopMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Spara ändringar
           </Button>
@@ -150,7 +135,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Notifications */}
-      <Card className="bg-card border-border shadow-sm">
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
@@ -172,15 +157,43 @@ export default function SettingsPage() {
             </div>
             <Switch checked={eveningReminder} onCheckedChange={setEveningReminder} />
           </div>
-          <Button variant="outline" onClick={handleSaveReminders} disabled={saveReminderMutation.isPending} className="active:scale-95 transition-transform">
+          <Button variant="outline" onClick={() => saveReminderMutation.mutate({ morning_reminder: morningReminder, evening_reminder: eveningReminder })} disabled={saveReminderMutation.isPending} className="rounded-xl">
             {saveReminderMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Spara påminnelser
           </Button>
         </CardContent>
       </Card>
 
+      {/* Support / Contact */}
+      <Card className="border-border/50 shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <HelpCircle className="h-5 w-5 text-primary" />
+            Kontakta kundtjänst
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Har du frågor, problem eller behöver hjälp? Skriv till oss nedan eller mejla direkt till{' '}
+            <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a>.
+          </p>
+          <Textarea
+            placeholder="Beskriv ditt ärende..."
+            value={supportMsg}
+            onChange={(e) => setSupportMsg(e.target.value)}
+            rows={3}
+            className="rounded-xl"
+          />
+          <Button variant="outline" onClick={() => { if (supportMsg.trim()) supportMutation.mutate({ message: `[SUPPORT] ${supportMsg.trim()}` }); }} disabled={supportMutation.isPending || !supportMsg.trim()} className="rounded-xl gap-2">
+            {supportMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            <Mail className="h-4 w-4" />
+            Skicka
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Feedback */}
-      <Card className="bg-card border-border shadow-sm">
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
@@ -193,16 +206,33 @@ export default function SettingsPage() {
             value={feedbackMsg}
             onChange={(e) => setFeedbackMsg(e.target.value)}
             rows={3}
+            className="rounded-xl"
           />
-          <Button variant="outline" onClick={handleFeedback} disabled={feedbackMutation.isPending || !feedbackMsg.trim()}>
+          <Button variant="outline" onClick={() => { if (feedbackMsg.trim()) feedbackMutation.mutate({ message: feedbackMsg.trim() }); }} disabled={feedbackMutation.isPending || !feedbackMsg.trim()} className="rounded-xl">
             {feedbackMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Skicka
           </Button>
         </CardContent>
       </Card>
 
+      {/* Legal */}
+      <Card className="border-border/50 shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Juridiskt
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Button variant="ghost" className="w-full justify-start gap-2 text-sm text-muted-foreground hover:text-foreground rounded-xl" onClick={() => navigate('/terms')}>
+            <FileText className="h-4 w-4" />
+            Användarvillkor & Integritetspolicy
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Account */}
-      <Card className="bg-card border-border shadow-sm">
+      <Card className="border-border/50 shadow-sm">
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
@@ -210,12 +240,10 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="pt-2">
-            <Button variant="outline" className="gap-2 text-destructive hover:text-destructive" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
-              Logga ut
-            </Button>
-          </div>
+          <Button variant="outline" className="gap-2 text-destructive hover:text-destructive rounded-xl" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
+            Logga ut
+          </Button>
         </CardContent>
       </Card>
     </div>

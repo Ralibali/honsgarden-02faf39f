@@ -26,6 +26,7 @@ const Premium = React.lazy(() => import("./pages/Premium"));
 const Community = React.lazy(() => import("./pages/Community"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const Admin = React.lazy(() => import("./pages/Admin"));
+const Terms = React.lazy(() => import("./pages/Terms"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +60,7 @@ const AppRoutes = () => (
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="eggs" element={<Eggs />} />

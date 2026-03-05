@@ -49,9 +49,12 @@ export async function getEggs() {
   return data;
 }
 
-export async function createEggRecord(record: { date: string; count: number; notes?: string }) {
+export async function createEggRecord(record: { date: string; count: number; notes?: string; hen_id?: string }) {
   const userId = await getUserId();
-  const { data, error } = await supabase.from('egg_logs').insert({ ...record, user_id: userId }).select().single();
+  const insertData: any = { date: record.date, count: record.count, user_id: userId };
+  if (record.notes) insertData.notes = record.notes;
+  if (record.hen_id) insertData.hen_id = record.hen_id;
+  const { data, error } = await supabase.from('egg_logs').insert(insertData).select().single();
   if (error) throw new Error(error.message);
   return data;
 }
@@ -497,6 +500,33 @@ export async function adminUpdateFeedbackStatus(feedbackId: string, statusData: 
   return data;
 }
 
+export async function adminSubscriptions() {
+  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function adminDeleteUser(userId: string) {
+  // Delete profile (cascading will handle related data)
+  const { error } = await supabase.from('profiles').delete().eq('user_id', userId);
+  if (error) throw new Error(error.message);
+  return {};
+}
+
+export async function adminUpdateSubscription(userId: string, data: any) {
+  const status = data.is_premium ? 'premium' : 'free';
+  const { error } = await supabase.from('profiles').update({ subscription_status: status }).eq('user_id', userId);
+  if (error) throw new Error(error.message);
+  return {};
+}
+
+export async function adminAcceptTerms() {
+  const userId = await getUserId();
+  const { error } = await supabase.from('profiles').update({ terms_accepted_at: new Date().toISOString() }).eq('user_id', userId);
+  if (error) throw new Error(error.message);
+  return {};
+}
+
 // Placeholder stubs for features that need more context
 export async function getStatisticsInsights() { return { insights: [] }; }
 export async function getAdvancedInsights() { return { insights: [] }; }
@@ -508,9 +538,6 @@ export async function getFlockStatistics() { return {}; }
 export async function getFlockHealth() { return {}; }
 export async function getInsights() { return { insights: [] }; }
 export async function getAgdaInboxToday() { return { messages: [] }; }
-export async function adminSubscriptions() { return []; }
-export async function adminDeleteUser(_userId: string) { return {}; }
-export async function adminUpdateSubscription(_userId: string, _data: any) { return {}; }
 export async function markHenSeen(_id: string) { return {}; }
 
 // Legacy compatibility: export as api object for existing imports
@@ -539,4 +566,5 @@ export const api = {
   getInsights, getAgdaInboxToday,
   adminCheck, adminStats, adminUsers, adminSubscriptions,
   adminFeedback, adminUpdateFeedbackStatus, adminDeleteUser, adminUpdateSubscription,
+  adminAcceptTerms,
 };
