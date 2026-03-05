@@ -12,6 +12,7 @@ import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { PremiumGate } from '@/components/PremiumGate';
 
 export default function Finance() {
   const [view, setView] = useState('overview');
