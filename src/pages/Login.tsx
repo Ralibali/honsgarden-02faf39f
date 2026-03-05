@@ -6,19 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Egg, ArrowRight, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 type AuthMode = 'welcome' | 'login' | 'register' | 'forgot';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const [authMode, setAuthMode] = useState<AuthMode>('welcome');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +38,8 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.register(email, password, name);
-      toast({ title: 'Konto skapat!', description: 'Kontrollera din e-post för att verifiera kontot.' });
+      await register(email, password, name);
+      toast({ title: 'Konto skapat!', description: 'Du kan nu logga in direkt.' });
       setAuthMode('login');
     } catch (err: any) {
       toast({ title: 'Registrering misslyckades', description: err.message, variant: 'destructive' });
@@ -54,7 +55,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await api.forgotPassword(email);
+      await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
       toast({ title: 'E-post skickad!', description: 'Kolla din inkorg för att återställa lösenordet.' });
     } catch (err: any) {
       toast({ title: 'Fel', description: err.message, variant: 'destructive' });
@@ -128,6 +129,10 @@ export default function Login() {
                   </div>
                 </div>
               </div>
+              <div className="flex items-center gap-2 mt-1">
+                <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="rounded border-border" />
+                <Label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">Kom ihåg mig</Label>
+              </div>
               <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Logga in <ArrowRight className="ml-2 h-4 w-4" />
@@ -165,7 +170,7 @@ export default function Login() {
                   <Label htmlFor="reg-password" className="text-muted-foreground">Lösenord</Label>
                   <div className="relative mt-1.5">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="reg-password" type="password" placeholder="Minst 8 tecken" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-11" required />
+                    <Input id="reg-password" type="password" placeholder="Minst 6 tecken" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-11" minLength={6} required />
                   </div>
                 </div>
               </div>
