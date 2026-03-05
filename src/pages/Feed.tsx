@@ -77,6 +77,7 @@ export default function Feed() {
   }
 
   return (
+    <PremiumGate feature="Foderspårning" blur>
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
