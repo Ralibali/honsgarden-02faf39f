@@ -531,7 +531,7 @@ export const api = {
   getStatisticsInsights, getAdvancedInsights, getTrendAnalysis,
   getYesterdaySummary, getFarmToday,
   getWeather,
-  getDailyReport, getEggForecast, getDailyTip, getFreeTip,
+  getDailyTip,
   getPremiumStatus, createCheckoutSession, cancelSubscription,
   getAlerts, dismissAlert,
   getStreak, touchStreak,
