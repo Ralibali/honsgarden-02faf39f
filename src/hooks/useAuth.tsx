@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 interface UserProfile {
   id: string;
@@ -22,12 +22,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function toBasicProfile(supaUser: SupabaseUser): UserProfile {
+  return {
+    id: supaUser.id,
+    email: supaUser.email ?? '',
+    name: supaUser.user_metadata?.name ?? '',
+    is_premium: false,
+    subscription_status: 'free',
+  };
+}
+
 async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('display_name, subscription_status')
     .eq('user_id', supaUser.id)
-    .single();
+    .maybeSingle();
 
   return {
     id: supaUser.id,
@@ -43,41 +53,86 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth changes FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const profile = await buildProfile(session.user);
-        setUser(profile);
-      } else {
+    let isMounted = true;
+
+    const applySession = (session: Session | null, hydrateProfile: boolean) => {
+      const supaUser = session?.user ?? null;
+
+      if (!supaUser) {
+        if (isMounted) setUser(null);
+        return;
+      }
+
+      if (isMounted) {
+        // Set basic user immediately for fast route access
+        setUser(toBasicProfile(supaUser));
+      }
+
+      if (hydrateProfile) {
+        // Fire-and-forget: do not block auth state callback
+        void buildProfile(supaUser)
+          .then((profile) => {
+            if (isMounted) setUser(profile);
+          })
+          .catch(() => {
+            // Keep basic profile if profile query fails
+          });
+      }
+    };
+
+    // 1) Restore session from storage first
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!isMounted) return;
+        applySession(session, true);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!isMounted) return;
         setUser(null);
+        setLoading(false);
+      });
+
+    // 2) React to subsequent auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setLoading(false);
+        return;
       }
+
+      const shouldHydrateProfile = event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED';
+      applySession(session, shouldHydrateProfile);
       setLoading(false);
     });
 
-    // Then check existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const profile = await buildProfile(session.user);
-        setUser(profile);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
+
+    if (data.user) {
+      setUser(toBasicProfile(data.user));
+      void buildProfile(data.user).then(setUser).catch(() => undefined);
+    }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name } },
     });
     if (error) throw new Error(error.message);
+    return data;
   };
 
   const logout = async () => {
