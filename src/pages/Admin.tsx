@@ -133,7 +133,7 @@ export default function Admin() {
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <Egg className="h-5 w-5 text-accent mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.total_eggs ?? stats.eggs ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">{stats.egg_records ?? '–'}</p>
               <p className="text-[10px] text-muted-foreground">Ägg totalt</p>
             </CardContent>
           </Card>
