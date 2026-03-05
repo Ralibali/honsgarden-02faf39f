@@ -36,6 +36,7 @@ export default function Statistics() {
   }
 
   return (
+    <PremiumGate feature="Statistik" blur>
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Statistik 📊</h1>
