@@ -42,16 +42,27 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, subscription_status')
+    .select('display_name, subscription_status, premium_expires_at')
     .eq('user_id', supaUser.id)
     .maybeSingle();
+
+  // Check if premium has expired
+  let subStatus = profile?.subscription_status ?? 'free';
+  if (subStatus === 'premium' && profile?.premium_expires_at) {
+    const expiresAt = new Date(profile.premium_expires_at);
+    if (expiresAt < new Date()) {
+      subStatus = 'free';
+      // Auto-downgrade in DB (fire-and-forget)
+      void supabase.from('profiles').update({ subscription_status: 'free', premium_expires_at: null }).eq('user_id', supaUser.id);
+    }
+  }
 
   return {
     id: supaUser.id,
     email: supaUser.email ?? '',
     name: profile?.display_name ?? supaUser.user_metadata?.name ?? '',
-    is_premium: profile?.subscription_status === 'premium',
-    subscription_status: profile?.subscription_status ?? 'free',
+    is_premium: subStatus === 'premium',
+    subscription_status: subStatus,
   };
 }
 

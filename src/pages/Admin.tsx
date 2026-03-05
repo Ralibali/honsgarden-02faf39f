@@ -3,9 +3,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -20,7 +21,7 @@ import {
 export default function Admin() {
   const queryClient = useQueryClient();
   const [userSearch, setUserSearch] = useState('');
-
+  const [premiumDurations, setPremiumDurations] = useState<Record<string, string>>({});
   const { data: adminCheck, isLoading: checkLoading, isError: checkError } = useQuery({
     queryKey: ['admin-check'],
     queryFn: () => api.adminCheck(),
@@ -201,25 +202,50 @@ export default function Admin() {
                       </div>
                     </div>
 
-                    <div className="flex gap-1 shrink-0">
+                    <div className="flex gap-1 shrink-0 items-center">
                       {user.subscription_status !== 'premium' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-[10px] h-7 rounded-lg"
-                          onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true } })}
-                        >
-                          <Crown className="h-3 w-3 mr-1" /> Ge Premium
-                        </Button>
+                        <>
+                          <Select value={premiumDurations[user.user_id] || '30'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
+                            <SelectTrigger className="h-7 w-[90px] text-[10px] rounded-lg">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 dagar</SelectItem>
+                              <SelectItem value="14">14 dagar</SelectItem>
+                              <SelectItem value="30">30 dagar</SelectItem>
+                              <SelectItem value="90">90 dagar</SelectItem>
+                              <SelectItem value="365">1 år</SelectItem>
+                              <SelectItem value="lifetime">♾️ Livstid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] h-7 rounded-lg"
+                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '30' } })}
+                          >
+                            <Crown className="h-3 w-3 mr-1" /> Ge
+                          </Button>
+                        </>
                       ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-[10px] h-7 text-destructive rounded-lg"
-                          onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: false } })}
-                        >
-                          Ta bort Premium
-                        </Button>
+                        <div className="flex flex-col items-end gap-1">
+                          {user.premium_expires_at ? (
+                            <span className="text-[9px] text-muted-foreground flex items-center gap-1">
+                              <CalendarDays className="h-2.5 w-2.5" />
+                              Går ut {new Date(user.premium_expires_at).toLocaleDateString('sv-SE')}
+                            </span>
+                          ) : (
+                            <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] h-7 text-destructive rounded-lg"
+                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: false } })}
+                          >
+                            Ta bort Premium
+                          </Button>
+                        </div>
                       )}
 
                       <AlertDialog>
@@ -283,25 +309,50 @@ export default function Admin() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-1 shrink-0">
+                      <div className="flex gap-1 shrink-0 items-center">
                         {user.subscription_status !== 'premium' ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[10px] h-7 rounded-lg"
-                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true } })}
-                          >
-                            <Crown className="h-3 w-3 mr-1" /> Ge Premium
-                          </Button>
+                          <>
+                            <Select value={premiumDurations[user.user_id] || '30'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
+                              <SelectTrigger className="h-7 w-[90px] text-[10px] rounded-lg">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="7">7 dagar</SelectItem>
+                                <SelectItem value="14">14 dagar</SelectItem>
+                                <SelectItem value="30">30 dagar</SelectItem>
+                                <SelectItem value="90">90 dagar</SelectItem>
+                                <SelectItem value="365">1 år</SelectItem>
+                                <SelectItem value="lifetime">♾️ Livstid</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-[10px] h-7 rounded-lg"
+                              onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '30' } })}
+                            >
+                              <Crown className="h-3 w-3 mr-1" /> Ge
+                            </Button>
+                          </>
                         ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[10px] h-7 text-destructive rounded-lg"
-                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: false } })}
-                          >
-                            Avsluta
-                          </Button>
+                          <div className="flex flex-col items-end gap-1">
+                            {user.premium_expires_at ? (
+                              <span className="text-[9px] text-muted-foreground flex items-center gap-1">
+                                <CalendarDays className="h-2.5 w-2.5" />
+                                Går ut {new Date(user.premium_expires_at).toLocaleDateString('sv-SE')}
+                              </span>
+                            ) : (
+                              <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-[10px] h-7 text-destructive rounded-lg"
+                              onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: false } })}
+                            >
+                              Avsluta
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </div>
