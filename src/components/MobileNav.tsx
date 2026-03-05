@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins } from 'lucide-react';
+import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState } from 'react';
 
@@ -16,6 +16,8 @@ const moreItems = [
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
   { title: 'Ekonomi', url: '/app/finance', icon: Coins },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
+  { title: 'Premium', url: '/app/premium', icon: Crown },
+  { title: 'Inställningar', url: '/app/settings', icon: Settings },
 ];
 
 export function MobileNav() {
@@ -30,7 +32,7 @@ export function MobileNav() {
             className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-2 shadow-xl animate-fade-in-scale"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-4 gap-1">
               {moreItems.map((item) => (
                 <NavLink
                   key={item.url}
