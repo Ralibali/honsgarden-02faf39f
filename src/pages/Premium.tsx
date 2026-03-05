@@ -62,7 +62,7 @@ export default function Premium() {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
       if (data?.url) {
-        window.open(data.url, '_blank');
+        window.location.href = data.url;
       }
     } catch (err: any) {
       toast({ title: 'Fel', description: err.message || 'Kunde inte öppna kundportalen.', variant: 'destructive' });
@@ -84,7 +84,7 @@ export default function Premium() {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
       if (data?.url) {
-        window.open(data.url, '_blank');
+        window.location.href = data.url;
       } else {
         throw new Error('Ingen checkout-URL returnerades');
       }

@@ -1,7 +1,9 @@
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +33,7 @@ const secondaryNav = [
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
+  { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -38,6 +41,14 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => {
+      setIsAdmin(!!data);
+    });
+  }, [user?.id]);
 
   const handleLogout = async () => {
     await logout();
@@ -74,7 +85,7 @@ export function AppSidebar() {
           {!collapsed && <SidebarGroupLabel className="text-[10px] text-muted-foreground uppercase tracking-widest px-4 mt-2">Verktyg</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {secondaryNav.map((item) => (
+              {secondaryNav.filter(item => !(item as any).adminOnly || isAdmin).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200" activeClassName="bg-primary/15 text-primary font-medium">
