@@ -121,7 +121,12 @@ export function AppSidebar() {
                       activeClassName="bg-primary/12 text-primary font-medium shadow-sm"
                     >
                       <item.icon className="h-[18px] w-[18px] shrink-0" />
-                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="text-[13px] flex items-center gap-1.5">
+                          {item.title}
+                          {(item as any).premium && !isPremium && <Crown className="h-3 w-3 text-warning/60" />}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
