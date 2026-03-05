@@ -79,6 +79,36 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_ai_tip: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          season: string
+          source: string | null
+          tip_text: string
+          version: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          season: string
+          source?: string | null
+          tip_text: string
+          version?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          season?: string
+          source?: string | null
+          tip_text?: string
+          version?: number | null
+        }
+        Relationships: []
+      }
       daily_chores: {
         Row: {
           created_at: string
