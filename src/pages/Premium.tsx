@@ -54,6 +54,23 @@ const testimonials = [
 export default function Premium() {
   const { user } = useAuth();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+  const isPremium = user?.subscription_status === 'premium';
+
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw new Error(error.message);
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message || 'Kunde inte öppna kundportalen.', variant: 'destructive' });
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
 
   const handleCheckout = async (priceId: string, planName: string) => {
     if (!user) {
