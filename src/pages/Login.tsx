@@ -198,6 +198,7 @@ export default function Login() {
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1">Har du en kod från en vän? Ni får båda 7 dagars Premium!</p>
                 </div>
+                <div className="flex items-start gap-2">
                   <input
                     type="checkbox"
                     id="terms"
@@ -211,7 +212,6 @@ export default function Login() {
                     <a href="/terms" target="_blank" className="text-primary hover:underline">användarvillkoren & integritetspolicyn</a>, inklusive att kontaktas via e-post med nyhetsbrev och erbjudanden.
                   </label>
                 </div>
-              </div>
               <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading || !acceptedTerms}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Skapa konto <ArrowRight className="ml-2 h-4 w-4" />
