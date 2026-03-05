@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,14 +23,14 @@ const mainNav = [
   { title: 'Ägg', url: '/app/eggs', icon: Egg },
   { title: 'Hönor', url: '/app/hens', icon: Bird },
   { title: 'Dagliga uppgifter', url: '/app/tasks', icon: ClipboardCheck },
-  { title: 'Foder', url: '/app/feed', icon: Package },
-  { title: 'Kläckning', url: '/app/hatching', icon: Baby },
+  { title: 'Foder', url: '/app/feed', icon: Package, premium: true },
+  { title: 'Kläckning', url: '/app/hatching', icon: Baby, premium: true },
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
 ];
 
 const secondaryNav = [
-  { title: 'Ekonomi', url: '/app/finance', icon: Coins },
-  { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
+  { title: 'Ekonomi', url: '/app/finance', icon: Coins, premium: true },
+  { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
   { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },
