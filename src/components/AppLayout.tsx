@@ -32,6 +32,7 @@ export default function AppLayout() {
         </div>
 
         <MobileNav />
+        <QuickEggFAB />
       </div>
     </SidebarProvider>
   );
