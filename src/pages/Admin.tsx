@@ -21,7 +21,7 @@ import {
 export default function Admin() {
   const queryClient = useQueryClient();
   const [userSearch, setUserSearch] = useState('');
-
+  const [premiumDurations, setPremiumDurations] = useState<Record<string, string>>({});
   const { data: adminCheck, isLoading: checkLoading, isError: checkError } = useQuery({
     queryKey: ['admin-check'],
     queryFn: () => api.adminCheck(),
