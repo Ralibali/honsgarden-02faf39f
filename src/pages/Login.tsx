@@ -54,7 +54,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await api.forgotPassword(email);
+      await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
       toast({ title: 'E-post skickad!', description: 'Kolla din inkorg för att återställa lösenordet.' });
     } catch (err: any) {
       toast({ title: 'Fel', description: err.message, variant: 'destructive' });
