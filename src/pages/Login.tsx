@@ -14,6 +14,7 @@ type AuthMode = 'welcome' | 'login' | 'register' | 'forgot';
 export default function Login() {
   const navigate = useNavigate();
   const { login, register } = useAuth();
+  const [authMode, setAuthMode] = useState<AuthMode>('welcome');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
