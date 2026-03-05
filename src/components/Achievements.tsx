@@ -36,6 +36,8 @@ function getTierColors(tier: string, unlocked: boolean) {
 }
 
 export default function Achievements({ eggs, hens, streak }: AchievementsProps) {
+  const { user } = useAuth();
+  const rewardedRef = useRef<Set<string>>(new Set());
   const achievements = useMemo(() => {
     const totalEggs = eggs.reduce((sum: number, e: any) => sum + (e.count || 0), 0);
     const activeHens = hens.filter((h: any) => h.is_active).length;
