@@ -140,7 +140,7 @@ export default function Admin() {
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-5 w-5 text-success mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.active_today ?? stats.dau ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">{stats.hen_count ?? '–'}</p>
               <p className="text-[10px] text-muted-foreground">Aktiva idag</p>
             </CardContent>
           </Card>
