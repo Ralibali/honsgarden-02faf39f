@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      chore_completions: {
+        Row: {
+          chore_id: string
+          completed_date: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chore_id: string
+          completed_date?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chore_id?: string
+          completed_date?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chore_completions_chore_id_fkey"
+            columns: ["chore_id"]
+            isOneToOne: false
+            referencedRelation: "daily_chores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coop_settings: {
+        Row: {
+          coop_name: string | null
+          created_at: string
+          hen_count: number | null
+          id: string
+          location: string | null
+          settings: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coop_name?: string | null
+          created_at?: string
+          hen_count?: number | null
+          id?: string
+          location?: string | null
+          settings?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coop_name?: string | null
+          created_at?: string
+          hen_count?: number | null
+          id?: string
+          location?: string | null
+          settings?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_chores: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean | null
+          sort_order: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          sort_order?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          sort_order?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       egg_logs: {
         Row: {
           count: number
@@ -94,6 +189,33 @@ export type Database = {
           id?: string
           message?: string
           status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      flocks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -181,6 +303,7 @@ export type Database = {
           breed: string | null
           color: string | null
           created_at: string
+          flock_id: string | null
           id: string
           is_active: boolean
           name: string
@@ -193,6 +316,7 @@ export type Database = {
           breed?: string | null
           color?: string | null
           created_at?: string
+          flock_id?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -205,6 +329,7 @@ export type Database = {
           breed?: string | null
           color?: string | null
           created_at?: string
+          flock_id?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -212,7 +337,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hens_flock_id_fkey"
+            columns: ["flock_id"]
+            isOneToOne: false
+            referencedRelation: "flocks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -242,6 +375,45 @@ export type Database = {
           id?: string
           preferences?: Json
           subscription_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reminder_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean | null
+          evening_reminder: boolean | null
+          evening_time: string | null
+          id: string
+          morning_reminder: boolean | null
+          morning_time: string | null
+          settings: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean | null
+          evening_reminder?: boolean | null
+          evening_time?: string | null
+          id?: string
+          morning_reminder?: boolean | null
+          morning_time?: string | null
+          settings?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean | null
+          evening_reminder?: boolean | null
+          evening_time?: string | null
+          id?: string
+          morning_reminder?: boolean | null
+          morning_time?: string | null
+          settings?: Json | null
           updated_at?: string
           user_id?: string
         }
