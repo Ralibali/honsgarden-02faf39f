@@ -549,6 +549,18 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Achievements */}
+      <Achievements eggs={eggs} hens={hens as any[]} streak={streak} />
+
+      {/* Share card */}
+      <ShareCard
+        weekEggs={weekEggs}
+        totalEggs={eggs.reduce((s: number, e: any) => s + (e.count || 0), 0)}
+        henCount={activeHens}
+        streak={streak}
+        userName={user?.name?.split(' ')[0]}
+      />
+
       {/* Diary dialog */}
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>
         <DialogContent className="max-w-sm rounded-2xl">
