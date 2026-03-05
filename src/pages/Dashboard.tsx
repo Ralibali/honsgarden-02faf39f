@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Egg, Bird, CalendarDays, Coins, Thermometer, Lightbulb,
   ArrowRight, BookOpen, Loader2, Plus, TrendingUp, Sparkles, Feather,
+  Flame, Award, Heart, Sun, CloudRain, Snowflake, Wind,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -15,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PremiumNudge } from '@/components/PremiumGate';
+import { useAuth } from '@/hooks/useAuth';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -39,7 +41,7 @@ function getMonthName(month: number) {
 }
 
 async function fetchWeather() {
-  const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.33&longitude=18.07&current=temperature_2m,weathercode&timezone=Europe%2FStockholm');
+  const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.33&longitude=18.07&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe%2FStockholm&forecast_days=5');
   if (!res.ok) throw new Error('Weather fetch failed');
   return res.json();
 }
@@ -64,13 +66,55 @@ function getWeatherTip(temp: number, code: number): string {
   return 'Lagom väder – bra dag för hönsen att vara ute.';
 }
 
+function getSeasonalTip(): { text: string; emoji: string } {
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return { text: 'Vårens ökade dagsljus stimulerar värpningen – förvänta fler ägg!', emoji: '🌱' };
+  if (month >= 5 && month <= 7) return { text: 'Sommarens värme kan minska aptiten. Erbjud fryst frukt som godis.', emoji: '☀️' };
+  if (month >= 8 && month <= 10) return { text: 'Höstens ruggning pågår – extra protein i fodret hjälper fjädertillväxten.', emoji: '🍂' };
+  return { text: 'Kort dagsljus minskar värpningen. Överväg belysning i hönshuset.', emoji: '❄️' };
+}
+
+function calculateStreak(eggs: any[]): number {
+  const today = new Date();
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const hasEggs = eggs.some((e: any) => e.date === dateStr && e.count > 0);
+    if (hasEggs) streak++;
+    else if (i > 0) break; // Allow today to not have eggs yet
+    else continue;
+  }
+  return streak;
+}
+
+function getTopHen(eggs: any[], hens: any[]): { name: string; count: number } | null {
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekEggs = eggs.filter((e: any) => e.hen_id && new Date(e.date) >= weekAgo);
+  const henCounts: Record<string, number> = {};
+  weekEggs.forEach((e: any) => { henCounts[e.hen_id] = (henCounts[e.hen_id] || 0) + e.count; });
+  const topId = Object.entries(henCounts).sort(([, a], [, b]) => b - a)[0];
+  if (!topId) return null;
+  const hen = hens.find((h: any) => h.id === topId[0]);
+  return hen ? { name: hen.name, count: topId[1] } : null;
+}
+
+function getDayName(dateStr: string): string {
+  const days = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
+  return days[new Date(dateStr).getDay()];
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryText, setDiaryText] = useState('');
   const [customEggCount, setCustomEggCount] = useState('');
   const [selectedHenId, setSelectedHenId] = useState<string>('all');
+  const [weatherExpanded, setWeatherExpanded] = useState(false);
   const now = new Date();
 
   const { data: eggs = [] } = useQuery({ queryKey: ['eggs'], queryFn: () => api.getEggs(), staleTime: 60_000 });
@@ -116,6 +160,10 @@ export default function Dashboard() {
   const monthExpense = (transactions as any[]).filter((t: any) => t.type === 'expense' && new Date(t.date).getMonth() === now.getMonth()).reduce((s: number, t: any) => s + t.amount, 0);
   const monthProfit = monthIncome - monthExpense;
 
+  const streak = calculateStreak(eggs);
+  const topHen = getTopHen(eggs, hens as any[]);
+  const seasonal = getSeasonalTip();
+
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
@@ -156,6 +204,9 @@ export default function Dashboard() {
     { icon: Coins, value: `${monthProfit >= 0 ? '+' : ''}${Math.round(monthProfit)}`, label: 'kr/mån', color: monthProfit >= 0 ? 'text-success' : 'text-destructive', bg: monthProfit >= 0 ? 'bg-success/8' : 'bg-destructive/8' },
   ];
 
+  // Weather forecast data
+  const forecast = weatherData?.daily;
+
   return (
     <div className="max-w-2xl mx-auto space-y-5 animate-fade-in pb-8">
       <DailySummaryModal />
@@ -165,10 +216,13 @@ export default function Dashboard() {
         <div>
           <p className="data-label mb-1.5">{getFormattedDate()}</p>
           <h1 className="text-2xl sm:text-3xl font-serif gradient-text leading-snug">
-            {getGreeting()}!
+            {getGreeting()}{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
           </h1>
         </div>
-        <div className="flex items-center gap-2 bg-card border border-border/60 rounded-2xl px-3.5 py-2 shadow-sm shrink-0">
+        <button
+          onClick={() => setWeatherExpanded(!weatherExpanded)}
+          className="flex items-center gap-2 bg-card border border-border/60 rounded-2xl px-3.5 py-2 shadow-sm shrink-0 hover:shadow-md transition-shadow cursor-pointer"
+        >
           {weatherLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
           ) : (
@@ -179,8 +233,39 @@ export default function Dashboard() {
               </span>
             </>
           )}
-        </div>
+        </button>
       </div>
+
+      {/* Expandable weather forecast */}
+      {weatherExpanded && forecast && (
+        <Card className="border-border/50 shadow-sm animate-fade-in overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Thermometer className="h-4 w-4 text-destructive/70" />
+              <span className="font-serif text-sm text-foreground">5-dagars prognos</span>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+              {forecast.time?.slice(0, 5).map((date: string, i: number) => (
+                <div key={date} className="text-center p-2 rounded-xl bg-muted/30 border border-border/20">
+                  <p className="text-[10px] text-muted-foreground font-medium mb-1">
+                    {i === 0 ? 'Idag' : getDayName(date)}
+                  </p>
+                  <span className="text-lg">{getWeatherIcon(forecast.weathercode?.[i] ?? 0)}</span>
+                  <p className="text-xs font-semibold text-foreground mt-1">
+                    {Math.round(forecast.temperature_2m_max?.[i])}°
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {Math.round(forecast.temperature_2m_min?.[i])}°
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 italic">
+              {currentTemp != null ? getWeatherTip(currentTemp, weatherCode) : ''}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick stats */}
       <div className="grid grid-cols-4 gap-2.5 stagger-children">
@@ -195,6 +280,48 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Streak + Best hen row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Streak */}
+        <Card className="border-border/50 shadow-sm card-hover">
+          <CardContent className="p-4 flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+              <Flame className={`h-5 w-5 ${streak >= 7 ? 'text-warning' : 'text-muted-foreground'}`} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground tabular-nums leading-none">
+                {streak} <span className="text-sm font-normal text-muted-foreground">dagar</span>
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {streak === 0 ? 'Logga ägg för att starta din streak!' : streak >= 7 ? '🔥 Fantastisk streak!' : 'Loggningssvit i rad'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Top hen */}
+        <Card className="border-border/50 shadow-sm card-hover">
+          <CardContent className="p-4 flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+              <Award className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              {topHen ? (
+                <>
+                  <p className="text-sm font-semibold text-foreground leading-tight">🏆 {topHen.name}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{topHen.count} ägg denna vecka</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-muted-foreground">Ingen data</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-0.5">Logga ägg per höna för att se veckans bästa</p>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Premium nudge */}
@@ -273,19 +400,17 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Two-column: Weather tip + AI tip */}
+      {/* Seasonal tip + AI tip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card className="border-border/50 shadow-sm card-hover">
           <CardContent className="p-4">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-destructive/8 flex items-center justify-center">
-                <Thermometer className="h-3.5 w-3.5 text-destructive/70" />
+              <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                <span className="text-sm">{seasonal.emoji}</span>
               </div>
-              <span className="data-label">Vädertips</span>
+              <span className="data-label">Säsongens tips</span>
             </div>
-            <p className="text-sm text-foreground leading-relaxed">
-              {currentTemp != null ? getWeatherTip(currentTemp, weatherCode) : 'Laddar väderdata...'}
-            </p>
+            <p className="text-sm text-foreground leading-relaxed">{seasonal.text}</p>
           </CardContent>
         </Card>
 
@@ -351,24 +476,37 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Navigate to eggs */}
-      <Card
-        className="border-primary/10 cursor-pointer hover:bg-primary/4 transition-all duration-200 shadow-sm card-hover group"
-        onClick={() => navigate('/app/eggs')}
-      >
-        <CardContent className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
-              <Egg className="h-5 w-5 text-primary" />
+      {/* Quick links */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card
+          className="border-primary/10 cursor-pointer hover:bg-primary/4 transition-all duration-200 shadow-sm card-hover group"
+          onClick={() => navigate('/app/eggs')}
+        >
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors shrink-0">
+              <Egg className="h-4.5 w-4.5 text-primary" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">Alla äggregistreringar</p>
-              <p className="text-[11px] text-muted-foreground">{todayEggs} ägg idag · se historik →</p>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">Ägghistorik</p>
+              <p className="text-[10px] text-muted-foreground">{todayEggs} idag</p>
             </div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-primary/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        <Card
+          className="border-accent/10 cursor-pointer hover:bg-accent/4 transition-all duration-200 shadow-sm card-hover group"
+          onClick={() => navigate('/app/hens')}
+        >
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-accent/8 flex items-center justify-center group-hover:bg-accent/12 transition-colors shrink-0">
+              <Bird className="h-4.5 w-4.5 text-accent" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">Mina hönor</p>
+              <p className="text-[10px] text-muted-foreground">{activeHens} aktiva</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Diary */}
       <Card className="border-border/50 shadow-sm">

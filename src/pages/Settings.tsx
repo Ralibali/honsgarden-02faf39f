@@ -4,13 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail, FileText, HelpCircle } from 'lucide-react';
+import {
+  User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail,
+  FileText, HelpCircle, Crown, Download, Palette, Moon, Sun,
+  Heart, ExternalLink, Info,
+} from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -30,10 +35,13 @@ export default function SettingsPage() {
   const [coopName, setCoopName] = useState('');
   const [henCount, setHenCount] = useState('');
   const [location, setLocation] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [morningReminder, setMorningReminder] = useState(true);
   const [eveningReminder, setEveningReminder] = useState(true);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     if (coopSettings) {
@@ -50,11 +58,44 @@ export default function SettingsPage() {
     }
   }, [reminderSettings]);
 
+  useEffect(() => {
+    setDisplayName(user?.name || '');
+  }, [user?.name]);
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains('dark');
+    setDarkMode(isDark);
+  }, []);
+
+  const toggleDarkMode = (enabled: boolean) => {
+    setDarkMode(enabled);
+    if (enabled) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
   const saveCoopMutation = useMutation({
     mutationFn: (data: any) => api.updateCoopSettings(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coop-settings'] });
       toast({ title: 'Inställningar sparade! ✅' });
+    },
+    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+  });
+
+  const saveProfileMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const userId = user?.id;
+      if (!userId) throw new Error('Inte inloggad');
+      const { error } = await supabase.from('profiles').update({ display_name: name }).eq('user_id', userId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast({ title: 'Namn uppdaterat! ✅' });
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
@@ -86,17 +127,82 @@ export default function SettingsPage() {
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
 
+  const handleExportData = async () => {
+    setExportLoading(true);
+    try {
+      const [eggs, hens, transactions] = await Promise.all([
+        api.getEggs(),
+        api.getHens(),
+        api.getTransactions(),
+      ]);
+
+      // Build CSV for eggs
+      let csv = 'Typ,Datum,Antal,Höna,Anteckningar\n';
+      (eggs as any[]).forEach((e: any) => {
+        csv += `Ägg,${e.date},${e.count},"${e.hen_id || ''}","${(e.notes || '').replace(/"/g, '""')}"\n`;
+      });
+      csv += '\nTyp,Namn,Ras,Färg,Födelsedatum,Aktiv,Typ\n';
+      (hens as any[]).forEach((h: any) => {
+        csv += `Höna,"${h.name}","${h.breed || ''}","${h.color || ''}",${h.birth_date || ''},${h.is_active},${h.hen_type}\n`;
+      });
+      csv += '\nTyp,Datum,Belopp,Kategori,Beskrivning\n';
+      (transactions as any[]).forEach((t: any) => {
+        csv += `Transaktion,${t.date},${t.amount},"${t.category || ''}","${(t.description || '').replace(/"/g, '""')}"\n`;
+      });
+
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `honsgarden-export-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: 'Data exporterad! 📥' });
+    } catch (err: any) {
+      toast({ title: 'Fel vid export', description: err.message, variant: 'destructive' });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
+  const isPremium = user?.subscription_status === 'premium';
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in pb-8">
       <div>
         <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Inställningar ⚙️</h1>
         <p className="text-sm text-muted-foreground mt-1">Hantera ditt konto och din hönsgård</p>
       </div>
+
+      {/* Subscription status */}
+      <Card className={`shadow-sm overflow-hidden ${isPremium ? 'border-primary/30 bg-primary/3' : 'border-warning/20 bg-warning/3'}`}>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPremium ? 'bg-primary/10' : 'bg-warning/10'}`}>
+              <Crown className={`h-5 w-5 ${isPremium ? 'text-primary' : 'text-warning'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {isPremium ? 'Premium-medlem' : 'Gratisplan'}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {isPremium ? 'Du har tillgång till alla funktioner' : 'Uppgradera för full funktionalitet'}
+              </p>
+            </div>
+          </div>
+          {!isPremium && (
+            <Button size="sm" className="rounded-xl gap-1.5 text-xs" onClick={() => navigate('/app/premium')}>
+              <Crown className="h-3.5 w-3.5" />
+              Uppgradera
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Profile */}
       <Card className="border-border/50 shadow-sm">
@@ -109,15 +215,30 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
+              <Label className="text-muted-foreground">Visningsnamn</Label>
+              <div className="flex gap-2 mt-1.5">
+                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Ditt namn" className="h-11 rounded-xl flex-1" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-11 px-3 rounded-xl"
+                  disabled={saveProfileMutation.isPending || displayName === user?.name}
+                  onClick={() => saveProfileMutation.mutate(displayName)}
+                >
+                  {saveProfileMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Spara'}
+                </Button>
+              </div>
+            </div>
+            <div>
               <Label className="text-muted-foreground">E-post</Label>
               <Input value={user?.email || ''} disabled className="mt-1.5 h-11 bg-muted/50 rounded-xl" />
             </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label className="text-muted-foreground">Gårdsnamn</Label>
               <Input value={coopName} onChange={(e) => setCoopName(e.target.value)} placeholder="Min hönsgård" className="mt-1.5 h-11 rounded-xl" />
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label className="text-muted-foreground">Antal hönor</Label>
               <Input type="number" value={henCount} onChange={(e) => setHenCount(e.target.value)} placeholder="0" className="mt-1.5 h-11 rounded-xl" />
@@ -129,8 +250,30 @@ export default function SettingsPage() {
           </div>
           <Button onClick={() => saveCoopMutation.mutate({ coop_name: coopName, hen_count: Number(henCount) || 0, location: location || null })} disabled={saveCoopMutation.isPending} className="rounded-xl">
             {saveCoopMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Spara ändringar
+            Spara gårdsinställningar
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Appearance */}
+      <Card className="border-border/50 shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" />
+            Utseende
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-3">
+              {darkMode ? <Moon className="h-4.5 w-4.5 text-muted-foreground" /> : <Sun className="h-4.5 w-4.5 text-warning" />}
+              <div>
+                <p className="text-sm font-medium text-foreground">Mörkt tema</p>
+                <p className="text-xs text-muted-foreground">Byt till mörkare färger för ögonen</p>
+              </div>
+            </div>
+            <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
+          </div>
         </CardContent>
       </Card>
 
@@ -160,6 +303,25 @@ export default function SettingsPage() {
           <Button variant="outline" onClick={() => saveReminderMutation.mutate({ morning_reminder: morningReminder, evening_reminder: eveningReminder })} disabled={saveReminderMutation.isPending} className="rounded-xl">
             {saveReminderMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Spara påminnelser
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Data export */}
+      <Card className="border-border/50 shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <Download className="h-5 w-5 text-primary" />
+            Exportera data
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Ladda ner all din data (ägg, hönor, transaktioner) som en CSV-fil för bokföring eller backup.
+          </p>
+          <Button variant="outline" className="rounded-xl gap-2" onClick={handleExportData} disabled={exportLoading}>
+            {exportLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            Exportera som CSV
           </Button>
         </CardContent>
       </Card>
@@ -239,13 +401,22 @@ export default function SettingsPage() {
             Konto
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
           <Button variant="outline" className="gap-2 text-destructive hover:text-destructive rounded-xl" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             Logga ut
           </Button>
         </CardContent>
       </Card>
+
+      {/* App info */}
+      <div className="text-center pt-2 pb-4">
+        <div className="flex items-center justify-center gap-1.5 text-muted-foreground/50">
+          <Heart className="h-3 w-3" />
+          <span className="text-[10px]">Hönsgården v1.0 · Gjord med kärlek i Sverige</span>
+          <Heart className="h-3 w-3" />
+        </div>
+      </div>
     </div>
   );
 }
