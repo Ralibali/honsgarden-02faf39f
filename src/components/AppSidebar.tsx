@@ -39,6 +39,14 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => {
+      setIsAdmin(!!data);
+    });
+  }, [user?.id]);
 
   const handleLogout = async () => {
     await logout();
