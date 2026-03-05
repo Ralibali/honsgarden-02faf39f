@@ -394,15 +394,14 @@ export async function getEggForecast() {
 }
 
 export async function getDailyTip() {
-  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'daily-tip' } });
+  const { data, error } = await supabase.functions.invoke('get-daily-tip');
   if (error) throw new Error(error.message);
   return data;
 }
 
 export async function getFreeTip() {
-  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'free-tip' } });
-  if (error) throw new Error(error.message);
-  return data;
+  // Free tip uses the same cached daily tip
+  return getDailyTip();
 }
 
 // ==================== PREMIUM ====================
