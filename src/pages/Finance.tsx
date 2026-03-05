@@ -12,6 +12,7 @@ import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { PremiumGate } from '@/components/PremiumGate';
 
 export default function Finance() {
   const [view, setView] = useState('overview');
@@ -85,6 +86,7 @@ export default function Finance() {
   }
 
   return (
+    <PremiumGate feature="Ekonomi" blur>
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -245,5 +247,6 @@ export default function Finance() {
         </Card>
       )}
     </div>
+    </PremiumGate>
   );
 }

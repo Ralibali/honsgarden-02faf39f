@@ -12,6 +12,7 @@ import { DailySummaryModal } from '@/components/DailySummaryModal';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PremiumNudge } from '@/components/PremiumGate';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -185,6 +186,9 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Premium nudge */}
+      <PremiumNudge />
 
       {/* Egg quick-add */}
       <Card className="border-primary/15 overflow-hidden shadow-sm">

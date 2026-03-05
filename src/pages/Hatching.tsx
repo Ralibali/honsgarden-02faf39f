@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PremiumGate } from '@/components/PremiumGate';
 
 const milestones = [
   { day: 1, label: 'Start', emoji: '🥚' },
@@ -79,6 +80,7 @@ export default function Hatching() {
   }
 
   return (
+    <PremiumGate feature="Kläckning" blur>
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -176,5 +178,6 @@ export default function Hatching() {
         );
       })}
     </div>
+    </PremiumGate>
   );
 }

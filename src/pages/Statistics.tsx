@@ -4,6 +4,7 @@ import { Calculator } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PremiumGate } from '@/components/PremiumGate';
 
 export default function Statistics() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
@@ -35,6 +36,7 @@ export default function Statistics() {
   }
 
   return (
+    <PremiumGate feature="Statistik" blur>
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Statistik 📊</h1>
@@ -173,5 +175,6 @@ export default function Statistics() {
         </Card>
       )}
     </div>
+    </PremiumGate>
   );
 }
