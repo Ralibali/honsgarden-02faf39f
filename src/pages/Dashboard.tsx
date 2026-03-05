@@ -562,6 +562,9 @@ export default function Dashboard() {
         userName={user?.name?.split(' ')[0]}
       />
 
+      {/* Referral */}
+      <ReferralCard />
+
       {/* Diary dialog */}
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>
         <DialogContent className="max-w-sm rounded-2xl">
