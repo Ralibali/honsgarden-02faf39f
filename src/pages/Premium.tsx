@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby, Loader2 } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby, Loader2, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -54,6 +54,23 @@ const testimonials = [
 export default function Premium() {
   const { user } = useAuth();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+  const isPremium = user?.subscription_status === 'premium';
+
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw new Error(error.message);
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message || 'Kunde inte öppna kundportalen.', variant: 'destructive' });
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
 
   const handleCheckout = async (priceId: string, planName: string) => {
     if (!user) {
@@ -233,17 +250,43 @@ export default function Premium() {
         </CardContent>
       </Card>
 
+      {/* Manage subscription */}
+      {isPremium && (
+        <Card className="bg-card border-border shadow-sm">
+          <CardContent className="p-5 sm:p-6 text-center space-y-3">
+            <div className="inline-flex items-center gap-2 text-primary font-medium">
+              <Crown className="h-5 w-5 text-warning" />
+              Du har Premium!
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Hantera din prenumeration, byt betalmetod eller avsluta via kundportalen.
+            </p>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleManageSubscription}
+              disabled={loadingPortal}
+            >
+              {loadingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
+              Hantera prenumeration
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Bottom CTA */}
       <div className="text-center pb-4">
-        <Button 
-          size="lg" 
-          className="h-12 px-8 text-base gap-2 active:scale-95 transition-transform shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"
-          onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
-          disabled={!!loadingPlan}
-        >
-          {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-          Uppgradera till Premium
-        </Button>
+        {!isPremium && (
+          <Button 
+            size="lg" 
+            className="h-12 px-8 text-base gap-2 active:scale-95 transition-transform shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"
+            onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
+            disabled={!!loadingPlan}
+          >
+            {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+            Uppgradera till Premium
+          </Button>
+        )}
         <p className="text-xs text-muted-foreground mt-3">
           Frågor? Kontakta oss på <a href="mailto:support@honsgarden.se" className="text-primary hover:underline">support@honsgarden.se</a>
         </p>
