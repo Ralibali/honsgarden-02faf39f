@@ -33,6 +33,13 @@ function toBasicProfile(supaUser: SupabaseUser): UserProfile {
 }
 
 async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
+  // Fire check-subscription to sync Stripe status → profiles table
+  try {
+    await supabase.functions.invoke('check-subscription');
+  } catch {
+    // Non-blocking – profile query below will still work with cached status
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('display_name, subscription_status')
