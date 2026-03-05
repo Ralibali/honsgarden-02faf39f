@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, RotateCcw, Sun, Moon, Clock, Sparkles } from 'lucide-react';
+import { Check, Sun, Moon, Clock, Sparkles } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,23 +31,16 @@ export default function DailyTasks() {
   });
 
   const toggleChore = (chore: any) => {
-    const choreId = chore._id || chore.id;
-    if (chore.completed_today || chore.done) {
+    const choreId = chore.id;
+    if (chore.completed) {
       uncompleteMutation.mutate(choreId);
     } else {
       completeMutation.mutate(choreId);
     }
   };
 
-  const completedCount = chores.filter((c: any) => c.completed_today || c.done).length;
+  const completedCount = chores.filter((c: any) => c.completed).length;
   const progress = chores.length > 0 ? Math.round((completedCount / chores.length) * 100) : 0;
-
-  // Group by time_of_day
-  const grouped = {
-    morning: chores.filter((c: any) => (c.time_of_day || c.time || 'anytime') === 'morning'),
-    anytime: chores.filter((c: any) => (c.time_of_day || c.time || 'anytime') === 'anytime'),
-    evening: chores.filter((c: any) => (c.time_of_day || c.time || 'anytime') === 'evening'),
-  };
 
   if (isLoading) {
     return <div className="max-w-5xl mx-auto space-y-4 animate-fade-in"><Skeleton className="h-10 w-48" /><Skeleton className="h-20" /><Skeleton className="h-40" /></div>;
@@ -55,11 +48,9 @@ export default function DailyTasks() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Dagliga uppgifter ✅</h1>
-          <p className="text-sm text-muted-foreground mt-1">Din dagliga checklista – återställs varje morgon</p>
-        </div>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Dagliga uppgifter ✅</h1>
+        <p className="text-sm text-muted-foreground mt-1">Din dagliga checklista – återställs varje morgon</p>
       </div>
 
       {/* Progress */}
@@ -77,64 +68,30 @@ export default function DailyTasks() {
         </CardContent>
       </Card>
 
-      {/* Task groups */}
-      {(['morning', 'anytime', 'evening'] as const).map((time) => {
-        const config = timeConfig[time] || timeConfig.anytime;
-        const groupTasks = grouped[time];
-        if (groupTasks.length === 0) return null;
-        const Icon = config.icon;
-        return (
-          <Card key={time} className="bg-card border-border shadow-sm">
-            <CardHeader className="px-4 sm:px-6 pb-2">
-              <CardTitle className="font-serif text-base flex items-center gap-2">
-                <Icon className={`h-4 w-4 ${config.color}`} />
-                {config.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-border">
-                {groupTasks.map((chore: any) => {
-                  const isDone = chore.completed_today || chore.done;
-                  return (
-                    <button
-                      key={chore._id || chore.id}
-                      onClick={() => toggleChore(chore)}
-                      className="flex items-center gap-3 px-4 sm:px-6 py-3 w-full text-left hover:bg-secondary/50 transition-colors"
-                    >
-                      <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-success/20 border-success' : 'border-border hover:border-primary'}`}>
-                        {isDone && <Check className="h-3 w-3 text-success" />}
-                      </div>
-                      <span className={`text-xs sm:text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                        {chore.title || chore.text}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-
-      {/* If no groups matched, show flat list */}
-      {chores.length > 0 && Object.values(grouped).every(g => g.length === 0) && (
+      {/* All tasks */}
+      {chores.length > 0 && (
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-0">
             <div className="divide-y divide-border">
               {chores.map((chore: any) => {
-                const isDone = chore.completed_today || chore.done;
+                const isDone = chore.completed;
                 return (
                   <button
-                    key={chore._id || chore.id}
+                    key={chore.id}
                     onClick={() => toggleChore(chore)}
-                    className="flex items-center gap-3 px-4 sm:px-6 py-3 w-full text-left hover:bg-secondary/50 transition-colors"
+                    className="flex items-center gap-3 px-4 sm:px-6 py-3.5 w-full text-left hover:bg-secondary/50 transition-colors"
                   >
                     <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-success/20 border-success' : 'border-border hover:border-primary'}`}>
                       {isDone && <Check className="h-3 w-3 text-success" />}
                     </div>
-                    <span className={`text-xs sm:text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                      {chore.title || chore.text}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs sm:text-sm ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                        {chore.title}
+                      </span>
+                      {chore.description && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{chore.description}</p>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -146,7 +103,7 @@ export default function DailyTasks() {
       {chores.length === 0 && (
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-8 text-center text-muted-foreground text-sm">
-            Inga dagliga uppgifter konfigurerade. Lägg till dem i inställningarna.
+            Inga dagliga uppgifter konfigurerade ännu. Kontakta support för att lägga upp standarduppgifter.
           </CardContent>
         </Card>
       )}
