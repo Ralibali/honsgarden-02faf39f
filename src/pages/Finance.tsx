@@ -247,5 +247,6 @@ export default function Finance() {
         </Card>
       )}
     </div>
+    </PremiumGate>
   );
 }
