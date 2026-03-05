@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Plus, Egg, Thermometer, Droplets, RotateCcw, Trash2, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
@@ -32,7 +33,7 @@ function getDayInfo(startDate: string, duration: number = 21) {
 export default function Hatching() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [newName, setNewName] = useState('');
+  const [newNotes, setNewNotes] = useState('');
   const [newDate, setNewDate] = useState('');
   const [newCount, setNewCount] = useState('');
 
@@ -45,9 +46,9 @@ export default function Hatching() {
     mutationFn: (data: any) => api.createHatching(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hatching'] });
-      toast({ title: 'Kläckning startad!' });
+      toast({ title: 'Kläckning startad! 🐣' });
       setOpen(false);
-      setNewName(''); setNewDate(''); setNewCount('');
+      setNewNotes(''); setNewDate(''); setNewCount('');
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
@@ -61,11 +62,15 @@ export default function Hatching() {
   });
 
   const handleAdd = () => {
-    if (!newName || !newDate) return;
+    if (!newDate) return;
+    const startDate = new Date(newDate);
+    const expectedHatch = new Date(startDate);
+    expectedHatch.setDate(expectedHatch.getDate() + 21);
     createMutation.mutate({
-      name: newName,
       start_date: newDate,
       egg_count: Number(newCount) || 1,
+      notes: newNotes || null,
+      expected_hatch_date: expectedHatch.toISOString().split('T')[0],
     });
   };
 
@@ -87,9 +92,18 @@ export default function Hatching() {
           <DialogContent>
             <DialogHeader><DialogTitle className="font-serif">Starta ny kläckning</DialogTitle></DialogHeader>
             <div className="space-y-3 pt-2">
-              <Input placeholder="Namn (t.ex. Vår-kull 2026)" value={newName} onChange={(e) => setNewName(e.target.value)} />
-              <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
-              <Input placeholder="Antal ägg" type="number" value={newCount} onChange={(e) => setNewCount(e.target.value)} />
+              <div>
+                <Label>Namn / anteckning</Label>
+                <Input className="mt-1.5" placeholder="T.ex. Vår-kull 2026" value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
+              </div>
+              <div>
+                <Label>Startdatum *</Label>
+                <Input className="mt-1.5" type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} required />
+              </div>
+              <div>
+                <Label>Antal ägg</Label>
+                <Input className="mt-1.5" placeholder="T.ex. 12" type="number" value={newCount} onChange={(e) => setNewCount(e.target.value)} />
+              </div>
               <Button className="w-full" onClick={handleAdd} disabled={createMutation.isPending}>
                 {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                 Starta kläckning
@@ -119,19 +133,18 @@ export default function Hatching() {
       )}
 
       {batches.map((batch: any) => {
-        const batchId = batch._id || batch.id;
-        const startDate = batch.start_date || batch.startDate;
-        const duration = batch.duration || 21;
-        const { elapsed, remaining, progress, done } = getDayInfo(startDate, duration);
+        const batchId = batch.id;
+        const startDate = batch.start_date;
+        const { elapsed, remaining, progress, done } = getDayInfo(startDate);
         return (
           <Card key={batchId} className={`bg-card border-border shadow-sm ${done ? 'border-success/50' : ''}`}>
             <CardContent className="p-4 sm:p-5">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-serif text-base text-foreground flex items-center gap-2">
-                    {done ? '🐣' : '🥚'} {batch.name}
+                    {done ? '🐣' : '🥚'} {batch.notes || `Kläckning ${startDate}`}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{batch.egg_count || batch.eggCount} ägg · Startade {startDate}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{batch.egg_count} ägg · Startade {startDate}</p>
                 </div>
                 <Button variant="ghost" size="sm" className="text-muted-foreground h-8 w-8 p-0" onClick={() => deleteMutation.mutate(batchId)}>
                   <Trash2 className="h-3.5 w-3.5" />
@@ -139,7 +152,7 @@ export default function Hatching() {
               </div>
               <div className="mb-3">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">Dag {Math.min(elapsed, duration)} av {duration}</span>
+                  <span className="text-muted-foreground">Dag {Math.min(elapsed, 21)} av 21</span>
                   <span className={`font-medium ${done ? 'text-success' : 'text-primary'}`}>
                     {done ? 'Kläckt! 🎉' : `${remaining} dagar kvar`}
                   </span>
