@@ -40,6 +40,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const isPremium = user?.subscription_status === 'premium';
   const [isAdmin, setIsAdmin] = useState(false);
 
