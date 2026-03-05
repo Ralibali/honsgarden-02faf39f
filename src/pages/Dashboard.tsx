@@ -144,7 +144,10 @@ export default function Dashboard() {
       text: l.description,
     }));
 
-  const addEggs = (count: number) => eggMutation.mutate(count);
+  const addEggs = (count: number) => {
+    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
+    eggMutation.mutate({ count, hen_id });
+  };
 
   const stats = [
     { icon: Egg, value: yesterdayEggs, label: 'igår', color: 'text-accent', bg: 'bg-accent/8' },
