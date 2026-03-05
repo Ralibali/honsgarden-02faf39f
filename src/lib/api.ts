@@ -1,405 +1,561 @@
-const API_BASE = 'https://honsgarden.onrender.com/api';
-
-class ApiClient {
-  private token: string | null = null;
-
-  constructor() {
-    this.token = localStorage.getItem('auth_token');
-  }
-
-  setToken(token: string | null) {
-    this.token = token;
-    if (token) {
-      localStorage.setItem('auth_token', token);
-    } else {
-      localStorage.removeItem('auth_token');
-    }
-  }
-
-  getToken() {
-    return this.token;
-  }
-
-  private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> || {}),
-    };
-
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
-
-    const res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
-
-    if (res.status === 401) {
-      this.setToken(null);
-      window.location.href = '/login';
-      throw new Error('Unauthorized');
-    }
-
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({ detail: 'Unknown error' }));
-      throw new Error(error.detail || `Request failed: ${res.status}`);
-    }
-
-    return res.json();
-  }
-
-  // Auth
-  async login(email: string, password: string) {
-    const data = await this.request<{ access_token: string; token_type: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    this.setToken(data.access_token);
-    return data;
-  }
-
-  async register(email: string, password: string, name: string) {
-    return this.request<any>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name }),
-    });
-  }
-
-  async forgotPassword(email: string) {
-    return this.request<any>('/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
-  }
-
-  async getMe() {
-    return this.request<any>('/auth/me');
-  }
-
-  async logout() {
-    try {
-      await this.request<any>('/auth/logout', { method: 'POST' });
-    } finally {
-      this.setToken(null);
-    }
-  }
-
-  // Hens
-  async getHens() {
-    return this.request<any[]>('/hens');
-  }
-
-  async createHen(data: any) {
-    return this.request<any>('/hens', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateHen(id: string, data: any) {
-    return this.request<any>(`/hens/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async deleteHen(id: string) {
-    return this.request<any>(`/hens/${id}`, { method: 'DELETE' });
-  }
-
-  async getHenProfile(id: string) {
-    return this.request<any>(`/hens/${id}/profile`);
-  }
-
-  async markHenSeen(id: string) {
-    return this.request<any>(`/hens/${id}/seen`, { method: 'POST' });
-  }
-
-  async getHenHealthScores() {
-    return this.request<any>('/hens/health-scores');
-  }
-
-  async getProductivityAlerts() {
-    return this.request<any>('/hens/productivity-alerts');
-  }
-
-  // Eggs
-  async getEggs() {
-    return this.request<any[]>('/eggs');
-  }
-
-  async createEggRecord(data: { date: string; count: number; notes?: string }) {
-    return this.request<any>('/eggs', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async deleteEggRecord(id: string) {
-    return this.request<any>(`/eggs/${id}`, { method: 'DELETE' });
-  }
-
-  // Feed
-  async getFeedRecords() {
-    return this.request<any[]>('/feed');
-  }
-
-  async createFeedRecord(data: any) {
-    return this.request<any>('/feed', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async deleteFeedRecord(id: string) {
-    return this.request<any>(`/feed/${id}`, { method: 'DELETE' });
-  }
-
-  async getFeedInventory() {
-    return this.request<any>('/feed/inventory');
-  }
-
-  async getFeedStatistics() {
-    return this.request<any>('/feed/statistics');
-  }
-
-  // Hatching
-  async getHatchings() {
-    return this.request<any[]>('/hatching');
-  }
-
-  async createHatching(data: any) {
-    return this.request<any>('/hatching', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateHatching(id: string, data: any) {
-    return this.request<any>(`/hatching/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async deleteHatching(id: string) {
-    return this.request<any>(`/hatching/${id}`, { method: 'DELETE' });
-  }
-
-  async getHatchingAlerts() {
-    return this.request<any>('/hatching-alerts');
-  }
-
-  // Transactions (Finance)
-  async getTransactions() {
-    return this.request<any[]>('/transactions');
-  }
-
-  async createTransaction(data: any) {
-    return this.request<any>('/transactions', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async deleteTransaction(id: string) {
-    return this.request<any>(`/transactions/${id}`, { method: 'DELETE' });
-  }
-
-  // Statistics
-  async getTodayStats() {
-    return this.request<any>('/statistics/today');
-  }
-
-  async getMonthStats(year: number, month: number) {
-    return this.request<any>(`/statistics/month/${year}/${month}`);
-  }
-
-  async getYearStats(year: number) {
-    return this.request<any>(`/statistics/year/${year}`);
-  }
-
-  async getSummaryStats() {
-    return this.request<any>('/statistics/summary');
-  }
-
-  async getStatisticsInsights() {
-    return this.request<any>('/statistics/insights');
-  }
-
-  async getAdvancedInsights() {
-    return this.request<any>('/statistics/advanced-insights');
-  }
-
-  async getTrendAnalysis() {
-    return this.request<any>('/statistics/trend-analysis');
-  }
-
-  // Daily Chores
-  async getDailyChores() {
-    return this.request<any[]>('/daily-chores');
-  }
-
-  async completeChore(choreId: string) {
-    return this.request<any>(`/daily-chores/${choreId}/complete`, { method: 'POST' });
-  }
-
-  async uncompleteChore(choreId: string) {
-    return this.request<any>(`/daily-chores/${choreId}/complete`, { method: 'DELETE' });
-  }
-
-  // Coop settings
-  async getCoopSettings() {
-    return this.request<any>('/coop');
-  }
-
-  async updateCoopSettings(data: any) {
-    return this.request<any>('/coop', { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  // Yesterday summary
-  async getYesterdaySummary() {
-    return this.request<any>('/stats/yesterday-summary');
-  }
-
-  // Farm today
-  async getFarmToday() {
-    return this.request<any>('/farm/today');
-  }
-
-  // Flocks
-  async getFlocks() {
-    return this.request<any[]>('/flocks');
-  }
-
-  async createFlock(data: any) {
-    return this.request<any>('/flocks', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateFlock(id: string, data: any) {
-    return this.request<any>(`/flocks/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async deleteFlock(id: string) {
-    return this.request<any>(`/flocks/${id}`, { method: 'DELETE' });
-  }
-
-  // Weather
-  async getWeather() {
-    return this.request<any>('/weather');
-  }
-
-  // AI
-  async getDailyReport() {
-    return this.request<any>('/ai/daily-report');
-  }
-
-  async getEggForecast() {
-    return this.request<any>('/ai/egg-forecast');
-  }
-
-  async getDailyTip() {
-    return this.request<any>('/ai/daily-tip');
-  }
-
-  async getFreeTip() {
-    return this.request<any>('/ai/free-tip');
-  }
-
-  // Premium
-  async getPremiumStatus() {
-    return this.request<any>('/premium/status');
-  }
-
-  async createCheckoutSession(data: any) {
-    return this.request<any>('/checkout/create', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async cancelSubscription() {
-    return this.request<any>('/subscription/cancel', { method: 'POST' });
-  }
-
-  // Reminders
-  async getReminderSettings() {
-    return this.request<any>('/reminders/settings');
-  }
-
-  async updateReminderSettings(data: any) {
-    return this.request<any>('/reminders/settings', { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  // Health logs
-  async getHealthLogs() {
-    return this.request<any[]>('/health-logs');
-  }
-
-  async createHealthLog(data: any) {
-    return this.request<any>('/health-logs', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async getHenHealthLogs(henId: string) {
-    return this.request<any[]>(`/health-logs/${henId}`);
-  }
-
-  // Alerts
-  async getAlerts() {
-    return this.request<any[]>('/alerts');
-  }
-
-  async dismissAlert(id: string) {
-    return this.request<any>(`/alerts/${id}/dismiss`, { method: 'POST' });
-  }
-
-  // Streak
-  async getStreak() {
-    return this.request<any>('/me/streak');
-  }
-
-  async touchStreak() {
-    return this.request<any>('/me/streak/touch', { method: 'POST' });
-  }
-
-  // Ranking
-  async getRankingSummary() {
-    return this.request<any>('/ranking/summary');
-  }
-
-  // Flock stats
-  async getFlockStatistics() {
-    return this.request<any>('/flock/statistics');
-  }
-
-  async getFlockHealth() {
-    return this.request<any>('/flock/health');
-  }
-
-  // Feedback
-  async submitFeedback(data: any) {
-    return this.request<any>('/feedback', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  // Insights
-  async getInsights() {
-    return this.request<any>('/insights');
-  }
-
-  // Agda inbox
-  async getAgdaInboxToday() {
-    return this.request<any>('/agda/inbox/today');
-  }
-
-  // Admin
-  async adminCheck() {
-    return this.request<any>('/admin/check');
-  }
-
-  async adminStats() {
-    return this.request<any>('/admin/stats');
-  }
-
-  async adminUsers() {
-    return this.request<any[]>('/admin/users');
-  }
-
-  async adminSubscriptions() {
-    return this.request<any[]>('/admin/subscriptions');
-  }
-
-  async adminFeedback() {
-    return this.request<any[]>('/admin/feedback');
-  }
-
-  async adminUpdateFeedbackStatus(feedbackId: string, data: any) {
-    return this.request<any>(`/admin/feedback/${feedbackId}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async adminDeleteUser(userId: string) {
-    return this.request<any>(`/admin/users/${userId}`, { method: 'DELETE' });
-  }
-
-  async adminUpdateSubscription(userId: string, data: any) {
-    return this.request<any>(`/admin/subscriptions/${userId}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
+import { supabase } from '@/integrations/supabase/client';
+import { format, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
+
+// Helper to get current user id
+async function getUserId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  return user.id;
 }
 
-export const api = new ApiClient();
+// ==================== HENS ====================
+
+export async function getHens() {
+  const { data, error } = await supabase.from('hens').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createHen(henData: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('hens').insert({ ...henData, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateHen(id: string, henData: any) {
+  const { data, error } = await supabase.from('hens').update(henData).eq('id', id).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteHen(id: string) {
+  const { error } = await supabase.from('hens').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function getHenProfile(id: string) {
+  const { data: hen, error } = await supabase.from('hens').select('*').eq('id', id).single();
+  if (error) throw new Error(error.message);
+  const { data: healthLogs } = await supabase.from('health_logs').select('*').eq('hen_id', id).order('date', { ascending: false });
+  return { ...hen, health_logs: healthLogs || [] };
+}
+
+// ==================== EGGS ====================
+
+export async function getEggs() {
+  const { data, error } = await supabase.from('egg_logs').select('*').order('date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createEggRecord(record: { date: string; count: number; notes?: string }) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('egg_logs').insert({ ...record, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteEggRecord(id: string) {
+  const { error } = await supabase.from('egg_logs').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ==================== FEED ====================
+
+export async function getFeedRecords() {
+  const { data, error } = await supabase.from('feed_records').select('*').order('date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createFeedRecord(record: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('feed_records').insert({ ...record, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteFeedRecord(id: string) {
+  const { error } = await supabase.from('feed_records').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function getFeedInventory() {
+  const { data, error } = await supabase.from('feed_records').select('*').order('date', { ascending: false }).limit(50);
+  if (error) throw new Error(error.message);
+  const totalKg = (data || []).reduce((sum, r) => sum + (r.amount_kg || 0), 0);
+  return { total_kg: totalKg, records: data };
+}
+
+export async function getFeedStatistics() {
+  const { data, error } = await supabase.from('feed_records').select('*').order('date', { ascending: false });
+  if (error) throw new Error(error.message);
+  const totalCost = (data || []).reduce((sum, r) => sum + (r.cost || 0), 0);
+  const totalKg = (data || []).reduce((sum, r) => sum + (r.amount_kg || 0), 0);
+  return { total_cost: totalCost, total_kg: totalKg, record_count: (data || []).length };
+}
+
+// ==================== HATCHING ====================
+
+export async function getHatchings() {
+  const { data, error } = await supabase.from('hatchings').select('*').order('start_date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createHatching(record: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('hatchings').insert({ ...record, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateHatching(id: string, record: any) {
+  const { data, error } = await supabase.from('hatchings').update(record).eq('id', id).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteHatching(id: string) {
+  const { error } = await supabase.from('hatchings').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function getHatchingAlerts() {
+  const { data, error } = await supabase.from('hatchings').select('*').eq('status', 'incubating');
+  if (error) throw new Error(error.message);
+  const today = new Date();
+  return (data || []).filter(h => {
+    if (!h.expected_hatch_date) return false;
+    const diff = Math.ceil((new Date(h.expected_hatch_date).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return diff <= 3 && diff >= 0;
+  }).map(h => ({ ...h, days_remaining: Math.ceil((new Date(h.expected_hatch_date!).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) }));
+}
+
+// ==================== TRANSACTIONS ====================
+
+export async function getTransactions() {
+  const { data, error } = await supabase.from('transactions').select('*').order('date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createTransaction(record: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('transactions').insert({ ...record, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteTransaction(id: string) {
+  const { error } = await supabase.from('transactions').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ==================== HEALTH LOGS ====================
+
+export async function getHealthLogs() {
+  const { data, error } = await supabase.from('health_logs').select('*').order('date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createHealthLog(record: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('health_logs').insert({ ...record, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getHenHealthLogs(henId: string) {
+  const { data, error } = await supabase.from('health_logs').select('*').eq('hen_id', henId).order('date', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ==================== FEEDBACK ====================
+
+export async function submitFeedback(feedbackData: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('feedback').insert({ ...feedbackData, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ==================== DAILY CHORES ====================
+
+export async function getDailyChores() {
+  const userId = await getUserId();
+  const today = format(new Date(), 'yyyy-MM-dd');
+
+  const { data: chores, error } = await supabase
+    .from('daily_chores')
+    .select('*')
+    .order('sort_order');
+  if (error) throw new Error(error.message);
+
+  const { data: completions } = await supabase
+    .from('chore_completions')
+    .select('chore_id')
+    .eq('completed_date', today);
+
+  const completedIds = new Set((completions || []).map(c => c.chore_id));
+  return (chores || []).map(c => ({ ...c, completed: completedIds.has(c.id) }));
+}
+
+export async function completeChore(choreId: string) {
+  const userId = await getUserId();
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { error } = await supabase.from('chore_completions').insert({ chore_id: choreId, user_id: userId, completed_date: today });
+  if (error) throw new Error(error.message);
+}
+
+export async function uncompleteChore(choreId: string) {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { error } = await supabase.from('chore_completions').delete().eq('chore_id', choreId).eq('completed_date', today);
+  if (error) throw new Error(error.message);
+}
+
+// ==================== COOP SETTINGS ====================
+
+export async function getCoopSettings() {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('coop_settings').select('*').eq('user_id', userId).single();
+  if (error && error.code === 'PGRST116') {
+    // No settings yet, create default
+    const { data: newData, error: insertError } = await supabase
+      .from('coop_settings')
+      .insert({ user_id: userId })
+      .select()
+      .single();
+    if (insertError) throw new Error(insertError.message);
+    return newData;
+  }
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateCoopSettings(settings: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('coop_settings').update(settings).eq('user_id', userId).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ==================== FLOCKS ====================
+
+export async function getFlocks() {
+  const { data, error } = await supabase.from('flocks').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function createFlock(flockData: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('flocks').insert({ ...flockData, user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateFlock(id: string, flockData: any) {
+  const { data, error } = await supabase.from('flocks').update(flockData).eq('id', id).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteFlock(id: string) {
+  const { error } = await supabase.from('flocks').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ==================== REMINDER SETTINGS ====================
+
+export async function getReminderSettings() {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('reminder_settings').select('*').eq('user_id', userId).single();
+  if (error && error.code === 'PGRST116') {
+    const { data: newData, error: insertError } = await supabase
+      .from('reminder_settings')
+      .insert({ user_id: userId })
+      .select()
+      .single();
+    if (insertError) throw new Error(insertError.message);
+    return newData;
+  }
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateReminderSettings(settings: any) {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('reminder_settings').update(settings).eq('user_id', userId).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ==================== STATISTICS (computed client-side) ====================
+
+export async function getTodayStats() {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const [eggs, hens, feed] = await Promise.all([
+    supabase.from('egg_logs').select('count').eq('date', today),
+    supabase.from('hens').select('id').eq('is_active', true),
+    supabase.from('feed_records').select('amount_kg, cost').eq('date', today),
+  ]);
+  const eggCount = (eggs.data || []).reduce((s, r) => s + r.count, 0);
+  const henCount = (hens.data || []).length;
+  const feedKg = (feed.data || []).reduce((s, r) => s + (r.amount_kg || 0), 0);
+  const feedCost = (feed.data || []).reduce((s, r) => s + (r.cost || 0), 0);
+  return { eggs: eggCount, hens: henCount, feed_kg: feedKg, feed_cost: feedCost, date: today };
+}
+
+export async function getMonthStats(year: number, month: number) {
+  const start = format(startOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd');
+  const end = format(endOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd');
+  const { data: eggs } = await supabase.from('egg_logs').select('*').gte('date', start).lte('date', end).order('date');
+  const { data: feed } = await supabase.from('feed_records').select('*').gte('date', start).lte('date', end);
+  const { data: txns } = await supabase.from('transactions').select('*').gte('date', start).lte('date', end);
+  return {
+    eggs: eggs || [],
+    feed: feed || [],
+    transactions: txns || [],
+    total_eggs: (eggs || []).reduce((s, r) => s + r.count, 0),
+    total_feed_cost: (feed || []).reduce((s, r) => s + (r.cost || 0), 0),
+  };
+}
+
+export async function getYearStats(year: number) {
+  const start = format(startOfYear(new Date(year, 0)), 'yyyy-MM-dd');
+  const end = format(endOfYear(new Date(year, 0)), 'yyyy-MM-dd');
+  const { data: eggs } = await supabase.from('egg_logs').select('*').gte('date', start).lte('date', end);
+  const { data: txns } = await supabase.from('transactions').select('*').gte('date', start).lte('date', end);
+  return {
+    total_eggs: (eggs || []).reduce((s, r) => s + r.count, 0),
+    transactions: txns || [],
+    monthly_eggs: eggs || [],
+  };
+}
+
+export async function getSummaryStats() {
+  const [eggs, hens, txns] = await Promise.all([
+    supabase.from('egg_logs').select('count, date'),
+    supabase.from('hens').select('id').eq('is_active', true),
+    supabase.from('transactions').select('amount, type'),
+  ]);
+  const totalEggs = (eggs.data || []).reduce((s, r) => s + r.count, 0);
+  const income = (txns.data || []).filter(t => t.type === 'income').reduce((s, r) => s + r.amount, 0);
+  const expense = (txns.data || []).filter(t => t.type === 'expense').reduce((s, r) => s + r.amount, 0);
+  return { total_eggs: totalEggs, active_hens: (hens.data || []).length, total_income: income, total_expense: expense, profit: income - expense };
+}
+
+export async function getYesterdaySummary() {
+  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+  const { data: eggs } = await supabase.from('egg_logs').select('count').eq('date', yesterday);
+  const eggCount = (eggs || []).reduce((s, r) => s + r.count, 0);
+  return { date: yesterday, eggs: eggCount };
+}
+
+export async function getFarmToday() {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const [eggs, hens, chores] = await Promise.all([
+    supabase.from('egg_logs').select('count').eq('date', today),
+    supabase.from('hens').select('id, name').eq('is_active', true),
+    getDailyChores(),
+  ]);
+  return {
+    eggs_today: (eggs.data || []).reduce((s, r) => s + r.count, 0),
+    active_hens: (hens.data || []).length,
+    chores_completed: chores.filter((c: any) => c.completed).length,
+    chores_total: chores.length,
+  };
+}
+
+// ==================== WEATHER (direct API) ====================
+
+export async function getWeather() {
+  const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.33&longitude=18.07&current=temperature_2m,weathercode&timezone=Europe/Stockholm');
+  if (!res.ok) throw new Error('Weather fetch failed');
+  return res.json();
+}
+
+// ==================== AI (via edge function) ====================
+
+export async function getDailyReport() {
+  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'daily-report' } });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getEggForecast() {
+  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'egg-forecast' } });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getDailyTip() {
+  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'daily-tip' } });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getFreeTip() {
+  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'free-tip' } });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ==================== PREMIUM ====================
+
+export async function getPremiumStatus() {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('profiles').select('subscription_status').eq('user_id', userId).single();
+  if (error) throw new Error(error.message);
+  return { is_premium: data.subscription_status === 'premium', status: data.subscription_status };
+}
+
+export async function createCheckoutSession(sessionData: any) {
+  const { data, error } = await supabase.functions.invoke('stripe-checkout', { body: sessionData });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function cancelSubscription() {
+  const { data, error } = await supabase.functions.invoke('stripe-cancel', { body: {} });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ==================== HEN ANALYTICS (computed) ====================
+
+export async function getHenHealthScores() {
+  const hens = await getHens();
+  const healthLogs = await getHealthLogs();
+  return (hens || []).map(hen => {
+    const henLogs = (healthLogs || []).filter(l => l.hen_id === hen.id);
+    const recentIssues = henLogs.filter(l => {
+      const d = new Date(l.date);
+      return (Date.now() - d.getTime()) < 30 * 24 * 60 * 60 * 1000;
+    }).length;
+    return { ...hen, health_score: Math.max(0, 100 - recentIssues * 20) };
+  });
+}
+
+export async function getProductivityAlerts() {
+  const eggs = await getEggs();
+  const hens = await getHens();
+  const activeHens = (hens || []).filter(h => h.is_active).length;
+  if (activeHens === 0) return [];
+  const last7 = (eggs || []).filter(e => {
+    const d = new Date(e.date);
+    return (Date.now() - d.getTime()) < 7 * 24 * 60 * 60 * 1000;
+  });
+  const avgPerDay = last7.reduce((s, r) => s + r.count, 0) / 7;
+  const alerts: any[] = [];
+  if (avgPerDay < activeHens * 0.3) {
+    alerts.push({ type: 'low_production', message: 'Äggproduktionen är ovanligt låg senaste veckan.' });
+  }
+  return alerts;
+}
+
+// ==================== STREAK (profile-based) ====================
+
+export async function getStreak() {
+  const userId = await getUserId();
+  const { data } = await supabase.from('profiles').select('preferences').eq('user_id', userId).single();
+  const prefs = (data?.preferences as any) || {};
+  return { current_streak: prefs.streak || 0, last_activity: prefs.last_activity || null };
+}
+
+export async function touchStreak() {
+  const userId = await getUserId();
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { data: profile } = await supabase.from('profiles').select('preferences').eq('user_id', userId).single();
+  const prefs = (profile?.preferences as any) || {};
+  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+  let streak = prefs.streak || 0;
+  if (prefs.last_activity === today) return { current_streak: streak };
+  if (prefs.last_activity === yesterday) streak += 1;
+  else streak = 1;
+  await supabase.from('profiles').update({ preferences: { ...prefs, streak, last_activity: today } }).eq('user_id', userId);
+  return { current_streak: streak };
+}
+
+// ==================== ADMIN ====================
+
+export async function adminCheck() {
+  const userId = await getUserId();
+  const { data } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' });
+  return { is_admin: !!data };
+}
+
+export async function adminStats() {
+  const [profiles, eggs, hens] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact' }),
+    supabase.from('egg_logs').select('id', { count: 'exact' }),
+    supabase.from('hens').select('id', { count: 'exact' }),
+  ]);
+  return { user_count: profiles.count || 0, egg_records: eggs.count || 0, hen_count: hens.count || 0 };
+}
+
+export async function adminUsers() {
+  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function adminFeedback() {
+  const { data, error } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function adminUpdateFeedbackStatus(feedbackId: string, statusData: any) {
+  const { data, error } = await supabase.from('feedback').update(statusData).eq('id', feedbackId).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Placeholder stubs for features that need more context
+export async function getStatisticsInsights() { return { insights: [] }; }
+export async function getAdvancedInsights() { return { insights: [] }; }
+export async function getTrendAnalysis() { return { trends: [] }; }
+export async function getAlerts() { return []; }
+export async function dismissAlert(_id: string) { return {}; }
+export async function getRankingSummary() { return { rank: 1, total: 1 }; }
+export async function getFlockStatistics() { return {}; }
+export async function getFlockHealth() { return {}; }
+export async function getInsights() { return { insights: [] }; }
+export async function getAgdaInboxToday() { return { messages: [] }; }
+export async function adminSubscriptions() { return []; }
+export async function adminDeleteUser(_userId: string) { return {}; }
+export async function adminUpdateSubscription(_userId: string, _data: any) { return {}; }
+export async function markHenSeen(_id: string) { return {}; }
+
+// Legacy compatibility: export as api object for existing imports
+export const api = {
+  getHens, createHen, updateHen, deleteHen, getHenProfile, markHenSeen,
+  getHenHealthScores, getProductivityAlerts,
+  getEggs, createEggRecord, deleteEggRecord,
+  getFeedRecords, createFeedRecord, deleteFeedRecord, getFeedInventory, getFeedStatistics,
+  getHatchings, createHatching, updateHatching, deleteHatching, getHatchingAlerts,
+  getTransactions, createTransaction, deleteTransaction,
+  getHealthLogs, createHealthLog, getHenHealthLogs,
+  submitFeedback,
+  getDailyChores, completeChore, uncompleteChore,
+  getCoopSettings, updateCoopSettings,
+  getFlocks, createFlock, updateFlock, deleteFlock,
+  getReminderSettings, updateReminderSettings,
+  getTodayStats, getMonthStats, getYearStats, getSummaryStats,
+  getStatisticsInsights, getAdvancedInsights, getTrendAnalysis,
+  getYesterdaySummary, getFarmToday,
+  getWeather,
+  getDailyReport, getEggForecast, getDailyTip, getFreeTip,
+  getPremiumStatus, createCheckoutSession, cancelSubscription,
+  getAlerts, dismissAlert,
+  getStreak, touchStreak,
+  getRankingSummary, getFlockStatistics, getFlockHealth,
+  getInsights, getAgdaInboxToday,
+  adminCheck, adminStats, adminUsers, adminSubscriptions,
+  adminFeedback, adminUpdateFeedbackStatus, adminDeleteUser, adminUpdateSubscription,
+};

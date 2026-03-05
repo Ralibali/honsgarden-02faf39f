@@ -119,28 +119,28 @@ export default function Admin() {
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <Users className="h-5 w-5 text-primary mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.total_users ?? stats.users ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">{stats.user_count ?? '–'}</p>
               <p className="text-[10px] text-muted-foreground">Användare</p>
             </CardContent>
           </Card>
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <Crown className="h-5 w-5 text-warning mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.premium_users ?? stats.premium ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">–</p>
               <p className="text-[10px] text-muted-foreground">Premium</p>
             </CardContent>
           </Card>
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <Egg className="h-5 w-5 text-accent mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.total_eggs ?? stats.eggs ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">{stats.egg_records ?? '–'}</p>
               <p className="text-[10px] text-muted-foreground">Ägg totalt</p>
             </CardContent>
           </Card>
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-5 w-5 text-success mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.active_today ?? stats.dau ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">{stats.hen_count ?? '–'}</p>
               <p className="text-[10px] text-muted-foreground">Aktiva idag</p>
             </CardContent>
           </Card>
