@@ -326,7 +326,7 @@ export default function Index() {
             <FadeUp className="order-1 lg:order-2">
               <p className="data-label mb-3">Prisvärt</p>
               <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
-                Gratis att börja – <span className="gradient-text">Premium från 99 kr</span>
+                Gratis att börja – <span className="gradient-text">Premium från 19 kr</span>
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground mb-5 leading-relaxed">
                 Börja gratis med grundfunktionerna. Uppgradera till Premium för avancerad statistik och smarta varningar.
