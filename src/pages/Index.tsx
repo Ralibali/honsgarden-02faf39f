@@ -74,13 +74,13 @@ export default function Index() {
 
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)] active:scale-95 transition-transform">
-                <a href="/login">
+                <a href="/login?mode=register">
                   Kom igång gratis
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base backdrop-blur-sm">
-                <a href="/login">Logga in</a>
+                <a href="/login?mode=login">Logga in</a>
               </Button>
             </div>
 
@@ -233,7 +233,7 @@ export default function Index() {
           <div>
             <p className="data-label mb-2">💰 Prisvärt</p>
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-3">
-              Gratis att börja – Premium från 19 kr/mån
+              Gratis att börja – Premium från 99 kr/mån
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mb-4">
               Börja gratis med grundfunktionerna. Uppgradera till Premium för avancerad statistik, smarta varningar och obegränsade hönor.
@@ -247,16 +247,16 @@ export default function Index() {
               ))}
             </ul>
             <div className="flex items-baseline gap-2 mb-6">
-              <span className="stat-number text-3xl text-foreground">19 kr</span>
+              <span className="stat-number text-3xl text-foreground">99 kr</span>
               <span className="text-muted-foreground text-sm">/mån</span>
               <span className="text-muted-foreground text-sm mx-1">eller</span>
-              <span className="stat-number text-3xl text-foreground">149 kr</span>
+              <span className="stat-number text-3xl text-foreground">799 kr</span>
               <span className="text-muted-foreground text-sm">/år</span>
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-2">Spara 35%</span>
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-2">Spara 33%</span>
             </div>
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 active:scale-95 transition-transform">
-              <a href="/login">
-                Prova gratis
+              <a href="/login?mode=register">
+                Prova gratis i 7 dagar
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
@@ -273,7 +273,7 @@ export default function Index() {
             Skapa ett konto gratis och börja logga ägg redan idag. Dina hönor förtjänar det!
           </p>
           <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)] active:scale-95 transition-transform">
-            <a href="/login">
+            <a href="/login?mode=register">
               Skapa gratis konto
               <ArrowRight className="h-4 w-4" />
             </a>
