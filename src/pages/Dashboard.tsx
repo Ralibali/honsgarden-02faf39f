@@ -204,7 +204,7 @@ export default function Dashboard() {
       <Card className="border-primary/15 overflow-hidden shadow-sm">
         <div className="h-1 bg-gradient-to-r from-primary/40 via-primary/20 to-accent/30" />
         <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Egg className="h-4 w-4 text-primary" />
@@ -215,6 +215,24 @@ export default function Dashboard() {
               {todayEggs} idag
             </span>
           </div>
+
+          {/* Hen selector */}
+          {activeHensList.length > 0 && (
+            <div className="mb-3">
+              <Select value={selectedHenId} onValueChange={setSelectedHenId}>
+                <SelectTrigger className="h-8 text-[11px] rounded-lg border-border/50">
+                  <SelectValue placeholder="Alla hönor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alla hönor (generellt)</SelectItem>
+                  {activeHensList.map((hen: any) => (
+                    <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 justify-center">
             {[1, 2, 3, 4, 5].map((n) => (
               <Button
@@ -228,17 +246,28 @@ export default function Dashboard() {
                 +{n}
               </Button>
             ))}
+          </div>
+
+          {/* Custom count inline input */}
+          <div className="flex items-center gap-2 mt-3">
+            <Input
+              type="number"
+              min="1"
+              placeholder="Valfritt antal"
+              value={customEggCount}
+              onChange={(e) => setCustomEggCount(e.target.value)}
+              className="h-9 text-sm rounded-xl flex-1"
+            />
             <Button
-              variant="outline"
               size="sm"
-              className="w-12 h-10 text-sm font-bold border-border/60 text-muted-foreground hover:bg-secondary rounded-xl"
+              className="h-9 px-4 rounded-xl text-sm"
+              disabled={!customEggCount || Number(customEggCount) <= 0 || eggMutation.isPending}
               onClick={() => {
-                const custom = prompt('Antal ägg:');
-                if (custom && !isNaN(Number(custom)) && Number(custom) > 0) addEggs(Number(custom));
+                const n = Number(customEggCount);
+                if (n > 0) { addEggs(n); setCustomEggCount(''); }
               }}
-              disabled={eggMutation.isPending}
             >
-              ···
+              Lägg till
             </Button>
           </div>
         </CardContent>

@@ -527,6 +527,19 @@ export async function adminAcceptTerms() {
   return {};
 }
 
+// Placeholder stubs for features that need more context
+export async function getStatisticsInsights() { return { insights: [] }; }
+export async function getAdvancedInsights() { return { insights: [] }; }
+export async function getTrendAnalysis() { return { trends: [] }; }
+export async function getAlerts() { return []; }
+export async function dismissAlert(_id: string) { return {}; }
+export async function getRankingSummary() { return { rank: 1, total: 1 }; }
+export async function getFlockStatistics() { return {}; }
+export async function getFlockHealth() { return {}; }
+export async function getInsights() { return { insights: [] }; }
+export async function getAgdaInboxToday() { return { messages: [] }; }
+export async function markHenSeen(_id: string) { return {}; }
+
 // Legacy compatibility: export as api object for existing imports
 export const api = {
   getHens, createHen, updateHen, deleteHen, getHenProfile, markHenSeen,
@@ -553,4 +566,5 @@ export const api = {
   getInsights, getAgdaInboxToday,
   adminCheck, adminStats, adminUsers, adminSubscriptions,
   adminFeedback, adminUpdateFeedbackStatus, adminDeleteUser, adminUpdateSubscription,
+  adminAcceptTerms,
 };
