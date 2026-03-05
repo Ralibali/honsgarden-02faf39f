@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+
+const PRICES = {
+  monthly: 'price_1T3joGHzffTezY82dRQc7GTO',
+  yearly: 'price_1T3jwRHzffTezY829aWQVXZr',
+};
 
 const freeFeatures = [
   'Upp till 10 hönor',
@@ -44,6 +52,30 @@ const testimonials = [
 ];
 
 export default function Premium() {
+  const { user } = useAuth();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleCheckout = async (priceId: string, planName: string) => {
+    if (!user) {
+      toast({ title: 'Logga in först', description: 'Du behöver vara inloggad för att uppgradera.', variant: 'destructive' });
+      return;
+    }
+    setLoadingPlan(planName);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message || 'Kunde inte starta checkout.', variant: 'destructive' });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       {/* Header */}
@@ -114,10 +146,21 @@ export default function Premium() {
             </ul>
 
             <div className="space-y-2">
-              <Button className="w-full h-11 active:scale-95 transition-transform text-base font-medium">
+              <Button 
+                className="w-full h-11 active:scale-95 transition-transform text-base font-medium"
+                onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
+                disabled={!!loadingPlan}
+              >
+                {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Välj årsplan – 149 kr/år
               </Button>
-              <Button variant="outline" className="w-full h-10 text-sm">
+              <Button 
+                variant="outline" 
+                className="w-full h-10 text-sm"
+                onClick={() => handleCheckout(PRICES.monthly, 'monthly')}
+                disabled={!!loadingPlan}
+              >
+                {loadingPlan === 'monthly' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Välj månadsplan – 19 kr/mån
               </Button>
             </div>
@@ -192,8 +235,13 @@ export default function Premium() {
 
       {/* Bottom CTA */}
       <div className="text-center pb-4">
-        <Button size="lg" className="h-12 px-8 text-base gap-2 active:scale-95 transition-transform shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]">
-          <Crown className="h-4 w-4" />
+        <Button 
+          size="lg" 
+          className="h-12 px-8 text-base gap-2 active:scale-95 transition-transform shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"
+          onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
+          disabled={!!loadingPlan}
+        >
+          {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
           Uppgradera till Premium
         </Button>
         <p className="text-xs text-muted-foreground mt-3">
