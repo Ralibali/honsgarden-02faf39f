@@ -515,7 +515,26 @@ export async function adminDeleteUser(userId: string) {
 
 export async function adminUpdateSubscription(userId: string, data: any) {
   const status = data.is_premium ? 'premium' : 'free';
-  const { error } = await supabase.from('profiles').update({ subscription_status: status }).eq('user_id', userId);
+  let premium_expires_at: string | null = null;
+
+  if (data.is_premium && data.days) {
+    if (data.days === 'lifetime') {
+      premium_expires_at = null; // null = lifetime
+    } else {
+      const expires = new Date();
+      expires.setDate(expires.getDate() + Number(data.days));
+      premium_expires_at = expires.toISOString();
+    }
+  }
+
+  const updateData: any = { subscription_status: status };
+  if (data.is_premium) {
+    updateData.premium_expires_at = premium_expires_at;
+  } else {
+    updateData.premium_expires_at = null;
+  }
+
+  const { error } = await supabase.from('profiles').update(updateData).eq('user_id', userId);
   if (error) throw new Error(error.message);
   return {};
 }
