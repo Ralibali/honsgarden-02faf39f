@@ -49,9 +49,12 @@ export async function getEggs() {
   return data;
 }
 
-export async function createEggRecord(record: { date: string; count: number; notes?: string }) {
+export async function createEggRecord(record: { date: string; count: number; notes?: string; hen_id?: string }) {
   const userId = await getUserId();
-  const { data, error } = await supabase.from('egg_logs').insert({ ...record, user_id: userId }).select().single();
+  const insertData: any = { date: record.date, count: record.count, user_id: userId };
+  if (record.notes) insertData.notes = record.notes;
+  if (record.hen_id) insertData.hen_id = record.hen_id;
+  const { data, error } = await supabase.from('egg_logs').insert(insertData).select().single();
   if (error) throw new Error(error.message);
   return data;
 }
