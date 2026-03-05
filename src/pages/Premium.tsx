@@ -122,10 +122,11 @@ export default function Premium() {
           <CardContent className="p-6">
             <h3 className="font-serif text-lg text-foreground mb-1">Månadsplan</h3>
             <p className="text-muted-foreground text-sm mb-5">Flexibelt, ingen bindningstid</p>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-foreground">19</span>
+            <div className="mb-2">
+              <span className="text-4xl font-bold text-foreground">99</span>
               <span className="text-lg text-muted-foreground ml-1">kr/mån</span>
             </div>
+            <p className="text-xs text-muted-foreground mb-4">7 dagar gratis provperiod</p>
             <Button 
               variant="outline"
               className="w-full h-11 gap-2 active:scale-95 transition-transform"
