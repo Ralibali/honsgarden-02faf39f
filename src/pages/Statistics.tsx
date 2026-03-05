@@ -175,5 +175,6 @@ export default function Statistics() {
         </Card>
       )}
     </div>
+    </PremiumGate>
   );
 }
