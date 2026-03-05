@@ -49,7 +49,7 @@ export function MobileNav() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="grid grid-cols-4 gap-1">
-              {moreItems.map((item) => (
+              {allMoreItems.map((item) => (
                 <NavLink
                   key={item.url}
                   to={item.url}
