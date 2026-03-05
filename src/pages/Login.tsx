@@ -39,7 +39,7 @@ export default function Login() {
     setLoading(true);
     try {
       await api.register(email, password, name);
-      toast({ title: 'Konto skapat!', description: 'Kontrollera din e-post för att verifiera kontot.' });
+      toast({ title: 'Konto skapat!', description: 'Du kan nu logga in direkt.' });
       setAuthMode('login');
     } catch (err: any) {
       toast({ title: 'Registrering misslyckades', description: err.message, variant: 'destructive' });
