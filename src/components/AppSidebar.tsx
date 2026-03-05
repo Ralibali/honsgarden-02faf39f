@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock, FileBarChart } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +31,7 @@ const mainNav = [
 const secondaryNav = [
   { title: 'Ekonomi', url: '/app/finance', icon: Coins, premium: true },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
+  { title: 'Veckorapport', url: '/app/weekly-report', icon: FileBarChart },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
   { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },

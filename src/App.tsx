@@ -28,6 +28,7 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 const Admin = React.lazy(() => import("./pages/Admin"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const HenProfile = React.lazy(() => import("./pages/HenProfile"));
+const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,7 @@ const AppRoutes = () => (
           <Route path="community" element={<Community />} />
           <Route path="admin" element={<Admin />} />
           <Route path="hens/:henId" element={<HenProfile />} />
+          <Route path="weekly-report" element={<WeeklyReport />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
