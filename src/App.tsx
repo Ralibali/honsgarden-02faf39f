@@ -28,6 +28,7 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 const Admin = React.lazy(() => import("./pages/Admin"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const HenProfile = React.lazy(() => import("./pages/HenProfile"));
+const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
