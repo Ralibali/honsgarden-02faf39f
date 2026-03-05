@@ -35,8 +35,12 @@ function toBasicProfile(supaUser: SupabaseUser): UserProfile {
 
 async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
   // Fire check-subscription to sync Stripe status → profiles table
+  let subscriptionEnd: string | null = null;
   try {
-    await supabase.functions.invoke('check-subscription');
+    const { data } = await supabase.functions.invoke('check-subscription');
+    if (data?.subscription_end) {
+      subscriptionEnd = data.subscription_end;
+    }
   } catch {
     // Non-blocking – profile query below will still work with cached status
   }
@@ -64,6 +68,7 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
     name: profile?.display_name ?? supaUser.user_metadata?.name ?? '',
     is_premium: subStatus === 'premium',
     subscription_status: subStatus,
+    subscription_end: subscriptionEnd,
   };
 }
 
