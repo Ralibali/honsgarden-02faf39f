@@ -146,7 +146,7 @@ export default function Finance() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label>Typ</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                <Select value={form.type} onValueChange={handleTypeChange}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="income">Intäkt</SelectItem>
@@ -155,9 +155,22 @@ export default function Finance() {
                 </Select>
               </div>
               <div>
-                <Label>Beskrivning</Label>
-                <Input className="mt-1.5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="T.ex. Äggförsäljning" required />
+                <Label>Kategori</Label>
+                <Select value={form.category} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Välj kategori..." /></SelectTrigger>
+                  <SelectContent>
+                    {categories.map(c => (
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              {isOther && (
+                <div>
+                  <Label>Beskrivning</Label>
+                  <Input className="mt-1.5" value={form.customDescription} onChange={(e) => setForm({ ...form, customDescription: e.target.value })} placeholder="Beskriv transaktionen..." required />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Belopp (kr)</Label>
@@ -168,11 +181,7 @@ export default function Finance() {
                   <Input className="mt-1.5" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
                 </div>
               </div>
-              <div>
-                <Label>Kategori (valfritt)</Label>
-                <Input className="mt-1.5" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="T.ex. Foder, Ägg, Strö" />
-              </div>
-              <Button type="submit" className="w-full" disabled={createMutation.isPending}>
+              <Button type="submit" className="w-full" disabled={createMutation.isPending || !form.category}>
                 {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Spara transaktion
               </Button>
