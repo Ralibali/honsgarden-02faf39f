@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby, Loader2 } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Shield, Download, TrendingUp, Zap, Star, Egg, Bird, Calculator, Syringe, Camera, ClipboardCheck, Baby, Loader2, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
