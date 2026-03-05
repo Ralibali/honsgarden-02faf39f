@@ -16,6 +16,8 @@ const moreItems = [
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
   { title: 'Ekonomi', url: '/app/finance', icon: Coins },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
+  { title: 'Premium', url: '/app/premium', icon: Crown },
+  { title: 'Inställningar', url: '/app/settings', icon: Settings },
 ];
 
 export function MobileNav() {
