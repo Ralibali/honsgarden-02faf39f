@@ -126,7 +126,7 @@ export default function Admin() {
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <Crown className="h-5 w-5 text-warning mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.premium_users ?? stats.premium ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">–</p>
               <p className="text-[10px] text-muted-foreground">Premium</p>
             </CardContent>
           </Card>
