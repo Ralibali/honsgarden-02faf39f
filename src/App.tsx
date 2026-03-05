@@ -27,6 +27,7 @@ const Community = React.lazy(() => import("./pages/Community"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const Admin = React.lazy(() => import("./pages/Admin"));
 const Terms = React.lazy(() => import("./pages/Terms"));
+const HenProfile = React.lazy(() => import("./pages/HenProfile"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
