@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'react-router-dom';
+import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 const PRICES = {
   monthly: 'price_1T3joGHzffTezY82dRQc7GTO',
@@ -263,6 +265,17 @@ export default function Premium() {
               <Crown className="h-5 w-5 text-warning" />
               Du har Premium!
             </div>
+            {user?.subscription_end && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <CalendarDays className="h-4 w-4" />
+                <span>
+                  Betald t.o.m.{' '}
+                  <span className="font-medium text-foreground">
+                    {format(new Date(user.subscription_end), 'd MMMM yyyy', { locale: sv })}
+                  </span>
+                </span>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">
               Hantera din prenumeration, byt betalmetod eller avsluta.
             </p>
