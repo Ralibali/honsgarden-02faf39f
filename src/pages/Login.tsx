@@ -37,7 +37,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.register(email, password, name);
+      await register(email, password, name);
       toast({ title: 'Konto skapat!', description: 'Du kan nu logga in direkt.' });
       setAuthMode('login');
     } catch (err: any) {
