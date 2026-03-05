@@ -55,7 +55,14 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      try {
+        const endTimestamp = subscription.current_period_end;
+        if (endTimestamp && typeof endTimestamp === 'number') {
+          subscriptionEnd = new Date(endTimestamp * 1000).toISOString();
+        }
+      } catch {
+        // Skip if date parsing fails
+      }
       productId = subscription.items.data[0].price.product;
 
       // Update profile to premium
