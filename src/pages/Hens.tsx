@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 
 export default function Hens() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showInactive, setShowInactive] = useState(false);
   const [tab, setTab] = useState('alla');
