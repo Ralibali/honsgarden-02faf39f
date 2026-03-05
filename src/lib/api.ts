@@ -226,6 +226,22 @@ export async function uncompleteChore(choreId: string) {
   if (error) throw new Error(error.message);
 }
 
+export async function createChore(title: string, description?: string) {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('daily_chores')
+    .insert({ title, description: description || null, user_id: userId, is_default: false })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteChore(choreId: string) {
+  const { error } = await supabase.from('daily_chores').delete().eq('id', choreId);
+  if (error) throw new Error(error.message);
+}
+
 // ==================== COOP SETTINGS ====================
 
 export async function getCoopSettings() {
@@ -696,7 +712,7 @@ export const api = {
   getTransactions, createTransaction, deleteTransaction,
   getHealthLogs, createHealthLog, getHenHealthLogs,
   submitFeedback,
-  getDailyChores, completeChore, uncompleteChore,
+  getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
   getCoopSettings, updateCoopSettings,
   getFlocks, createFlock, updateFlock, deleteFlock,
   getReminderSettings, updateReminderSettings,

@@ -20,6 +20,8 @@ import { useAuth } from '@/hooks/useAuth';
 import Achievements from '@/components/Achievements';
 import ShareCard from '@/components/ShareCard';
 import ReferralCard from '@/components/ReferralCard';
+import InstallAppCard from '@/components/InstallAppCard';
+import { motion } from 'framer-motion';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -211,8 +213,18 @@ export default function Dashboard() {
   const forecast = weatherData?.daily;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5 animate-fade-in pb-8">
+    <motion.div
+      className="max-w-2xl mx-auto space-y-5 pb-8"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+    >
       <DailySummaryModal />
+
+      {/* Install app card (mobile) */}
+      <div className="block md:hidden">
+        <InstallAppCard />
+      </div>
 
       {/* Hero header */}
       <div className="flex items-end justify-between gap-4 pt-1">
@@ -593,6 +605,6 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
