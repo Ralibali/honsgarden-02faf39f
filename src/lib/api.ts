@@ -92,11 +92,17 @@ export async function getFeedInventory() {
 }
 
 export async function getFeedStatistics() {
-  const { data, error } = await supabase.from('feed_records').select('*').order('date', { ascending: false });
-  if (error) throw new Error(error.message);
-  const totalCost = (data || []).reduce((sum, r) => sum + (r.cost || 0), 0);
-  const totalKg = (data || []).reduce((sum, r) => sum + (r.amount_kg || 0), 0);
-  return { total_cost: totalCost, total_kg: totalKg, record_count: (data || []).length };
+  const [feedRes, eggRes] = await Promise.all([
+    supabase.from('feed_records').select('*').order('date', { ascending: false }),
+    supabase.from('egg_logs').select('count'),
+  ]);
+  if (feedRes.error) throw new Error(feedRes.error.message);
+  const feed = feedRes.data || [];
+  const totalCost = feed.reduce((sum, r) => sum + (r.cost || 0), 0);
+  const totalKg = feed.reduce((sum, r) => sum + (r.amount_kg || 0), 0);
+  const totalEggs = (eggRes.data || []).reduce((sum, r) => sum + r.count, 0);
+  const costPerEgg = totalEggs > 0 ? totalCost / totalEggs : 0;
+  return { total_cost: totalCost, total_kg: totalKg, record_count: feed.length, cost_per_egg: costPerEgg };
 }
 
 // ==================== HATCHING ====================
@@ -226,7 +232,6 @@ export async function getCoopSettings() {
   const userId = await getUserId();
   const { data, error } = await supabase.from('coop_settings').select('*').eq('user_id', userId).single();
   if (error && error.code === 'PGRST116') {
-    // No settings yet, create default
     const { data: newData, error: insertError } = await supabase
       .from('coop_settings')
       .insert({ user_id: userId })
@@ -341,15 +346,36 @@ export async function getYearStats(year: number) {
 }
 
 export async function getSummaryStats() {
-  const [eggs, hens, txns] = await Promise.all([
+  const [eggsRes, hensRes, txnsRes] = await Promise.all([
     supabase.from('egg_logs').select('count, date'),
     supabase.from('hens').select('id').eq('is_active', true),
     supabase.from('transactions').select('amount, type'),
   ]);
-  const totalEggs = (eggs.data || []).reduce((s, r) => s + r.count, 0);
-  const income = (txns.data || []).filter(t => t.type === 'income').reduce((s, r) => s + r.amount, 0);
-  const expense = (txns.data || []).filter(t => t.type === 'expense').reduce((s, r) => s + r.amount, 0);
-  return { total_eggs: totalEggs, active_hens: (hens.data || []).length, total_income: income, total_expense: expense, profit: income - expense };
+  const eggs = eggsRes.data || [];
+  const totalEggs = eggs.reduce((s, r) => s + r.count, 0);
+  const activeHens = (hensRes.data || []).length;
+  const income = (txnsRes.data || []).filter(t => t.type === 'income').reduce((s, r) => s + r.amount, 0);
+  const expense = (txnsRes.data || []).filter(t => t.type === 'expense').reduce((s, r) => s + r.amount, 0);
+
+  // Compute avg per day and best day
+  const dailyCounts: Record<string, number> = {};
+  eggs.forEach(e => { dailyCounts[e.date] = (dailyCounts[e.date] || 0) + e.count; });
+  const days = Object.keys(dailyCounts);
+  const avgPerDay = days.length > 0 ? totalEggs / days.length : 0;
+  const bestDayEntry = days.length > 0 ? days.reduce((best, d) => dailyCounts[d] > dailyCounts[best] ? d : best, days[0]) : null;
+  const bestDay = bestDayEntry ? `${dailyCounts[bestDayEntry]} (${new Date(bestDayEntry).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })})` : '–';
+  const productivity = activeHens > 0 && days.length > 0 ? (avgPerDay / activeHens) * 100 : 0;
+
+  return {
+    total_eggs: totalEggs,
+    active_hens: activeHens,
+    total_income: income,
+    total_expense: expense,
+    profit: income - expense,
+    avg_per_day: avgPerDay,
+    best_day: bestDay,
+    productivity,
+  };
 }
 
 export async function getYesterdaySummary() {
@@ -442,28 +468,142 @@ export async function getProductivityAlerts() {
   return alerts;
 }
 
-// ==================== STREAK (profile-based) ====================
+// ==================== STREAK (unified – based on egg_logs) ====================
 
 export async function getStreak() {
-  const userId = await getUserId();
-  const { data } = await supabase.from('profiles').select('preferences').eq('user_id', userId).single();
-  const prefs = (data?.preferences as any) || {};
-  return { current_streak: prefs.streak || 0, last_activity: prefs.last_activity || null };
+  const eggs = await getEggs();
+  const streak = calculateStreakFromEggs(eggs || []);
+  return { current_streak: streak, last_activity: eggs?.[0]?.date ?? null };
 }
 
 export async function touchStreak() {
-  const userId = await getUserId();
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const { data: profile } = await supabase.from('profiles').select('preferences').eq('user_id', userId).single();
-  const prefs = (profile?.preferences as any) || {};
-  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-  let streak = prefs.streak || 0;
-  if (prefs.last_activity === today) return { current_streak: streak };
-  if (prefs.last_activity === yesterday) streak += 1;
-  else streak = 1;
-  await supabase.from('profiles').update({ preferences: { ...prefs, streak, last_activity: today } }).eq('user_id', userId);
-  return { current_streak: streak };
+  // No-op: streak is now computed from egg_logs directly
+  const eggs = await getEggs();
+  return { current_streak: calculateStreakFromEggs(eggs || []) };
 }
+
+function calculateStreakFromEggs(eggs: any[]): number {
+  const today = new Date();
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const hasEggs = eggs.some((e: any) => e.date === dateStr && e.count > 0);
+    if (hasEggs) streak++;
+    else if (i > 0) break;
+    else continue; // Allow today to not have eggs yet
+  }
+  return streak;
+}
+
+// ==================== STATISTICS INSIGHTS (real) ====================
+
+export async function getStatisticsInsights() {
+  const [eggsRes, txnsRes, feedRes, hensRes] = await Promise.all([
+    supabase.from('egg_logs').select('count, date, hen_id'),
+    supabase.from('transactions').select('amount, type, date'),
+    supabase.from('feed_records').select('cost, amount_kg, date'),
+    supabase.from('hens').select('id, name, is_active, hen_type'),
+  ]);
+
+  const eggs = eggsRes.data || [];
+  const txns = txnsRes.data || [];
+  const feed = feedRes.data || [];
+  const hens = (hensRes.data || []).filter(h => h.hen_type !== 'rooster');
+
+  const tips: string[] = [];
+
+  // Revenue per egg
+  const totalEggs = eggs.reduce((s, r) => s + r.count, 0);
+  const totalIncome = txns.filter(t => t.type === 'income').reduce((s, r) => s + r.amount, 0);
+  const revenuePerEgg = totalEggs > 0 ? totalIncome / totalEggs : 0;
+
+  // Weekly trend
+  const now = new Date();
+  const thisWeekEggs = eggs.filter(e => {
+    const diff = (now.getTime() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+    return diff <= 7;
+  }).reduce((s, r) => s + r.count, 0);
+  const lastWeekEggs = eggs.filter(e => {
+    const diff = (now.getTime() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+    return diff > 7 && diff <= 14;
+  }).reduce((s, r) => s + r.count, 0);
+
+  if (lastWeekEggs > 0) {
+    const change = Math.round(((thisWeekEggs - lastWeekEggs) / lastWeekEggs) * 100);
+    if (change > 10) tips.push(`Äggproduktionen ökade med ${change}% jämfört med förra veckan – bra jobbat! 🎉`);
+    else if (change < -10) tips.push(`Äggproduktionen minskade med ${Math.abs(change)}% jämfört med förra veckan. Kontrollera foder och ljus.`);
+    else tips.push(`Äggproduktionen är stabil jämfört med förra veckan.`);
+  }
+
+  // Productivity per hen
+  const activeHens = hens.filter(h => h.is_active).length;
+  if (activeHens > 0 && totalEggs > 0) {
+    const dailyCounts: Record<string, number> = {};
+    eggs.forEach(e => { dailyCounts[e.date] = (dailyCounts[e.date] || 0) + e.count; });
+    const avgPerDay = Object.keys(dailyCounts).length > 0 ? totalEggs / Object.keys(dailyCounts).length : 0;
+    const rate = (avgPerDay / activeHens) * 100;
+    if (rate > 70) tips.push(`Produktiviteten är ${Math.round(rate)}% – dina hönor presterar utmärkt! 🏆`);
+    else if (rate < 40) tips.push(`Produktiviteten är ${Math.round(rate)}% – det kan vara ruggning, ålder eller foderkvalitet.`);
+  }
+
+  // Feed cost insight
+  const totalFeedCost = feed.reduce((s, r) => s + (r.cost || 0), 0);
+  if (totalFeedCost > 0 && totalEggs > 0) {
+    const costPerEgg = totalFeedCost / totalEggs;
+    tips.push(`Foderkostnad per ägg: ${costPerEgg.toFixed(2)} kr. ${costPerEgg > 5 ? 'Överväg att jämföra fodertyper.' : 'Det är en bra kostnad!'}`);
+  }
+
+  // Top hen
+  if (eggs.some(e => e.hen_id)) {
+    const henCounts: Record<string, number> = {};
+    eggs.filter(e => e.hen_id).forEach(e => { henCounts[e.hen_id!] = (henCounts[e.hen_id!] || 0) + e.count; });
+    const topId = Object.entries(henCounts).sort(([, a], [, b]) => b - a)[0];
+    if (topId) {
+      const topHen = hens.find(h => h.id === topId[0]);
+      if (topHen) tips.push(`${topHen.name} är din bästa värpare med ${topId[1]} ägg totalt! 🐔`);
+    }
+  }
+
+  if (tips.length === 0) {
+    tips.push('Samla mer data för att se detaljerade insikter om din hönsgård.');
+  }
+
+  return { tips, revenue_per_egg: revenuePerEgg };
+}
+
+/** Get hens with computed egg totals from egg_logs */
+export async function getHensWithEggTotals() {
+  const [hensRes, eggsRes] = await Promise.all([
+    supabase.from('hens').select('*').order('created_at', { ascending: false }),
+    supabase.from('egg_logs').select('hen_id, count'),
+  ]);
+  if (hensRes.error) throw new Error(hensRes.error.message);
+  const hens = hensRes.data || [];
+  const eggs = eggsRes.data || [];
+
+  const henEggCounts: Record<string, number> = {};
+  eggs.filter(e => e.hen_id).forEach(e => {
+    henEggCounts[e.hen_id!] = (henEggCounts[e.hen_id!] || 0) + e.count;
+  });
+
+  return hens.map(hen => ({
+    ...hen,
+    total_eggs: henEggCounts[hen.id] || 0,
+  }));
+}
+
+export async function getAdvancedInsights() { return { insights: [] }; }
+export async function getTrendAnalysis() { return { trends: [] }; }
+export async function getAlerts() { return []; }
+export async function dismissAlert(_id: string) { return {}; }
+export async function getRankingSummary() { return { rank: 1, total: 1 }; }
+export async function getFlockStatistics() { return {}; }
+export async function getFlockHealth() { return {}; }
+export async function getInsights() { return { insights: [] }; }
+export async function getAgdaInboxToday() { return { messages: [] }; }
+export async function markHenSeen(_id: string) { return {}; }
 
 // ==================== ADMIN ====================
 
@@ -507,7 +647,6 @@ export async function adminSubscriptions() {
 }
 
 export async function adminDeleteUser(userId: string) {
-  // Delete profile (cascading will handle related data)
   const { error } = await supabase.from('profiles').delete().eq('user_id', userId);
   if (error) throw new Error(error.message);
   return {};
@@ -519,7 +658,7 @@ export async function adminUpdateSubscription(userId: string, data: any) {
 
   if (data.is_premium && data.days) {
     if (data.days === 'lifetime') {
-      premium_expires_at = null; // null = lifetime
+      premium_expires_at = null;
     } else {
       const expires = new Date();
       expires.setDate(expires.getDate() + Number(data.days));
@@ -546,23 +685,11 @@ export async function adminAcceptTerms() {
   return {};
 }
 
-// Placeholder stubs for features that need more context
-export async function getStatisticsInsights() { return { insights: [] }; }
-export async function getAdvancedInsights() { return { insights: [] }; }
-export async function getTrendAnalysis() { return { trends: [] }; }
-export async function getAlerts() { return []; }
-export async function dismissAlert(_id: string) { return {}; }
-export async function getRankingSummary() { return { rank: 1, total: 1 }; }
-export async function getFlockStatistics() { return {}; }
-export async function getFlockHealth() { return {}; }
-export async function getInsights() { return { insights: [] }; }
-export async function getAgdaInboxToday() { return { messages: [] }; }
-export async function markHenSeen(_id: string) { return {}; }
-
 // Legacy compatibility: export as api object for existing imports
 export const api = {
   getHens, createHen, updateHen, deleteHen, getHenProfile, markHenSeen,
   getHenHealthScores, getProductivityAlerts,
+  getHensWithEggTotals,
   getEggs, createEggRecord, deleteEggRecord,
   getFeedRecords, createFeedRecord, deleteFeedRecord, getFeedInventory, getFeedStatistics,
   getHatchings, createHatching, updateHatching, deleteHatching, getHatchingAlerts,

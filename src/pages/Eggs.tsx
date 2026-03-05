@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Calendar, Egg as EggIcon, Loader2, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -13,19 +14,29 @@ export default function Eggs() {
   const [showForm, setShowForm] = useState(false);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [count, setCount] = useState('');
+  const [selectedHenId, setSelectedHenId] = useState<string>('all');
 
   const { data: eggs = [], isLoading } = useQuery({
     queryKey: ['eggs'],
     queryFn: () => api.getEggs(),
   });
 
+  const { data: hens = [] } = useQuery({
+    queryKey: ['hens'],
+    queryFn: () => api.getHens(),
+    staleTime: 60_000,
+  });
+
+  const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
+
   const createMutation = useMutation({
-    mutationFn: (data: { date: string; count: number }) => api.createEggRecord(data),
+    mutationFn: (data: { date: string; count: number; hen_id?: string }) => api.createEggRecord(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
-      toast({ title: 'Ägg registrerade!' });
+      toast({ title: '🥚 Ägg registrerade!' });
       setShowForm(false);
       setCount('');
+      setSelectedHenId('all');
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
@@ -40,13 +51,18 @@ export default function Eggs() {
 
   const handleSubmit = () => {
     if (!count || Number(count) <= 0) return;
-    createMutation.mutate({ date, count: Number(count) });
+    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
+    createMutation.mutate({ date, count: Number(count), hen_id });
   };
 
   const todayEggs = eggs.filter((e: any) => e.date === new Date().toISOString().split('T')[0]).reduce((s: number, e: any) => s + (e.count || 0), 0);
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
   const weekEggs = eggs.filter((e: any) => new Date(e.date) >= weekAgo).reduce((s: number, e: any) => s + (e.count || 0), 0);
   const monthEggs = eggs.filter((e: any) => new Date(e.date).getMonth() === new Date().getMonth()).reduce((s: number, e: any) => s + (e.count || 0), 0);
+
+  // Build hen name lookup
+  const henNameMap: Record<string, string> = {};
+  (hens as any[]).forEach((h: any) => { henNameMap[h.id] = h.name; });
 
   if (isLoading) {
     return (
@@ -85,6 +101,22 @@ export default function Eggs() {
                 <Input type="number" placeholder="0" value={count} onChange={(e) => setCount(e.target.value)} className="h-11" />
               </div>
             </div>
+            {activeHens.length > 0 && (
+              <div>
+                <label className="data-label mb-1.5 block">Höna (valfritt)</label>
+                <Select value={selectedHenId} onValueChange={setSelectedHenId}>
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="Alla hönor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alla hönor (generellt)</SelectItem>
+                    {activeHens.map((hen: any) => (
+                      <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex gap-2">
               <Button onClick={handleSubmit} disabled={createMutation.isPending} className="active:scale-95 transition-transform">
                 {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
@@ -119,6 +151,7 @@ export default function Eggs() {
           <div className="divide-y divide-border">
             {eggs.slice(0, 20).map((entry: any) => {
               const entryId = entry._id || entry.id;
+              const henName = entry.hen_id ? henNameMap[entry.hen_id] : null;
               return (
                 <div key={entryId} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-secondary/50 transition-colors">
                   <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -129,6 +162,9 @@ export default function Eggs() {
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
                         <p className="text-xs sm:text-sm text-muted-foreground">{entry.date}</p>
+                        {henName && (
+                          <span className="text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-md font-medium">🐔 {henName}</span>
+                        )}
                       </div>
                       {entry.notes && <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{entry.notes}</p>}
                     </div>
