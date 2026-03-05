@@ -69,6 +69,8 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryText, setDiaryText] = useState('');
+  const [customEggCount, setCustomEggCount] = useState('');
+  const [selectedHenId, setSelectedHenId] = useState<string>('all');
   const now = new Date();
 
   const { data: eggs = [] } = useQuery({ queryKey: ['eggs'], queryFn: () => api.getEggs(), staleTime: 60_000 });
@@ -78,8 +80,11 @@ export default function Dashboard() {
   const { data: weatherData, isLoading: weatherLoading } = useQuery({ queryKey: ['weather'], queryFn: fetchWeather, staleTime: 30 * 60 * 1000, retry: 2 });
   const { data: aiTip } = useQuery({ queryKey: ['daily-tip'], queryFn: () => api.getDailyTip(), staleTime: 60 * 60 * 1000, retry: 1 });
 
+  const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
+
   const eggMutation = useMutation({
-    mutationFn: (count: number) => api.createEggRecord({ date: now.toISOString().split('T')[0], count }),
+    mutationFn: ({ count, hen_id }: { count: number; hen_id?: string }) =>
+      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['eggs'] }); toast({ title: '🥚 Ägg registrerade!' }); },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
