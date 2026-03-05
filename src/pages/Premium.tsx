@@ -51,7 +51,30 @@ export default function Premium() {
 
   useEffect(() => {
     if (searchParams.get('success') === 'true') {
-      toast({ title: '🎉 Välkommen till Premium!', description: 'Din uppgradering är klar. Njut av alla funktioner!' });
+      // After Stripe redirect, sync subscription status
+      const syncSubscription = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('check-subscription');
+          if (!error && data?.subscribed) {
+            toast({ title: '🎉 Välkommen till Premium!', description: 'Din uppgradering är klar. Njut av alla funktioner!' });
+            // Reload to pick up new profile status
+            window.location.replace('/app/premium');
+          } else {
+            // Stripe may take a moment – retry once after 3s
+            setTimeout(async () => {
+              const { data: retryData } = await supabase.functions.invoke('check-subscription');
+              if (retryData?.subscribed) {
+                window.location.replace('/app/premium');
+              } else {
+                toast({ title: 'Betalningen behandlas', description: 'Det kan ta någon minut innan din premium aktiveras. Ladda om sidan snart.' });
+              }
+            }, 3000);
+          }
+        } catch {
+          toast({ title: 'Betalningen behandlas', description: 'Ladda om sidan om en stund för att se din premium-status.' });
+        }
+      };
+      syncSubscription();
     }
   }, [searchParams]);
 
