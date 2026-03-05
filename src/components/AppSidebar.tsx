@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
