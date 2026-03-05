@@ -190,7 +190,14 @@ export default function Login() {
                     <Input id="reg-password" type="password" placeholder="Minst 6 tecken" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-11" minLength={6} required />
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
+                <div>
+                  <Label htmlFor="referral" className="text-muted-foreground">Värvningskod (valfritt)</Label>
+                  <div className="relative mt-1.5">
+                    <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="referral" type="text" placeholder="T.ex. A1B2C3" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} className="pl-10 h-11 uppercase" maxLength={6} />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">Har du en kod från en vän? Ni får båda 7 dagars Premium!</p>
+                </div>
                   <input
                     type="checkbox"
                     id="terms"
