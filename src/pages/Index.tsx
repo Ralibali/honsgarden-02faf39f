@@ -1,19 +1,39 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown } from 'lucide-react';
-import { motion } from 'framer-motion';
 import heroFarm from '@/assets/hero-farm.jpg';
 import henPortrait from '@/assets/hen-portrait.jpg';
 import eggsBasket from '@/assets/eggs-basket.jpg';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
-  }),
-};
+// Lightweight IntersectionObserver reveal (no framer-motion)
+function useInView(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, visible } = useInView();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-600 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
 
 const features = [
   { icon: Egg, title: 'Äggloggning', desc: 'Logga dagens ägg med ett tryck. Se statistik dag för dag.' },
@@ -53,7 +73,6 @@ export default function Index() {
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative min-h-[90vh] flex items-center justify-center">
-        {/* Background image with dark overlay */}
         <img
           src={heroFarm}
           alt="Svensk hönsgård i morgonljus"
@@ -80,62 +99,54 @@ export default function Index() {
 
         {/* Hero content */}
         <div className="relative z-10 text-center px-5 sm:px-6 max-w-3xl mx-auto">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+          <FadeUp>
             <span className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-md text-primary-foreground px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-primary-foreground/20 mb-6">
               🌾 Appen för svenska hönsägare
             </span>
-          </motion.div>
+          </FadeUp>
 
-          <motion.h1
-            initial="hidden" animate="visible" variants={fadeUp} custom={1}
-            className="font-serif text-4xl sm:text-5xl md:text-7xl text-primary-foreground mb-4 sm:mb-5 leading-[1.1] drop-shadow-lg"
-          >
-            Ha full koll på{' '}
-            <span className="relative inline-block">
-              din hönsgård
-              <svg className="absolute -bottom-1 left-0 w-full h-3 text-primary" viewBox="0 0 200 12" fill="none">
-                <path d="M2 8 C50 2, 150 2, 198 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-              </svg>
-            </span>
-          </motion.h1>
+          <FadeUp delay={100}>
+            <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl text-primary-foreground mb-4 sm:mb-5 leading-[1.1] drop-shadow-lg">
+              Ha full koll på{' '}
+              <span className="relative inline-block">
+                din hönsgård
+                <svg className="absolute -bottom-1 left-0 w-full h-3 text-primary" viewBox="0 0 200 12" fill="none">
+                  <path d="M2 8 C50 2, 150 2, 198 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              </span>
+            </h1>
+          </FadeUp>
 
-          <motion.p
-            initial="hidden" animate="visible" variants={fadeUp} custom={2}
-            className="text-base sm:text-xl text-primary-foreground/80 mb-8 max-w-lg mx-auto leading-relaxed"
-          >
-            Logga ägg, följ flocken och håll koll på ekonomin – enkelt och smidigt, direkt i mobilen.
-          </motion.p>
+          <FadeUp delay={200}>
+            <p className="text-base sm:text-xl text-primary-foreground/80 mb-8 max-w-lg mx-auto leading-relaxed">
+              Logga ägg, följ flocken och håll koll på ekonomin – enkelt och smidigt, direkt i mobilen.
+            </p>
+          </FadeUp>
 
-          <motion.div
-            initial="hidden" animate="visible" variants={fadeUp} custom={3}
-            className="flex flex-col sm:flex-row gap-3 justify-center mb-8"
-          >
-            <Button asChild size="lg" className="h-13 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] transition-shadow">
-              <a href="/login?mode=register">
-                Skapa gratis konto
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </motion.div>
+          <FadeUp delay={300}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+              <Button asChild size="lg" className="h-13 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] transition-shadow">
+                <a href="/login?mode=register">
+                  Skapa gratis konto
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </FadeUp>
 
-          <motion.div
-            initial="hidden" animate="visible" variants={fadeUp} custom={4}
-            className="flex flex-wrap gap-x-6 gap-y-1 justify-center text-xs sm:text-sm text-primary-foreground/70"
-          >
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Helt gratis att börja</span>
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Ingen bindningstid</span>
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 100% svensk 🇸🇪</span>
-          </motion.div>
+          <FadeUp delay={400}>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 justify-center text-xs sm:text-sm text-primary-foreground/70">
+              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Helt gratis att börja</span>
+              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Ingen bindningstid</span>
+              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 100% svensk 🇸🇪</span>
+            </div>
+          </FadeUp>
         </div>
 
         {/* Scroll indicator */}
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        >
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
           <ChevronDown className="h-6 w-6 text-primary-foreground/40" />
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════ SOCIAL PROOF BAR ═══════ */}
@@ -147,14 +158,10 @@ export default function Index() {
               { value: '2 500+', label: 'hönsägare' },
               { value: '100%', label: 'svensk app 🇸🇪' },
             ].map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                className="py-6 sm:py-8 text-center"
-              >
+              <FadeUp key={s.label} delay={i * 100} className="py-6 sm:py-8 text-center">
                 <p className="stat-number text-xl sm:text-3xl text-foreground">{s.value}</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{s.label}</p>
-              </motion.div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -163,28 +170,26 @@ export default function Index() {
       {/* ═══════ FEATURES ═══════ */}
       <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-10 sm:mb-14">
+          <FadeUp className="text-center mb-10 sm:mb-14">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">
               Allt du behöver – <span className="gradient-text">inget du inte behöver</span>
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
               Enkla verktyg som gör skillnad i vardagen.
             </p>
-          </motion.div>
+          </FadeUp>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                className="group relative p-5 sm:p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300 card-hover"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                  <f.icon className="h-5 w-5 text-primary" />
+              <FadeUp key={f.title} delay={i * 80}>
+                <div className="group relative p-5 sm:p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300 card-hover h-full">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                    <f.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-serif text-base sm:text-lg text-foreground mb-1">{f.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
                 </div>
-                <h3 className="font-serif text-base sm:text-lg text-foreground mb-1">{f.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -194,7 +199,7 @@ export default function Index() {
       <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
+            <FadeUp>
               <p className="data-label mb-3">Smarta insikter</p>
               <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
                 Appen som <span className="gradient-text">lär känna</span> dina hönor
@@ -204,48 +209,45 @@ export default function Index() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {smartFeatures.map((f, i) => (
-                  <motion.div
-                    key={f.title}
-                    initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-background border border-border"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <f.icon className="h-3.5 w-3.5 text-primary" />
+                  <FadeUp key={f.title} delay={i * 80}>
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-background border border-border">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <f.icon className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{f.title}</p>
+                        <p className="text-[11px] text-muted-foreground">{f.desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{f.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{f.desc}</p>
-                    </div>
-                  </motion.div>
+                  </FadeUp>
                 ))}
               </div>
-            </motion.div>
+            </FadeUp>
 
-            <motion.div
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
-              className="relative"
-            >
-              <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border">
-                <img
-                  src={henPortrait}
-                  alt="Höna i mysigt hönshus"
-                  className="w-full h-72 sm:h-80 lg:h-[420px] object-cover"
-                  loading="lazy"
-                />
-              </div>
-              {/* Floating card */}
-              <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-card border border-border rounded-xl p-3 shadow-xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-success/15 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">+23% ägg</p>
-                    <p className="text-[10px] text-muted-foreground">denna månad</p>
+            <FadeUp delay={200}>
+              <div className="relative">
+                <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border">
+                  <img
+                    src={henPortrait}
+                    alt="Höna i mysigt hönshus"
+                    className="w-full h-72 sm:h-80 lg:h-[420px] object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                {/* Floating card */}
+                <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-card border border-border rounded-xl p-3 shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-success/15 flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-success" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">+23% ägg</p>
+                      <p className="text-[10px] text-muted-foreground">denna månad</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </FadeUp>
           </div>
         </div>
       </section>
@@ -253,27 +255,23 @@ export default function Index() {
       {/* ═══════ HOW IT WORKS ═══════ */}
       <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-4xl mx-auto px-5 sm:px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-10 sm:mb-14">
+          <FadeUp className="text-center mb-10 sm:mb-14">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Tre steg till full koll</h2>
             <p className="text-sm sm:text-base text-muted-foreground">Du behöver ingen manual.</p>
-          </motion.div>
+          </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
             {[
               { num: '1', title: 'Skapa konto', desc: 'Gratis på några sekunder.' },
               { num: '2', title: 'Lägg in hönorna', desc: 'Ange antal eller namnge varje höna.' },
               { num: '3', title: 'Börja logga ägg', desc: 'Tryck in äggen – se statistiken växa!' },
             ].map((s, i) => (
-              <motion.div
-                key={s.num}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                className="text-center relative"
-              >
+              <FadeUp key={s.num} delay={i * 100} className="text-center">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-serif text-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
                   {s.num}
                 </div>
                 <h3 className="font-serif text-lg text-foreground mb-1">{s.title}</h3>
                 <p className="text-sm text-muted-foreground">{s.desc}</p>
-              </motion.div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -282,32 +280,30 @@ export default function Index() {
       {/* ═══════ TESTIMONIALS ═══════ */}
       <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="text-center mb-10 sm:mb-14">
+          <FadeUp className="text-center mb-10 sm:mb-14">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground">Älskad av hönsägare</h2>
-          </motion.div>
+          </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {testimonials.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}
-                className="p-5 sm:p-6 rounded-2xl bg-background border border-border card-hover"
-              >
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
-                  ))}
-                </div>
-                <p className="text-sm text-foreground leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                    {t.name.charAt(0)}
+              <FadeUp key={t.name} delay={i * 100}>
+                <div className="p-5 sm:p-6 rounded-2xl bg-background border border-border card-hover h-full">
+                  <div className="flex gap-0.5 mb-3">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{t.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{t.location}</p>
+                  <p className="text-sm text-foreground leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                      {t.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{t.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{t.location}</p>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -317,7 +313,7 @@ export default function Index() {
       <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1} className="relative order-2 lg:order-1">
+            <FadeUp delay={100} className="relative order-2 lg:order-1">
               <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border">
                 <img
                   src={eggsBasket}
@@ -326,8 +322,8 @@ export default function Index() {
                   loading="lazy"
                 />
               </div>
-            </motion.div>
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="order-1 lg:order-2">
+            </FadeUp>
+            <FadeUp className="order-1 lg:order-2">
               <p className="data-label mb-3">Prisvärt</p>
               <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
                 Gratis att börja – <span className="gradient-text">Premium från 99 kr</span>
@@ -359,7 +355,7 @@ export default function Index() {
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
-            </motion.div>
+            </FadeUp>
           </div>
         </div>
       </section>
@@ -367,24 +363,23 @@ export default function Index() {
       {/* ═══════ FINAL CTA ═══════ */}
       <section className="relative z-10 pb-16 sm:pb-24">
         <div className="container max-w-3xl mx-auto px-5 sm:px-6">
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-            className="rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-warning/5 border border-primary/15 p-8 sm:p-12 text-center"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
-              <Shield className="h-7 w-7 text-primary" />
+          <FadeUp>
+            <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-warning/5 border border-primary/15 p-8 sm:p-12 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
+                <Shield className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Redo att börja?</h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
+                Skapa ett konto gratis och börja logga ägg redan idag. Dina hönor förtjänar det!
+              </p>
+              <Button asChild size="lg" className="h-13 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
+                <a href="/login?mode=register">
+                  Skapa gratis konto
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </Button>
             </div>
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Redo att börja?</h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-              Skapa ett konto gratis och börja logga ägg redan idag. Dina hönor förtjänar det!
-            </p>
-            <Button asChild size="lg" className="h-13 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
-              <a href="/login?mode=register">
-                Skapa gratis konto
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </motion.div>
+          </FadeUp>
         </div>
       </section>
 
