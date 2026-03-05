@@ -85,7 +85,7 @@ export function AppSidebar() {
           {!collapsed && <SidebarGroupLabel className="text-[10px] text-muted-foreground uppercase tracking-widest px-4 mt-2">Verktyg</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
-              {secondaryNav.map((item) => (
+              {secondaryNav.filter(item => !(item as any).adminOnly || isAdmin).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-200" activeClassName="bg-primary/15 text-primary font-medium">
