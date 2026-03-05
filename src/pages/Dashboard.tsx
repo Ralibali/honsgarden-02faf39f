@@ -605,6 +605,6 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
