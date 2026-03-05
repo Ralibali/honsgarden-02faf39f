@@ -51,8 +51,16 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await register(email, password, name);
-      toast({ title: 'Konto skapat!', description: 'Du kan nu logga in direkt.' });
+      const data = await register(email, password, name);
+      // Process referral code if provided
+      if (referralCode.trim() && data?.user?.id) {
+        try {
+          await supabase.rpc('process_referral', { _referral_code: referralCode.trim().toUpperCase(), _new_user_id: data.user.id });
+        } catch {
+          // Non-blocking – referral is a bonus
+        }
+      }
+      toast({ title: 'Konto skapat!', description: referralCode.trim() ? 'Du har fått 7 dagars gratis Premium! 🎉' : 'Du kan nu logga in direkt.' });
       setAuthMode('login');
     } catch (err: any) {
       toast({ title: 'Registrering misslyckades', description: err.message, variant: 'destructive' });
