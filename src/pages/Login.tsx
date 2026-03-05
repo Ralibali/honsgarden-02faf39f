@@ -182,7 +182,22 @@ export default function Login() {
                   </div>
                 </div>
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading}>
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 rounded border-border"
+                    required
+                  />
+                  <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed">
+                    Jag har läst och godkänner{' '}
+                    <a href="/terms" target="_blank" className="text-primary hover:underline">användarvillkoren & integritetspolicyn</a>, inklusive att kontaktas via e-post med nyhetsbrev och erbjudanden.
+                  </label>
+                </div>
+              </div>
+              <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading || !acceptedTerms}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Skapa konto <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
