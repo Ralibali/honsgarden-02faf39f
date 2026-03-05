@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Egg, ArrowRight, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 type AuthMode = 'welcome' | 'login' | 'register' | 'forgot';
 
