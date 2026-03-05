@@ -212,6 +212,7 @@ export default function Login() {
                     <a href="/terms" target="_blank" className="text-primary hover:underline">användarvillkoren & integritetspolicyn</a>, inklusive att kontaktas via e-post med nyhetsbrev och erbjudanden.
                   </label>
                 </div>
+              </div>
               <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading || !acceptedTerms}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Skapa konto <ArrowRight className="ml-2 h-4 w-4" />
