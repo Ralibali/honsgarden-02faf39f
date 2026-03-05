@@ -17,6 +17,8 @@ import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { PremiumNudge } from '@/components/PremiumGate';
 import { useAuth } from '@/hooks/useAuth';
+import Achievements from '@/components/Achievements';
+import ShareCard from '@/components/ShareCard';
 
 function getGreeting() {
   const hour = new Date().getHours();
