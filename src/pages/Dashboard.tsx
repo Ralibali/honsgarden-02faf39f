@@ -20,6 +20,8 @@ import { useAuth } from '@/hooks/useAuth';
 import Achievements from '@/components/Achievements';
 import ShareCard from '@/components/ShareCard';
 import ReferralCard from '@/components/ReferralCard';
+import InstallAppCard from '@/components/InstallAppCard';
+import { motion } from 'framer-motion';
 
 function getGreeting() {
   const hour = new Date().getHours();
