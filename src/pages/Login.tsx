@@ -4,7 +4,7 @@ import heroFarm from '@/assets/hero-farm.jpg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Egg, ArrowRight, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Egg, ArrowRight, Mail, Lock, User, Loader2, Gift } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
