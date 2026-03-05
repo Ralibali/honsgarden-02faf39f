@@ -408,20 +408,19 @@ export async function getFreeTip() {
 // ==================== PREMIUM ====================
 
 export async function getPremiumStatus() {
-  const userId = await getUserId();
-  const { data, error } = await supabase.from('profiles').select('subscription_status').eq('user_id', userId).single();
+  const { data, error } = await supabase.functions.invoke('check-subscription');
   if (error) throw new Error(error.message);
-  return { is_premium: data.subscription_status === 'premium', status: data.subscription_status };
+  return { is_premium: data?.subscribed ?? false, status: data?.subscribed ? 'premium' : 'free', subscription_end: data?.subscription_end };
 }
 
 export async function createCheckoutSession(sessionData: any) {
-  const { data, error } = await supabase.functions.invoke('stripe-checkout', { body: sessionData });
+  const { data, error } = await supabase.functions.invoke('create-checkout', { body: sessionData });
   if (error) throw new Error(error.message);
   return data;
 }
 
 export async function cancelSubscription() {
-  const { data, error } = await supabase.functions.invoke('stripe-cancel', { body: {} });
+  const { data, error } = await supabase.functions.invoke('customer-portal');
   if (error) throw new Error(error.message);
   return data;
 }
