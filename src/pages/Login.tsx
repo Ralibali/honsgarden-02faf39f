@@ -129,6 +129,10 @@ export default function Login() {
                   </div>
                 </div>
               </div>
+              <div className="flex items-center gap-2 mt-1">
+                <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="rounded border-border" />
+                <Label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">Kom ihåg mig</Label>
+              </div>
               <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Logga in <ArrowRight className="ml-2 h-4 w-4" />
