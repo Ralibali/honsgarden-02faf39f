@@ -14,10 +14,31 @@ import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { PremiumGate } from '@/components/PremiumGate';
 
+const INCOME_CATEGORIES = [
+  { value: 'egg_sales', label: 'Äggförsäljning' },
+  { value: 'hen_sales', label: 'Sålt höna' },
+  { value: 'rooster_sales', label: 'Sålt tupp' },
+  { value: 'chick_sales', label: 'Sålt kycklingar' },
+  { value: 'manure_sales', label: 'Sålt gödsel' },
+  { value: 'other', label: 'Övrigt' },
+];
+
+const EXPENSE_CATEGORIES = [
+  { value: 'feed', label: 'Foder' },
+  { value: 'bedding', label: 'Strö & bäddmaterial' },
+  { value: 'veterinary', label: 'Veterinär' },
+  { value: 'medicine', label: 'Medicin & avmaskning' },
+  { value: 'equipment', label: 'Utrustning & material' },
+  { value: 'electricity', label: 'El & värme' },
+  { value: 'coop_maintenance', label: 'Underhåll av hönshus' },
+  { value: 'new_hens', label: 'Inköp av hönor/tuppar' },
+  { value: 'other', label: 'Övrigt' },
+];
+
 export default function Finance() {
   const [view, setView] = useState('overview');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ type: 'income', amount: '', description: '', category: '', date: format(new Date(), 'yyyy-MM-dd') });
+  const [form, setForm] = useState({ type: 'income', amount: '', description: '', category: '', customDescription: '', date: format(new Date(), 'yyyy-MM-dd') });
   const queryClient = useQueryClient();
 
   const { data: transactions = [], isLoading } = useQuery({
@@ -25,13 +46,17 @@ export default function Finance() {
     queryFn: () => api.getTransactions(),
   });
 
+  const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const selectedCategory = categories.find(c => c.value === form.category);
+  const isOther = form.category === 'other';
+
   const createMutation = useMutation({
     mutationFn: (data: any) => api.createTransaction(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['summary-stats'] });
       setDialogOpen(false);
-      setForm({ type: 'income', amount: '', description: '', category: '', date: format(new Date(), 'yyyy-MM-dd') });
+      setForm({ type: 'income', amount: '', description: '', category: '', customDescription: '', date: format(new Date(), 'yyyy-MM-dd') });
       toast({ title: 'Transaktion sparad!' });
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
@@ -45,14 +70,28 @@ export default function Finance() {
     },
   });
 
+  const handleCategoryChange = (value: string) => {
+    const cat = categories.find(c => c.value === value);
+    if (value === 'other') {
+      setForm({ ...form, category: value, description: '', customDescription: '' });
+    } else {
+      setForm({ ...form, category: value, description: cat?.label ?? '', customDescription: '' });
+    }
+  };
+
+  const handleTypeChange = (value: string) => {
+    setForm({ ...form, type: value, category: '', description: '', customDescription: '' });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.amount || !form.description) return;
+    const description = isOther ? form.customDescription : form.description;
+    if (!form.amount || !description || !form.category) return;
     createMutation.mutate({
       type: form.type,
       amount: parseFloat(form.amount),
-      description: form.description,
-      category: form.category || null,
+      description,
+      category: isOther ? form.customDescription : (selectedCategory?.label ?? form.category),
       date: form.date,
     });
   };
