@@ -4,7 +4,7 @@ import heroFarm from '@/assets/hero-farm.jpg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Egg, ArrowRight, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Egg, ArrowRight, Mail, Lock, User, Loader2, Gift } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +24,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,8 +51,16 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await register(email, password, name);
-      toast({ title: 'Konto skapat!', description: 'Du kan nu logga in direkt.' });
+      const data = await register(email, password, name);
+      // Process referral code if provided
+      if (referralCode.trim() && data?.user?.id) {
+        try {
+          await supabase.rpc('process_referral', { _referral_code: referralCode.trim().toUpperCase(), _new_user_id: data.user.id });
+        } catch {
+          // Non-blocking – referral is a bonus
+        }
+      }
+      toast({ title: 'Konto skapat!', description: referralCode.trim() ? 'Du har fått 7 dagars gratis Premium! 🎉' : 'Du kan nu logga in direkt.' });
       setAuthMode('login');
     } catch (err: any) {
       toast({ title: 'Registrering misslyckades', description: err.message, variant: 'destructive' });
@@ -180,6 +189,14 @@ export default function Login() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input id="reg-password" type="password" placeholder="Minst 6 tecken" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-11" minLength={6} required />
                   </div>
+                </div>
+                <div>
+                  <Label htmlFor="referral" className="text-muted-foreground">Värvningskod (valfritt)</Label>
+                  <div className="relative mt-1.5">
+                    <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="referral" type="text" placeholder="T.ex. A1B2C3" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} className="pl-10 h-11 uppercase" maxLength={6} />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">Har du en kod från en vän? Ni får båda 7 dagars Premium!</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <input

@@ -19,6 +19,7 @@ import { PremiumNudge } from '@/components/PremiumGate';
 import { useAuth } from '@/hooks/useAuth';
 import Achievements from '@/components/Achievements';
 import ShareCard from '@/components/ShareCard';
+import ReferralCard from '@/components/ReferralCard';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -560,6 +561,9 @@ export default function Dashboard() {
         streak={streak}
         userName={user?.name?.split(' ')[0]}
       />
+
+      {/* Referral */}
+      <ReferralCard />
 
       {/* Diary dialog */}
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>
