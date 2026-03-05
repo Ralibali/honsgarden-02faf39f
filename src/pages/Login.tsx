@@ -181,7 +181,6 @@ export default function Login() {
                     <Input id="reg-password" type="password" placeholder="Minst 6 tecken" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 h-11" minLength={6} required />
                   </div>
                 </div>
-              </div>
                 <div className="flex items-start gap-2">
                   <input
                     type="checkbox"
