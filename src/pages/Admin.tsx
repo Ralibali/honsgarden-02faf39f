@@ -119,7 +119,7 @@ export default function Admin() {
           <Card className="border-border">
             <CardContent className="p-4 text-center">
               <Users className="h-5 w-5 text-primary mx-auto mb-1" />
-              <p className="stat-number text-2xl text-foreground">{stats.total_users ?? stats.users ?? '–'}</p>
+              <p className="stat-number text-2xl text-foreground">{stats.user_count ?? '–'}</p>
               <p className="text-[10px] text-muted-foreground">Användare</p>
             </CardContent>
           </Card>
