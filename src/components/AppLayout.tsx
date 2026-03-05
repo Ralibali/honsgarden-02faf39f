@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { MobileNav } from './MobileNav';
+import { QuickEggFAB } from './QuickEggFAB';
 import { Menu, Feather } from 'lucide-react';
 
 export default function AppLayout() {
