@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb, ArrowRight, Sun, BookOpen, Leaf, Loader2, Plus } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Egg, Bird, CalendarDays, Coins, Thermometer, Heart, Lightbulb,
+  ArrowRight, Sun, BookOpen, Leaf, Loader2, Plus, TrendingUp, Sparkles,
+} from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { DailySummaryModal } from '@/components/DailySummaryModal';
-import { PremiumUpsellBanner } from '@/components/AffiliateRecommendations';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -22,8 +25,8 @@ function getGreeting() {
 }
 
 function getFormattedDate() {
-  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
-  const months = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
+  const days = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
+  const months = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   const now = new Date();
   return `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
 }
@@ -33,24 +36,20 @@ function getMonthName(month: number) {
   return months[month];
 }
 
-function getSeasonTips(): { title: string; tips: string[] } {
-  const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) {
-    return { title: '🌱 Vår-tips', tips: ['Hönsen börjar lägga fler ägg nu – se till att de har extra kalcium.', 'Rengör hönshuset ordentligt efter vintern.', 'Kolla efter kvalster som trivs i värmen.', 'Börja släppa ut hönsen längre stunder.'] };
-  }
-  if (month >= 5 && month <= 7) {
-    return { title: '☀️ Sommar-tips', tips: ['Se till att hönsen har skugga och gott om vatten.', 'Samla ägg ofta så de inte går sönder.', 'Håll utkik efter rovdjur som rävar.', 'Ge vattenmelon som godis vid värmeböljor.'] };
-  }
-  if (month >= 8 && month <= 10) {
-    return { title: '🍂 Höst-tips', tips: ['Många höns ruggar nu – ge extra protein.', 'Äggproduktionen minskar – helt normalt.', 'Börja förbereda hönshuset för vintern.', 'Kontrollera ventilationen.'] };
-  }
-  return { title: '❄️ Vinter-tips', tips: ['Se till att vattnet inte fryser.', 'Extra belysning kan hjälpa äggproduktionen.', 'Isolera hönshuset men behåll ventilationen.', 'Ge lite extra foder för värmen.'] };
-}
-
 async function fetchWeather() {
   const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.33&longitude=18.07&current=temperature_2m,weathercode&timezone=Europe%2FStockholm');
   if (!res.ok) throw new Error('Weather fetch failed');
   return res.json();
+}
+
+function getWeatherIcon(code: number) {
+  if (code === 0) return '☀️';
+  if (code <= 3) return '⛅';
+  if (code <= 48) return '🌫️';
+  if (code <= 67) return '🌧️';
+  if (code <= 77) return '🌨️';
+  if (code <= 82) return '🌦️';
+  return '⛈️';
 }
 
 function getWeatherTip(temp: number, code: number): string {
@@ -69,15 +68,8 @@ export default function Dashboard() {
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryText, setDiaryText] = useState('');
   const now = new Date();
-  const season = getSeasonTips();
 
   // Fetch real data
-  const { data: farmData } = useQuery({
-    queryKey: ['farm-today'],
-    queryFn: () => api.getFarmToday(),
-    staleTime: 60_000,
-  });
-
   const { data: eggs = [] } = useQuery({
     queryKey: ['eggs'],
     queryFn: () => api.getEggs(),
@@ -109,18 +101,24 @@ export default function Dashboard() {
     retry: 2,
   });
 
+  const { data: aiTip } = useQuery({
+    queryKey: ['daily-tip'],
+    queryFn: () => api.getDailyTip(),
+    staleTime: 60 * 60 * 1000, // 1 hour cache on client
+    retry: 1,
+  });
+
   // Egg quick-add mutation
   const eggMutation = useMutation({
     mutationFn: (count: number) => api.createEggRecord({ date: now.toISOString().split('T')[0], count }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
-      queryClient.invalidateQueries({ queryKey: ['farm-today'] });
       toast({ title: '🥚 Ägg registrerade!' });
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
 
-  // Diary entry mutation (uses health_logs with type 'diary')
+  // Diary entry mutation
   const diaryMutation = useMutation({
     mutationFn: (text: string) => api.createHealthLog({ date: now.toISOString().split('T')[0], type: 'diary', description: text }),
     onSuccess: () => {
@@ -154,7 +152,7 @@ export default function Dashboard() {
   const monthExpense = (transactions as any[]).filter((t: any) => t.type === 'expense' && new Date(t.date).getMonth() === now.getMonth()).reduce((s: number, t: any) => s + t.amount, 0);
   const monthProfit = monthIncome - monthExpense;
 
-  // Build egg calendar from real data
+  // Build egg calendar
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
@@ -169,139 +167,87 @@ export default function Dashboard() {
   });
 
   const getEggColor = (count: number) => {
-    if (count === 0) return 'bg-muted text-muted-foreground';
-    if (count <= 3) return 'bg-primary/10 text-primary';
-    if (count <= 6) return 'bg-primary/20 text-primary font-semibold';
+    if (count === 0) return 'bg-muted/50 text-muted-foreground';
+    if (count <= 2) return 'bg-primary/10 text-primary';
+    if (count <= 5) return 'bg-primary/20 text-primary font-semibold';
     return 'bg-primary/30 text-primary font-bold';
   };
 
-  // Diary entries from health_logs
+  // Diary entries
   const diaryEntries = (healthLogs as any[])
     .filter((l: any) => l.type === 'diary' && l.description)
-    .slice(0, 5)
+    .slice(0, 4)
     .map((l: any) => ({
       date: new Date(l.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }),
       text: l.description,
-      emoji: '📝',
     }));
 
-  const addEggs = (count: number) => {
-    eggMutation.mutate(count);
-  };
+  const addEggs = (count: number) => eggMutation.mutate(count);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5 animate-fade-in">
+    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in pb-8">
       <DailySummaryModal />
 
-      {/* Header */}
-      <div className="flex items-start justify-between">
+      {/* Hero header */}
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs sm:text-sm uppercase tracking-widest text-muted-foreground font-semibold">{getGreeting()}</p>
-          <h1 className="text-2xl sm:text-4xl font-serif text-foreground mt-1">Min Hönsgård</h1>
-          <p className="text-sm text-muted-foreground mt-1">{getFormattedDate()}</p>
+          <p className="data-label mb-1">{getFormattedDate()}</p>
+          <h1 className="text-2xl sm:text-3xl font-serif gradient-text leading-snug">
+            {getGreeting()}!
+          </h1>
         </div>
-        <div className="flex items-center gap-2 bg-card border border-border rounded-full px-3 py-1.5 shadow-sm">
-          <Sun className="h-4 w-4 text-warning" />
+        {/* Weather pill */}
+        <div className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 shadow-sm shrink-0">
           {weatherLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
           ) : (
-            <span className="text-sm font-medium text-foreground">
-              {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
-            </span>
+            <>
+              <span className="text-sm">{getWeatherIcon(weatherCode)}</span>
+              <span className="text-sm font-semibold text-foreground tabular-nums">
+                {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
+              </span>
+            </>
           )}
         </div>
       </div>
 
-      {/* Stats bar – REAL data */}
-      <Card className="bg-card border-border shadow-sm overflow-hidden">
-        <CardContent className="p-0">
-          <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
-            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
-              <Egg className="h-4 w-4 text-accent shrink-0" />
-              <span className="font-bold text-foreground">{yesterdayEggs}</span>
-              <span className="text-xs text-muted-foreground">igår</span>
-            </div>
-            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
-              <Bird className="h-4 w-4 text-primary shrink-0" />
-              <span className="font-bold text-foreground">{activeHens}</span>
-              <span className="text-xs text-muted-foreground">hönor</span>
-            </div>
-            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
-              <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="font-bold text-foreground">{weekEggs}</span>
-              <span className="text-xs text-muted-foreground">veckan</span>
-            </div>
-            <div className="flex items-center gap-2 py-3 sm:py-4 px-3 justify-center">
-              <Coins className="h-4 w-4 text-accent shrink-0" />
-              <span className="font-bold text-foreground">{monthProfit >= 0 ? '+' : ''}{Math.round(monthProfit)}</span>
-              <span className="text-xs text-muted-foreground whitespace-nowrap">kr/mån</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Din hönsgård idag */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg">🐔</span>
-          <h2 className="text-lg font-serif text-primary">Din hönsgård idag</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="border border-primary/20 bg-primary/5 shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px]">
-              <Egg className="h-5 w-5 text-primary/60 mb-1" />
-              <p className="text-xl font-bold text-foreground">{todayEggs}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">ägg idag</p>
+      {/* Quick stats */}
+      <div className="grid grid-cols-4 gap-2">
+        {[
+          { icon: Egg, value: yesterdayEggs, label: 'igår', color: 'text-accent' },
+          { icon: Bird, value: activeHens, label: 'hönor', color: 'text-primary' },
+          { icon: TrendingUp, value: weekEggs, label: 'veckan', color: 'text-muted-foreground' },
+          { icon: Coins, value: `${monthProfit >= 0 ? '+' : ''}${Math.round(monthProfit)}`, label: 'kr/mån', color: monthProfit >= 0 ? 'text-success' : 'text-destructive' },
+        ].map(({ icon: Icon, value, label, color }, i) => (
+          <Card key={i} className="border-border shadow-sm card-hover">
+            <CardContent className="p-3 text-center">
+              <Icon className={`h-4 w-4 mx-auto mb-1 ${color}`} />
+              <p className="stat-number text-lg text-foreground">{value}</p>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wide">{label}</p>
             </CardContent>
           </Card>
-          <Card className="border border-border bg-secondary/30 shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px]">
-              <Thermometer className="h-5 w-5 text-destructive/70 mb-1" />
-              {weatherLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                <p className="text-xl font-bold text-foreground">
-                  {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
-                </p>
-              )}
-              <p className="text-[10px] text-muted-foreground mt-0.5">temperatur</p>
-            </CardContent>
-          </Card>
-          <Card className="border border-warning/20 bg-warning/5 shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px]">
-              <Heart className="h-5 w-5 text-success mb-1" />
-              <p className="text-xl font-bold text-success">{activeHens > 0 ? '100' : '–'}/100</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">hälsoscore</p>
-            </CardContent>
-          </Card>
-          <Card className="border border-accent/20 bg-accent/5 shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[100px]">
-              <Lightbulb className="h-5 w-5 text-warning mb-1" />
-              <p className="text-[11px] text-foreground font-medium leading-snug">
-                {currentTemp != null ? getWeatherTip(currentTemp, weatherCode) : 'Bra väder för dina höns idag!'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        ))}
       </div>
 
-      {/* Registrera ägg – quick add (saves to DB) */}
-      <Card className="border-border bg-card shadow-sm">
+      {/* Egg quick-add */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 shadow-sm">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Egg className="h-5 w-5 text-accent" />
-              <span className="font-serif text-primary font-medium">Snabbregistrera ägg</span>
+              <Egg className="h-4 w-4 text-primary" />
+              <span className="font-serif text-sm text-primary">Registrera ägg</span>
             </div>
-            <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{todayEggs} idag</span>
+            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium tabular-nums">
+              {todayEggs} idag
+            </span>
           </div>
           <div className="flex items-center gap-2 justify-center">
-            {[1, 2, 3].map((n) => (
+            {[1, 2, 3, 4, 5].map((n) => (
               <Button
                 key={n}
                 variant="outline"
-                size="lg"
-                className="w-14 h-10 text-base font-bold bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+                size="sm"
+                className="w-11 h-9 text-sm font-bold bg-card border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                 onClick={() => addEggs(n)}
                 disabled={eggMutation.isPending}
               >
@@ -310,50 +256,69 @@ export default function Dashboard() {
             ))}
             <Button
               variant="outline"
-              size="lg"
-              className="w-14 h-10 text-base font-bold border-border text-muted-foreground hover:bg-secondary"
+              size="sm"
+              className="w-11 h-9 text-sm font-bold border-border text-muted-foreground hover:bg-secondary"
               onClick={() => {
                 const custom = prompt('Antal ägg:');
                 if (custom && !isNaN(Number(custom)) && Number(custom) > 0) addEggs(Number(custom));
               }}
               disabled={eggMutation.isPending}
             >
-              ...
+              ···
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Go to eggs page */}
-      <Card
-        className="bg-primary/10 border-primary/20 cursor-pointer hover:bg-primary/15 transition-colors shadow-sm"
-        onClick={() => navigate('/app/eggs')}
-      >
-        <CardContent className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Egg className="h-5 w-5 text-primary" />
-            <div>
-              <p className="font-medium text-foreground">Se alla äggregistreringar</p>
-              <p className="text-xs text-muted-foreground">{todayEggs} ägg idag</p>
+      {/* Two-column: Weather tip + AI tip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Weather tip */}
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Thermometer className="h-4 w-4 text-destructive/70" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Vädertips</span>
             </div>
-          </div>
-          <ArrowRight className="h-5 w-5 text-primary" />
-        </CardContent>
-      </Card>
+            <p className="text-sm text-foreground leading-relaxed">
+              {currentTemp != null ? getWeatherTip(currentTemp, weatherCode) : 'Laddar väderdata...'}
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Äggkalender – compact */}
-      <Card className="border-border bg-card shadow-sm">
+        {/* AI daily tip */}
+        <Card className="border-warning/20 bg-warning/5 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-warning" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Dagens tips</span>
+            </div>
+            {aiTip?.tip_text ? (
+              <p className="text-sm text-foreground leading-relaxed">{aiTip.tip_text}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Laddar dagens tips...</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Egg calendar – compact */}
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <CalendarDays className="h-4 w-4 text-primary" />
-            <h2 className="font-serif text-sm text-primary font-medium">Äggkalender – {getMonthName(now.getMonth())}</h2>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-primary" />
+              <h2 className="font-serif text-sm text-primary">{getMonthName(now.getMonth())}</h2>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {Object.values(eggCalendarData).reduce((a, b) => a + b, 0)} ägg totalt
+            </span>
           </div>
-          <div className="grid grid-cols-7 gap-0.5 mb-1">
+          <div className="grid grid-cols-7 gap-1 mb-1">
             {['M', 'T', 'O', 'T', 'F', 'L', 'S'].map((d, i) => (
-              <div key={`${d}-${i}`} className="text-[9px] text-center text-muted-foreground font-medium py-0.5">{d}</div>
+              <div key={`${d}-${i}`} className="text-[9px] text-center text-muted-foreground font-medium">{d}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-0.5">
+          <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: startOffset }).map((_, i) => (
               <div key={`empty-${i}`} />
             ))}
@@ -365,51 +330,75 @@ export default function Dashboard() {
               return (
                 <div
                   key={day}
-                  className={`rounded text-center py-0.5 text-[10px] transition-colors
-                    ${isFuture ? 'bg-muted/30 text-muted-foreground/40' : getEggColor(eggCount)}
-                    ${isToday ? 'ring-1 ring-primary ring-offset-1 ring-offset-background' : ''}
+                  className={`rounded-md text-center py-1 text-[10px] transition-colors
+                    ${isFuture ? 'bg-muted/20 text-muted-foreground/30' : getEggColor(eggCount)}
+                    ${isToday ? 'ring-1.5 ring-primary ring-offset-1 ring-offset-background' : ''}
                   `}
                 >
                   <span className="leading-none">{day}</span>
                   {!isFuture && eggCount > 0 && (
-                    <span className="block text-[8px] leading-none">{eggCount}</span>
+                    <span className="block text-[8px] leading-none opacity-80">{eggCount}</span>
                   )}
                 </div>
               );
             })}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Totalt: <strong className="text-foreground">{Object.values(eggCalendarData).reduce((a, b) => a + b, 0)} ägg</strong> i {getMonthName(now.getMonth()).toLowerCase()}
-          </p>
         </CardContent>
       </Card>
 
-      {/* Hönornas dagbok – real data */}
-      <Card className="border-border bg-card shadow-sm">
+      {/* Navigate to eggs */}
+      <Card
+        className="border-primary/15 cursor-pointer hover:bg-primary/5 transition-colors shadow-sm card-hover"
+        onClick={() => navigate('/app/eggs')}
+      >
+        <CardContent className="p-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Egg className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Alla äggregistreringar</p>
+              <p className="text-[10px] text-muted-foreground">{todayEggs} ägg idag</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-primary" />
+        </CardContent>
+      </Card>
+
+      {/* Diary */}
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="h-4 w-4 text-accent" />
-            <h2 className="font-serif text-sm text-accent font-medium">Hönornas dagbok</h2>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-accent" />
+              <h2 className="font-serif text-sm text-accent">Dagbok</h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-primary hover:text-primary"
+              onClick={() => setDiaryOpen(true)}
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Skriv
+            </Button>
           </div>
           {diaryEntries.length > 0 ? (
             <div className="space-y-2">
               {diaryEntries.map((entry, i) => (
-                <div key={i} className="flex gap-2.5 items-start">
-                  <span className="text-base mt-0.5">{entry.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground">{entry.text}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{entry.date}</p>
-                  </div>
+                <div key={i} className="flex gap-3 items-start p-2 rounded-lg bg-muted/30">
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5 font-medium">{entry.date}</span>
+                  <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">Inga dagboksinlägg ännu. Börja skriva om dina höns!</p>
+            <div className="text-center py-6">
+              <BookOpen className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Inga inlägg ännu</p>
+              <p className="text-xs text-muted-foreground/70">Skriv om vad som händer med dina höns</p>
+            </div>
           )}
-          <Button variant="outline" size="sm" className="w-full mt-3 text-muted-foreground gap-1.5" onClick={() => setDiaryOpen(true)}>
-            <Plus className="h-3.5 w-3.5" />
-            Skriv i dagboken
-          </Button>
         </CardContent>
       </Card>
 
@@ -417,15 +406,14 @@ export default function Dashboard() {
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-serif">📝 Skriv i dagboken</DialogTitle>
+            <DialogTitle className="font-serif">Skriv i dagboken</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <Input
+            <Textarea
               placeholder="Vad hände idag med hönsen?"
               value={diaryText}
               onChange={(e) => setDiaryText(e.target.value)}
-              className="h-11"
-              onKeyDown={(e) => { if (e.key === 'Enter' && diaryText.trim()) diaryMutation.mutate(diaryText.trim()); }}
+              className="min-h-[100px] resize-none"
             />
             <div className="flex gap-2">
               <Button
@@ -441,27 +429,6 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Säsongsguide */}
-      <Card className="border-primary/20 bg-primary/5 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Leaf className="h-4 w-4 text-primary" />
-            <h2 className="font-serif text-sm text-primary font-medium">{season.title}</h2>
-          </div>
-          <ul className="space-y-1.5">
-            {season.tips.map((tip, i) => (
-              <li key={i} className="flex gap-2 items-start text-xs text-foreground">
-                <span className="text-primary mt-0.5 shrink-0">•</span>
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Premium upsell */}
-      <PremiumUpsellBanner variant="full" />
     </div>
   );
 }

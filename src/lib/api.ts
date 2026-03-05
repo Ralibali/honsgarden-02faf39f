@@ -381,27 +381,10 @@ export async function getWeather() {
 
 // ==================== AI (via edge function) ====================
 
-export async function getDailyReport() {
-  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'daily-report' } });
-  if (error) throw new Error(error.message);
-  return data;
-}
-
-export async function getEggForecast() {
-  const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { type: 'egg-forecast' } });
-  if (error) throw new Error(error.message);
-  return data;
-}
-
 export async function getDailyTip() {
   const { data, error } = await supabase.functions.invoke('get-daily-tip');
   if (error) throw new Error(error.message);
   return data;
-}
-
-export async function getFreeTip() {
-  // Free tip uses the same cached daily tip
-  return getDailyTip();
 }
 
 // ==================== PREMIUM ====================
@@ -548,7 +531,7 @@ export const api = {
   getStatisticsInsights, getAdvancedInsights, getTrendAnalysis,
   getYesterdaySummary, getFarmToday,
   getWeather,
-  getDailyReport, getEggForecast, getDailyTip, getFreeTip,
+  getDailyTip,
   getPremiumStatus, createCheckoutSession, cancelSubscription,
   getAlerts, dismissAlert,
   getStreak, touchStreak,
