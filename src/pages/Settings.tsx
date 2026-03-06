@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import {
   User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail,
   FileText, HelpCircle, Crown, Download, Palette, Moon, Sun,
-  Heart, ExternalLink, Info,
+  Heart, ExternalLink, Info, Trash2,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -42,6 +42,21 @@ export default function SettingsPage() {
   const [supportMsg, setSupportMsg] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('delete-account');
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: async () => {
+      toast({ title: 'Konto raderat 👋', description: 'All din data har tagits bort.' });
+      await logout();
+      navigate('/login');
+    },
+    onError: (err: any) => toast({ title: 'Fel vid radering', description: err.message, variant: 'destructive' }),
+  });
 
   useEffect(() => {
     if (coopSettings) {
@@ -401,11 +416,47 @@ export default function SettingsPage() {
             Konto
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <Button variant="outline" className="gap-2 text-destructive hover:text-destructive rounded-xl" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             Logga ut
           </Button>
+
+          <div className="border-t border-border/50 pt-4">
+            <p className="text-xs text-muted-foreground mb-3">
+              Genom att radera ditt konto tas all din data bort permanent. Detta kan inte ångras.
+            </p>
+            {!showDeleteConfirm ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl text-xs"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Radera mitt konto
+              </Button>
+            ) : (
+              <div className="space-y-2 p-3 bg-destructive/5 rounded-xl border border-destructive/20">
+                <p className="text-sm font-medium text-destructive">Är du säker? All data raderas permanent.</p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="gap-2 rounded-xl"
+                    disabled={deleteAccountMutation.isPending}
+                    onClick={() => deleteAccountMutation.mutate()}
+                  >
+                    {deleteAccountMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    Ja, radera allt
+                  </Button>
+                  <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setShowDeleteConfirm(false)}>
+                    Avbryt
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

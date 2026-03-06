@@ -16,7 +16,7 @@ export default function Terms() {
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-6 sm:p-8 prose prose-sm max-w-none">
           <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-1">Användarvillkor & Integritetspolicy</h1>
-          <p className="text-xs text-muted-foreground mb-6">honsgarden.se | Senast uppdaterad: 2026-02-25</p>
+          <p className="text-xs text-muted-foreground mb-6">honsgarden.se | Senast uppdaterad: 2026-03-06</p>
 
           <h2 className="font-serif text-lg text-foreground mt-6 mb-2">1. Allmänt</h2>
           <p className="text-sm text-foreground leading-relaxed">
@@ -53,14 +53,30 @@ export default function Terms() {
           <ul className="text-sm text-foreground space-y-1 list-disc pl-5">
             <li>Rätt till tillgång – du kan begära ett utdrag av dina uppgifter</li>
             <li>Rätt till rättelse – du kan korrigera felaktiga uppgifter</li>
-            <li>Rätt till radering ("rätten att bli glömd")</li>
-            <li>Rätt till dataportabilitet – få dina uppgifter i maskinläsbart format</li>
+            <li>Rätt till radering ("rätten att bli glömd") – du kan radera ditt konto och all data via Inställningar</li>
+            <li>Rätt till dataportabilitet – exportera dina uppgifter som CSV via Inställningar</li>
             <li>Rätt att invända mot behandling</li>
             <li>Rätt att återkalla samtycke när som helst</li>
           </ul>
           <p className="text-sm text-foreground leading-relaxed mt-2">
-            För att utöva dina rättigheter, kontakta oss på: <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a>
+            Du kan utöva rätten till radering och dataportabilitet direkt i appen under Inställningar. För övriga förfrågningar, kontakta oss på: <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a>
           </p>
+
+          <h3 className="font-serif text-base text-foreground mt-4 mb-1">Personuppgiftsansvarig:</h3>
+          <p className="text-sm text-foreground leading-relaxed">
+            Hönsgården / honsgarden.se<br />
+            E-post: <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a><br />
+            Du har rätt att lämna klagomål till Integritetsskyddsmyndigheten (IMY): <a href="https://www.imy.se" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.imy.se</a>
+          </p>
+
+          <h3 className="font-serif text-base text-foreground mt-4 mb-1">Tredjeparter & Underbiträden:</h3>
+          <p className="text-sm text-foreground leading-relaxed">
+            Vi använder följande tjänsteleverantörer för att driva appen. Dina uppgifter kan överföras till dessa:
+          </p>
+          <ul className="text-sm text-foreground space-y-1 list-disc pl-5">
+            <li><strong>Lovable Cloud</strong> (databas, autentisering, backend) – EU/EES</li>
+            <li><strong>Stripe</strong> (betalningshantering) – USA, med EU Standard Contractual Clauses</li>
+          </ul>
 
           <h3 className="font-serif text-base text-foreground mt-4 mb-1">Lagringstid:</h3>
           <p className="text-sm text-foreground leading-relaxed">
