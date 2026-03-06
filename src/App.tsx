@@ -30,6 +30,8 @@ const Admin = React.lazy(() => import("./pages/Admin"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const HenProfile = React.lazy(() => import("./pages/HenProfile"));
 const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
+const Guides = React.lazy(() => import("./pages/Guides"));
+const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
