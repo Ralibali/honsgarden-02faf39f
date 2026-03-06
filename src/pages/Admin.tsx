@@ -367,6 +367,11 @@ export default function Admin() {
           )}
         </TabsContent>
 
+        {/* Blog tab */}
+        <TabsContent value="blog" className="space-y-3">
+          <BlogEditor />
+        </TabsContent>
+
         {/* Feedback tab */}
         <TabsContent value="feedback" className="space-y-3">
           {feedbackLoading ? (
