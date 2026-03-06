@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Calendar, Egg as EggIcon, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Calendar, Egg as EggIcon, Loader2, Trash2, Download } from 'lucide-react';
+import { downloadCSV, downloadPDF } from '@/lib/exportUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -81,10 +82,33 @@ export default function Eggs() {
           <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Äggloggning 🥚</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">Registrera och följ din äggproduktion</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2 active:scale-95 transition-transform w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          Ny registrering
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+            const rows = eggs.map((e: any) => ({
+              Datum: e.date,
+              Antal: e.count,
+              Höna: e.hen_id ? henNameMap[e.hen_id] || '' : '',
+              Anteckningar: e.notes || '',
+            }));
+            downloadCSV(rows, `agglogg-${new Date().toISOString().split('T')[0]}`);
+          }}>
+            <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+            downloadPDF(
+              'Ägglogg',
+              ['Datum', 'Antal', 'Höna', 'Anteckningar'],
+              eggs.map((e: any) => [e.date, String(e.count), e.hen_id ? henNameMap[e.hen_id] || '' : '', e.notes || '']),
+              'agglogg'
+            );
+          }}>
+            <Download className="h-3.5 w-3.5" /> PDF
+          </Button>
+          <Button onClick={() => setShowForm(!showForm)} className="gap-2 active:scale-95 transition-transform flex-1 sm:flex-initial">
+            <Plus className="h-4 w-4" />
+            Ny registrering
+          </Button>
+        </div>
       </div>
 
       {showForm && (
