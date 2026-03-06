@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,17 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function Guides() {
+  // SEO meta
+  useEffect(() => {
+    document.title = 'Guider & tips om höns | Hönsgården';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.');
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = 'https://honsgarden.lovable.app/guider';
+    return () => { document.title = 'Hönsgården'; document.querySelector('link[rel="canonical"]')?.remove(); };
+  }, []);
+
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['public-blog-posts'],
     queryFn: async () => {

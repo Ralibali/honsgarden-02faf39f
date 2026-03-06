@@ -68,14 +68,53 @@ export default function GuideArticle() {
     enabled: !!slug,
   });
 
-  // SEO - set document title
+  // SEO - set document title, meta, and JSON-LD
   React.useEffect(() => {
     if (post) {
       document.title = post.meta_title || post.title + ' | Hönsgården';
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', post.meta_description || post.excerpt || '');
+
+      // Canonical URL
+      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+      }
+      canonical.href = `https://honsgarden.lovable.app/guider/${post.slug}`;
+
+      // JSON-LD Article structured data
+      const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: post.title,
+        description: post.meta_description || post.excerpt || '',
+        image: post.cover_image_url || 'https://honsgarden.lovable.app/favicon.ico',
+        datePublished: post.published_at,
+        dateModified: post.updated_at || post.published_at,
+        author: { '@type': 'Organization', name: 'Hönsgården' },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Hönsgården',
+          url: 'https://honsgarden.lovable.app',
+        },
+        mainEntityOfPage: `https://honsgarden.lovable.app/guider/${post.slug}`,
+      };
+      let script = document.getElementById('json-ld-article') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'json-ld-article';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.textContent = JSON.stringify(jsonLd);
     }
-    return () => { document.title = 'Hönsgården'; };
+    return () => {
+      document.title = 'Hönsgården';
+      document.getElementById('json-ld-article')?.remove();
+      document.querySelector('link[rel="canonical"]')?.remove();
+    };
   }, [post]);
 
   if (isLoading) {
