@@ -70,6 +70,7 @@ function renderContent(content: string): string {
 export default function GuideArticle() {
   const { slug } = useParams<{ slug: string }>();
 
+  // Fetch current post
   const { data: post, isLoading, isError } = useQuery({
     queryKey: ['blog-post', slug],
     queryFn: async () => {
@@ -83,6 +84,20 @@ export default function GuideArticle() {
       return data;
     },
     enabled: !!slug,
+  });
+
+  // Fetch all published posts for internal linking + related posts
+  const { data: allPosts = [] } = useQuery({
+    queryKey: ['all-published-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
   });
 
   // SEO - set document title, meta, and JSON-LD
