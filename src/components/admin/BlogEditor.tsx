@@ -92,6 +92,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [metaTitle, setMetaTitle] = useState(post?.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(post?.meta_description || '');
   const [coverUrl, setCoverUrl] = useState(post?.cover_image_url || '');
+  const [uploading, setUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [autoSlug, setAutoSlug] = useState(!post);
 
