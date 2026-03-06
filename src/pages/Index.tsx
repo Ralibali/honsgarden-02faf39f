@@ -515,7 +515,7 @@ export default function Index() {
             <p className="text-sm text-muted-foreground mb-4">Bli en av 2 500+ nöjda hönsägare</p>
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
               <a href="/login?mode=register">
-                Skapa gratis konto
+                Skapa konto
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
