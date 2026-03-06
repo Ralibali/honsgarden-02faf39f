@@ -624,6 +624,8 @@ export default function Index() {
               <span className="font-serif text-foreground">Hönsgården</span>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <a href="/blogg" className="hover:text-foreground transition-colors">Blogg</a>
+              <span>·</span>
               <a href="/terms" className="hover:text-foreground transition-colors">Villkor & Integritet</a>
               <span>·</span>
               <a href="mailto:support@honsgarden.se" className="text-primary hover:underline">support@honsgarden.se</a>
