@@ -170,8 +170,13 @@ const demoScreens = [
 
 export default function Index() {
   const [activeDemo, setActiveDemo] = useState(0);
+  useSeo({
+    title: 'Hönsgården – Äggloggare & hönsapp för hobbyuppfödare',
+    description: 'Håll koll på ägg, höns, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden. Kom igång direkt!',
+    path: '/',
+    ogImage: 'https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e1014f54-6f35-42d9-b63d-227905c1953e/id-preview-f0f73d59--f0c63bdf-2baf-4795-b008-16d49fc7d8ae.lovable.app-1772665473956.png',
+  });
 
-  return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <VisitorWelcomePopup />
 
