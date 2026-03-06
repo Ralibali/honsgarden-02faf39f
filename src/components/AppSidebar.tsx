@@ -23,15 +23,14 @@ const mainNav = [
   { title: 'Ägg', url: '/app/eggs', icon: Egg },
   { title: 'Hönor', url: '/app/hens', icon: Bird },
   { title: 'Dagliga uppgifter', url: '/app/tasks', icon: ClipboardCheck },
-  { title: 'Foder', url: '/app/feed', icon: Package, premium: true },
-  { title: 'Kläckning', url: '/app/hatching', icon: Baby, premium: true },
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
 ];
 
 const secondaryNav = [
+  { title: 'Foder', url: '/app/feed', icon: Package, premium: true },
+  { title: 'Kläckning', url: '/app/hatching', icon: Baby, premium: true },
   { title: 'Ekonomi', url: '/app/finance', icon: Coins, premium: true },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
-  { title: 'Veckorapport', url: '/app/weekly-report', icon: FileBarChart },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
   { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },
