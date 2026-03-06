@@ -82,7 +82,7 @@ export default function Guides() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map(post => (
-              <Link key={post.id} to={`/guider/${post.slug}`} className="group">
+              <Link key={post.id} to={`/blogg/${post.slug}`} className="group">
                 <Card className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full">
                   {post.cover_image_url ? (
                     <div className="aspect-video overflow-hidden">
