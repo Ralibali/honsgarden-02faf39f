@@ -88,8 +88,7 @@ const stockImages = [
   { path: '/blog-images/grit-calcium.jpg', label: 'Maggrus' },
 ];
 
-
-  id: string;
+type BlogPost = {
   title: string;
   slug: string;
   excerpt: string | null;
