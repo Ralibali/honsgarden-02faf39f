@@ -194,11 +194,39 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                 <Textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} placeholder="Kort beskrivning som visas i listan..." rows={2} className="rounded-xl" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Innehåll (Markdown)</label>
-                <Textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Skriv din artikel här... Använd **fetstil**, *kursiv*, ## rubriker, [länktext](url) etc." rows={16} className="rounded-xl font-mono text-sm" />
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Tips: Använd [Köp här →](https://din-affiliate-länk.se) för affiliate-länkar
-                </p>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-medium text-muted-foreground">Innehåll (Markdown / HTML)</label>
+                  <Button
+                    type="button"
+                    variant={showPreview ? 'default' : 'outline'}
+                    size="sm"
+                    className="h-7 rounded-lg text-[10px] gap-1"
+                    onClick={() => setShowPreview(!showPreview)}
+                  >
+                    <MonitorSmartphone className="h-3 w-3" />
+                    {showPreview ? 'Redigera' : 'Förhandsgranska'}
+                  </Button>
+                </div>
+                {showPreview ? (
+                  <div className="rounded-xl border border-border/60 bg-background p-4 sm:p-6 min-h-[400px] overflow-auto">
+                    {coverUrl && (
+                      <img src={coverUrl} alt={title} className="w-full aspect-video object-cover rounded-xl mb-6" />
+                    )}
+                    <h1 className="text-2xl sm:text-3xl font-serif text-foreground mb-2">{title || 'Utan titel'}</h1>
+                    {excerpt && <p className="text-muted-foreground text-sm mb-6">{excerpt}</p>}
+                    <div
+                      className="prose-custom"
+                      dangerouslySetInnerHTML={{ __html: renderPreview(content) }}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <Textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Skriv din artikel här... Använd **fetstil**, *kursiv*, ## rubriker, [länktext](url) eller klistra in HTML." rows={16} className="rounded-xl font-mono text-sm" />
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Tips: Använd [Köp här →](https://din-affiliate-länk.se) för affiliate-länkar. Du kan även klistra in ren HTML.
+                    </p>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
