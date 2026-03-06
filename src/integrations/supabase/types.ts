@@ -35,6 +35,60 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_id: string
+          category: string | null
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          is_published: boolean
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          category?: string | null
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          category?: string | null
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chore_completions: {
         Row: {
           chore_id: string
