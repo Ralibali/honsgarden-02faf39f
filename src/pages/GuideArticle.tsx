@@ -130,7 +130,7 @@ export default function GuideArticle() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-4">
         <BookOpen className="h-10 w-10 text-muted-foreground/30" />
         <h1 className="font-serif text-xl text-foreground">Artikeln hittades inte</h1>
-        <Link to="/guider"><Button variant="outline" className="rounded-xl"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka till guider</Button></Link>
+        <Link to="/blogg"><Button variant="outline" className="rounded-xl"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka till bloggen</Button></Link>
       </div>
     );
   }
