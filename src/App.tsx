@@ -83,6 +83,8 @@ const AppRoutes = () => (
         <Route path="/terms" element={<Terms />} />
         <Route path="/guider" element={<Guides />} />
         <Route path="/guider/:slug" element={<GuideArticle />} />
+        <Route path="/blogg" element={<Guides />} />
+        <Route path="/blogg/:slug" element={<GuideArticle />} />
         <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="eggs" element={<Eggs />} />

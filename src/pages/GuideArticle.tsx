@@ -82,7 +82,7 @@ export default function GuideArticle() {
         canonical.rel = 'canonical';
         document.head.appendChild(canonical);
       }
-      canonical.href = `https://honsgarden.lovable.app/guider/${post.slug}`;
+      canonical.href = `https://honsgarden.lovable.app/blogg/${post.slug}`;
 
       // JSON-LD Article structured data
       const jsonLd = {
@@ -99,7 +99,7 @@ export default function GuideArticle() {
           name: 'Hönsgården',
           url: 'https://honsgarden.lovable.app',
         },
-        mainEntityOfPage: `https://honsgarden.lovable.app/guider/${post.slug}`,
+        mainEntityOfPage: `https://honsgarden.lovable.app/blogg/${post.slug}`,
       };
       let script = document.getElementById('json-ld-article') as HTMLScriptElement;
       if (!script) {
@@ -130,7 +130,7 @@ export default function GuideArticle() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-4">
         <BookOpen className="h-10 w-10 text-muted-foreground/30" />
         <h1 className="font-serif text-xl text-foreground">Artikeln hittades inte</h1>
-        <Link to="/guider"><Button variant="outline" className="rounded-xl"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka till guider</Button></Link>
+        <Link to="/blogg"><Button variant="outline" className="rounded-xl"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka till bloggen</Button></Link>
       </div>
     );
   }
@@ -140,8 +140,8 @@ export default function GuideArticle() {
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/guider" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Guider
+          <Link to="/blogg" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Blogg
           </Link>
           <Link to="/login">
             <Button size="sm" className="rounded-xl text-xs gap-1">
@@ -223,7 +223,7 @@ export default function GuideArticle() {
           <span>© {new Date().getFullYear()} Hönsgården</span>
           <div className="flex gap-4">
             <Link to="/" className="hover:text-foreground transition-colors">Startsidan</Link>
-            <Link to="/guider" className="hover:text-foreground transition-colors">Guider</Link>
+            <Link to="/blogg" className="hover:text-foreground transition-colors">Blogg</Link>
             <Link to="/terms" className="hover:text-foreground transition-colors">Villkor</Link>
           </div>
         </div>

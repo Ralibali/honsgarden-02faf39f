@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
-    { loc: "/guider", priority: "0.9", changefreq: "daily" },
+    { loc: "/blogg", priority: "0.9", changefreq: "daily" },
     { loc: "/login", priority: "0.5", changefreq: "monthly" },
     { loc: "/terms", priority: "0.3", changefreq: "yearly" },
   ];
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
       xml += `  <url>
-    <loc>${BASE_URL}/guider/${post.slug}</loc>
+    <loc>${BASE_URL}/blogg/${post.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

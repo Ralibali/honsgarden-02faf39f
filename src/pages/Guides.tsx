@@ -18,12 +18,12 @@ const categoryLabels: Record<string, string> = {
 export default function Guides() {
   // SEO meta
   useEffect(() => {
-    document.title = 'Guider & tips om höns | Hönsgården';
+    document.title = 'Blogg om höns – Guider, tips & recensioner | Hönsgården';
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.');
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
-    canonical.href = 'https://honsgarden.lovable.app/guider';
+    canonical.href = 'https://honsgarden.lovable.app/blogg';
     return () => { document.title = 'Hönsgården'; document.querySelector('link[rel="canonical"]')?.remove(); };
   }, []);
 
@@ -61,7 +61,7 @@ export default function Guides() {
         {/* Hero */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 text-primary text-xs font-medium mb-4">
-            <BookOpen className="h-3.5 w-3.5" /> Guider & tips
+            <BookOpen className="h-3.5 w-3.5" /> Hönsbloggen
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
             Allt du behöver veta om höns
@@ -82,7 +82,7 @@ export default function Guides() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map(post => (
-              <Link key={post.id} to={`/guider/${post.slug}`} className="group">
+              <Link key={post.id} to={`/blogg/${post.slug}`} className="group">
                 <Card className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full">
                   {post.cover_image_url ? (
                     <div className="aspect-video overflow-hidden">
