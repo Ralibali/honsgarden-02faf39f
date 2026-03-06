@@ -17,6 +17,13 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const { login, register, isAuthenticated, loading: authLoading } = useAuth();
 
+  useSeo({
+    title: 'Logga in eller skapa konto | Hönsgården',
+    description: 'Logga in på Hönsgården eller skapa ett gratis konto för att börja logga ägg, höns och foder.',
+    path: '/login',
+    noindex: true,
+  });
+
   // Read mode from URL: /login?mode=register or /login?mode=login
   const initialMode = searchParams.get('mode');
   const [authMode, setAuthMode] = useState<AuthMode>(

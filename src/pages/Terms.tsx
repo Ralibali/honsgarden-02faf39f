@@ -8,6 +8,12 @@ import { useNavigate } from 'react-router-dom';
 export default function Terms() {
   const navigate = useNavigate();
 
+  useSeo({
+    title: 'Användarvillkor & Integritetspolicy | Hönsgården',
+    description: 'Läs Hönsgårdens användarvillkor och integritetspolicy. Information om dataskydd, cookies och dina rättigheter.',
+    path: '/terms',
+  });
+
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 animate-fade-in">
       <Button variant="ghost" size="sm" className="mb-4 gap-1.5 rounded-xl" onClick={() => navigate(-1)}>
