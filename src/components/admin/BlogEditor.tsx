@@ -89,6 +89,7 @@ const stockImages = [
 ];
 
 type BlogPost = {
+  id: string;
   title: string;
   slug: string;
   excerpt: string | null;
