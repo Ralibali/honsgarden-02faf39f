@@ -61,8 +61,8 @@ function renderMarkdown(md: string): string {
 function renderContent(content: string): string {
   const raw = isHtmlContent(content) ? content : renderMarkdown(content);
   return DOMPurify.sanitize(raw, {
-    ADD_TAGS: ['iframe', 'video', 'source', 'picture'],
-    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel'],
+    ADD_TAGS: ['iframe', 'video', 'source', 'picture', 'details', 'summary'],
+    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style'],
   });
 }
 
