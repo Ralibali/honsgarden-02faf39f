@@ -342,6 +342,9 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Achievement nudge */}
+      <AchievementNudge eggs={eggs} hens={hens as any[]} streak={streak} />
+
       {/* Premium nudge */}
       <PremiumNudge />
 
