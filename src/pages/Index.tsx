@@ -232,12 +232,12 @@ export default function Index() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
               <Button asChild size="lg" className="h-14 px-12 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
-                  🥚 Skapa gratis konto
+                  🥚 Kom igång nu
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
             </div>
-            <p className="text-xs text-primary-foreground/60">Tar 10 sekunder · Inget kreditkort · Gratis för alltid</p>
+            <p className="text-xs text-primary-foreground/60">Klart på 10 sekunder · Helt kostnadsfritt</p>
           </FadeUp>
 
           <FadeUp delay={400}>
