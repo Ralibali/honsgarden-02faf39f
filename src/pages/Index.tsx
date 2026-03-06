@@ -193,7 +193,7 @@ export default function Index() {
               <a href="/login?mode=login">Logga in</a>
             </Button>
             <Button asChild size="sm" className="shadow-lg">
-              <a href="/login?mode=register">Kom igång gratis</a>
+              <a href="/login?mode=register">Kom igång</a>
             </Button>
           </div>
         </nav>
@@ -232,12 +232,12 @@ export default function Index() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
               <Button asChild size="lg" className="h-14 px-12 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
-                  🥚 Skapa gratis konto
+                  🥚 Kom igång nu
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
             </div>
-            <p className="text-xs text-primary-foreground/60">Tar 10 sekunder · Inget kreditkort · Gratis för alltid</p>
+            <p className="text-xs text-primary-foreground/60">Klart på 10 sekunder · Helt kostnadsfritt</p>
           </FadeUp>
 
           <FadeUp delay={400}>
@@ -388,7 +388,7 @@ export default function Index() {
           <FadeUp delay={400} className="text-center mt-10">
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
               <a href="/login?mode=register">
-                Skapa gratis konto
+                Testa själv
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
@@ -515,7 +515,7 @@ export default function Index() {
             <p className="text-sm text-muted-foreground mb-4">Bli en av 2 500+ nöjda hönsägare</p>
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
               <a href="/login?mode=register">
-                Skapa gratis konto
+                Skapa konto
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
@@ -601,15 +601,15 @@ export default function Index() {
               <div className="text-5xl mb-4">🐔</div>
               <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Dina hönor förtjänar det bästa</h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-                Gå med 2 500+ svenska hönsägare som redan har full koll. Skapa ett gratis konto på 10 sekunder.
+                Gå med 2 500+ svenska hönsägare som redan har full koll. Skapa ett konto på 10 sekunder.
               </p>
               <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
-                  Skapa gratis konto nu
+                  Kom igång nu
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">Inget kreditkort · Gratis för alltid · Avsluta när du vill</p>
+              <p className="text-xs text-muted-foreground mt-4">Helt kostnadsfritt · Avsluta när du vill</p>
             </div>
           </FadeUp>
         </div>
@@ -639,7 +639,7 @@ export default function Index() {
       <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-background/95 backdrop-blur-lg border-t border-border px-4 py-3">
         <Button asChild size="lg" className="w-full h-12 text-base gap-2">
           <a href="/login?mode=register">
-            🥚 Skapa gratis konto
+            🥚 Kom igång nu
             <ArrowRight className="h-4 w-4" />
           </a>
         </Button>
