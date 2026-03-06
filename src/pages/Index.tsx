@@ -233,7 +233,7 @@ export default function Index() {
 
           <FadeUp delay={200}>
             <p className="text-base sm:text-xl text-primary-foreground/85 mb-8 max-w-lg mx-auto leading-relaxed">
-              Logga ägg, håll koll på flocken och se om hönsgården går plus – på <strong>10 sekunder om dagen</strong>.
+              Logga ägg, följ flocken och kolla om hönsgården går plus – det tar bara <strong>10 sekunder om dagen</strong>.
             </p>
           </FadeUp>
 
