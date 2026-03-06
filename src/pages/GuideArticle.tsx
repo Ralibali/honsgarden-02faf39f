@@ -59,17 +59,48 @@ function renderMarkdown(md: string): string {
 }
 
 /** Sanitize and render content – supports both raw HTML and Markdown */
-function renderContent(content: string): string {
-  const raw = isHtmlContent(content) ? content : renderMarkdown(content);
+function renderContent(content: string, otherPosts?: { title: string; slug: string }[]): string {
+  let raw = isHtmlContent(content) ? content : renderMarkdown(content);
+
+  // Auto internal linking: find mentions of other post titles and link them
+  if (otherPosts && otherPosts.length > 0) {
+    // Sort by title length descending so longer titles match first
+    const sorted = [...otherPosts].sort((a, b) => b.title.length - a.title.length);
+    const linked = new Set<string>();
+
+    for (const other of sorted) {
+      if (linked.size >= 5) break; // Max 5 internal links per article
+      // Create variations to match: full title and simplified keywords
+      const titleWords = other.title.split(/[\s–—-]+/).filter(w => w.length > 3);
+      const searchTerms = [other.title];
+      // Add 2-3 word key phrases from the title
+      if (titleWords.length >= 2) {
+        searchTerms.push(titleWords.slice(0, 3).join(' '));
+      }
+
+      for (const term of searchTerms) {
+        if (linked.has(other.slug)) break;
+        // Only match text NOT already inside a tag or link
+        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<![<\\/a-zA-Z"=])\\b(${escapedTerm})\\b(?![^<]*>)(?![^<]*<\\/a>)`, 'i');
+        if (regex.test(raw)) {
+          raw = raw.replace(regex, `<a href="/blogg/${other.slug}" class="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity" title="${other.title}">$1</a>`);
+          linked.add(other.slug);
+        }
+      }
+    }
+  }
+
   return DOMPurify.sanitize(raw, {
     ADD_TAGS: ['iframe', 'video', 'source', 'picture', 'details', 'summary'],
-    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style'],
+    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style', 'title'],
   });
 }
 
 export default function GuideArticle() {
   const { slug } = useParams<{ slug: string }>();
 
+  // Fetch current post
   const { data: post, isLoading, isError } = useQuery({
     queryKey: ['blog-post', slug],
     queryFn: async () => {
@@ -83,6 +114,20 @@ export default function GuideArticle() {
       return data;
     },
     enabled: !!slug,
+  });
+
+  // Fetch all published posts for internal linking + related posts
+  const { data: allPosts = [] } = useQuery({
+    queryKey: ['all-published-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
   });
 
   // SEO - set document title, meta, and JSON-LD
@@ -246,10 +291,17 @@ export default function GuideArticle() {
           />
         )}
 
-        {/* Content */}
+        {/* Content with auto internal links */}
         <div
           className="prose-custom"
-          dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
+          dangerouslySetInnerHTML={{
+            __html: renderContent(
+              post.content,
+              allPosts
+                .filter(p => p.slug !== slug)
+                .map(p => ({ title: p.title, slug: p.slug }))
+            ),
+          }}
         />
 
         {/* Tags */}
@@ -276,6 +328,56 @@ export default function GuideArticle() {
             </Button>
           </Link>
         </div>
+
+        {/* Related posts */}
+        {(() => {
+          const otherPosts = allPosts.filter(p => p.slug !== slug);
+          if (otherPosts.length === 0) return null;
+
+          // Score relevance: shared tags + same category
+          const postTags = new Set(post.tags || []);
+          const scored = otherPosts.map(p => {
+            let score = 0;
+            if (p.category === post.category) score += 2;
+            (p.tags || []).forEach(t => { if (postTags.has(t)) score += 1; });
+            return { ...p, score };
+          });
+          scored.sort((a, b) => b.score - a.score || (new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime()));
+          const related = scored.slice(0, 3);
+
+          return (
+            <div className="mt-14 pt-8 border-t border-border/50">
+              <h2 className="font-serif text-xl text-foreground mb-5 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" /> Fler artiklar
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {related.map(r => (
+                  <Link key={r.id} to={`/blogg/${r.slug}`} className="group">
+                    <div className="rounded-xl border border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full bg-card">
+                      {r.cover_image_url ? (
+                        <div className="aspect-video overflow-hidden">
+                          <img src={r.cover_image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-gradient-to-br from-primary/8 to-accent/8 flex items-center justify-center">
+                          <BookOpen className="h-6 w-6 text-primary/30" />
+                        </div>
+                      )}
+                      <div className="p-3 space-y-1">
+                        <h3 className="font-serif text-sm text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                          {r.title}
+                        </h3>
+                        {r.excerpt && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">{r.excerpt}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </article>
 
       {/* Footer */}
