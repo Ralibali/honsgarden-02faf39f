@@ -133,13 +133,36 @@ export default function Finance() {
           <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Ekonomi 💰</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">Intäkter, kostnader och netto</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 active:scale-95 transition-transform w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
-              Ny transaktion
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+            const rows = transactions.map((t: any) => ({
+              Datum: t.date,
+              Typ: t.type === 'income' ? 'Intäkt' : 'Kostnad',
+              Kategori: t.category || '',
+              Beskrivning: t.description || '',
+              Belopp: t.amount,
+            }));
+            downloadCSV(rows, `ekonomi-${new Date().toISOString().split('T')[0]}`);
+          }}>
+            <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+            downloadPDF(
+              'Ekonomi – Transaktioner',
+              ['Datum', 'Typ', 'Kategori', 'Beskrivning', 'Belopp (kr)'],
+              transactions.map((t: any) => [t.date, t.type === 'income' ? 'Intäkt' : 'Kostnad', t.category || '', t.description || '', String(t.amount)]),
+              'ekonomi'
+            );
+          }}>
+            <Download className="h-3.5 w-3.5" /> PDF
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 active:scale-95 transition-transform flex-1 sm:flex-initial">
+                <Plus className="h-4 w-4" />
+                Ny transaktion
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="font-serif">Ny transaktion</DialogTitle>
