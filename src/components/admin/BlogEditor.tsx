@@ -185,7 +185,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">URL-slug</label>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">/guider/</span>
+                  <span className="text-xs text-muted-foreground">/blogg/</span>
                   <Input value={slug} onChange={e => { setSlug(e.target.value); setAutoSlug(false); }} placeholder="basta-honsfodret" className="rounded-xl text-sm" />
                 </div>
               </div>
