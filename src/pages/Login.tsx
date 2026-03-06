@@ -122,7 +122,7 @@ export default function Login() {
                   Logga in <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button variant="outline" onClick={() => setAuthMode('register')} className="w-full h-12 text-base font-medium">
-                  Skapa konto – gratis
+                  Skapa ett konto
                 </Button>
               </div>
             </div>
