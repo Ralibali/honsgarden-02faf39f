@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import { Button } from '@/components/ui/button';
 import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown, ChevronRight, HelpCircle, Smartphone, Users, Clock } from 'lucide-react';
 import heroFarm from '@/assets/hero-farm.jpg';
@@ -171,6 +172,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <VisitorWelcomePopup />
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative min-h-[92vh] flex items-center justify-center">

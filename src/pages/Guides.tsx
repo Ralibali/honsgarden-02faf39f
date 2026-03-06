@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
@@ -42,6 +43,7 @@ export default function Guides() {
 
   return (
     <div className="min-h-screen bg-background">
+      <VisitorWelcomePopup />
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
