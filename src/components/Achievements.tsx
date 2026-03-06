@@ -18,6 +18,13 @@ interface Achievement {
   tier: 'bronze' | 'silver' | 'gold' | 'diamond';
 }
 
+const TIER_PREMIUM_DAYS: Record<Achievement['tier'], number> = {
+  bronze: 1,
+  silver: 3,
+  gold: 5,
+  diamond: 7,
+};
+
 interface AchievementsProps {
   eggs: any[];
   hens: any[];
@@ -224,11 +231,11 @@ export default function Achievements({ eggs, hens, streak }: AchievementsProps) 
         if (alreadyRewarded.has(achievement.id) || rewardedRef.current.has(achievement.id)) continue;
         rewardedRef.current.add(achievement.id);
 
-        // Record reward and grant premium
+        const days = TIER_PREMIUM_DAYS[achievement.tier] || 1;
         const { error } = await supabase.from('achievement_rewards').insert({ user_id: user.id, achievement_id: achievement.id });
         if (!error) {
-          await supabase.rpc('grant_premium_days', { _user_id: user.id, _days: 7 });
-          toast({ title: `🏆 ${achievement.title} – upplåst!`, description: 'Du har fått 7 dagars gratis Premium som belöning!' });
+          await supabase.rpc('grant_premium_days', { _user_id: user.id, _days: days });
+          toast({ title: `🏆 ${achievement.title} – upplåst!`, description: `Du har fått ${days} dagar${days > 1 ? 's' : ''} gratis Premium som belöning!` });
         }
       }
     };
