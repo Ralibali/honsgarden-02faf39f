@@ -291,6 +291,26 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                 </label>
               )}
               <Input value={coverUrl} onChange={e => setCoverUrl(e.target.value)} placeholder="Eller klistra in bild-URL" className="rounded-xl text-xs" />
+              
+              {/* Image gallery picker */}
+              <details className="group">
+                <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1">
+                  <ImagePlus className="h-3 w-3" /> Välj exempelbild ({stockImages.length} st)
+                </summary>
+                <div className="grid grid-cols-3 gap-1.5 mt-2 max-h-48 overflow-y-auto rounded-lg">
+                  {stockImages.map((img) => (
+                    <button
+                      key={img.path}
+                      type="button"
+                      onClick={() => setCoverUrl(img.path)}
+                      className={`relative aspect-video rounded-md overflow-hidden border-2 transition-all hover:opacity-90 ${coverUrl === img.path ? 'border-primary ring-1 ring-primary' : 'border-transparent'}`}
+                    >
+                      <img src={img.path} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
+                      <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] leading-tight px-1 py-0.5 truncate">{img.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </details>
             </CardContent>
           </Card>
 
