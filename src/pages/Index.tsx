@@ -193,7 +193,7 @@ export default function Index() {
               <a href="/login?mode=login">Logga in</a>
             </Button>
             <Button asChild size="sm" className="shadow-lg">
-              <a href="/login?mode=register">Kom igång gratis</a>
+              <a href="/login?mode=register">Kom igång</a>
             </Button>
           </div>
         </nav>
