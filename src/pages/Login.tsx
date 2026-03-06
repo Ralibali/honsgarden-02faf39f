@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSeo } from '@/hooks/useSeo';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import heroFarm from '@/assets/hero-farm.jpg';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,13 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, register, isAuthenticated, loading: authLoading } = useAuth();
+
+  useSeo({
+    title: 'Logga in eller skapa konto | Hönsgården',
+    description: 'Logga in på Hönsgården eller skapa ett gratis konto för att börja logga ägg, höns och foder.',
+    path: '/login',
+    noindex: true,
+  });
 
   // Read mode from URL: /login?mode=register or /login?mode=login
   const initialMode = searchParams.get('mode');

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
 import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown, ChevronRight, HelpCircle, Smartphone, Users, Clock } from 'lucide-react';
 import heroFarm from '@/assets/hero-farm.jpg';
@@ -169,6 +170,12 @@ const demoScreens = [
 
 export default function Index() {
   const [activeDemo, setActiveDemo] = useState(0);
+  useSeo({
+    title: 'Hönsgården – Äggloggare & hönsapp för hobbyuppfödare',
+    description: 'Håll koll på ägg, höns, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden. Kom igång direkt!',
+    path: '/',
+    ogImage: 'https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e1014f54-6f35-42d9-b63d-227905c1953e/id-preview-f0f73d59--f0c63bdf-2baf-4795-b008-16d49fc7d8ae.lovable.app-1772665473956.png',
+  });
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -185,7 +192,7 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/50 to-background" />
 
         {/* Top nav */}
-        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
+        <nav aria-label="Huvudnavigation" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           <div className="flex items-center gap-2">
             <span className="text-xl">🥚</span>
             <span className="font-serif text-lg text-primary-foreground drop-shadow-sm">Hönsgården</span>

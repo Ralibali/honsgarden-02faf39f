@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import { useSeo } from '@/hooks/useSeo';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
@@ -17,16 +18,18 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function Guides() {
-  // SEO meta
-  useEffect(() => {
-    document.title = 'Blogg om höns – Guider, tips & recensioner | Hönsgården';
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.');
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
-    canonical.href = 'https://honsgarden.se/blogg';
-    return () => { document.title = 'Hönsgården'; document.querySelector('link[rel="canonical"]')?.remove(); };
-  }, []);
+  useSeo({
+    title: 'Blogg om höns – Guider, tips & recensioner | Hönsgården',
+    description: 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.',
+    path: '/blogg',
+    jsonLd: {
+      '@type': 'CollectionPage',
+      name: 'Hönsbloggen – Guider, tips & recensioner',
+      description: 'Recensioner, guider och tips för dig som håller höns.',
+      url: 'https://honsgarden.se/blogg',
+      isPartOf: { '@id': 'https://honsgarden.se/#website' },
+    },
+  });
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['public-blog-posts'],
@@ -44,6 +47,25 @@ export default function Guides() {
   return (
     <div className="min-h-screen bg-background">
       <VisitorWelcomePopup />
+
+      {/* ItemList JSON-LD for blog listing */}
+      {posts.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              itemListElement: posts.map((p, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                url: `https://honsgarden.se/blogg/${p.slug}`,
+                name: p.title,
+              })),
+            }),
+          }}
+        />
+      )}
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">

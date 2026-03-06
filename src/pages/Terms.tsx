@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSeo } from '@/hooks/useSeo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -6,6 +7,12 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Terms() {
   const navigate = useNavigate();
+
+  useSeo({
+    title: 'Användarvillkor & Integritetspolicy | Hönsgården',
+    description: 'Läs Hönsgårdens användarvillkor och integritetspolicy. Information om dataskydd, cookies och dina rättigheter.',
+    path: '/terms',
+  });
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 animate-fade-in">
