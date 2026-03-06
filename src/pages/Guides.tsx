@@ -1,0 +1,149 @@
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, BookOpen, Loader2, Egg } from 'lucide-react';
+
+const categoryLabels: Record<string, string> = {
+  guide: 'Guide',
+  recension: 'Recension',
+  tips: 'Tips & tricks',
+  halsa: 'Hälsa',
+  nyborjare: 'Nybörjare',
+};
+
+export default function Guides() {
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['public-blog-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <span className="text-xl">🐔</span>
+            <span className="font-serif text-lg text-foreground">Hönsgården</span>
+          </Link>
+          <Link to="/login">
+            <Button size="sm" className="rounded-xl text-xs gap-1">
+              <Egg className="h-3 w-3" /> Kom igång
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
+        {/* Hero */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 text-primary text-xs font-medium mb-4">
+            <BookOpen className="h-3.5 w-3.5" /> Guider & tips
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
+            Allt du behöver veta om höns
+          </h1>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Recensioner, guider och tips för dig som vill ge dina höns det bästa. Vi testar produkter och delar med oss av vår kunskap.
+          </p>
+        </div>
+
+        {/* Posts */}
+        {isLoading ? (
+          <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+        ) : !posts.length ? (
+          <div className="text-center py-16">
+            <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
+            <p className="text-muted-foreground">Inga guider publicerade ännu. Kom tillbaka snart!</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map(post => (
+              <Link key={post.id} to={`/guider/${post.slug}`} className="group">
+                <Card className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full">
+                  {post.cover_image_url ? (
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={post.cover_image_url}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-gradient-to-br from-primary/8 to-accent/8 flex items-center justify-center">
+                      <BookOpen className="h-8 w-8 text-primary/30" />
+                    </div>
+                  )}
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {post.category && (
+                        <Badge variant="secondary" className="text-[9px]">
+                          {categoryLabels[post.category] || post.category}
+                        </Badge>
+                      )}
+                      {post.published_at && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="font-serif text-lg text-foreground leading-snug group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h2>
+                    {post.excerpt && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                    )}
+                    <span className="inline-flex items-center text-xs font-medium text-primary gap-1 pt-1">
+                      Läs mer <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="mt-16 text-center bg-gradient-to-br from-primary/5 via-card to-accent/5 rounded-2xl p-8 sm:p-12 border border-border/30">
+          <span className="text-3xl mb-3 block">🥚</span>
+          <h2 className="font-serif text-xl sm:text-2xl text-foreground mb-2">
+            Håll koll på dina höns – helt gratis
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto mb-5">
+            Med Hönsgården loggar du ägg, hälsa och foder på ett ställe. Perfekt för dig som vill ha full koll på din hönsgård.
+          </p>
+          <Link to="/login">
+            <Button size="lg" className="rounded-xl gap-2">
+              <Egg className="h-4 w-4" /> Skapa ett konto
+            </Button>
+          </Link>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 mt-16 py-8 px-4">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} Hönsgården</span>
+          <div className="flex gap-4">
+            <Link to="/" className="hover:text-foreground transition-colors">Startsidan</Link>
+            <Link to="/terms" className="hover:text-foreground transition-colors">Villkor</Link>
+            <Link to="/login" className="hover:text-foreground transition-colors">Logga in</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
