@@ -212,9 +212,9 @@ export default function Index() {
 
           <FadeUp delay={100}>
             <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl text-primary-foreground mb-4 sm:mb-5 leading-[1.1] drop-shadow-lg">
-              Sluta gissa,{' '}
+              Håll koll på{' '}
               <span className="relative inline-block">
-                börja veta
+                hela hönsgården
                 <svg className="absolute -bottom-1 left-0 w-full h-3 text-primary" viewBox="0 0 200 12" fill="none">
                   <path d="M2 8 C50 2, 150 2, 198 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
