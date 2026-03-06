@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSeo } from '@/hooks/useSeo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSeo } from '@/hooks/useSeo';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import heroFarm from '@/assets/hero-farm.jpg';
 import { Button } from '@/components/ui/button';
