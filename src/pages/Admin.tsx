@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen
 } from 'lucide-react';
+import BlogEditor from '@/components/admin/BlogEditor';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -140,12 +141,15 @@ export default function Admin() {
       )}
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid grid-cols-3 w-full rounded-xl">
+        <TabsList className="grid grid-cols-4 w-full rounded-xl">
           <TabsTrigger value="users" className="text-xs sm:text-sm gap-1 rounded-lg">
-            <Users className="h-3.5 w-3.5" /> Användare
+            <Users className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Användare</span><span className="sm:hidden">Users</span>
           </TabsTrigger>
           <TabsTrigger value="subscriptions" className="text-xs sm:text-sm gap-1 rounded-lg">
-            <Crown className="h-3.5 w-3.5" /> Prenumerationer
+            <Crown className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Prenumerationer</span><span className="sm:hidden">Prem</span>
+          </TabsTrigger>
+          <TabsTrigger value="blog" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <BookOpen className="h-3.5 w-3.5" /> Blogg
           </TabsTrigger>
           <TabsTrigger value="feedback" className="text-xs sm:text-sm gap-1 rounded-lg">
             <MessageSquare className="h-3.5 w-3.5" /> Feedback
@@ -361,6 +365,11 @@ export default function Admin() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Blog tab */}
+        <TabsContent value="blog" className="space-y-3">
+          <BlogEditor />
         </TabsContent>
 
         {/* Feedback tab */}
