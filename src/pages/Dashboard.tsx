@@ -22,6 +22,7 @@ import ShareCard from '@/components/ShareCard';
 import ReferralCard from '@/components/ReferralCard';
 import InstallAppCard from '@/components/InstallAppCard';
 import OnboardingGuide from '@/components/OnboardingGuide';
+import AchievementNudge from '@/components/AchievementNudge';
 import { motion } from 'framer-motion';
 
 function getGreeting() {
@@ -340,6 +341,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Achievement nudge */}
+      <AchievementNudge eggs={eggs} hens={hens as any[]} streak={streak} />
 
       {/* Premium nudge */}
       <PremiumNudge />
