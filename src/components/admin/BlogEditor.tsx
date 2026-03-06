@@ -114,6 +114,113 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '');
 }
 
+function ProductInsertCard({ onInsert }: { onInsert: (html: string) => void }) {
+  const [prodUrl, setProdUrl] = useState('');
+  const [prodName, setProdName] = useState('');
+  const [prodImage, setProdImage] = useState('');
+  const [prodPrice, setProdPrice] = useState('');
+  const [prodBadge, setProdBadge] = useState('');
+
+  const handleInsert = () => {
+    if (!prodUrl || !prodName) {
+      toast({ title: 'Ange minst namn och URL', variant: 'destructive' });
+      return;
+    }
+    const imgHtml = prodImage
+      ? `<div class="product-card-image"><img src="${prodImage}" alt="${prodName}" /></div>`
+      : '';
+    const badgeHtml = prodBadge
+      ? `<span class="product-card-badge">${prodBadge}</span>`
+      : '';
+    const priceHtml = prodPrice
+      ? `<span class="product-card-price">${prodPrice}</span>`
+      : '';
+    const html = `<div class="product-card">
+  ${badgeHtml}
+  ${imgHtml}
+  <div class="product-card-body">
+    <h4 class="product-card-title">${prodName}</h4>
+    ${priceHtml}
+    <a href="${prodUrl}" target="_blank" rel="noopener sponsored" class="product-card-cta">Se pris →</a>
+  </div>
+</div>`;
+    onInsert(html);
+    setProdUrl('');
+    setProdName('');
+    setProdImage('');
+    setProdPrice('');
+    setProdBadge('');
+    toast({ title: 'Produktkort infogat!' });
+  };
+
+  return (
+    <Card className="border-border/50">
+      <CardContent className="p-4 space-y-2.5">
+        <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+          <ShoppingBag className="h-3 w-3" /> Snabbprodukt
+        </p>
+        <Input
+          value={prodName}
+          onChange={e => setProdName(e.target.value)}
+          placeholder="Produktnamn"
+          className="rounded-xl text-xs h-8"
+        />
+        <Input
+          value={prodUrl}
+          onChange={e => setProdUrl(e.target.value)}
+          placeholder="Affiliatelänk (URL)"
+          className="rounded-xl text-xs h-8"
+        />
+        <Input
+          value={prodImage}
+          onChange={e => setProdImage(e.target.value)}
+          placeholder="Bild-URL (valfritt)"
+          className="rounded-xl text-xs h-8"
+        />
+        <div className="flex gap-2">
+          <Input
+            value={prodPrice}
+            onChange={e => setProdPrice(e.target.value)}
+            placeholder="Pris (valfritt)"
+            className="rounded-xl text-xs h-8 flex-1"
+          />
+          <Input
+            value={prodBadge}
+            onChange={e => setProdBadge(e.target.value)}
+            placeholder="Badge"
+            className="rounded-xl text-xs h-8 w-24"
+          />
+        </div>
+        {(prodName || prodImage) && (
+          <div className="rounded-lg border border-border/40 p-2.5 bg-muted/30 flex items-center gap-2.5">
+            {prodImage ? (
+              <img src={prodImage} alt={prodName} className="w-12 h-12 rounded-md object-cover shrink-0" />
+            ) : (
+              <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
+                <ShoppingBag className="h-4 w-4 text-muted-foreground/50" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate">{prodName || 'Produktnamn'}</p>
+              {prodPrice && <p className="text-[10px] text-muted-foreground">{prodPrice}</p>}
+            </div>
+            <LinkIcon className="h-3 w-3 text-muted-foreground shrink-0" />
+          </div>
+        )}
+        <Button
+          type="button"
+          size="sm"
+          className="w-full rounded-xl text-xs h-8 gap-1"
+          onClick={handleInsert}
+          disabled={!prodName || !prodUrl}
+        >
+          <Plus className="h-3 w-3" /> Infoga produktkort
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(post?.title || '');
