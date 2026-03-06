@@ -19,13 +19,13 @@ const categoryLabels: Record<string, string> = {
 
 export default function Guides() {
   useSeo({
-    title: 'Blogg om höns – Guider, tips & recensioner | Hönsgården',
-    description: 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.',
+    title: 'Blogg – Höns, hem, trädgård & friluftsliv | Hönsgården',
+    description: 'Guider, recensioner och tips om höns, hemmet, trädgården och friluftsliv. Testat och granskat av Hönsgården.',
     path: '/blogg',
     jsonLd: {
       '@type': 'CollectionPage',
-      name: 'Hönsbloggen – Guider, tips & recensioner',
-      description: 'Recensioner, guider och tips för dig som håller höns.',
+      name: 'Bloggen – Höns, hem, trädgård & friluftsliv',
+      description: 'Guider, recensioner och tips om höns, hemmet, trädgården och friluftsliv.',
       url: 'https://honsgarden.se/blogg',
       isPartOf: { '@id': 'https://honsgarden.se/#website' },
     },
