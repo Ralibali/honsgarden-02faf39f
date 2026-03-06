@@ -110,6 +110,7 @@ const App = () => (
       <AuthProvider>
         <CacheClearer />
         <AppRoutes />
+        <CookieConsent />
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
