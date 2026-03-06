@@ -326,24 +326,24 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
               <Input value={coverUrl} onChange={e => setCoverUrl(e.target.value)} placeholder="Eller klistra in bild-URL" className="rounded-xl text-xs" />
               
               {/* Image gallery picker */}
-              <details className="group">
-                <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1">
-                  <ImagePlus className="h-3 w-3" /> Välj exempelbild ({stockImages.length} st)
-                </summary>
-                <div className="grid grid-cols-3 gap-1.5 mt-2 max-h-48 overflow-y-auto rounded-lg">
+              <div>
+                <p className="text-[10px] font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                  <ImagePlus className="h-3 w-3" /> Välj från bildgalleriet ({stockImages.length} st)
+                </p>
+                <div className="grid grid-cols-3 gap-1.5 max-h-56 overflow-y-auto rounded-lg border border-border/40 p-1.5">
                   {stockImages.map((img) => (
                     <button
                       key={img.path}
                       type="button"
                       onClick={() => setCoverUrl(img.path)}
-                      className={`relative aspect-video rounded-md overflow-hidden border-2 transition-all hover:opacity-90 ${coverUrl === img.path ? 'border-primary ring-1 ring-primary' : 'border-transparent'}`}
+                      className={`relative aspect-video rounded-md overflow-hidden border-2 transition-all hover:opacity-90 ${coverUrl === img.path ? 'border-primary ring-1 ring-primary' : 'border-border/30 hover:border-primary/40'}`}
                     >
                       <img src={img.path} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
                       <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] leading-tight px-1 py-0.5 truncate">{img.label}</span>
                     </button>
                   ))}
                 </div>
-              </details>
+              </div>
             </CardContent>
           </Card>
 
