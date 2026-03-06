@@ -19,13 +19,13 @@ const categoryLabels: Record<string, string> = {
 
 export default function Guides() {
   useSeo({
-    title: 'Blogg om höns – Guider, tips & recensioner | Hönsgården',
-    description: 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.',
+    title: 'Blogg – Höns, hem, trädgård & friluftsliv | Hönsgården',
+    description: 'Guider, recensioner och tips om höns, hemmet, trädgården och friluftsliv. Testat och granskat av Hönsgården.',
     path: '/blogg',
     jsonLd: {
       '@type': 'CollectionPage',
-      name: 'Hönsbloggen – Guider, tips & recensioner',
-      description: 'Recensioner, guider och tips för dig som håller höns.',
+      name: 'Bloggen – Höns, hem, trädgård & friluftsliv',
+      description: 'Guider, recensioner och tips om höns, hemmet, trädgården och friluftsliv.',
       url: 'https://honsgarden.se/blogg',
       isPartOf: { '@id': 'https://honsgarden.se/#website' },
     },
@@ -85,13 +85,13 @@ export default function Guides() {
         {/* Hero */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 text-primary text-xs font-medium mb-4">
-            <BookOpen className="h-3.5 w-3.5" /> Hönsbloggen
+            <BookOpen className="h-3.5 w-3.5" /> Bloggen
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
-            Allt du behöver veta om höns
+            Höns, hem, trädgård & friluftsliv
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Recensioner, guider och tips för dig som vill ge dina höns det bästa. Vi testar produkter och delar med oss av vår kunskap.
+            Guider, recensioner och tips för dig som älskar höns, hemmet, trädgården och livet utomhus. Vi testar produkter och delar med oss av vår kunskap.
           </p>
         </div>
 
