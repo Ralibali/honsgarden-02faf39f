@@ -82,7 +82,7 @@ export default function GuideArticle() {
         canonical.rel = 'canonical';
         document.head.appendChild(canonical);
       }
-      canonical.href = `https://honsgarden.lovable.app/guider/${post.slug}`;
+      canonical.href = `https://honsgarden.lovable.app/blogg/${post.slug}`;
 
       // JSON-LD Article structured data
       const jsonLd = {
