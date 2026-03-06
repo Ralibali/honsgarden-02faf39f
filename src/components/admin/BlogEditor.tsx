@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   Plus, ArrowLeft, Save, Eye, EyeOff, Trash2, Loader2,
-  ImagePlus, FileText, Tag, Search, Globe, MonitorSmartphone
+  ImagePlus, FileText, Tag, Search, Globe, MonitorSmartphone, ShoppingBag, LinkIcon
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
