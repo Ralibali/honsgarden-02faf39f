@@ -99,7 +99,7 @@ export default function GuideArticle() {
           name: 'Hönsgården',
           url: 'https://honsgarden.lovable.app',
         },
-        mainEntityOfPage: `https://honsgarden.lovable.app/guider/${post.slug}`,
+        mainEntityOfPage: `https://honsgarden.lovable.app/blogg/${post.slug}`,
       };
       let script = document.getElementById('json-ld-article') as HTMLScriptElement;
       if (!script) {
