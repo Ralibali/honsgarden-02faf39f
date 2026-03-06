@@ -15,6 +15,12 @@ const categoryLabels: Record<string, string> = {
   nyborjare: 'Nybörjare',
 };
 
+/** Detect if content is raw HTML (starts with a tag) or Markdown */
+function isHtmlContent(content: string): boolean {
+  const trimmed = content.trim();
+  return trimmed.startsWith('<') || trimmed.startsWith('<!');
+}
+
 /** Simple markdown to HTML - handles common patterns */
 function renderMarkdown(md: string): string {
   let html = md
@@ -49,6 +55,15 @@ function renderMarkdown(md: string): string {
     .replace(/\n/g, '<br />');
 
   return `<p class="text-foreground/85 leading-relaxed mb-4">${html}</p>`;
+}
+
+/** Sanitize and render content – supports both raw HTML and Markdown */
+function renderContent(content: string): string {
+  const raw = isHtmlContent(content) ? content : renderMarkdown(content);
+  return DOMPurify.sanitize(raw, {
+    ADD_TAGS: ['iframe', 'video', 'source', 'picture'],
+    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel'],
+  });
 }
 
 export default function GuideArticle() {
