@@ -55,7 +55,40 @@ function renderPreview(md: string): string {
   return DOMPurify.sanitize(`<p class="text-foreground/85 leading-relaxed mb-4">${html}</p>`);
 }
 
-type BlogPost = {
+const stockImages = [
+  { path: '/blog-images/hens-garden.jpg', label: 'Höns i trädgård' },
+  { path: '/blog-images/eggs-basket.jpg', label: 'Äggkorg' },
+  { path: '/blog-images/chicken-coop.jpg', label: 'Hönshus' },
+  { path: '/blog-images/hen-portrait.jpg', label: 'Hönsporträtt' },
+  { path: '/blog-images/baby-chicks.jpg', label: 'Kycklingar' },
+  { path: '/blog-images/eggs-nest.jpg', label: 'Ägg i bo' },
+  { path: '/blog-images/hens-feeding.jpg', label: 'Utfodring' },
+  { path: '/blog-images/hen-health-check.jpg', label: 'Hälsokontroll' },
+  { path: '/blog-images/rooster-portrait.jpg', label: 'Tupp' },
+  { path: '/blog-images/hens-autumn.jpg', label: 'Höst' },
+  { path: '/blog-images/winter-hens.jpg', label: 'Vinter' },
+  { path: '/blog-images/feed-varieties.jpg', label: 'Fodersorter' },
+  { path: '/blog-images/hen-with-chicks.jpg', label: 'Höna med kycklingar' },
+  { path: '/blog-images/organic-eggs.jpg', label: 'Ekologiska ägg' },
+  { path: '/blog-images/building-coop.jpg', label: 'Bygga hönshus' },
+  { path: '/blog-images/chicken-breeds.jpg', label: 'Hönsraser' },
+  { path: '/blog-images/morning-farm.jpg', label: 'Morgon på gården' },
+  { path: '/blog-images/egg-collecting.jpg', label: 'Ägginsamling' },
+  { path: '/blog-images/dust-bath.jpg', label: 'Sandbad' },
+  { path: '/blog-images/water-station.jpg', label: 'Vattenstation' },
+  { path: '/blog-images/hens-meadow.jpg', label: 'Blomsteräng' },
+  { path: '/blog-images/sunset-farm.jpg', label: 'Solnedgång' },
+  { path: '/blog-images/hen-nesting.jpg', label: 'Höna ruvar' },
+  { path: '/blog-images/chicken-run.jpg', label: 'Hönsrastgård' },
+  { path: '/blog-images/roost-bar.jpg', label: 'Sittpinne' },
+  { path: '/blog-images/farm-kitchen.jpg', label: 'Lantligt kök' },
+  { path: '/blog-images/spring-garden.jpg', label: 'Vårträdgård' },
+  { path: '/blog-images/hen-detail.jpg', label: 'Hönsdetalj' },
+  { path: '/blog-images/silkie-chicken.jpg', label: 'Silkeshöna' },
+  { path: '/blog-images/grit-calcium.jpg', label: 'Maggrus' },
+];
+
+
   id: string;
   title: string;
   slug: string;
