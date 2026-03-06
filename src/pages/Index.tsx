@@ -601,15 +601,15 @@ export default function Index() {
               <div className="text-5xl mb-4">🐔</div>
               <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Dina hönor förtjänar det bästa</h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-                Gå med 2 500+ svenska hönsägare som redan har full koll. Skapa ett gratis konto på 10 sekunder.
+                Gå med 2 500+ svenska hönsägare som redan har full koll. Skapa ett konto på 10 sekunder.
               </p>
               <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
-                  Skapa gratis konto nu
+                  Kom igång nu
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">Inget kreditkort · Gratis för alltid · Avsluta när du vill</p>
+              <p className="text-xs text-muted-foreground mt-4">Helt kostnadsfritt · Avsluta när du vill</p>
             </div>
           </FadeUp>
         </div>
