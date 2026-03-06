@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown } from 'lucide-react';
+import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
 import heroFarm from '@/assets/hero-farm.jpg';
 import henPortrait from '@/assets/hen-portrait.jpg';
 import eggsBasket from '@/assets/eggs-basket.jpg';
 
-// Lightweight IntersectionObserver reveal (no framer-motion)
+// Lightweight IntersectionObserver reveal
 function useInView(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -31,6 +31,48 @@ function FadeUp({ children, delay = 0, className = '' }: { children: React.React
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
+    </div>
+  );
+}
+
+// Animated counter
+function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const { ref, visible } = useInView(0.3);
+
+  useEffect(() => {
+    if (!visible) return;
+    let start = 0;
+    const duration = 1500;
+    const step = Math.ceil(target / (duration / 16));
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { setCount(target); clearInterval(timer); }
+      else setCount(start);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [visible, target]);
+
+  return <span ref={ref}>{count.toLocaleString('sv-SE')}{suffix}</span>;
+}
+
+// FAQ Accordion
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border border-border rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-muted/50 transition-colors"
+      >
+        <span className="text-sm sm:text-base font-medium text-foreground pr-4">{q}</span>
+        <ChevronRight className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} />
+      </button>
+      {open && (
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5 -mt-1">
+          <p className="text-sm text-muted-foreground leading-relaxed">{a}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -67,12 +109,20 @@ const testimonials = [
   },
 ];
 
+const faqs = [
+  { q: 'Kostar det något?', a: 'Nej, grundversionen är helt gratis – för alltid. Du kan logga ägg, hantera hönor och se statistik utan att betala. Premium med extra funktioner kostar från 19 kr/mån.' },
+  { q: 'Behöver jag ladda ner en app?', a: 'Nej! Hönsgården fungerar direkt i din webbläsare på mobilen. Du kan lägga till den på hemskärmen så känns det precis som en app.' },
+  { q: 'Kan jag testa utan att skapa konto?', a: 'Registreringen tar bara 10 sekunder med e-post och lösenord. Vi behöver ett konto för att spara dina data säkert.' },
+  { q: 'Är mina data säkra?', a: 'Absolut. All data lagras krypterat i EU. Vi följer GDPR och du kan när som helst radera ditt konto och all data.' },
+  { q: 'Hur många hönor kan jag ha?', a: 'I gratisversionen kan du ha obegränsat antal hönor. Det finns inga begränsningar.' },
+];
+
 export default function Index() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
 
       {/* ═══════ HERO ═══════ */}
-      <section className="relative min-h-[90vh] flex items-center justify-center">
+      <section className="relative min-h-[92vh] flex items-center justify-center">
         <img
           src={heroFarm}
           alt="Svensk hönsgård i morgonljus"
@@ -101,15 +151,15 @@ export default function Index() {
         <div className="relative z-10 text-center px-5 sm:px-6 max-w-3xl mx-auto">
           <FadeUp>
             <span className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-md text-primary-foreground px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-primary-foreground/20 mb-6">
-              🌾 Appen för svenska hönsägare
+              ✨ Gratis för alltid – ingen bindningstid
             </span>
           </FadeUp>
 
           <FadeUp delay={100}>
             <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl text-primary-foreground mb-4 sm:mb-5 leading-[1.1] drop-shadow-lg">
-              Ha full koll på{' '}
+              Sluta gissa,{' '}
               <span className="relative inline-block">
-                din hönsgård
+                börja veta
                 <svg className="absolute -bottom-1 left-0 w-full h-3 text-primary" viewBox="0 0 200 12" fill="none">
                   <path d="M2 8 C50 2, 150 2, 198 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
@@ -118,26 +168,27 @@ export default function Index() {
           </FadeUp>
 
           <FadeUp delay={200}>
-            <p className="text-base sm:text-xl text-primary-foreground/80 mb-8 max-w-lg mx-auto leading-relaxed">
-              Logga ägg, följ flocken och håll koll på ekonomin – enkelt och smidigt, direkt i mobilen.
+            <p className="text-base sm:text-xl text-primary-foreground/85 mb-8 max-w-lg mx-auto leading-relaxed">
+              Logga ägg, håll koll på flocken och se om hönsgården går plus – på <strong>10 sekunder om dagen</strong>.
             </p>
           </FadeUp>
 
           <FadeUp delay={300}>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-              <Button asChild size="lg" className="h-13 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] transition-shadow">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
+              <Button asChild size="lg" className="h-14 px-12 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] transition-shadow">
                 <a href="/login?mode=register">
-                  Skapa gratis konto
+                  🥚 Skapa gratis konto
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
             </div>
+            <p className="text-xs text-primary-foreground/60">Tar 10 sekunder · Inget kreditkort behövs</p>
           </FadeUp>
 
           <FadeUp delay={400}>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 justify-center text-xs sm:text-sm text-primary-foreground/70">
+            <div className="flex flex-wrap gap-x-6 gap-y-1 justify-center text-xs sm:text-sm text-primary-foreground/70 mt-6">
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Helt gratis att börja</span>
-              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Ingen bindningstid</span>
+              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Fungerar i mobilen</span>
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 100% svensk 🇸🇪</span>
             </div>
           </FadeUp>
@@ -154,12 +205,14 @@ export default function Index() {
         <div className="container max-w-5xl mx-auto px-5">
           <div className="grid grid-cols-3 divide-x divide-border">
             {[
-              { value: '50 000+', label: 'ägg loggade' },
-              { value: '2 500+', label: 'hönsägare' },
-              { value: '100%', label: 'svensk app 🇸🇪' },
+              { target: 50000, suffix: '+', label: 'ägg loggade' },
+              { target: 2500, suffix: '+', label: 'hönsägare' },
+              { target: 100, suffix: '%', label: 'svensk app 🇸🇪' },
             ].map((s, i) => (
               <FadeUp key={s.label} delay={i * 100} className="py-6 sm:py-8 text-center">
-                <p className="stat-number text-xl sm:text-3xl text-foreground">{s.value}</p>
+                <p className="stat-number text-xl sm:text-3xl text-foreground">
+                  <AnimatedNumber target={s.target} suffix={s.suffix} />
+                </p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{s.label}</p>
               </FadeUp>
             ))}
@@ -167,8 +220,42 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ═══════ FEATURES ═══════ */}
+      {/* ═══════ "SÅ FUNKAR DET" – 3 STEPS ═══════ */}
       <section className="relative z-10 py-16 sm:py-24">
+        <div className="container max-w-4xl mx-auto px-5 sm:px-6">
+          <FadeUp className="text-center mb-10 sm:mb-14">
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Kom igång på under en minut</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Ingen manual behövs. Så här enkelt är det:</p>
+          </FadeUp>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+            {[
+              { num: '1', title: 'Skapa konto', desc: 'Gratis på 10 sekunder. Bara e-post och lösenord.', emoji: '✉️' },
+              { num: '2', title: 'Lägg till dina hönor', desc: 'Ange antal eller ge dem namn – du väljer!', emoji: '🐔' },
+              { num: '3', title: 'Logga ägg varje dag', desc: 'Ett tryck per dag. Se statistiken växa!', emoji: '🥚' },
+            ].map((s, i) => (
+              <FadeUp key={s.num} delay={i * 100} className="text-center">
+                <div className="text-4xl mb-3">{s.emoji}</div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center mx-auto mb-3">
+                  {s.num}
+                </div>
+                <h3 className="font-serif text-lg text-foreground mb-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.desc}</p>
+              </FadeUp>
+            ))}
+          </div>
+          <FadeUp delay={400} className="text-center mt-10">
+            <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+              <a href="/login?mode=register">
+                Skapa gratis konto
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </FadeUp>
+        </div>
+      </section>
+
+      {/* ═══════ FEATURES ═══════ */}
+      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <FadeUp className="text-center mb-10 sm:mb-14">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">
@@ -182,7 +269,7 @@ export default function Index() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {features.map((f, i) => (
               <FadeUp key={f.title} delay={i * 80}>
-                <div className="group relative p-5 sm:p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300 card-hover h-full">
+                <div className="group relative p-5 sm:p-6 rounded-2xl bg-background border border-border hover:border-primary/30 transition-all duration-300 card-hover h-full">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                     <f.icon className="h-5 w-5 text-primary" />
                   </div>
@@ -196,7 +283,7 @@ export default function Index() {
       </section>
 
       {/* ═══════ SMART INSIGHTS + IMAGE ═══════ */}
-      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
+      <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <FadeUp>
@@ -210,7 +297,7 @@ export default function Index() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {smartFeatures.map((f, i) => (
                   <FadeUp key={f.title} delay={i * 80}>
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-background border border-border">
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-card border border-border">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <f.icon className="h-3.5 w-3.5 text-primary" />
                       </div>
@@ -234,7 +321,6 @@ export default function Index() {
                     loading="lazy"
                   />
                 </div>
-                {/* Floating card */}
                 <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-card border border-border rounded-xl p-3 shadow-xl">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-success/15 flex items-center justify-center">
@@ -252,36 +338,12 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ═══════ HOW IT WORKS ═══════ */}
-      <section className="relative z-10 py-16 sm:py-24">
-        <div className="container max-w-4xl mx-auto px-5 sm:px-6">
-          <FadeUp className="text-center mb-10 sm:mb-14">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Tre steg till full koll</h2>
-            <p className="text-sm sm:text-base text-muted-foreground">Du behöver ingen manual.</p>
-          </FadeUp>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
-            {[
-              { num: '1', title: 'Skapa konto', desc: 'Gratis på några sekunder.' },
-              { num: '2', title: 'Lägg in hönorna', desc: 'Ange antal eller namnge varje höna.' },
-              { num: '3', title: 'Börja logga ägg', desc: 'Tryck in äggen – se statistiken växa!' },
-            ].map((s, i) => (
-              <FadeUp key={s.num} delay={i * 100} className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-serif text-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
-                  {s.num}
-                </div>
-                <h3 className="font-serif text-lg text-foreground mb-1">{s.title}</h3>
-                <p className="text-sm text-muted-foreground">{s.desc}</p>
-              </FadeUp>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ═══════ TESTIMONIALS ═══════ */}
       <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <FadeUp className="text-center mb-10 sm:mb-14">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground">Älskad av hönsägare</h2>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Älskad av hönsägare</h2>
+            <p className="text-sm text-muted-foreground">Hör vad våra användare säger</p>
           </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {testimonials.map((t, i) => (
@@ -309,8 +371,27 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ═══════ PRICING TEASER ═══════ */}
+      {/* ═══════ FAQ ═══════ */}
       <section className="relative z-10 py-16 sm:py-24">
+        <div className="container max-w-2xl mx-auto px-5 sm:px-6">
+          <FadeUp className="text-center mb-10 sm:mb-12">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <HelpCircle className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vanliga frågor</h2>
+          </FadeUp>
+          <FadeUp delay={100}>
+            <div className="space-y-2">
+              {faqs.map((f, i) => (
+                <FAQItem key={i} q={f.q} a={f.a} />
+              ))}
+            </div>
+          </FadeUp>
+        </div>
+      </section>
+
+      {/* ═══════ PRICING TEASER ═══════ */}
+      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <FadeUp delay={100} className="relative order-2 lg:order-1">
@@ -361,23 +442,22 @@ export default function Index() {
       </section>
 
       {/* ═══════ FINAL CTA ═══════ */}
-      <section className="relative z-10 pb-16 sm:pb-24">
+      <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-3xl mx-auto px-5 sm:px-6">
           <FadeUp>
             <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-warning/5 border border-primary/15 p-8 sm:p-12 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
-                <Shield className="h-7 w-7 text-primary" />
-              </div>
-              <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Redo att börja?</h2>
+              <div className="text-5xl mb-4">🐔</div>
+              <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Dina hönor förtjänar det bästa</h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-                Skapa ett konto gratis och börja logga ägg redan idag. Dina hönor förtjänar det!
+                Gå med tusentals svenska hönsägare som redan har full koll. Skapa ett gratis konto på 10 sekunder.
               </p>
-              <Button asChild size="lg" className="h-13 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
+              <Button asChild size="lg" className="h-14 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
                 <a href="/login?mode=register">
-                  Skapa gratis konto
+                  Skapa gratis konto nu
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
+              <p className="text-xs text-muted-foreground mt-4">Inget kreditkort · Gratis för alltid · Avsluta när du vill</p>
             </div>
           </FadeUp>
         </div>
@@ -391,12 +471,27 @@ export default function Index() {
               <span className="text-base">🥚</span>
               <span className="font-serif text-foreground">Hönsgården</span>
             </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <a href="/terms" className="hover:text-foreground transition-colors">Villkor & Integritet</a>
+              <span>·</span>
+              <a href="mailto:support@honsgarden.se" className="text-primary hover:underline">support@honsgarden.se</a>
+            </div>
             <p className="text-xs text-muted-foreground">
-              © 2026 honsgarden.se · <a href="mailto:support@honsgarden.se" className="text-primary hover:underline">support@honsgarden.se</a>
+              © 2026 Hönsgården
             </p>
           </div>
         </div>
       </footer>
+
+      {/* ═══════ STICKY MOBILE CTA ═══════ */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-background/95 backdrop-blur-lg border-t border-border px-4 py-3">
+        <Button asChild size="lg" className="w-full h-12 text-base gap-2">
+          <a href="/login?mode=register">
+            🥚 Skapa gratis konto
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </Button>
+      </div>
     </div>
   );
 }
