@@ -28,8 +28,8 @@ function isHtmlContent(content: string): boolean {
 function renderPreview(md: string): string {
   if (isHtmlContent(md)) {
     return DOMPurify.sanitize(md, {
-      ADD_TAGS: ['iframe', 'video', 'source', 'picture'],
-      ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel'],
+      ADD_TAGS: ['iframe', 'video', 'source', 'picture', 'details', 'summary'],
+      ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style'],
     });
   }
   let html = md
