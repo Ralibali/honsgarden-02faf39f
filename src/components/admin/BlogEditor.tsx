@@ -12,11 +12,48 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   Plus, ArrowLeft, Save, Eye, EyeOff, Trash2, Loader2,
-  ImagePlus, FileText, Tag, Search, Globe
+  ImagePlus, FileText, Tag, Search, Globe, MonitorSmartphone
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import DOMPurify from 'dompurify';
+
+/** Render content for preview – supports HTML and Markdown */
+function isHtmlContent(content: string): boolean {
+  const trimmed = content.trim();
+  return trimmed.startsWith('<') || trimmed.startsWith('<!');
+}
+
+function renderPreview(md: string): string {
+  if (isHtmlContent(md)) {
+    return DOMPurify.sanitize(md, {
+      ADD_TAGS: ['iframe', 'video', 'source', 'picture'],
+      ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel'],
+    });
+  }
+  let html = md
+    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-serif text-foreground mt-6 mb-2">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-serif text-foreground mt-8 mb-3">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-serif text-foreground mt-8 mb-3">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, (_, text, url) => {
+      const isAffiliate = url.includes('adtraction') || url.includes('awin') || url.includes('tradedoubler') || url.includes('partner') || text.includes('→') || text.toLowerCase().includes('köp');
+      if (isAffiliate) {
+        return `<a href="${url}" target="_blank" rel="noopener sponsored" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity no-underline">${text}</a>`;
+      }
+      return `<a href="${url}" target="_blank" rel="noopener" class="text-primary underline underline-offset-2 hover:opacity-80">${text}</a>`;
+    })
+    .replace(/^[-*] (.+)$/gm, '<li class="ml-4 list-disc text-foreground/90">$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal text-foreground/90">$1</li>')
+    .replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" class="rounded-xl my-4 w-full max-w-lg" loading="lazy" />')
+    .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary/30 pl-4 py-1 my-4 text-muted-foreground italic">$1</blockquote>')
+    .replace(/^---$/gm, '<hr class="my-6 border-border/50" />')
+    .replace(/\n\n/g, '</p><p class="text-foreground/85 leading-relaxed mb-4">')
+    .replace(/\n/g, '<br />');
+  return DOMPurify.sanitize(`<p class="text-foreground/85 leading-relaxed mb-4">${html}</p>`);
+}
 
 type BlogPost = {
   id: string;
