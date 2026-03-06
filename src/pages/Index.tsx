@@ -192,7 +192,7 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/50 to-background" />
 
         {/* Top nav */}
-        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
+        <nav aria-label="Huvudnavigation" className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           <div className="flex items-center gap-2">
             <span className="text-xl">🥚</span>
             <span className="font-serif text-lg text-primary-foreground drop-shadow-sm">Hönsgården</span>
