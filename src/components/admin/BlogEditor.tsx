@@ -371,6 +371,9 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
             </CardContent>
           </Card>
 
+          {/* Quick product insert */}
+          <ProductInsertCard onInsert={(html) => setContent(prev => prev + '\n\n' + html)} />
+
           {/* SEO */}
           <Card className="border-border/50">
             <CardContent className="p-4 space-y-3">
