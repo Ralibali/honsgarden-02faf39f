@@ -204,7 +204,7 @@ export default function GuideArticle() {
         {/* Content */}
         <div
           className="prose-custom"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
+          dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
         />
 
         {/* Tags */}
