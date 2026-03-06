@@ -55,6 +55,39 @@ function renderPreview(md: string): string {
   return DOMPurify.sanitize(`<p class="text-foreground/85 leading-relaxed mb-4">${html}</p>`);
 }
 
+const stockImages = [
+  { path: '/blog-images/hens-garden.jpg', label: 'Höns i trädgård' },
+  { path: '/blog-images/eggs-basket.jpg', label: 'Äggkorg' },
+  { path: '/blog-images/chicken-coop.jpg', label: 'Hönshus' },
+  { path: '/blog-images/hen-portrait.jpg', label: 'Hönsporträtt' },
+  { path: '/blog-images/baby-chicks.jpg', label: 'Kycklingar' },
+  { path: '/blog-images/eggs-nest.jpg', label: 'Ägg i bo' },
+  { path: '/blog-images/hens-feeding.jpg', label: 'Utfodring' },
+  { path: '/blog-images/hen-health-check.jpg', label: 'Hälsokontroll' },
+  { path: '/blog-images/rooster-portrait.jpg', label: 'Tupp' },
+  { path: '/blog-images/hens-autumn.jpg', label: 'Höst' },
+  { path: '/blog-images/winter-hens.jpg', label: 'Vinter' },
+  { path: '/blog-images/feed-varieties.jpg', label: 'Fodersorter' },
+  { path: '/blog-images/hen-with-chicks.jpg', label: 'Höna med kycklingar' },
+  { path: '/blog-images/organic-eggs.jpg', label: 'Ekologiska ägg' },
+  { path: '/blog-images/building-coop.jpg', label: 'Bygga hönshus' },
+  { path: '/blog-images/chicken-breeds.jpg', label: 'Hönsraser' },
+  { path: '/blog-images/morning-farm.jpg', label: 'Morgon på gården' },
+  { path: '/blog-images/egg-collecting.jpg', label: 'Ägginsamling' },
+  { path: '/blog-images/dust-bath.jpg', label: 'Sandbad' },
+  { path: '/blog-images/water-station.jpg', label: 'Vattenstation' },
+  { path: '/blog-images/hens-meadow.jpg', label: 'Blomsteräng' },
+  { path: '/blog-images/sunset-farm.jpg', label: 'Solnedgång' },
+  { path: '/blog-images/hen-nesting.jpg', label: 'Höna ruvar' },
+  { path: '/blog-images/chicken-run.jpg', label: 'Hönsrastgård' },
+  { path: '/blog-images/roost-bar.jpg', label: 'Sittpinne' },
+  { path: '/blog-images/farm-kitchen.jpg', label: 'Lantligt kök' },
+  { path: '/blog-images/spring-garden.jpg', label: 'Vårträdgård' },
+  { path: '/blog-images/hen-detail.jpg', label: 'Hönsdetalj' },
+  { path: '/blog-images/silkie-chicken.jpg', label: 'Silkeshöna' },
+  { path: '/blog-images/grit-calcium.jpg', label: 'Maggrus' },
+];
+
 type BlogPost = {
   id: string;
   title: string;
@@ -291,6 +324,26 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                 </label>
               )}
               <Input value={coverUrl} onChange={e => setCoverUrl(e.target.value)} placeholder="Eller klistra in bild-URL" className="rounded-xl text-xs" />
+              
+              {/* Image gallery picker */}
+              <details className="group">
+                <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1">
+                  <ImagePlus className="h-3 w-3" /> Välj exempelbild ({stockImages.length} st)
+                </summary>
+                <div className="grid grid-cols-3 gap-1.5 mt-2 max-h-48 overflow-y-auto rounded-lg">
+                  {stockImages.map((img) => (
+                    <button
+                      key={img.path}
+                      type="button"
+                      onClick={() => setCoverUrl(img.path)}
+                      className={`relative aspect-video rounded-md overflow-hidden border-2 transition-all hover:opacity-90 ${coverUrl === img.path ? 'border-primary ring-1 ring-primary' : 'border-transparent'}`}
+                    >
+                      <img src={img.path} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
+                      <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] leading-tight px-1 py-0.5 truncate">{img.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </details>
             </CardContent>
           </Card>
 
