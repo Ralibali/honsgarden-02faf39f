@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import eggsBasket from '@/assets/eggs-basket.jpg';
 import heroCoop from '@/assets/hero-coop.jpg';
 import henPortrait from '@/assets/hen-portrait.jpg';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const ONBOARDING_KEY = 'honsgarden-onboarding-done';
 
@@ -61,18 +63,50 @@ const steps = [
 export default function OnboardingGuide() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const done = localStorage.getItem(ONBOARDING_KEY);
-    if (!done) {
-      const timer = setTimeout(() => setOpen(true), 800);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    if (!user?.id) return;
+
+    // Check localStorage first (fast), then DB as source of truth
+    const localDone = localStorage.getItem(ONBOARDING_KEY);
+    if (localDone) return;
+
+    // Check DB preference
+    supabase
+      .from('profiles')
+      .select('preferences')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const prefs = (data?.preferences as Record<string, any>) ?? {};
+        if (prefs.onboarding_done) {
+          localStorage.setItem(ONBOARDING_KEY, '1');
+          return;
+        }
+        // First time – show onboarding
+        setTimeout(() => setOpen(true), 800);
+      });
+  }, [user?.id]);
 
   const finish = () => {
     setOpen(false);
     localStorage.setItem(ONBOARDING_KEY, '1');
+    // Persist to DB so it never shows again, even on new devices
+    if (user?.id) {
+      supabase
+        .from('profiles')
+        .select('preferences')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          const prefs = (data?.preferences as Record<string, any>) ?? {};
+          void supabase
+            .from('profiles')
+            .update({ preferences: { ...prefs, onboarding_done: true } })
+            .eq('user_id', user.id);
+        });
+    }
   };
 
   const next = () => {
