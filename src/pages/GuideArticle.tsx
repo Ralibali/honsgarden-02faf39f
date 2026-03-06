@@ -59,11 +59,41 @@ function renderMarkdown(md: string): string {
 }
 
 /** Sanitize and render content – supports both raw HTML and Markdown */
-function renderContent(content: string): string {
-  const raw = isHtmlContent(content) ? content : renderMarkdown(content);
+function renderContent(content: string, otherPosts?: { title: string; slug: string }[]): string {
+  let raw = isHtmlContent(content) ? content : renderMarkdown(content);
+
+  // Auto internal linking: find mentions of other post titles and link them
+  if (otherPosts && otherPosts.length > 0) {
+    // Sort by title length descending so longer titles match first
+    const sorted = [...otherPosts].sort((a, b) => b.title.length - a.title.length);
+    const linked = new Set<string>();
+
+    for (const other of sorted) {
+      if (linked.size >= 5) break; // Max 5 internal links per article
+      // Create variations to match: full title and simplified keywords
+      const titleWords = other.title.split(/[\s–—-]+/).filter(w => w.length > 3);
+      const searchTerms = [other.title];
+      // Add 2-3 word key phrases from the title
+      if (titleWords.length >= 2) {
+        searchTerms.push(titleWords.slice(0, 3).join(' '));
+      }
+
+      for (const term of searchTerms) {
+        if (linked.has(other.slug)) break;
+        // Only match text NOT already inside a tag or link
+        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<![<\\/a-zA-Z"=])\\b(${escapedTerm})\\b(?![^<]*>)(?![^<]*<\\/a>)`, 'i');
+        if (regex.test(raw)) {
+          raw = raw.replace(regex, `<a href="/blogg/${other.slug}" class="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity" title="${other.title}">$1</a>`);
+          linked.add(other.slug);
+        }
+      }
+    }
+  }
+
   return DOMPurify.sanitize(raw, {
     ADD_TAGS: ['iframe', 'video', 'source', 'picture', 'details', 'summary'],
-    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style'],
+    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style', 'title'],
   });
 }
 
