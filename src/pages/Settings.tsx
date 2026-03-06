@@ -94,9 +94,42 @@ export default function SettingsPage() {
   };
 
   const saveCoopMutation = useMutation({
-    mutationFn: (data: any) => api.updateCoopSettings(data),
+    mutationFn: async (data: any) => {
+      await api.updateCoopSettings(data);
+      // Auto-create example hens if hen_count > existing hens
+      const desiredCount = Number(data.hen_count) || 0;
+      if (desiredCount > 0) {
+        const existingHens = await api.getHens();
+        const activeHens = (existingHens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
+        const toCreate = desiredCount - activeHens.length;
+        if (toCreate > 0) {
+          const exampleNames = [
+            'Greta', 'Agda', 'Astrid', 'Berta', 'Doris', 'Elsa', 'Freja', 'Gullan',
+            'Hedvig', 'Inga', 'Kajsa', 'Lotta', 'Maja', 'Nora', 'Olga', 'Petra',
+            'Rut', 'Sigrid', 'Tyra', 'Ulla', 'Vera', 'Ylva', 'Åsa', 'Östra',
+            'Alma', 'Birgit', 'Dagny', 'Ebba', 'Fanny', 'Gerd',
+          ];
+          const usedNames = new Set((existingHens as any[]).map((h: any) => h.name));
+          const available = exampleNames.filter(n => !usedNames.has(n));
+          const breeds = ['Barnevelder', 'Leghorn', 'Sussex', 'Orpington', 'Wyandotte', 'Australorp', 'Maran', 'Araucana'];
+          const colors = ['Brun', 'Vit', 'Svart', 'Röd', 'Grå', 'Spräcklig'];
+          for (let i = 0; i < toCreate && i < available.length; i++) {
+            await api.createHen({
+              name: available[i],
+              breed: breeds[i % breeds.length],
+              color: colors[i % colors.length],
+              hen_type: 'hen',
+              birth_date: null,
+              notes: null,
+              flock_id: null,
+            });
+          }
+        }
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coop-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['hens'] });
       toast({ title: 'Inställningar sparade! ✅' });
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
