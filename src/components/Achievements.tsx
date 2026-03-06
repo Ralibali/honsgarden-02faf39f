@@ -18,6 +18,13 @@ interface Achievement {
   tier: 'bronze' | 'silver' | 'gold' | 'diamond';
 }
 
+const TIER_PREMIUM_DAYS: Record<Achievement['tier'], number> = {
+  bronze: 1,
+  silver: 3,
+  gold: 5,
+  diamond: 7,
+};
+
 interface AchievementsProps {
   eggs: any[];
   hens: any[];
