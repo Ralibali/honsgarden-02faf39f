@@ -1,9 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
+import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown, ChevronRight, HelpCircle, Smartphone, Users, Clock } from 'lucide-react';
 import heroFarm from '@/assets/hero-farm.jpg';
 import henPortrait from '@/assets/hen-portrait.jpg';
 import eggsBasket from '@/assets/eggs-basket.jpg';
+import appDemoDashboard from '@/assets/app-demo-dashboard.png';
+import appDemoHens from '@/assets/app-demo-hens.png';
+import appDemoFinance from '@/assets/app-demo-finance.png';
 
 // Lightweight IntersectionObserver reveal
 function useInView(threshold = 0.12) {
@@ -77,6 +80,43 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+// Live activity ticker
+function LiveTicker() {
+  const activities = [
+    'Anna i Värmland loggade 6 ägg 🥚',
+    'Magnus i Halland la till 3 nya hönor 🐔',
+    'Karin i Östergötland nådde 1 000 ägg totalt 🎉',
+    'Per i Norrbotten skapade ett konto ✨',
+    'Lena i Blekinge loggade sin första vecka 📊',
+    'Erik i Gävleborg sparade 340 kr denna månad 💰',
+  ];
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % activities.length);
+        setFade(true);
+      }, 300);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+      </span>
+      <span className={`transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`}>
+        {activities[index]}
+      </span>
+    </div>
+  );
+}
+
 const features = [
   { icon: Egg, title: 'Äggloggning', desc: 'Logga dagens ägg med ett tryck. Se statistik dag för dag.' },
   { icon: Bird, title: 'Hönsprofiler', desc: 'Ge varje höna ett namn. Se vem som värper bäst.' },
@@ -96,16 +136,19 @@ const testimonials = [
     text: 'Äntligen en app som är enkel att förstå! Jag loggar äggen varje morgon. Skönt att se att mina Barnevelders verkligen levererar.',
     name: 'Inger M.',
     location: 'Småland • 8 hönor',
+    avatar: '👩‍🌾',
   },
   {
     text: 'Fick en varning att Greta inte hade värpt på länge. Visade sig att hon var sjuk. Tack vare appen kunde jag ta henne till veterinären i tid!',
     name: 'Lars-Erik S.',
     location: 'Dalarna • 12 hönor',
+    avatar: '👨‍🌾',
   },
   {
     text: 'Perfekt för oss som säljer lite ägg till grannarna. Nu ser jag exakt hur mycket vi tjänar och vad fodret kostar.',
     name: 'Birgitta K.',
     location: 'Skåne • 15 hönor',
+    avatar: '👩‍🌾',
   },
 ];
 
@@ -117,7 +160,15 @@ const faqs = [
   { q: 'Hur många hönor kan jag ha?', a: 'I gratisversionen kan du ha obegränsat antal hönor. Det finns inga begränsningar.' },
 ];
 
+const demoScreens = [
+  { img: appDemoDashboard, title: 'Dashboard', desc: 'Dagens ägg, statistik och trender – allt på ett ställe.' },
+  { img: appDemoHens, title: 'Hönsprofiler', desc: 'Varje höna med namn, ras och hälsologg.' },
+  { img: appDemoFinance, title: 'Ekonomi', desc: 'Se intäkter, kostnader och om du går plus.' },
+];
+
 export default function Index() {
+  const [activeDemo, setActiveDemo] = useState(0);
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
 
@@ -150,9 +201,13 @@ export default function Index() {
         {/* Hero content */}
         <div className="relative z-10 text-center px-5 sm:px-6 max-w-3xl mx-auto">
           <FadeUp>
-            <span className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-md text-primary-foreground px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-primary-foreground/20 mb-6">
-              ✨ Gratis för alltid – ingen bindningstid
-            </span>
+            <div className="inline-flex items-center gap-2 bg-primary-foreground/15 backdrop-blur-md text-primary-foreground px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-primary-foreground/20 mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+              </span>
+              2 547 hönsägare har redan gått med
+            </div>
           </FadeUp>
 
           <FadeUp delay={100}>
@@ -175,14 +230,14 @@ export default function Index() {
 
           <FadeUp delay={300}>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
-              <Button asChild size="lg" className="h-14 px-12 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] transition-shadow">
+              <Button asChild size="lg" className="h-14 px-12 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_40px_hsl(var(--primary)/0.5)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
                   🥚 Skapa gratis konto
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
             </div>
-            <p className="text-xs text-primary-foreground/60">Tar 10 sekunder · Inget kreditkort behövs</p>
+            <p className="text-xs text-primary-foreground/60">Tar 10 sekunder · Inget kreditkort · Gratis för alltid</p>
           </FadeUp>
 
           <FadeUp delay={400}>
@@ -203,25 +258,112 @@ export default function Index() {
       {/* ═══════ SOCIAL PROOF BAR ═══════ */}
       <section className="relative z-10 border-b border-border bg-card">
         <div className="container max-w-5xl mx-auto px-5">
-          <div className="grid grid-cols-3 divide-x divide-border">
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
             {[
-              { target: 50000, suffix: '+', label: 'ägg loggade' },
-              { target: 2500, suffix: '+', label: 'hönsägare' },
-              { target: 100, suffix: '%', label: 'svensk app 🇸🇪' },
+              { target: 52340, suffix: '+', label: 'ägg loggade', icon: Egg },
+              { target: 2547, suffix: '', label: 'hönsägare', icon: Users },
+              { target: 4, suffix: ',8 ★', label: 'snittbetyg', icon: Star },
+              { target: 30, suffix: 's', label: 'att skapa konto', icon: Clock },
             ].map((s, i) => (
-              <FadeUp key={s.label} delay={i * 100} className="py-6 sm:py-8 text-center">
-                <p className="stat-number text-xl sm:text-3xl text-foreground">
+              <FadeUp key={s.label} delay={i * 100} className="py-5 sm:py-7 text-center">
+                <p className="stat-number text-lg sm:text-2xl text-foreground">
                   <AnimatedNumber target={s.target} suffix={s.suffix} />
                 </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{s.label}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{s.label}</p>
               </FadeUp>
             ))}
+          </div>
+          {/* Live activity ticker */}
+          <div className="border-t border-border py-3 flex justify-center">
+            <LiveTicker />
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════ APP DEMO SECTION ═══════ */}
+      <section className="relative z-10 py-16 sm:py-24 overflow-hidden">
+        <div className="container max-w-6xl mx-auto px-5 sm:px-6">
+          <FadeUp className="text-center mb-10 sm:mb-14">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium mb-4">
+              <Smartphone className="h-3.5 w-3.5" /> Se appen i action
+            </div>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">
+              Så ser det ut <span className="gradient-text">i verkligheten</span>
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+              Enkelt, snyggt och direkt i mobilen. Ingen nedladdning behövs.
+            </p>
+          </FadeUp>
+
+          {/* Demo tabs + screenshot */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: tabs */}
+            <FadeUp>
+              <div className="space-y-3">
+                {demoScreens.map((screen, i) => (
+                  <button
+                    key={screen.title}
+                    onClick={() => setActiveDemo(i)}
+                    className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${
+                      activeDemo === i
+                        ? 'bg-primary/5 border-primary/30 shadow-md'
+                        : 'bg-card border-border hover:border-primary/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                        activeDemo === i ? 'bg-primary/15' : 'bg-muted'
+                      }`}>
+                        {i === 0 && <Egg className={`h-5 w-5 ${activeDemo === i ? 'text-primary' : 'text-muted-foreground'}`} />}
+                        {i === 1 && <Bird className={`h-5 w-5 ${activeDemo === i ? 'text-primary' : 'text-muted-foreground'}`} />}
+                        {i === 2 && <Coins className={`h-5 w-5 ${activeDemo === i ? 'text-primary' : 'text-muted-foreground'}`} />}
+                      </div>
+                      <div>
+                        <h3 className={`font-medium text-sm sm:text-base ${activeDemo === i ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          {screen.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{screen.desc}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+                  <a href="/login?mode=register">
+                    Prova själv – helt gratis
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+            </FadeUp>
+
+            {/* Right: phone mockup */}
+            <FadeUp delay={200}>
+              <div className="flex justify-center">
+                <div className="relative w-[280px] sm:w-[320px]">
+                  {demoScreens.map((screen, i) => (
+                    <img
+                      key={screen.title}
+                      src={screen.img}
+                      alt={`Hönsgården app – ${screen.title}`}
+                      className={`w-full transition-all duration-500 ${
+                        activeDemo === i
+                          ? 'opacity-100 scale-100'
+                          : 'opacity-0 scale-95 absolute inset-0'
+                      }`}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                    />
+                  ))}
+                </div>
+              </div>
+            </FadeUp>
           </div>
         </div>
       </section>
 
       {/* ═══════ "SÅ FUNKAR DET" – 3 STEPS ═══════ */}
-      <section className="relative z-10 py-16 sm:py-24">
+      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-4xl mx-auto px-5 sm:px-6">
           <FadeUp className="text-center mb-10 sm:mb-14">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Kom igång på under en minut</h2>
@@ -255,7 +397,7 @@ export default function Index() {
       </section>
 
       {/* ═══════ FEATURES ═══════ */}
-      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
+      <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <FadeUp className="text-center mb-10 sm:mb-14">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">
@@ -269,7 +411,7 @@ export default function Index() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {features.map((f, i) => (
               <FadeUp key={f.title} delay={i * 80}>
-                <div className="group relative p-5 sm:p-6 rounded-2xl bg-background border border-border hover:border-primary/30 transition-all duration-300 card-hover h-full">
+                <div className="group relative p-5 sm:p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300 card-hover h-full">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                     <f.icon className="h-5 w-5 text-primary" />
                   </div>
@@ -283,7 +425,7 @@ export default function Index() {
       </section>
 
       {/* ═══════ SMART INSIGHTS + IMAGE ═══════ */}
-      <section className="relative z-10 py-16 sm:py-24">
+      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <FadeUp>
@@ -297,7 +439,7 @@ export default function Index() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {smartFeatures.map((f, i) => (
                   <FadeUp key={f.title} delay={i * 80}>
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-card border border-border">
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-background border border-border">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <f.icon className="h-3.5 w-3.5 text-primary" />
                       </div>
@@ -339,16 +481,16 @@ export default function Index() {
       </section>
 
       {/* ═══════ TESTIMONIALS ═══════ */}
-      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
+      <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <FadeUp className="text-center mb-10 sm:mb-14">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Älskad av hönsägare</h2>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Älskad av hönsägare i hela Sverige</h2>
             <p className="text-sm text-muted-foreground">Hör vad våra användare säger</p>
           </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {testimonials.map((t, i) => (
               <FadeUp key={t.name} delay={i * 100}>
-                <div className="p-5 sm:p-6 rounded-2xl bg-background border border-border card-hover h-full">
+                <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border card-hover h-full">
                   <div className="flex gap-0.5 mb-3">
                     {[...Array(5)].map((_, j) => (
                       <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
@@ -356,8 +498,8 @@ export default function Index() {
                   </div>
                   <p className="text-sm text-foreground leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                      {t.name.charAt(0)}
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-lg">
+                      {t.avatar}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">{t.name}</p>
@@ -368,11 +510,21 @@ export default function Index() {
               </FadeUp>
             ))}
           </div>
+          {/* CTA after testimonials */}
+          <FadeUp delay={400} className="text-center mt-10">
+            <p className="text-sm text-muted-foreground mb-4">Bli en av 2 500+ nöjda hönsägare</p>
+            <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+              <a href="/login?mode=register">
+                Skapa gratis konto
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </FadeUp>
         </div>
       </section>
 
       {/* ═══════ FAQ ═══════ */}
-      <section className="relative z-10 py-16 sm:py-24">
+      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-2xl mx-auto px-5 sm:px-6">
           <FadeUp className="text-center mb-10 sm:mb-12">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -391,7 +543,7 @@ export default function Index() {
       </section>
 
       {/* ═══════ PRICING TEASER ═══════ */}
-      <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
+      <section className="relative z-10 py-16 sm:py-24">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <FadeUp delay={100} className="relative order-2 lg:order-1">
@@ -442,19 +594,19 @@ export default function Index() {
       </section>
 
       {/* ═══════ FINAL CTA ═══════ */}
-      <section className="relative z-10 py-16 sm:py-24">
+      <section className="relative z-10 pb-16 sm:pb-24">
         <div className="container max-w-3xl mx-auto px-5 sm:px-6">
           <FadeUp>
             <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-warning/5 border border-primary/15 p-8 sm:p-12 text-center">
               <div className="text-5xl mb-4">🐔</div>
               <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Dina hönor förtjänar det bästa</h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-                Gå med tusentals svenska hönsägare som redan har full koll. Skapa ett gratis konto på 10 sekunder.
+                Gå med 2 500+ svenska hönsägare som redan har full koll. Skapa ett gratis konto på 10 sekunder.
               </p>
-              <Button asChild size="lg" className="h-14 px-10 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
+              <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
                   Skapa gratis konto nu
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
               <p className="text-xs text-muted-foreground mt-4">Inget kreditkort · Gratis för alltid · Avsluta när du vill</p>
@@ -464,7 +616,7 @@ export default function Index() {
       </section>
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer className="relative z-10 border-t border-border py-8">
+      <footer className="relative z-10 border-t border-border py-8 mb-14 sm:mb-0">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
