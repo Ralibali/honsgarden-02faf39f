@@ -227,6 +227,219 @@
   .stagger-children > *:nth-child(8) { animation-delay: 420ms; }
 }
 
+/* Blog prose - override inline styles for theme compatibility */
+.prose-custom {
+  color: hsl(var(--foreground));
+  line-height: 1.8;
+  font-size: 17px;
+}
+
+.prose-custom h1,
+.prose-custom h2,
+.prose-custom h3,
+.prose-custom h4 {
+  color: hsl(var(--foreground)) !important;
+  font-family: 'Young Serif', serif;
+}
+
+.prose-custom h2 {
+  border-bottom-color: hsl(var(--border)) !important;
+}
+
+.prose-custom p,
+.prose-custom li,
+.prose-custom span,
+.prose-custom td,
+.prose-custom th {
+  color: hsl(var(--foreground) / 0.9) !important;
+}
+
+.prose-custom strong {
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose-custom a {
+  color: hsl(var(--primary)) !important;
+}
+
+.prose-custom blockquote,
+.prose-custom .intro-block {
+  border-left-color: hsl(var(--accent)) !important;
+}
+
+.prose-custom blockquote p,
+.prose-custom .intro-block p {
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+
+.prose-custom hr {
+  border-color: hsl(var(--border)) !important;
+}
+
+.prose-custom table {
+  border-color: hsl(var(--border)) !important;
+}
+
+.prose-custom thead {
+  background: hsl(var(--primary)) !important;
+}
+
+.prose-custom thead th {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.prose-custom tbody tr:nth-child(even) {
+  background: hsl(var(--muted) / 0.3) !important;
+}
+
+.prose-custom tbody tr:nth-child(odd) {
+  background: hsl(var(--card)) !important;
+}
+
+.prose-custom tbody td {
+  border-bottom-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground) / 0.9) !important;
+}
+
+.prose-custom .table-wrapper {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Problem cards, experience boxes, summary boxes */
+.prose-custom .problem-card,
+.prose-custom .faq-item {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.prose-custom .problem-card-number {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.prose-custom .problem-card h3 {
+  color: hsl(var(--accent)) !important;
+}
+
+.prose-custom .experience-box {
+  background: hsl(var(--primary) / 0.08) !important;
+  border-left-color: hsl(var(--primary)) !important;
+}
+
+.prose-custom .experience-box h3 {
+  color: hsl(var(--primary)) !important;
+}
+
+.prose-custom .experience-box p,
+.prose-custom .experience-box li {
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+
+.prose-custom .summary-box {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.prose-custom .summary-box h2 {
+  color: hsl(var(--foreground)) !important;
+  border-bottom-color: hsl(var(--border)) !important;
+}
+
+.prose-custom .summary-box p,
+.prose-custom .summary-box li {
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+
+.prose-custom .summary-box strong {
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose-custom .summary-box ul li::marker {
+  color: hsl(var(--accent)) !important;
+}
+
+.prose-custom .faq-q {
+  background: hsl(var(--muted) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose-custom .faq-q::after {
+  color: hsl(var(--accent)) !important;
+}
+
+.prose-custom .faq-a {
+  background: hsl(var(--card)) !important;
+  border-top-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+
+.prose-custom .mistake-item {
+  border-bottom-color: hsl(var(--border)) !important;
+}
+
+.prose-custom .mistake-num,
+.prose-custom .step-num {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.prose-custom .label {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.prose-custom ul li::marker {
+  color: hsl(var(--accent)) !important;
+}
+
+/* Meta section at bottom */
+.prose-custom .meta-section {
+  background: hsl(var(--muted) / 0.3) !important;
+  border-top-color: hsl(var(--border)) !important;
+}
+
+.prose-custom .meta-card,
+.prose-custom .meta-full {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.prose-custom .meta-card-label {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.prose-custom .meta-card-value {
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose-custom .tag {
+  background: hsl(var(--muted) / 0.3) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground) / 0.8) !important;
+}
+
+/* Hero section in blog content */
+.prose-custom .hero {
+  background: var(--hero-gradient) !important;
+}
+
+.prose-custom .hero h1,
+.prose-custom .hero .hero-meta {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.prose-custom .site-header {
+  background: hsl(var(--card)) !important;
+}
+
+.prose-custom .site-header span {
+  color: hsl(var(--foreground) / 0.6) !important;
+}
+
+.prose-custom footer {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 5px;
