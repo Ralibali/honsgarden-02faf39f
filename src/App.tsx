@@ -56,6 +56,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Clear React Query cache when user changes to prevent data leakage
+function CacheClearer() {
+  const { user } = useAuth();
+  const prevUserId = React.useRef<string | null>(user?.id ?? null);
+
+  React.useEffect(() => {
+    if (user?.id !== prevUserId.current) {
+      queryClient.clear();
+      prevUserId.current = user?.id ?? null;
+    }
+  }, [user?.id]);
+
+  return null;
+}
+
 const AppRoutes = () => (
   <BrowserRouter>
     <Suspense fallback={<LoadingFallback />}>
