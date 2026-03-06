@@ -47,6 +47,25 @@ export default function Guides() {
   return (
     <div className="min-h-screen bg-background">
       <VisitorWelcomePopup />
+
+      {/* ItemList JSON-LD for blog listing */}
+      {posts.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              itemListElement: posts.map((p, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                url: `https://honsgarden.se/blogg/${p.slug}`,
+                name: p.title,
+              })),
+            }),
+          }}
+        />
+      )}
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
