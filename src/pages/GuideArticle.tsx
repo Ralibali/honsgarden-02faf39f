@@ -88,6 +88,7 @@ export default function GuideArticle() {
   // SEO - set document title, meta, and JSON-LD
   React.useEffect(() => {
     if (post) {
+      const BASE = 'https://honsgarden.se';
       document.title = post.meta_title || post.title + ' | Hönsgården';
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', post.meta_description || post.excerpt || '');
@@ -99,25 +100,67 @@ export default function GuideArticle() {
         canonical.rel = 'canonical';
         document.head.appendChild(canonical);
       }
-      canonical.href = `https://honsgarden.lovable.app/blogg/${post.slug}`;
+      canonical.href = `${BASE}/blogg/${post.slug}`;
 
-      // JSON-LD Article structured data
-      const jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: post.title,
-        description: post.meta_description || post.excerpt || '',
-        image: post.cover_image_url || 'https://honsgarden.lovable.app/favicon.ico',
-        datePublished: post.published_at,
-        dateModified: post.updated_at || post.published_at,
-        author: { '@type': 'Organization', name: 'Hönsgården' },
-        publisher: {
-          '@type': 'Organization',
-          name: 'Hönsgården',
-          url: 'https://honsgarden.lovable.app',
+      // Build JSON-LD @graph with Article + BreadcrumbList + optional FAQPage
+      const graph: any[] = [
+        {
+          '@type': 'Article',
+          headline: post.title,
+          description: post.meta_description || post.excerpt || '',
+          image: post.cover_image_url ? (post.cover_image_url.startsWith('http') ? post.cover_image_url : `${BASE}${post.cover_image_url}`) : `${BASE}/favicon.ico`,
+          datePublished: post.published_at,
+          dateModified: post.updated_at || post.published_at,
+          author: { '@type': 'Organization', name: 'Hönsgården', url: BASE },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Hönsgården',
+            url: BASE,
+            logo: { '@type': 'ImageObject', url: `${BASE}/favicon.ico` },
+          },
+          mainEntityOfPage: `${BASE}/blogg/${post.slug}`,
+          inLanguage: 'sv-SE',
+          ...(post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
         },
-        mainEntityOfPage: `https://honsgarden.lovable.app/blogg/${post.slug}`,
-      };
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Hem', item: BASE },
+            { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE}/blogg` },
+            { '@type': 'ListItem', position: 3, name: post.title, item: `${BASE}/blogg/${post.slug}` },
+          ],
+        },
+      ];
+
+      // Extract FAQ pairs from HTML content for FAQPage schema
+      const faqPairs: { q: string; a: string }[] = [];
+      const faqRegex = /<(?:div|dt)[^>]*class="faq-q"[^>]*>([\s\S]*?)<\/(?:div|dt)>\s*<(?:div|dd)[^>]*class="faq-a"[^>]*>([\s\S]*?)<\/(?:div|dd)>/gi;
+      let match;
+      while ((match = faqRegex.exec(post.content)) !== null) {
+        const q = match[1].replace(/<[^>]+>/g, '').trim();
+        const a = match[2].replace(/<[^>]+>/g, '').trim();
+        if (q && a) faqPairs.push({ q, a });
+      }
+      // Also check for <details><summary> FAQ pattern
+      const detailsRegex = /<summary[^>]*>([\s\S]*?)<\/summary>\s*([\s\S]*?)(?=<\/details>)/gi;
+      while ((match = detailsRegex.exec(post.content)) !== null) {
+        const q = match[1].replace(/<[^>]+>/g, '').trim();
+        const a = match[2].replace(/<[^>]+>/g, '').trim();
+        if (q && a) faqPairs.push({ q, a });
+      }
+
+      if (faqPairs.length > 0) {
+        graph.push({
+          '@type': 'FAQPage',
+          mainEntity: faqPairs.map(({ q, a }) => ({
+            '@type': 'Question',
+            name: q,
+            acceptedAnswer: { '@type': 'Answer', text: a },
+          })),
+        });
+      }
+
+      const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
       let script = document.getElementById('json-ld-article') as HTMLScriptElement;
       if (!script) {
         script = document.createElement('script');

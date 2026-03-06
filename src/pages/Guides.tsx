@@ -24,7 +24,7 @@ export default function Guides() {
     if (metaDesc) metaDesc.setAttribute('content', 'Recensioner, guider och tips för dig som håller höns. Allt från foder till hönshus – testat och granskat av Hönsgården.');
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
-    canonical.href = 'https://honsgarden.lovable.app/blogg';
+    canonical.href = 'https://honsgarden.se/blogg';
     return () => { document.title = 'Hönsgården'; document.querySelector('link[rel="canonical"]')?.remove(); };
   }, []);
 
