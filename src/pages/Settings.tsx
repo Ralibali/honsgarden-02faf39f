@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import {
   User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail,
   FileText, HelpCircle, Crown, Download, Palette, Moon, Sun,
-  Heart, ExternalLink, Info,
+  Heart, ExternalLink, Info, Trash2,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
