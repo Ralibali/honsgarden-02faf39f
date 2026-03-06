@@ -388,7 +388,7 @@ export default function Index() {
           <FadeUp delay={400} className="text-center mt-10">
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
               <a href="/login?mode=register">
-                Skapa gratis konto
+                Testa själv
                 <ArrowRight className="h-4 w-4" />
               </a>
             </Button>
