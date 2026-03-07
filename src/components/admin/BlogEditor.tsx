@@ -330,6 +330,8 @@ ${rows}
   );
 }
 
+type EditorMode = 'edit' | 'preview' | 'split';
+
 function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(post?.title || '');
@@ -342,7 +344,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [metaDescription, setMetaDescription] = useState(post?.meta_description || '');
   const [coverUrl, setCoverUrl] = useState(post?.cover_image_url || '');
   const [uploading, setUploading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [editorMode, setEditorMode] = useState<EditorMode>('edit');
   const [autoSlug, setAutoSlug] = useState(!post);
   const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>((post as any)?.glossary_ids || []);
 
