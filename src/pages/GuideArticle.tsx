@@ -14,6 +14,9 @@ const categoryLabels: Record<string, string> = {
   tips: 'Tips & tricks',
   halsa: 'Hälsa',
   nyborjare: 'Nybörjare',
+  tradgard: 'Trädgård & odling',
+  hem: 'Hem & hållbarhet',
+  friluftsliv: 'Friluftsliv & natur',
 };
 
 /** Detect if content is raw HTML (starts with a tag) or Markdown */
@@ -84,31 +87,47 @@ function renderContent(
     }
   }
 
-  // Auto internal linking: find mentions of other post titles and link them
+  // Auto internal linking: extract contextual keywords from titles/slugs and match in content
   if (otherPosts && otherPosts.length > 0) {
-    // Sort by title length descending so longer titles match first
-    const sorted = [...otherPosts].sort((a, b) => b.title.length - a.title.length);
     const linked = new Set<string>();
+    const stopWords = new Set(['guide', 'allt', 'bästa', 'enkla', 'denna', 'dessa', 'tips', 'från', 'till', 'eller', 'sverige', 'hemma', 'första', 'andra', 'igång', 'behöver', 'säker']);
 
-    for (const other of sorted) {
-      if (linked.size >= 5) break; // Max 5 internal links per article
-      // Create variations to match: full title and simplified keywords
-      const titleWords = other.title.split(/[\s–—-]+/).filter(w => w.length > 3);
-      const searchTerms = [other.title];
-      // Add 2-3 word key phrases from the title
-      if (titleWords.length >= 2) {
-        searchTerms.push(titleWords.slice(0, 3).join(' '));
+    // Build keyword → post mapping from titles
+    const keywordMap: { keyword: string; slug: string; title: string }[] = [];
+    for (const other of otherPosts) {
+      // Use the first part of the title (before –) as a keyword phrase
+      const parts = other.title.split(/\s*[–—|]\s*/);
+      if (parts[0]) {
+        keywordMap.push({ keyword: parts[0].trim(), slug: other.slug, title: other.title });
       }
+      // Readable slug as keyword (e.g. "kompostera hemma")
+      const slugPhrase = other.slug.replace(/-/g, ' ');
+      keywordMap.push({ keyword: slugPhrase, slug: other.slug, title: other.title });
+      // Extract meaningful individual words (5+ chars) as fallback
+      const words = other.title.toLowerCase().split(/[\s–—,.:]+/).filter(w => w.length >= 5 && !stopWords.has(w));
+      for (const word of words) {
+        keywordMap.push({ keyword: word, slug: other.slug, title: other.title });
+      }
+    }
 
-      for (const term of searchTerms) {
-        if (linked.has(other.slug)) break;
-        // Only match text NOT already inside a tag or link
-        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`(?<![<\\/a-zA-Z"=])\\b(${escapedTerm})\\b(?![^<]*>)(?![^<]*<\\/a>)`, 'i');
-        if (regex.test(raw)) {
-          raw = raw.replace(regex, `<a href="/blogg/${other.slug}" class="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity" title="${other.title}">$1</a>`);
-          linked.add(other.slug);
-        }
+    // Sort by keyword length descending (prefer longer, more specific matches)
+    keywordMap.sort((a, b) => b.keyword.length - a.keyword.length);
+
+    for (const entry of keywordMap) {
+      if (linked.size >= 5) break;
+      if (linked.has(entry.slug)) continue;
+
+      const escaped = entry.keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(
+        `(?<![<\\/a-zA-Z"=])\\b(${escaped})\\b(?![^<]*>)(?![^<]*<\\/a>)(?![^<]*<\\/h[1-6]>)`,
+        'i'
+      );
+      if (regex.test(raw)) {
+        raw = raw.replace(
+          regex,
+          `<a href="/blogg/${entry.slug}" class="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity" title="${entry.title.replace(/"/g, '&quot;')}">$1</a>`
+        );
+        linked.add(entry.slug);
       }
     }
   }
