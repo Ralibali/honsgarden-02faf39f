@@ -334,7 +334,8 @@ export default function GuideArticle() {
               post.content,
               allPosts
                 .filter(p => p.slug !== slug)
-                .map(p => ({ title: p.title, slug: p.slug }))
+                .map(p => ({ title: p.title, slug: p.slug })),
+              glossary
             ),
           }}
         />
