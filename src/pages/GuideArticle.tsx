@@ -133,7 +133,13 @@ export default function GuideArticle() {
         .eq('is_published', true)
         .single();
       if (error) throw error;
-      return data;
+      // Fetch author name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', data.author_id)
+        .single();
+      return { ...data, author_name: profile?.display_name || 'Hönsgården' };
     },
     enabled: !!slug,
   });
