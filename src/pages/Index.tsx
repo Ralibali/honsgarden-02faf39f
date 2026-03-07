@@ -187,7 +187,7 @@ export default function Index() {
           <img
             src="/hero-home.jpg"
             alt="Höns som pickar fritt på en grön äng i solljus"
-            className="w-full h-full object-cover object-[50%_35%] animate-hero-zoom"
+            className="w-full h-full object-cover object-[50%_55%] animate-hero-zoom"
             loading="eager"
           />
         </div>
