@@ -274,7 +274,7 @@ export default function Index() {
               { target: 52340, suffix: '+', label: 'ägg loggade', icon: Egg },
               { target: 2547, suffix: '', label: 'hönsägare', icon: Users },
               { target: 4, suffix: ',8 ★', label: 'snittbetyg', icon: Star },
-              { target: 30, suffix: 's', label: 'att skapa konto', icon: Clock },
+              { target: 10, suffix: 's', label: 'att skapa konto', icon: Clock },
             ].map((s, i) => (
               <FadeUp key={s.label} delay={i * 100} className="py-5 sm:py-7 text-center">
                 <p className="stat-number text-lg sm:text-2xl text-foreground">
