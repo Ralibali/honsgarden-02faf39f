@@ -330,6 +330,8 @@ ${rows}
   );
 }
 
+type EditorMode = 'edit' | 'preview' | 'split';
+
 function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState(post?.title || '');
@@ -342,7 +344,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [metaDescription, setMetaDescription] = useState(post?.meta_description || '');
   const [coverUrl, setCoverUrl] = useState(post?.cover_image_url || '');
   const [uploading, setUploading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [editorMode, setEditorMode] = useState<EditorMode>('edit');
   const [autoSlug, setAutoSlug] = useState(!post);
   const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>((post as any)?.glossary_ids || []);
 
@@ -460,18 +462,49 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-medium text-muted-foreground">Innehåll (Markdown / HTML)</label>
-                  <Button
-                    type="button"
-                    variant={showPreview ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-7 rounded-lg text-[10px] gap-1"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    <MonitorSmartphone className="h-3 w-3" />
-                    {showPreview ? 'Redigera' : 'Förhandsgranska'}
-                  </Button>
+                  <div className="flex gap-0.5 p-0.5 rounded-lg bg-muted/50">
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode('edit')}
+                      className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${editorMode === 'edit' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}
+                    >
+                      ✏️ Redigera
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode('split')}
+                      className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${editorMode === 'split' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}
+                    >
+                      📐 Delad vy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode('preview')}
+                      className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${editorMode === 'preview' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}
+                    >
+                      👁️ Förhandsvisa
+                    </button>
+                  </div>
                 </div>
-                {showPreview ? (
+
+                {editorMode === 'split' ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Skriv din artikel här..." rows={24} className="rounded-xl font-mono text-sm h-[600px] resize-none" />
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-background p-4 overflow-auto h-[600px]">
+                      {coverUrl && (
+                        <img src={coverUrl} alt={title} className="w-full aspect-video object-cover rounded-xl mb-4" />
+                      )}
+                      <h1 className="text-xl font-serif text-foreground mb-2">{title || 'Utan titel'}</h1>
+                      {excerpt && <p className="text-muted-foreground text-xs mb-4">{excerpt}</p>}
+                      <div
+                        className="prose-custom text-sm"
+                        dangerouslySetInnerHTML={{ __html: renderPreview(content) }}
+                      />
+                    </div>
+                  </div>
+                ) : editorMode === 'preview' ? (
                   <div className="rounded-xl border border-border/60 bg-background p-4 sm:p-6 min-h-[400px] overflow-auto">
                     {coverUrl && (
                       <img src={coverUrl} alt={title} className="w-full aspect-video object-cover rounded-xl mb-6" />
