@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,13 @@ export default function HenProfile() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '' });
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session);
+    });
+  }, []);
 
   const { data: hen, isLoading: henLoading } = useQuery({
     queryKey: ['hen-profile', henId],
@@ -278,8 +286,8 @@ export default function HenProfile() {
         </div>
       )}
 
-      {/* CTA */}
-      {!editing && (
+      {/* CTA – only for visitors who are not logged in */}
+      {!editing && !isLoggedIn && (
         <Card className="bg-primary/5 border-primary/15">
           <CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">
