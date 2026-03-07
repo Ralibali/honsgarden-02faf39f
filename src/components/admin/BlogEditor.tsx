@@ -344,6 +344,20 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [uploading, setUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [autoSlug, setAutoSlug] = useState(!post);
+  const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>((post as any)?.glossary_ids || []);
+
+  // Fetch all glossary entries
+  const { data: glossaryEntries = [] } = useQuery({
+    queryKey: ['glossary-entries-for-editor'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('link_glossary')
+        .select('id, keyword, url, is_active')
+        .order('keyword', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (autoSlug && title) setSlug(slugify(title));
