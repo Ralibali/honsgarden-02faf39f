@@ -25,6 +25,7 @@ export default function HenProfile() {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
