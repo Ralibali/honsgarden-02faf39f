@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import {
   ArrowLeft, Egg, Heart, Calendar, TrendingUp, Share2, Edit2, Loader2, Save, X,
-  Link2, Facebook, Instagram, Mail,
+  Link2, Facebook, Instagram, Mail, MessageSquare,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -138,7 +138,7 @@ export default function HenProfile() {
     setShareOpen(false);
   };
 
-  const shareVia = (platform: 'facebook' | 'instagram' | 'email') => {
+  const shareVia = (platform: 'facebook' | 'instagram' | 'email' | 'sms') => {
     const encoded = encodeURIComponent(shareUrl);
     const textEncoded = encodeURIComponent(shareText);
     if (platform === 'facebook') {
@@ -148,6 +148,8 @@ export default function HenProfile() {
       toast({ title: '📋 Text kopierad!', description: 'Klistra in i Instagram.' });
     } else if (platform === 'email') {
       window.open(`mailto:?subject=${encodeURIComponent(`${hen.name} – Hönsgården`)}&body=${textEncoded}%0A${encoded}`, '_blank');
+    } else if (platform === 'sms') {
+      window.open(`sms:?body=${textEncoded}%0A${encoded}`, '_blank');
     }
     setShareOpen(false);
   };
@@ -320,6 +322,9 @@ export default function HenProfile() {
             </Button>
             <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('email')}>
               <Mail className="h-4 w-4 text-muted-foreground" /> Skicka via e-post
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('sms')}>
+              <MessageSquare className="h-4 w-4 text-success" /> Skicka via SMS
             </Button>
           </div>
         </DialogContent>
