@@ -466,6 +466,36 @@ export type Database = {
           },
         ]
       }
+      link_glossary: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          keyword: string
+          rel: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          keyword: string
+          rel?: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          keyword?: string
+          rel?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
