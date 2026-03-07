@@ -19,16 +19,29 @@ const categoryLabels: Record<string, string> = {
 
 export default function Guides() {
   useSeo({
-    title: 'Blogg – Höns, hem, trädgård & friluftsliv | Hönsgården',
-    description: 'Guider, recensioner och tips om höns, hemmet, trädgården och friluftsliv. Testat och granskat av Hönsgården.',
+    title: 'Blogg om höns – Guider, recensioner & tips | Hönsgården',
+    description: 'Expertguider, produktrecensioner och tips om höns, hönshus, foder och hälsa. Allt du behöver veta som hönsägare – testat och granskat av Hönsgården.',
     path: '/blogg',
-    jsonLd: {
-      '@type': 'CollectionPage',
-      name: 'Bloggen – Höns, hem, trädgård & friluftsliv',
-      description: 'Guider, recensioner och tips om höns, hemmet, trädgården och friluftsliv.',
-      url: 'https://honsgarden.se/blogg',
-      isPartOf: { '@id': 'https://honsgarden.se/#website' },
-    },
+    ogImage: '/blog-images/hens-garden.jpg',
+    ogImageAlt: 'Höns i en vacker trädgård – Hönsgårdens blogg',
+    jsonLd: [
+      {
+        '@type': 'CollectionPage',
+        '@id': 'https://honsgarden.se/blogg',
+        name: 'Bloggen – Guider, recensioner & tips om höns',
+        description: 'Expertguider, produktrecensioner och tips om höns, hönshus, foder och hälsa.',
+        url: 'https://honsgarden.se/blogg',
+        isPartOf: { '@id': 'https://honsgarden.se/#website' },
+        inLanguage: 'sv-SE',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://honsgarden.se' },
+          { '@type': 'ListItem', position: 2, name: 'Blogg', item: 'https://honsgarden.se/blogg' },
+        ],
+      },
+    ],
   });
 
   const { data: posts = [], isLoading } = useQuery({
