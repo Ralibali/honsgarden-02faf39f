@@ -133,7 +133,13 @@ export default function GuideArticle() {
         .eq('is_published', true)
         .single();
       if (error) throw error;
-      return data;
+      // Fetch author name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', data.author_id)
+        .single();
+      return { ...data, author_name: profile?.display_name || 'Hönsgården' };
     },
     enabled: !!slug,
   });
@@ -421,6 +427,11 @@ export default function GuideArticle() {
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <CalendarDays className="h-3 w-3" />
               {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
+          )}
+          {post.author_name && (
+            <span className="text-xs text-muted-foreground">
+              av <span className="font-medium text-foreground/80">{post.author_name}</span>
             </span>
           )}
         </div>
