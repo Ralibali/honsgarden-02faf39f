@@ -15,6 +15,9 @@ const categoryLabels: Record<string, string> = {
   tips: 'Tips & tricks',
   halsa: 'Hälsa',
   nyborjare: 'Nybörjare',
+  tradgard: 'Trädgård & odling',
+  hem: 'Hem & hållbarhet',
+  friluftsliv: 'Friluftsliv & natur',
 };
 
 export default function Guides() {
