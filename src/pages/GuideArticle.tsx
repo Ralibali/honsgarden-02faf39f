@@ -14,6 +14,9 @@ const categoryLabels: Record<string, string> = {
   tips: 'Tips & tricks',
   halsa: 'Hälsa',
   nyborjare: 'Nybörjare',
+  tradgard: 'Trädgård & odling',
+  hem: 'Hem & hållbarhet',
+  friluftsliv: 'Friluftsliv & natur',
 };
 
 /** Detect if content is raw HTML (starts with a tag) or Markdown */
