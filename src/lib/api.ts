@@ -418,8 +418,8 @@ export async function getFarmToday() {
 
 // ==================== WEATHER (direct API) ====================
 
-export async function getWeather() {
-  const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.33&longitude=18.07&current=temperature_2m,weathercode&timezone=Europe/Stockholm');
+export async function getWeather(lat = 59.33, lon = 18.07) {
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`);
   if (!res.ok) throw new Error('Weather fetch failed');
   return res.json();
 }

@@ -47,8 +47,23 @@ function getMonthName(month: number) {
   return months[month];
 }
 
+async function getUserCoords(): Promise<{ lat: number; lon: number }> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ lat: 59.33, lon: 18.07 });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      () => resolve({ lat: 59.33, lon: 18.07 }),
+      { timeout: 5000, maximumAge: 30 * 60 * 1000 }
+    );
+  });
+}
+
 async function fetchWeather() {
-  const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.33&longitude=18.07&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe%2FStockholm&forecast_days=5');
+  const { lat, lon } = await getUserCoords();
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=5`);
   if (!res.ok) throw new Error('Weather fetch failed');
   return res.json();
 }
