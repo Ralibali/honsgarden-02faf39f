@@ -152,6 +152,19 @@ export default function GuideArticle() {
     },
   });
 
+  // Fetch glossary for auto-linking keywords
+  const { data: glossary = [] } = useQuery({
+    queryKey: ['link-glossary'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('link_glossary')
+        .select('keyword, url, rel')
+        .eq('is_active', true);
+      if (error) throw error;
+      return data as { keyword: string; url: string; rel: string }[];
+    },
+  });
+
   // SEO - set document title, meta, and JSON-LD
   React.useEffect(() => {
     if (post) {
