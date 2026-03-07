@@ -168,12 +168,12 @@
   }
 
   @keyframes hero-zoom {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.08); }
+    0% { transform: scale(1.10); }
+    100% { transform: scale(1.18); }
   }
 
   .animate-hero-zoom {
-    animation: hero-zoom 20s ease-out forwards;
+    animation: hero-zoom 25s ease-out forwards;
   }
 
   @keyframes fade-in {

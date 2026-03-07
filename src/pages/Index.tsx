@@ -186,8 +186,8 @@ export default function Index() {
         <div className="absolute inset-0 overflow-hidden">
           <img
             src="/hero-home.jpg"
-            alt="Höns som pickar fritt på en grön äng i solljus"
-            className="w-full h-full object-cover object-[50%_55%] animate-hero-zoom"
+            alt="Kvinna med höna på en svensk gård"
+            className="w-full h-full object-cover object-[50%_45%] animate-hero-zoom scale-110"
             loading="eager"
           />
         </div>
