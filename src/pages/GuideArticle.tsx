@@ -158,17 +158,21 @@ export default function GuideArticle() {
     },
   });
 
-  // Fetch glossary for auto-linking keywords
+  // Fetch glossary for auto-linking keywords – only those selected for this post
+  const postGlossaryIds: string[] = (post as any)?.glossary_ids || [];
   const { data: glossary = [] } = useQuery({
-    queryKey: ['link-glossary'],
+    queryKey: ['link-glossary', postGlossaryIds],
     queryFn: async () => {
+      if (postGlossaryIds.length === 0) return [];
       const { data, error } = await supabase
         .from('link_glossary')
         .select('keyword, url, rel')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .in('id', postGlossaryIds);
       if (error) throw error;
       return data as { keyword: string; url: string; rel: string }[];
     },
+    enabled: !!post,
   });
 
   // SEO - full OG, Twitter, hreflang, JSON-LD with Article + FAQ + Product + BreadcrumbList

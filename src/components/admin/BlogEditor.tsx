@@ -344,6 +344,20 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [uploading, setUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [autoSlug, setAutoSlug] = useState(!post);
+  const [selectedGlossaryIds, setSelectedGlossaryIds] = useState<string[]>((post as any)?.glossary_ids || []);
+
+  // Fetch all glossary entries
+  const { data: glossaryEntries = [] } = useQuery({
+    queryKey: ['glossary-entries-for-editor'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('link_glossary')
+        .select('id, keyword, url, is_active')
+        .order('keyword', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (autoSlug && title) setSlug(slugify(title));
@@ -366,6 +380,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
         meta_description: metaDescription || null,
         cover_image_url: coverUrl || null,
         author_id: user.id,
+        glossary_ids: selectedGlossaryIds,
       };
 
       if (publish !== undefined) {
@@ -584,6 +599,66 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                 <Input value={tagsInput} onChange={e => setTagsInput(e.target.value)} placeholder="foder, höns, recension" className="rounded-xl text-xs" />
                 <p className="text-[9px] text-muted-foreground mt-0.5">Kommaseparerade</p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Glossary / Länkord picker */}
+          <Card className="border-border/50">
+            <CardContent className="p-4 space-y-3">
+              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <LinkIcon className="h-3 w-3" /> Länkord ({selectedGlossaryIds.length} valda)
+              </p>
+              <p className="text-[9px] text-muted-foreground">Välj vilka affiliatelänkord som ska appliceras automatiskt i denna artikel.</p>
+              <div className="space-y-1 max-h-48 overflow-y-auto pr-0.5">
+                {glossaryEntries.filter(e => e.is_active).map(entry => (
+                  <label
+                    key={entry.id}
+                    className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-colors text-xs ${
+                      selectedGlossaryIds.includes(entry.id) ? 'bg-primary/10' : 'hover:bg-muted/50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedGlossaryIds.includes(entry.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedGlossaryIds(prev => [...prev, entry.id]);
+                        } else {
+                          setSelectedGlossaryIds(prev => prev.filter(id => id !== entry.id));
+                        }
+                      }}
+                      className="rounded border-border accent-primary h-3 w-3"
+                    />
+                    <span className="font-medium truncate">{entry.keyword}</span>
+                    <span className="text-[9px] text-muted-foreground truncate ml-auto max-w-[100px]">{new URL(entry.url).hostname}</span>
+                  </label>
+                ))}
+                {glossaryEntries.filter(e => e.is_active).length === 0 && (
+                  <p className="text-[10px] text-muted-foreground text-center py-3">Inga länkord finns. Skapa dem i Länkord-fliken.</p>
+                )}
+              </div>
+              {glossaryEntries.filter(e => e.is_active).length > 0 && (
+                <div className="flex gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 rounded-lg text-[10px] h-6"
+                    onClick={() => setSelectedGlossaryIds(glossaryEntries.filter(e => e.is_active).map(e => e.id))}
+                  >
+                    Välj alla
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 rounded-lg text-[10px] h-6"
+                    onClick={() => setSelectedGlossaryIds([])}
+                  >
+                    Avmarkera alla
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
