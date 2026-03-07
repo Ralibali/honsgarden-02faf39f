@@ -12,17 +12,22 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://honsgarden.se/blogg/odla-gronsaker-nybojare</loc>
+    <loc>https://honsgarden.se/blogg/aggledarinflammation-hons</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honsgarden.se/blogg/kompostera-hemma</loc>
+    <loc>https://honsgarden.se/blogg/kravproblem-hos-hons</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honsgarden.se/blogg/bygga-eldstad-tradgard</loc>
+    <loc>https://honsgarden.se/blogg/packlista-vandring-sverige</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/hur-manga-agg-lagger-en-hona</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -32,7 +37,77 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honsgarden.se/blogg/packlista-vandring-sverige</loc>
+    <loc>https://honsgarden.se/blogg/brahma-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/hons-pa-vintern</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/bygga-eldstad-tradgard</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/kopa-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/skaffa-hons-nyborjare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/kompostera-hemma</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/varprede-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/kvalster-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/odla-gronsaker-nybojare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/ruggning-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/sittpinnar-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/paduan-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/vattenautomat-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/fastsittande-agg-hons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://honsgarden.se/blogg/varmelampa-hons</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
