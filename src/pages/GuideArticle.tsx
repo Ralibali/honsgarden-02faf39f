@@ -429,6 +429,11 @@ export default function GuideArticle() {
               {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           )}
+          {post.author_name && (
+            <span className="text-xs text-muted-foreground">
+              av <span className="font-medium text-foreground/80">{post.author_name}</span>
+            </span>
+          )}
         </div>
 
         {/* Title */}
