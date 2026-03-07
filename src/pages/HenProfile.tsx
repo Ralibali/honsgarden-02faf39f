@@ -129,16 +129,27 @@ export default function HenProfile() {
   const avgPerWeek = monthEggs > 0 ? Math.round((monthEggs / 30) * 7 * 10) / 10 : 0;
   const healthLogs = (hen.health_logs || []).slice(0, 5);
 
-  const handleShare = async () => {
-    const text = `${isRooster ? '🐓' : '🐔'} ${hen.name}${hen.breed ? ` (${hen.breed})` : ''}\n${!isRooster ? `🥚 ${totalEggs} ägg totalt\n` : ''}Logga dina höns på honsgarden.se`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: `${hen.name} – Hönsgården`, text });
-      } else {
-        await navigator.clipboard.writeText(text);
-        toast({ title: '📋 Kopierat!' });
-      }
-    } catch { /* cancelled */ }
+  const shareUrl = `${window.location.origin}/app/hens/${henId}`;
+  const shareText = `${isRooster ? '🐓' : '🐔'} ${hen.name}${hen.breed ? ` (${hen.breed})` : ''}\n${!isRooster ? `🥚 ${totalEggs} ägg totalt\n` : ''}Logga dina höns på honsgarden.se`;
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(shareUrl);
+    toast({ title: '📋 Länk kopierad!' });
+    setShareOpen(false);
+  };
+
+  const shareVia = (platform: 'facebook' | 'instagram' | 'email') => {
+    const encoded = encodeURIComponent(shareUrl);
+    const textEncoded = encodeURIComponent(shareText);
+    if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`, '_blank');
+    } else if (platform === 'instagram') {
+      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast({ title: '📋 Text kopierad!', description: 'Klistra in i Instagram.' });
+    } else if (platform === 'email') {
+      window.open(`mailto:?subject=${encodeURIComponent(`${hen.name} – Hönsgården`)}&body=${textEncoded}%0A${encoded}`, '_blank');
+    }
+    setShareOpen(false);
   };
 
   return (
