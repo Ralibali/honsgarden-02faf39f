@@ -380,6 +380,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
         meta_description: metaDescription || null,
         cover_image_url: coverUrl || null,
         author_id: user.id,
+        glossary_ids: selectedGlossaryIds,
       };
 
       if (publish !== undefined) {
