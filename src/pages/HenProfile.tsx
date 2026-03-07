@@ -8,7 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import {
   ArrowLeft, Egg, Heart, Calendar, TrendingUp, Share2, Edit2, Loader2, Save, X,
+  Link2, Facebook, Instagram, Mail,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -21,6 +25,7 @@ export default function HenProfile() {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -124,16 +129,27 @@ export default function HenProfile() {
   const avgPerWeek = monthEggs > 0 ? Math.round((monthEggs / 30) * 7 * 10) / 10 : 0;
   const healthLogs = (hen.health_logs || []).slice(0, 5);
 
-  const handleShare = async () => {
-    const text = `${isRooster ? '🐓' : '🐔'} ${hen.name}${hen.breed ? ` (${hen.breed})` : ''}\n${!isRooster ? `🥚 ${totalEggs} ägg totalt\n` : ''}Logga dina höns på honsgarden.se`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: `${hen.name} – Hönsgården`, text });
-      } else {
-        await navigator.clipboard.writeText(text);
-        toast({ title: '📋 Kopierat!' });
-      }
-    } catch { /* cancelled */ }
+  const shareUrl = `${window.location.origin}/app/hens/${henId}`;
+  const shareText = `${isRooster ? '🐓' : '🐔'} ${hen.name}${hen.breed ? ` (${hen.breed})` : ''}\n${!isRooster ? `🥚 ${totalEggs} ägg totalt\n` : ''}Logga dina höns på honsgarden.se`;
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(shareUrl);
+    toast({ title: '📋 Länk kopierad!' });
+    setShareOpen(false);
+  };
+
+  const shareVia = (platform: 'facebook' | 'instagram' | 'email') => {
+    const encoded = encodeURIComponent(shareUrl);
+    const textEncoded = encodeURIComponent(shareText);
+    if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`, '_blank');
+    } else if (platform === 'instagram') {
+      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast({ title: '📋 Text kopierad!', description: 'Klistra in i Instagram.' });
+    } else if (platform === 'email') {
+      window.open(`mailto:?subject=${encodeURIComponent(`${hen.name} – Hönsgården`)}&body=${textEncoded}%0A${encoded}`, '_blank');
+    }
+    setShareOpen(false);
   };
 
   return (
@@ -275,7 +291,7 @@ export default function HenProfile() {
       {/* Action buttons */}
       {!editing && (
         <div className="flex gap-2">
-          <Button className="flex-1 rounded-xl h-11 gap-2" onClick={handleShare}>
+          <Button className="flex-1 rounded-xl h-11 gap-2" onClick={() => setShareOpen(true)}>
             <Share2 className="h-4 w-4" />
             Dela {hen.name}
           </Button>
@@ -285,6 +301,29 @@ export default function HenProfile() {
           </Button>
         </div>
       )}
+
+      {/* Share dialog */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-center">Dela {hen.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={copyLink}>
+              <Link2 className="h-4 w-4 text-primary" /> Kopiera länk
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('facebook')}>
+              <Facebook className="h-4 w-4 text-[#1877F2]" /> Dela på Facebook
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('instagram')}>
+              <Instagram className="h-4 w-4 text-[#E4405F]" /> Kopiera för Instagram
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('email')}>
+              <Mail className="h-4 w-4 text-muted-foreground" /> Skicka via e-post
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* CTA – only for visitors who are not logged in */}
       {!editing && !isLoggedIn && (
