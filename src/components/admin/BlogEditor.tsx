@@ -114,107 +114,216 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '');
 }
 
-function ProductInsertCard({ onInsert }: { onInsert: (html: string) => void }) {
-  const [prodUrl, setProdUrl] = useState('');
-  const [prodName, setProdName] = useState('');
-  const [prodImage, setProdImage] = useState('');
-  const [prodPrice, setProdPrice] = useState('');
-  const [prodBadge, setProdBadge] = useState('');
+type ProductItem = {
+  url: string;
+  name: string;
+  image: string;
+  price: string;
+  badge: string;
+  loading: boolean;
+};
 
-  const handleInsert = () => {
-    if (!prodUrl || !prodName) {
-      toast({ title: 'Ange minst namn och URL', variant: 'destructive' });
-      return;
+const emptyProduct = (): ProductItem => ({ url: '', name: '', image: '', price: '', badge: '', loading: false });
+
+function ProductInsertCard({ onInsert }: { onInsert: (html: string) => void }) {
+  const [products, setProducts] = useState<ProductItem[]>([emptyProduct()]);
+  const [insertMode, setInsertMode] = useState<'card' | 'table'>('table');
+
+  const updateProduct = (idx: number, updates: Partial<ProductItem>) => {
+    setProducts(prev => prev.map((p, i) => i === idx ? { ...p, ...updates } : p));
+  };
+
+  const autoFetch = async (idx: number, url: string) => {
+    if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) return;
+    updateProduct(idx, { loading: true });
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-product', { body: { url } });
+      if (error) throw error;
+      if (data?.success) {
+        const updates: Partial<ProductItem> = { loading: false };
+        if (data.title && !products[idx].name) updates.name = data.title;
+        if (data.image && !products[idx].image) updates.image = data.image;
+        if (data.price && !products[idx].price) updates.price = data.price;
+        updateProduct(idx, updates);
+        toast({ title: 'Produktdata hämtad!' });
+      } else {
+        updateProduct(idx, { loading: false });
+      }
+    } catch {
+      updateProduct(idx, { loading: false });
+      toast({ title: 'Kunde inte hämta produktdata', variant: 'destructive' });
     }
-    const imgHtml = prodImage
-      ? `<div class="product-card-image"><img src="${prodImage}" alt="${prodName}" /></div>`
-      : '';
-    const badgeHtml = prodBadge
-      ? `<span class="product-card-badge">${prodBadge}</span>`
-      : '';
-    const priceHtml = prodPrice
-      ? `<span class="product-card-price">${prodPrice}</span>`
-      : '';
-    const html = `<div class="product-card">
+  };
+
+  const addProduct = () => setProducts(prev => [...prev, emptyProduct()]);
+  const removeProduct = (idx: number) => setProducts(prev => prev.filter((_, i) => i !== idx));
+
+  const generateTableHtml = () => {
+    const valid = products.filter(p => p.url && p.name);
+    if (!valid.length) return '';
+    const rows = valid.map(p => {
+      const imgHtml = p.image ? `<img class="pct-product-img" src="${p.image}" alt="${p.name}" />` : '';
+      const badgeHtml = p.badge ? `<td><span class="pct-badge">${p.badge}</span></td>` : '<td></td>';
+      return `    <tr>
+      <td><div class="pct-product-cell">${imgHtml}<span class="pct-product-name">${p.name}</span></div></td>
+      ${badgeHtml}
+      <td><span class="pct-price">${p.price || '–'}</span></td>
+      <td><a href="${p.url}" target="_blank" rel="noopener sponsored" class="pct-cta">Se pris →</a></td>
+    </tr>`;
+    }).join('\n');
+    return `<table class="product-comparison-table">
+  <thead><tr><th>Produkt</th><th></th><th>Pris</th><th></th></tr></thead>
+  <tbody>
+${rows}
+  </tbody>
+</table>
+<p class="product-card-disclosure">* Affiliatelänkar – vi kan få ersättning vid köp.</p>`;
+  };
+
+  const generateCardsHtml = () => {
+    const valid = products.filter(p => p.url && p.name);
+    if (!valid.length) return '';
+    const cards = valid.map(p => {
+      const imgHtml = p.image ? `<div class="product-card-image"><img src="${p.image}" alt="${p.name}" /></div>` : '';
+      const badgeHtml = p.badge ? `<span class="product-card-badge">${p.badge}</span>` : '';
+      const priceHtml = p.price ? `<span class="product-card-price">${p.price}</span>` : '';
+      return `<div class="product-card">
   ${badgeHtml}
   ${imgHtml}
   <div class="product-card-body">
-    <h4 class="product-card-title">${prodName}</h4>
+    <h4 class="product-card-title">${p.name}</h4>
     ${priceHtml}
-    <a href="${prodUrl}" target="_blank" rel="noopener sponsored" class="product-card-cta">Se pris →</a>
+    <a href="${p.url}" target="_blank" rel="noopener sponsored" class="product-card-cta">Se pris →</a>
   </div>
 </div>`;
+    }).join('\n');
+    return `<div class="product-grid">\n${cards}\n</div>\n<p class="product-card-disclosure">* Affiliatelänkar – vi kan få ersättning vid köp.</p>`;
+  };
+
+  const handleInsert = () => {
+    const valid = products.filter(p => p.url && p.name);
+    if (!valid.length) {
+      toast({ title: 'Lägg till minst en produkt med namn och URL', variant: 'destructive' });
+      return;
+    }
+    const html = insertMode === 'table' ? generateTableHtml() : generateCardsHtml();
     onInsert(html);
-    setProdUrl('');
-    setProdName('');
-    setProdImage('');
-    setProdPrice('');
-    setProdBadge('');
-    toast({ title: 'Produktkort infogat!' });
+    setProducts([emptyProduct()]);
+    toast({ title: `${insertMode === 'table' ? 'Jämförelsetabell' : 'Produktkort'} infogade!` });
   };
 
   return (
     <Card className="border-border/50">
-      <CardContent className="p-4 space-y-2.5">
+      <CardContent className="p-4 space-y-3">
         <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-          <ShoppingBag className="h-3 w-3" /> Snabbprodukt
+          <ShoppingBag className="h-3 w-3" /> Produkter ({products.length})
         </p>
-        <Input
-          value={prodName}
-          onChange={e => setProdName(e.target.value)}
-          placeholder="Produktnamn"
-          className="rounded-xl text-xs h-8"
-        />
-        <Input
-          value={prodUrl}
-          onChange={e => setProdUrl(e.target.value)}
-          placeholder="Affiliatelänk (URL)"
-          className="rounded-xl text-xs h-8"
-        />
-        <Input
-          value={prodImage}
-          onChange={e => setProdImage(e.target.value)}
-          placeholder="Bild-URL (valfritt)"
-          className="rounded-xl text-xs h-8"
-        />
-        <div className="flex gap-2">
-          <Input
-            value={prodPrice}
-            onChange={e => setProdPrice(e.target.value)}
-            placeholder="Pris (valfritt)"
-            className="rounded-xl text-xs h-8 flex-1"
-          />
-          <Input
-            value={prodBadge}
-            onChange={e => setProdBadge(e.target.value)}
-            placeholder="Badge"
-            className="rounded-xl text-xs h-8 w-24"
-          />
+
+        {/* Mode toggle */}
+        <div className="flex gap-1 p-0.5 rounded-lg bg-muted/50">
+          <button
+            type="button"
+            onClick={() => setInsertMode('table')}
+            className={`flex-1 text-[10px] font-medium py-1.5 rounded-md transition-colors ${insertMode === 'table' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}
+          >
+            📊 Jämförelsetabell
+          </button>
+          <button
+            type="button"
+            onClick={() => setInsertMode('card')}
+            className={`flex-1 text-[10px] font-medium py-1.5 rounded-md transition-colors ${insertMode === 'card' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}
+          >
+            🃏 Produktkort
+          </button>
         </div>
-        {(prodName || prodImage) && (
-          <div className="rounded-lg border border-border/40 p-2.5 bg-muted/30 flex items-center gap-2.5">
-            {prodImage ? (
-              <img src={prodImage} alt={prodName} className="w-12 h-12 rounded-md object-cover shrink-0" />
-            ) : (
-              <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
-                <ShoppingBag className="h-4 w-4 text-muted-foreground/50" />
+
+        {/* Product list */}
+        <div className="space-y-3 max-h-[420px] overflow-y-auto pr-0.5">
+          {products.map((prod, idx) => (
+            <div key={idx} className="rounded-lg border border-border/40 p-2.5 space-y-1.5 bg-muted/20 relative">
+              {products.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeProduct(idx)}
+                  className="absolute top-1.5 right-1.5 text-destructive/50 hover:text-destructive transition-colors"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              )}
+              <div className="flex gap-1.5 items-end">
+                <div className="flex-1">
+                  <Input
+                    value={prod.url}
+                    onChange={e => updateProduct(idx, { url: e.target.value })}
+                    onBlur={() => autoFetch(idx, prod.url)}
+                    placeholder="Klistra in produkt-URL..."
+                    className="rounded-lg text-[11px] h-7 font-mono"
+                  />
+                </div>
+                {prod.loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0 mb-1" />}
               </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{prodName || 'Produktnamn'}</p>
-              {prodPrice && <p className="text-[10px] text-muted-foreground">{prodPrice}</p>}
+
+              {/* Preview row */}
+              <div className="flex items-center gap-2">
+                {prod.image ? (
+                  <img src={prod.image} alt={prod.name} className="w-10 h-10 rounded-md object-contain bg-background shrink-0 border border-border/30" />
+                ) : (
+                  <div className="w-10 h-10 rounded-md bg-muted/60 flex items-center justify-center shrink-0">
+                    <ShoppingBag className="h-3 w-3 text-muted-foreground/40" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <Input
+                    value={prod.name}
+                    onChange={e => updateProduct(idx, { name: e.target.value })}
+                    placeholder="Produktnamn"
+                    className="rounded-lg text-[11px] h-6 px-2 border-border/30"
+                  />
+                  <div className="flex gap-1">
+                    <Input
+                      value={prod.price}
+                      onChange={e => updateProduct(idx, { price: e.target.value })}
+                      placeholder="Pris"
+                      className="rounded-lg text-[10px] h-5 px-1.5 border-border/30 flex-1"
+                    />
+                    <Input
+                      value={prod.badge}
+                      onChange={e => updateProduct(idx, { badge: e.target.value })}
+                      placeholder="Badge"
+                      className="rounded-lg text-[10px] h-5 px-1.5 border-border/30 w-20"
+                    />
+                  </div>
+                </div>
+              </div>
+              <Input
+                value={prod.image}
+                onChange={e => updateProduct(idx, { image: e.target.value })}
+                placeholder="Bild-URL (auto-hämtas)"
+                className="rounded-lg text-[10px] h-6 px-2 border-border/30"
+              />
             </div>
-            <LinkIcon className="h-3 w-3 text-muted-foreground shrink-0" />
-          </div>
-        )}
+          ))}
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full rounded-xl text-xs h-7 gap-1"
+          onClick={addProduct}
+        >
+          <Plus className="h-3 w-3" /> Lägg till produkt
+        </Button>
+
         <Button
           type="button"
           size="sm"
           className="w-full rounded-xl text-xs h-8 gap-1"
           onClick={handleInsert}
-          disabled={!prodName || !prodUrl}
+          disabled={!products.some(p => p.url && p.name)}
         >
-          <Plus className="h-3 w-3" /> Infoga produktkort
+          <Plus className="h-3 w-3" />
+          {insertMode === 'table' ? 'Infoga jämförelsetabell' : 'Infoga produktkort'}
         </Button>
       </CardContent>
     </Card>
