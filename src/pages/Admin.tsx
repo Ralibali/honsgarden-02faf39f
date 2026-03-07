@@ -142,18 +142,21 @@ export default function Admin() {
       )}
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid grid-cols-4 w-full rounded-xl">
+        <TabsList className="grid grid-cols-5 w-full rounded-xl">
           <TabsTrigger value="users" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Users className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Användare</span><span className="sm:hidden">Users</span>
           </TabsTrigger>
           <TabsTrigger value="subscriptions" className="text-xs sm:text-sm gap-1 rounded-lg">
-            <Crown className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Prenumerationer</span><span className="sm:hidden">Prem</span>
+            <Crown className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Pren.</span><span className="sm:hidden">Prem</span>
           </TabsTrigger>
           <TabsTrigger value="blog" className="text-xs sm:text-sm gap-1 rounded-lg">
             <BookOpen className="h-3.5 w-3.5" /> Blogg
           </TabsTrigger>
+          <TabsTrigger value="glossary" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <Link2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Länkord</span><span className="sm:hidden">Länkar</span>
+          </TabsTrigger>
           <TabsTrigger value="feedback" className="text-xs sm:text-sm gap-1 rounded-lg">
-            <MessageSquare className="h-3.5 w-3.5" /> Feedback
+            <MessageSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Feedback</span><span className="sm:hidden">FB</span>
           </TabsTrigger>
         </TabsList>
 
