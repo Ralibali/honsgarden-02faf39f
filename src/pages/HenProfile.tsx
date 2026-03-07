@@ -286,8 +286,8 @@ export default function HenProfile() {
         </div>
       )}
 
-      {/* CTA */}
-      {!editing && (
+      {/* CTA – only for visitors who are not logged in */}
+      {!editing && !isLoggedIn && (
         <Card className="bg-primary/5 border-primary/15">
           <CardContent className="p-4 text-center">
             <p className="text-xs text-muted-foreground">
