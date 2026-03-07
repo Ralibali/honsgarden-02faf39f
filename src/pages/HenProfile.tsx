@@ -321,6 +321,9 @@ export default function HenProfile() {
             <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('email')}>
               <Mail className="h-4 w-4 text-muted-foreground" /> Skicka via e-post
             </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('sms')}>
+              <MessageSquare className="h-4 w-4 text-success" /> Skicka via SMS
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
