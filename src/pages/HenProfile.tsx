@@ -20,6 +20,13 @@ export default function HenProfile() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '' });
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session);
+    });
+  }, []);
 
   const { data: hen, isLoading: henLoading } = useQuery({
     queryKey: ['hen-profile', henId],
