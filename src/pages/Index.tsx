@@ -183,12 +183,14 @@ export default function Index() {
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative min-h-[92vh] flex items-center justify-center">
-        <img
-          src={heroFarm}
-          alt="Svensk hönsgård i morgonljus"
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="eager"
-        />
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src="/hero-home.jpg"
+            alt="Höns som pickar fritt på en grön äng i solljus"
+            className="w-full h-full object-cover object-[50%_35%] animate-hero-zoom"
+            loading="eager"
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/50 to-background" />
 
         {/* Top nav */}
