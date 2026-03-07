@@ -59,8 +59,30 @@ function renderMarkdown(md: string): string {
 }
 
 /** Sanitize and render content – supports both raw HTML and Markdown */
-function renderContent(content: string, otherPosts?: { title: string; slug: string }[]): string {
+function renderContent(
+  content: string,
+  otherPosts?: { title: string; slug: string }[],
+  glossary?: { keyword: string; url: string; rel: string }[]
+): string {
   let raw = isHtmlContent(content) ? content : renderMarkdown(content);
+
+  // Apply glossary links first (affiliate keywords → links)
+  if (glossary && glossary.length > 0) {
+    // Sort by keyword length descending so longer keywords match first
+    const sorted = [...glossary].sort((a, b) => b.keyword.length - a.keyword.length);
+    const linked = new Set<string>();
+
+    for (const entry of sorted) {
+      if (linked.has(entry.keyword.toLowerCase())) continue;
+      const escaped = entry.keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Match keyword NOT already inside a tag, link, or attribute
+      const regex = new RegExp(`(?<![<\\/a-zA-Z"=])\\b(${escaped})\\b(?![^<]*>)(?![^<]*<\\/a>)`, 'i');
+      if (regex.test(raw)) {
+        raw = raw.replace(regex, `<a href="${entry.url}" target="_blank" rel="${entry.rel}" class="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"  title="${entry.keyword}">$1</a>`);
+        linked.add(entry.keyword.toLowerCase());
+      }
+    }
+  }
 
   // Auto internal linking: find mentions of other post titles and link them
   if (otherPosts && otherPosts.length > 0) {
@@ -127,6 +149,19 @@ export default function GuideArticle() {
         .order('published_at', { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Fetch glossary for auto-linking keywords
+  const { data: glossary = [] } = useQuery({
+    queryKey: ['link-glossary'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('link_glossary')
+        .select('keyword, url, rel')
+        .eq('is_active', true);
+      if (error) throw error;
+      return data as { keyword: string; url: string; rel: string }[];
     },
   });
 
@@ -299,7 +334,8 @@ export default function GuideArticle() {
               post.content,
               allPosts
                 .filter(p => p.slug !== slug)
-                .map(p => ({ title: p.title, slug: p.slug }))
+                .map(p => ({ title: p.title, slug: p.slug })),
+              glossary
             ),
           }}
         />
