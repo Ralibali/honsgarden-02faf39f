@@ -291,7 +291,7 @@ export default function HenProfile() {
       {/* Action buttons */}
       {!editing && (
         <div className="flex gap-2">
-          <Button className="flex-1 rounded-xl h-11 gap-2" onClick={handleShare}>
+          <Button className="flex-1 rounded-xl h-11 gap-2" onClick={() => setShareOpen(true)}>
             <Share2 className="h-4 w-4" />
             Dela {hen.name}
           </Button>
@@ -301,6 +301,29 @@ export default function HenProfile() {
           </Button>
         </div>
       )}
+
+      {/* Share dialog */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-center">Dela {hen.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={copyLink}>
+              <Link2 className="h-4 w-4 text-primary" /> Kopiera länk
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('facebook')}>
+              <Facebook className="h-4 w-4 text-[#1877F2]" /> Dela på Facebook
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('instagram')}>
+              <Instagram className="h-4 w-4 text-[#E4405F]" /> Kopiera för Instagram
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-3 rounded-xl h-12" onClick={() => shareVia('email')}>
+              <Mail className="h-4 w-4 text-muted-foreground" /> Skicka via e-post
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* CTA – only for visitors who are not logged in */}
       {!editing && !isLoggedIn && (
