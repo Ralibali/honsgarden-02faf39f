@@ -591,6 +591,9 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                     <SelectItem value="tips">Tips & tricks</SelectItem>
                     <SelectItem value="halsa">Hälsa</SelectItem>
                     <SelectItem value="nybörjare">Nybörjare</SelectItem>
+                    <SelectItem value="tradgard">Trädgård & odling</SelectItem>
+                    <SelectItem value="hem">Hem & hållbarhet</SelectItem>
+                    <SelectItem value="friluftsliv">Friluftsliv & natur</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
