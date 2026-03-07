@@ -1,6 +1,10 @@
 User-agent: Googlebot
 Allow: /
 
+User-agent: Googlebot-Image
+Allow: /blog-images/
+Allow: /assets/
+
 User-agent: Bingbot
 Allow: /
 
@@ -10,7 +14,46 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: GPTBot
+Allow: /blogg/
+Allow: /guider/
+Disallow: /app/
+
+User-agent: ChatGPT-User
+Allow: /blogg/
+Allow: /guider/
+Disallow: /app/
+
+User-agent: Google-Extended
+Allow: /blogg/
+Allow: /guider/
+Disallow: /app/
+
+User-agent: PerplexityBot
+Allow: /blogg/
+Allow: /guider/
+Disallow: /app/
+
+User-agent: ClaudeBot
+Allow: /blogg/
+Allow: /guider/
+Disallow: /app/
+
 User-agent: *
 Allow: /
+Disallow: /app/
+Disallow: /login
 
 Sitemap: https://honsgarden.se/sitemap.xml

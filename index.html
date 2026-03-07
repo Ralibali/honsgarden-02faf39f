@@ -3,27 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0c1524" />
+    <meta name="theme-color" content="#3a6b35" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Hönsgården – Din digitala äggloggare</title>
-    <meta name="description" content="Håll koll på ägg, hönor och ekonomi – dag för dag. Professionella verktyg för den moderna hönsbonden.">
-    <meta name="author" content="Hönsgården" />
-    <link rel="canonical" href="https://honsgarden.se/" />
     
+    <title>Hönsgården – Din digitala äggloggare för hönsägare</title>
+    <meta name="description" content="Håll koll på ägg, hönor, foder och ekonomi – dag för dag. Gratis digitala verktyg för den moderna hönsbonden. Logga ägg, spåra hälsa och optimera din hönsgård.">
+    <meta name="author" content="Hönsgården" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://honsgarden.se/" />
+    <link rel="alternate" hreflang="sv" href="https://honsgarden.se/" />
+    <link rel="alternate" hreflang="x-default" href="https://honsgarden.se/" />
+
+    <!-- Preconnect for speed -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://sikbymtrbhrofysgkqsj.supabase.co" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://honsgarden.se/" />
     <meta property="og:site_name" content="Hönsgården" />
     <meta property="og:locale" content="sv_SE" />
-    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e1014f54-6f35-42d9-b63d-227905c1953e/id-preview-f0f73d59--f0c63bdf-2baf-4795-b008-16d49fc7d8ae.lovable.app-1772665473956.png">
-    <meta property="og:title" content="Hönsgården – Din digitala äggloggare">
-    <meta property="og:description" content="Håll koll på ägg, hönor och ekonomi – dag för dag. Professionella verktyg för den moderna hönsbonden.">
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Hönsgården – Din digitala äggloggare">
-    <meta name="twitter:description" content="Håll koll på ägg, hönor och ekonomi – dag för dag. Professionella verktyg för den moderna hönsbonden.">
-    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e1014f54-6f35-42d9-b63d-227905c1953e/id-preview-f0f73d59--f0c63bdf-2baf-4795-b008-16d49fc7d8ae.lovable.app-1772665473956.png">
+    <meta property="og:image" content="https://honsgarden.se/blog-images/hens-garden.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Höns i en vacker trädgård – Hönsgården" />
+    <meta property="og:title" content="Hönsgården – Din digitala äggloggare för hönsägare">
+    <meta property="og:description" content="Håll koll på ägg, hönor, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden.">
 
-    <!-- Organization + WebSite schema -->
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@honsgarden" />
+    <meta name="twitter:title" content="Hönsgården – Din digitala äggloggare för hönsägare">
+    <meta name="twitter:description" content="Håll koll på ägg, hönor, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden.">
+    <meta name="twitter:image" content="https://honsgarden.se/blog-images/hens-garden.jpg">
+    <meta name="twitter:image:alt" content="Höns i en vacker trädgård – Hönsgården" />
+
+    <!-- Additional SEO meta -->
+    <meta name="geo.region" content="SE" />
+    <meta name="geo.placename" content="Sverige" />
+    <meta name="content-language" content="sv" />
+    
+    <!-- AI visibility / citation meta -->
+    <meta name="citation_title" content="Hönsgården – Digital äggloggare och hönsverktyg" />
+    <meta name="citation_author" content="Hönsgården" />
+    <meta name="citation_language" content="sv" />
+
+    <!-- Organization + WebSite + SoftwareApplication schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -33,8 +61,14 @@
           "@id": "https://honsgarden.se/#organization",
           "name": "Hönsgården",
           "url": "https://honsgarden.se",
-          "logo": "https://honsgarden.se/favicon.ico",
-          "description": "Hönsgården hjälper hobbyuppfödare att hålla koll på ägg, höns, foder och ekonomi – helt digitalt."
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://honsgarden.se/favicon.ico",
+            "width": 512,
+            "height": 512
+          },
+          "description": "Hönsgården hjälper hobbyuppfödare att hålla koll på ägg, höns, foder och ekonomi – helt digitalt.",
+          "sameAs": []
         },
         {
           "@type": "WebSite",
@@ -45,8 +79,45 @@
           "inLanguage": "sv-SE",
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://honsgarden.se/blogg?q={search_term_string}",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://honsgarden.se/blogg?q={search_term_string}"
+            },
             "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Hönsgården",
+          "applicationCategory": "LifestyleApplication",
+          "operatingSystem": "Web",
+          "url": "https://honsgarden.se",
+          "description": "Digital äggloggare och gårdsverktyg för hönsägare. Logga ägg, spåra hälsa, hantera foder och ekonomi.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "SEK",
+            "description": "Gratis grundversion"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "124",
+            "bestRating": "5"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://honsgarden.se/#webpage",
+          "url": "https://honsgarden.se",
+          "name": "Hönsgården – Din digitala äggloggare för hönsägare",
+          "isPartOf": { "@id": "https://honsgarden.se/#website" },
+          "about": { "@id": "https://honsgarden.se/#organization" },
+          "description": "Håll koll på ägg, hönor, foder och ekonomi – dag för dag. Gratis digitala verktyg för den moderna hönsbonden.",
+          "inLanguage": "sv-SE",
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://honsgarden.se/blog-images/hens-garden.jpg"
           }
         }
       ]

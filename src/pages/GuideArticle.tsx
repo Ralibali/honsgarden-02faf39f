@@ -165,95 +165,212 @@ export default function GuideArticle() {
     },
   });
 
-  // SEO - set document title, meta, and JSON-LD
+  // SEO - full OG, Twitter, hreflang, JSON-LD with Article + FAQ + Product + BreadcrumbList
   React.useEffect(() => {
-    if (post) {
-      const BASE = 'https://honsgarden.se';
-      document.title = post.meta_title || post.title + ' | Hönsgården';
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) metaDesc.setAttribute('content', post.meta_description || post.excerpt || '');
+    if (!post) return;
+    const BASE = 'https://honsgarden.se';
+    const fullUrl = `${BASE}/blogg/${post.slug}`;
+    const pageTitle = post.meta_title || post.title + ' | Hönsgården';
+    const pageDesc = post.meta_description || post.excerpt || '';
+    const imageUrl = post.cover_image_url
+      ? (post.cover_image_url.startsWith('http') ? post.cover_image_url : `${BASE}${post.cover_image_url}`)
+      : `${BASE}/blog-images/hens-garden.jpg`;
 
-      // Canonical URL
-      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-      if (!canonical) {
-        canonical = document.createElement('link');
-        canonical.rel = 'canonical';
-        document.head.appendChild(canonical);
-      }
-      canonical.href = `${BASE}/blogg/${post.slug}`;
+    const createdElements: HTMLElement[] = [];
 
-      // Build JSON-LD @graph with Article + BreadcrumbList + optional FAQPage
-      const graph: any[] = [
-        {
-          '@type': 'Article',
-          headline: post.title,
-          description: post.meta_description || post.excerpt || '',
-          image: post.cover_image_url ? (post.cover_image_url.startsWith('http') ? post.cover_image_url : `${BASE}${post.cover_image_url}`) : `${BASE}/favicon.ico`,
-          datePublished: post.published_at,
-          dateModified: post.updated_at || post.published_at,
-          author: { '@type': 'Organization', name: 'Hönsgården', url: BASE },
-          publisher: {
-            '@type': 'Organization',
-            name: 'Hönsgården',
-            url: BASE,
-            logo: { '@type': 'ImageObject', url: `${BASE}/favicon.ico` },
-          },
-          mainEntityOfPage: `${BASE}/blogg/${post.slug}`,
-          inLanguage: 'sv-SE',
-          ...(post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
-        },
-        {
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Hem', item: BASE },
-            { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE}/blogg` },
-            { '@type': 'ListItem', position: 3, name: post.title, item: `${BASE}/blogg/${post.slug}` },
-          ],
-        },
-      ];
+    const setMeta = (attr: string, key: string, content: string) => {
+      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement;
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+        createdElements.push(el);
+      }
+      el.setAttribute('content', content);
+    };
 
-      // Extract FAQ pairs from HTML content for FAQPage schema
-      const faqPairs: { q: string; a: string }[] = [];
-      const faqRegex = /<(?:div|dt)[^>]*class="faq-q"[^>]*>([\s\S]*?)<\/(?:div|dt)>\s*<(?:div|dd)[^>]*class="faq-a"[^>]*>([\s\S]*?)<\/(?:div|dd)>/gi;
-      let match;
-      while ((match = faqRegex.exec(post.content)) !== null) {
-        const q = match[1].replace(/<[^>]+>/g, '').trim();
-        const a = match[2].replace(/<[^>]+>/g, '').trim();
-        if (q && a) faqPairs.push({ q, a });
-      }
-      // Also check for <details><summary> FAQ pattern
-      const detailsRegex = /<summary[^>]*>([\s\S]*?)<\/summary>\s*([\s\S]*?)(?=<\/details>)/gi;
-      while ((match = detailsRegex.exec(post.content)) !== null) {
-        const q = match[1].replace(/<[^>]+>/g, '').trim();
-        const a = match[2].replace(/<[^>]+>/g, '').trim();
-        if (q && a) faqPairs.push({ q, a });
-      }
+    const addLink = (rel: string, href: string, attrs?: Record<string, string>) => {
+      const el = document.createElement('link');
+      el.rel = rel;
+      el.href = href;
+      if (attrs) Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      document.head.appendChild(el);
+      createdElements.push(el);
+    };
 
-      if (faqPairs.length > 0) {
-        graph.push({
-          '@type': 'FAQPage',
-          mainEntity: faqPairs.map(({ q, a }) => ({
-            '@type': 'Question',
-            name: q,
-            acceptedAnswer: { '@type': 'Answer', text: a },
-          })),
-        });
-      }
+    // Title
+    document.title = pageTitle;
 
-      const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
-      let script = document.getElementById('json-ld-article') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'json-ld-article';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.textContent = JSON.stringify(jsonLd);
+    // Core meta
+    setMeta('name', 'description', pageDesc);
+    setMeta('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+
+    // Canonical + hreflang
+    document.querySelector('link[rel="canonical"]')?.remove();
+    addLink('canonical', fullUrl);
+    addLink('alternate', fullUrl, { hreflang: 'sv' });
+    addLink('alternate', fullUrl, { hreflang: 'x-default' });
+
+    // OG tags
+    setMeta('property', 'og:title', pageTitle);
+    setMeta('property', 'og:description', pageDesc);
+    setMeta('property', 'og:url', fullUrl);
+    setMeta('property', 'og:type', 'article');
+    setMeta('property', 'og:site_name', 'Hönsgården');
+    setMeta('property', 'og:locale', 'sv_SE');
+    setMeta('property', 'og:image', imageUrl);
+    setMeta('property', 'og:image:alt', post.title);
+
+    // Article meta
+    if (post.published_at) setMeta('property', 'article:published_time', post.published_at);
+    if (post.updated_at) setMeta('property', 'article:modified_time', post.updated_at);
+    setMeta('property', 'article:author', 'Hönsgården');
+    if (post.category) setMeta('property', 'article:section', post.category);
+    if (post.tags) {
+      post.tags.forEach((tag: string) => {
+        const el = document.createElement('meta');
+        el.setAttribute('property', 'article:tag');
+        el.setAttribute('content', tag);
+        document.head.appendChild(el);
+        createdElements.push(el);
+      });
     }
+
+    // Twitter Card
+    setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', pageTitle);
+    setMeta('name', 'twitter:description', pageDesc);
+    setMeta('name', 'twitter:image', imageUrl);
+    setMeta('name', 'twitter:image:alt', post.title);
+
+    // AI citation meta
+    setMeta('name', 'citation_title', post.title);
+    setMeta('name', 'citation_author', 'Hönsgården');
+    setMeta('name', 'citation_language', 'sv');
+    if (post.published_at) setMeta('name', 'citation_date', post.published_at.split('T')[0]);
+
+    // JSON-LD @graph
+    const graph: any[] = [
+      {
+        '@type': 'Article',
+        '@id': `${fullUrl}#article`,
+        headline: post.title,
+        description: pageDesc,
+        image: { '@type': 'ImageObject', url: imageUrl },
+        datePublished: post.published_at,
+        dateModified: post.updated_at || post.published_at,
+        author: { '@type': 'Organization', name: 'Hönsgården', url: BASE, '@id': `${BASE}/#organization` },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Hönsgården',
+          url: BASE,
+          '@id': `${BASE}/#organization`,
+          logo: { '@type': 'ImageObject', url: `${BASE}/favicon.ico` },
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': fullUrl },
+        isPartOf: { '@id': `${BASE}/#website` },
+        inLanguage: 'sv-SE',
+        ...(post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
+        wordCount: post.content.replace(/<[^>]+>/g, '').split(/\s+/).length,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hem', item: BASE },
+          { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE}/blogg` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: fullUrl },
+        ],
+      },
+      {
+        '@type': 'WebPage',
+        '@id': fullUrl,
+        url: fullUrl,
+        name: pageTitle,
+        isPartOf: { '@id': `${BASE}/#website` },
+        primaryImageOfPage: { '@type': 'ImageObject', url: imageUrl },
+        datePublished: post.published_at,
+        dateModified: post.updated_at || post.published_at,
+        inLanguage: 'sv-SE',
+      },
+    ];
+
+    // Extract FAQ pairs from HTML content
+    const faqPairs: { q: string; a: string }[] = [];
+    const faqRegex = /<(?:div|dt)[^>]*class="faq-q"[^>]*>([\s\S]*?)<\/(?:div|dt)>\s*<(?:div|dd)[^>]*class="faq-a"[^>]*>([\s\S]*?)<\/(?:div|dd)>/gi;
+    let match;
+    while ((match = faqRegex.exec(post.content)) !== null) {
+      const q = match[1].replace(/<[^>]+>/g, '').trim();
+      const a = match[2].replace(/<[^>]+>/g, '').trim();
+      if (q && a) faqPairs.push({ q, a });
+    }
+    const detailsRegex = /<summary[^>]*>([\s\S]*?)<\/summary>\s*([\s\S]*?)(?=<\/details>)/gi;
+    while ((match = detailsRegex.exec(post.content)) !== null) {
+      const q = match[1].replace(/<[^>]+>/g, '').trim();
+      const a = match[2].replace(/<[^>]+>/g, '').trim();
+      if (q && a) faqPairs.push({ q, a });
+    }
+
+    if (faqPairs.length > 0) {
+      graph.push({
+        '@type': 'FAQPage',
+        mainEntity: faqPairs.map(({ q, a }) => ({
+          '@type': 'Question',
+          name: q,
+          acceptedAnswer: { '@type': 'Answer', text: a },
+        })),
+      });
+    }
+
+    // Extract Product schema from product cards/tables in content
+    const productRegex = /<(?:h4|span)[^>]*class="(?:product-card-title|pct-product-name)"[^>]*>([\s\S]*?)<\/(?:h4|span)>/gi;
+    const priceRegex = /<span[^>]*class="(?:product-card-price|pct-price)"[^>]*>([\s\S]*?)<\/span>/gi;
+    const productNames: string[] = [];
+    const productPrices: string[] = [];
+    while ((match = productRegex.exec(post.content)) !== null) {
+      productNames.push(match[1].replace(/<[^>]+>/g, '').trim());
+    }
+    while ((match = priceRegex.exec(post.content)) !== null) {
+      productPrices.push(match[1].replace(/<[^>]+>/g, '').trim());
+    }
+    if (productNames.length > 0) {
+      const itemList = {
+        '@type': 'ItemList',
+        name: `Produkter i ${post.title}`,
+        itemListElement: productNames.map((name, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'Product',
+            name,
+            ...(productPrices[i] ? {
+              offers: {
+                '@type': 'Offer',
+                priceCurrency: 'SEK',
+                price: productPrices[i].replace(/[^\d,]/g, '').replace(',', '.'),
+                availability: 'https://schema.org/InStock',
+              },
+            } : {}),
+          },
+        })),
+      };
+      graph.push(itemList);
+    }
+
+    const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
+    let script = document.getElementById('json-ld-article') as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'json-ld-article';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+      createdElements.push(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+
     return () => {
       document.title = 'Hönsgården';
+      createdElements.forEach(el => el.remove());
       document.getElementById('json-ld-article')?.remove();
-      document.querySelector('link[rel="canonical"]')?.remove();
     };
   }, [post]);
 
