@@ -376,6 +376,11 @@ export default function Admin() {
           <BlogEditor />
         </TabsContent>
 
+        {/* Glossary tab */}
+        <TabsContent value="glossary" className="space-y-3">
+          <GlossaryManager />
+        </TabsContent>
+
         {/* Feedback tab */}
         <TabsContent value="feedback" className="space-y-3">
           {feedbackLoading ? (
