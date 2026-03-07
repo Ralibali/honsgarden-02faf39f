@@ -8,58 +8,109 @@ interface SeoOptions {
   path: string;
   ogType?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   noindex?: boolean;
   jsonLd?: Record<string, any> | Record<string, any>[];
+  articleMeta?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    author?: string;
+    section?: string;
+    tags?: string[];
+  };
 }
 
 /**
- * Sets document title, meta description, canonical URL, OG tags and optional JSON-LD.
- * Cleans up on unmount.
+ * Sets document title, meta description, canonical URL, OG tags, Twitter cards,
+ * hreflang, article meta and optional JSON-LD. Cleans up on unmount.
  */
-export function useSeo({ title, description, path, ogType = 'website', ogImage, noindex, jsonLd }: SeoOptions) {
+export function useSeo({ title, description, path, ogType = 'website', ogImage, ogImageAlt, noindex, jsonLd, articleMeta }: SeoOptions) {
   useEffect(() => {
+    const createdElements: HTMLElement[] = [];
+
+    const setMeta = (attr: string, key: string, content: string) => {
+      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement;
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+        createdElements.push(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    const addLink = (rel: string, href: string, attrs?: Record<string, string>) => {
+      const el = document.createElement('link');
+      el.rel = rel;
+      el.href = href;
+      if (attrs) Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      document.head.appendChild(el);
+      createdElements.push(el);
+    };
+
     // Title
     document.title = title;
 
     // Meta description
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', description);
+    setMeta('name', 'description', description);
+
+    // Robots
+    setMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
 
     // Canonical
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.rel = 'canonical';
-      document.head.appendChild(canonical);
-    }
-    canonical.href = `${BASE}${path}`;
+    if (canonical) canonical.remove();
+    addLink('canonical', `${BASE}${path}`);
+
+    // Hreflang
+    addLink('alternate', `${BASE}${path}`, { hreflang: 'sv' });
+    addLink('alternate', `${BASE}${path}`, { hreflang: 'x-default' });
 
     // OG tags
-    const setMeta = (property: string, content: string) => {
-      let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute('property', property);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-    setMeta('og:title', title);
-    setMeta('og:description', description);
-    setMeta('og:url', `${BASE}${path}`);
-    setMeta('og:type', ogType);
-    if (ogImage) setMeta('og:image', ogImage.startsWith('http') ? ogImage : `${BASE}${ogImage}`);
-
-    // Noindex
-    if (noindex) {
-      let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
-      if (!robots) {
-        robots = document.createElement('meta');
-        robots.name = 'robots';
-        document.head.appendChild(robots);
-      }
-      robots.content = 'noindex, nofollow';
+    const fullUrl = `${BASE}${path}`;
+    setMeta('property', 'og:title', title);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', fullUrl);
+    setMeta('property', 'og:type', ogType);
+    setMeta('property', 'og:site_name', 'Hönsgården');
+    setMeta('property', 'og:locale', 'sv_SE');
+    if (ogImage) {
+      const imgUrl = ogImage.startsWith('http') ? ogImage : `${BASE}${ogImage}`;
+      setMeta('property', 'og:image', imgUrl);
+      setMeta('property', 'og:image:alt', ogImageAlt || title);
     }
+
+    // Twitter Card
+    setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', title);
+    setMeta('name', 'twitter:description', description);
+    if (ogImage) {
+      const imgUrl = ogImage.startsWith('http') ? ogImage : `${BASE}${ogImage}`;
+      setMeta('name', 'twitter:image', imgUrl);
+      setMeta('name', 'twitter:image:alt', ogImageAlt || title);
+    }
+
+    // Article-specific meta
+    if (articleMeta) {
+      if (articleMeta.publishedTime) setMeta('property', 'article:published_time', articleMeta.publishedTime);
+      if (articleMeta.modifiedTime) setMeta('property', 'article:modified_time', articleMeta.modifiedTime);
+      if (articleMeta.author) setMeta('property', 'article:author', articleMeta.author);
+      if (articleMeta.section) setMeta('property', 'article:section', articleMeta.section);
+      if (articleMeta.tags) {
+        articleMeta.tags.forEach(tag => {
+          const el = document.createElement('meta');
+          el.setAttribute('property', 'article:tag');
+          el.setAttribute('content', tag);
+          document.head.appendChild(el);
+          createdElements.push(el);
+        });
+      }
+    }
+
+    // AI citation meta
+    setMeta('name', 'citation_title', title);
+    setMeta('name', 'citation_author', 'Hönsgården');
+    setMeta('name', 'citation_language', 'sv');
 
     // JSON-LD
     if (jsonLd) {
@@ -69,6 +120,7 @@ export function useSeo({ title, description, path, ogType = 'website', ogImage, 
         script.id = 'json-ld-page';
         script.type = 'application/ld+json';
         document.head.appendChild(script);
+        createdElements.push(script);
       }
       const data = Array.isArray(jsonLd)
         ? { '@context': 'https://schema.org', '@graph': jsonLd }
@@ -78,9 +130,7 @@ export function useSeo({ title, description, path, ogType = 'website', ogImage, 
 
     return () => {
       document.title = 'Hönsgården – Din digitala äggloggare';
-      document.querySelector('link[rel="canonical"]')?.remove();
-      document.getElementById('json-ld-page')?.remove();
-      if (noindex) document.querySelector('meta[name="robots"]')?.remove();
+      createdElements.forEach(el => el.remove());
     };
-  }, [title, description, path, ogType, ogImage, noindex, jsonLd]);
+  }, [title, description, path, ogType, ogImage, ogImageAlt, noindex, jsonLd, articleMeta]);
 }
