@@ -138,7 +138,7 @@ export default function HenProfile() {
     setShareOpen(false);
   };
 
-  const shareVia = (platform: 'facebook' | 'instagram' | 'email') => {
+  const shareVia = (platform: 'facebook' | 'instagram' | 'email' | 'sms') => {
     const encoded = encodeURIComponent(shareUrl);
     const textEncoded = encodeURIComponent(shareText);
     if (platform === 'facebook') {
@@ -148,6 +148,8 @@ export default function HenProfile() {
       toast({ title: '📋 Text kopierad!', description: 'Klistra in i Instagram.' });
     } else if (platform === 'email') {
       window.open(`mailto:?subject=${encodeURIComponent(`${hen.name} – Hönsgården`)}&body=${textEncoded}%0A${encoded}`, '_blank');
+    } else if (platform === 'sms') {
+      window.open(`sms:?body=${textEncoded}%0A${encoded}`, '_blank');
     }
     setShareOpen(false);
   };
