@@ -143,7 +143,7 @@ export default function Admin() {
       )}
 
       <Tabs defaultValue="analytics" className="space-y-4">
-        <TabsList className="grid grid-cols-6 w-full rounded-xl">
+        <TabsList className="flex w-full overflow-x-auto rounded-xl">
           <TabsTrigger value="analytics" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Eye className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Analys</span><span className="sm:hidden">📊</span>
           </TabsTrigger>
