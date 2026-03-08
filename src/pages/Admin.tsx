@@ -6,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye
 } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
 import GlossaryManager from '@/components/admin/GlossaryManager';
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -141,8 +142,11 @@ export default function Admin() {
         </div>
       )}
 
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid grid-cols-5 w-full rounded-xl">
+      <Tabs defaultValue="analytics" className="space-y-4">
+        <TabsList className="grid grid-cols-6 w-full rounded-xl">
+          <TabsTrigger value="analytics" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <Eye className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Analys</span><span className="sm:hidden">📊</span>
+          </TabsTrigger>
           <TabsTrigger value="users" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Users className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Användare</span><span className="sm:hidden">Users</span>
           </TabsTrigger>
@@ -159,6 +163,11 @@ export default function Admin() {
             <MessageSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Feedback</span><span className="sm:hidden">FB</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Analytics tab */}
+        <TabsContent value="analytics" className="space-y-3">
+          <AnalyticsDashboard />
+        </TabsContent>
 
         {/* Users tab */}
         <TabsContent value="users" className="space-y-3">
