@@ -63,9 +63,18 @@ async function getUserCoords(): Promise<{ lat: number; lon: number }> {
 
 async function fetchWeather() {
   const { lat, lon } = await getUserCoords();
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=5`);
-  if (!res.ok) throw new Error('Weather fetch failed');
-  return res.json();
+  const [weatherRes, geoRes] = await Promise.all([
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=5`),
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=sv`).catch(() => null),
+  ]);
+  if (!weatherRes.ok) throw new Error('Weather fetch failed');
+  const weather = await weatherRes.json();
+  let cityName: string | null = null;
+  if (geoRes?.ok) {
+    const geo = await geoRes.json();
+    cityName = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.municipality || null;
+  }
+  return { ...weather, cityName };
 }
 
 function getWeatherIcon(code: number) {
@@ -264,6 +273,9 @@ export default function Dashboard() {
               <span className="text-sm font-semibold text-foreground tabular-nums">
                 {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
               </span>
+              {weatherData?.cityName && (
+                <span className="text-xs text-muted-foreground hidden sm:inline">{weatherData.cityName}</span>
+              )}
             </>
           )}
         </button>
