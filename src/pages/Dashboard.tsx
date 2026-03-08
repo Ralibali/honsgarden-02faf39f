@@ -273,6 +273,9 @@ export default function Dashboard() {
               <span className="text-sm font-semibold text-foreground tabular-nums">
                 {currentTemp != null ? `${Math.round(currentTemp)}°` : '–'}
               </span>
+              {weatherData?.cityName && (
+                <span className="text-xs text-muted-foreground hidden sm:inline">{weatherData.cityName}</span>
+              )}
             </>
           )}
         </button>
