@@ -75,8 +75,14 @@ function CacheClearer() {
   return null;
 }
 
+function PageTracker() {
+  usePageTracking();
+  return null;
+}
+
 const AppRoutes = () => (
   <BrowserRouter>
+    <PageTracker />
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route path="/" element={<Index />} />
