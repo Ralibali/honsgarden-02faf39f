@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Egg, Loader2, BookOpen, CalendarDays } from 'lucide-react';
+import ShareButtons from '@/components/ShareButtons';
+const BlogComments = lazy(() => import('@/components/BlogComments'));
 
 const categoryLabels: Record<string, string> = {
   guide: 'Guide',
