@@ -111,7 +111,16 @@ export default function Guides() {
           </p>
         </div>
 
-        {/* Posts */}
+        {/* Category navigation */}
+        <nav aria-label="Kategorier" className="flex flex-wrap justify-center gap-2 mb-10">
+          {Object.entries(categoryLabels).map(([key, label]) => (
+            <Link key={key} to={`/blogg/kategori/${key}`}>
+              <Badge variant="secondary" className="cursor-pointer text-xs hover:bg-primary hover:text-primary-foreground transition-colors">
+                {label}
+              </Badge>
+            </Link>
+          ))}
+        </nav>
         {isLoading ? (
           <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
         ) : !posts.length ? (
