@@ -29,6 +29,16 @@ Deno.serve(async (req) => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
+  // Collect unique tags
+  const allTags = new Set<string>();
+  if (posts) {
+    for (const post of posts) {
+      if (post.tags) {
+        for (const tag of post.tags) allTags.add(tag);
+      }
+    }
+  }
+
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/blogg", priority: "0.9", changefreq: "daily" },
@@ -67,6 +77,20 @@ Deno.serve(async (req) => {
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}/blogg/kategori/${cat}" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/blogg/kategori/${cat}" />
+  </url>
+`;
+  }
+
+  // Tag pages
+  for (const tag of allTags) {
+    const encoded = encodeURIComponent(tag);
+    xml += `  <url>
+    <loc>${BASE_URL}/blogg/tagg/${encoded}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}/blogg/tagg/${encoded}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/blogg/tagg/${encoded}" />
   </url>
 `;
   }

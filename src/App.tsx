@@ -34,6 +34,7 @@ const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
 const Guides = React.lazy(() => import("./pages/Guides"));
 const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 const BlogCategory = React.lazy(() => import("./pages/BlogCategory"));
+const BlogTag = React.lazy(() => import("./pages/BlogTag"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +94,7 @@ const AppRoutes = () => (
         <Route path="/guider/:slug" element={<GuideArticle />} />
         <Route path="/blogg" element={<Guides />} />
         <Route path="/blogg/kategori/:category" element={<BlogCategory />} />
+        <Route path="/blogg/tagg/:tag" element={<BlogTag />} />
         <Route path="/blogg/:slug" element={<GuideArticle />} />
         <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />

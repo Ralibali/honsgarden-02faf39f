@@ -350,6 +350,49 @@ export default function GuideArticle() {
       });
     }
 
+    // Extract HowTo schema from ordered lists in guide/nyborjare category
+    if (post.category === 'guide' || post.category === 'nyborjare' || post.category === 'tips') {
+      // Look for <ol> with <li> items as steps
+      const olRegex = /<ol[^>]*>([\s\S]*?)<\/ol>/gi;
+      let olMatch;
+      const steps: { name: string; text: string }[] = [];
+      while ((olMatch = olRegex.exec(post.content)) !== null) {
+        const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+        let liMatch;
+        while ((liMatch = liRegex.exec(olMatch[1])) !== null) {
+          const text = liMatch[1].replace(/<[^>]+>/g, '').trim();
+          if (text.length > 10) {
+            const name = text.length > 80 ? text.substring(0, 80) + '…' : text;
+            steps.push({ name, text });
+          }
+        }
+      }
+      // Fallback: look for h2/h3 + paragraph patterns as steps
+      if (steps.length < 2) {
+        const stepRegex = /<h[23][^>]*>(?:Steg\s*\d+[:\.\s]*|(\d+)[.\s]+)?([\s\S]*?)<\/h[23]>\s*<p[^>]*>([\s\S]*?)<\/p>/gi;
+        let stepMatch;
+        while ((stepMatch = stepRegex.exec(post.content)) !== null) {
+          const name = (stepMatch[2] || '').replace(/<[^>]+>/g, '').trim();
+          const text = (stepMatch[3] || '').replace(/<[^>]+>/g, '').trim();
+          if (name && text) steps.push({ name, text });
+        }
+      }
+      if (steps.length >= 2) {
+        graph.push({
+          '@type': 'HowTo',
+          name: post.title,
+          description: pageDesc,
+          image: imageUrl,
+          step: steps.map((s, i) => ({
+            '@type': 'HowToStep',
+            position: i + 1,
+            name: s.name,
+            text: s.text,
+          })),
+        });
+      }
+    }
+
     // Extract Product schema from product cards/tables in content
     const productRegex = /<(?:h4|span)[^>]*class="(?:product-card-title|pct-product-name)"[^>]*>([\s\S]*?)<\/(?:h4|span)>/gi;
     const priceRegex = /<span[^>]*class="(?:product-card-price|pct-price)"[^>]*>([\s\S]*?)<\/span>/gi;
