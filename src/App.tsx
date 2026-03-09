@@ -79,6 +79,7 @@ function CacheClearer() {
 
 function PageTracker() {
   usePageTracking();
+  useAutoClickTracking();
   return null;
 }
 
