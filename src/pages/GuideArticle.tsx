@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Egg, Loader2, BookOpen, CalendarDays } from 'lucide-react';
+import ShareButtons from '@/components/ShareButtons';
+const BlogComments = lazy(() => import('@/components/BlogComments'));
 
 const categoryLabels: Record<string, string> = {
   guide: 'Guide',
@@ -534,14 +536,28 @@ export default function GuideArticle() {
           }}
         />
 
-        {/* Tags */}
+        {/* Tags + Share */}
         {post.tags && post.tags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap mt-8 pt-6 border-t border-border/50">
-            {post.tags.map(tag => (
-              <Badge key={tag} variant="outline" className="text-[10px]">#{tag}</Badge>
-            ))}
+          <div className="flex items-center justify-between gap-4 flex-wrap mt-8 pt-6 border-t border-border/50">
+            <div className="flex items-center gap-2 flex-wrap">
+              {post.tags.map(tag => (
+                <Link key={tag} to={`/blogg/tagg/${encodeURIComponent(tag)}`}>
+                  <Badge variant="outline" className="text-[10px] cursor-pointer hover:bg-accent">#{tag}</Badge>
+                </Link>
+              ))}
+            </div>
+            <ShareButtons
+              url={`https://honsgarden.se/blogg/${post.slug}`}
+              title={post.title}
+              description={post.excerpt || ''}
+            />
           </div>
         )}
+
+        {/* Comments */}
+        <Suspense fallback={<Loader2 className="h-5 w-5 animate-spin text-muted-foreground mt-8" />}>
+          <BlogComments postId={post.id} />
+        </Suspense>
 
         {/* Inline CTA */}
         <div className="mt-12 bg-gradient-to-br from-primary/5 via-card to-accent/5 rounded-2xl p-6 sm:p-8 border border-border/30 text-center">
