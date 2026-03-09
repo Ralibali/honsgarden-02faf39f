@@ -29,6 +29,16 @@ Deno.serve(async (req) => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
+  // Collect unique tags
+  const allTags = new Set<string>();
+  if (posts) {
+    for (const post of posts) {
+      if (post.tags) {
+        for (const tag of post.tags) allTags.add(tag);
+      }
+    }
+  }
+
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/blogg", priority: "0.9", changefreq: "daily" },
