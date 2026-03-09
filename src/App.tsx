@@ -92,6 +92,7 @@ const AppRoutes = () => (
         <Route path="/guider" element={<Guides />} />
         <Route path="/guider/:slug" element={<GuideArticle />} />
         <Route path="/blogg" element={<Guides />} />
+        <Route path="/blogg/kategori/:category" element={<BlogCategory />} />
         <Route path="/blogg/:slug" element={<GuideArticle />} />
         <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />

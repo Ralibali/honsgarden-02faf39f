@@ -8,6 +8,11 @@ const corsHeaders = {
 
 const BASE_URL = "https://honsgarden.se";
 
+const CATEGORIES = [
+  "guide", "recension", "tips", "halsa",
+  "nyborjare", "tradgard", "hem", "friluftsliv",
+];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -20,7 +25,7 @@ Deno.serve(async (req) => {
 
   const { data: posts } = await supabase
     .from("blog_posts")
-    .select("slug, updated_at, published_at, cover_image_url, title")
+    .select("slug, updated_at, published_at, cover_image_url, title, category, tags")
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
@@ -40,6 +45,7 @@ Deno.serve(async (req) => {
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 `;
 
+  // Static pages
   for (const page of staticPages) {
     xml += `  <url>
     <loc>${BASE_URL}${page.loc}</loc>
@@ -52,6 +58,20 @@ Deno.serve(async (req) => {
 `;
   }
 
+  // Category pages
+  for (const cat of CATEGORIES) {
+    xml += `  <url>
+    <loc>${BASE_URL}/blogg/kategori/${cat}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}/blogg/kategori/${cat}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/blogg/kategori/${cat}" />
+  </url>
+`;
+  }
+
+  // Blog posts
   if (posts) {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
