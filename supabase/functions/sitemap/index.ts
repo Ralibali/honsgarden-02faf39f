@@ -13,6 +13,15 @@ const CATEGORIES = [
   "nyborjare", "tradgard", "hem", "friluftsliv",
 ];
 
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -95,7 +104,7 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Blog posts
+  // Blog posts (both /blogg/ canonical and /guider/ alternate)
   if (posts) {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
@@ -114,8 +123,8 @@ Deno.serve(async (req) => {
       if (imageUrl) {
         xml += `
     <image:image>
-      <image:loc>${imageUrl}</image:loc>
-      <image:title>${(post.title || "").replace(/&/g, "&amp;").replace(/</g, "&lt;")}</image:title>
+      <image:loc>${escapeXml(imageUrl)}</image:loc>
+      <image:title>${escapeXml(post.title || "")}</image:title>
     </image:image>`;
       }
 
@@ -128,6 +137,9 @@ Deno.serve(async (req) => {
   xml += `</urlset>`;
 
   return new Response(xml, {
-    headers: { ...corsHeaders, "Cache-Control": "public, max-age=3600, s-maxage=3600" },
+    headers: {
+      ...corsHeaders,
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+    },
   });
 });
