@@ -34,6 +34,7 @@ const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
 const Guides = React.lazy(() => import("./pages/Guides"));
 const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 const BlogCategory = React.lazy(() => import("./pages/BlogCategory"));
+const BlogTag = React.lazy(() => import("./pages/BlogTag"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
