@@ -175,6 +175,36 @@ export default function Index() {
     description: 'Håll koll på ägg, höns, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden. Kom igång direkt!',
     path: '/',
     ogImage: 'https://honsgarden.se/blog-images/hens-garden.jpg',
+    jsonLd: [
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map(f => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
+        '@type': 'WebPage',
+        '@id': 'https://honsgarden.se/#webpage',
+        url: 'https://honsgarden.se',
+        name: 'Hönsgården – Äggloggare & hönsapp för hobbyuppfödare',
+        isPartOf: { '@id': 'https://honsgarden.se/#website' },
+        about: { '@id': 'https://honsgarden.se/#organization' },
+        description: 'Håll koll på ägg, höns, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden.',
+        inLanguage: 'sv-SE',
+        speakable: {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['h1', '.hero-description'],
+        },
+        review: testimonials.map(t => ({
+          '@type': 'Review',
+          reviewBody: t.text,
+          author: { '@type': 'Person', name: t.name },
+          reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+        })),
+      },
+    ],
   });
 
   return (

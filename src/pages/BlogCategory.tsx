@@ -1,39 +1,87 @@
 import React from 'react';
-import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import { useParams, Link } from 'react-router-dom';
 import { useSeo } from '@/hooks/useSeo';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookOpen, Loader2, Egg } from 'lucide-react';
+import { ArrowRight, BookOpen, Loader2, Egg, ArrowLeft } from 'lucide-react';
+import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 
-const categoryLabels: Record<string, string> = {
-  guide: 'Guide',
-  recension: 'Recension',
-  tips: 'Tips & tricks',
-  halsa: 'Hälsa',
-  nyborjare: 'Nybörjare',
-  tradgard: 'Trädgård & odling',
-  hem: 'Hem & hållbarhet',
-  friluftsliv: 'Friluftsliv & natur',
+const categoryMeta: Record<string, { label: string; title: string; description: string; ogImage: string }> = {
+  guide: {
+    label: 'Guider',
+    title: 'Guider om höns – Allt du behöver veta som hönsägare | Hönsgården',
+    description: 'Kompletta guider om höns – från att bygga hönshus till att välja rätt ras. Steg-för-steg-instruktioner för nybörjare och erfarna hönsägare.',
+    ogImage: '/blog-images/chicken-coop.jpg',
+  },
+  recension: {
+    label: 'Recensioner',
+    title: 'Produktrecensioner för hönsägare – Testat & granskat | Hönsgården',
+    description: 'Ärliga recensioner av produkter för hönsägare. Vi testar hönshus, foder, värmelampor, äggkläckare och mer – så du slipper gissa.',
+    ogImage: '/blog-images/feed-varieties.jpg',
+  },
+  tips: {
+    label: 'Tips & tricks',
+    title: 'Tips & tricks för hönsägare – Smarta knep för hönsgården | Hönsgården',
+    description: 'Praktiska tips och smarta knep för att sköta dina höns bättre. Spara tid, pengar och håll flocken frisk.',
+    ogImage: '/blog-images/hens-feeding.jpg',
+  },
+  halsa: {
+    label: 'Hälsa',
+    title: 'Hönshälsa – Sjukdomar, behandling & förebyggande | Hönsgården',
+    description: 'Allt om hönshälsa: vanliga sjukdomar, symptom, behandling och förebyggande åtgärder. Håll din flock frisk och glad.',
+    ogImage: '/blog-images/hen-health-check.jpg',
+  },
+  nyborjare: {
+    label: 'Nybörjare',
+    title: 'Börja med höns – Komplett nybörjarguide | Hönsgården',
+    description: 'Ska du skaffa höns? Här hittar du allt en nybörjare behöver veta – från val av ras till bygge av hönshus och daglig skötsel.',
+    ogImage: '/blog-images/baby-chicks.jpg',
+  },
+  tradgard: {
+    label: 'Trädgård & odling',
+    title: 'Trädgård & odling – Tips för självhushåll | Hönsgården',
+    description: 'Odla grönsaker, kompostera med höns och skapa en produktiv trädgård. Guider för dig som kombinerar höns med odling.',
+    ogImage: '/blog-images/spring-garden.jpg',
+  },
+  hem: {
+    label: 'Hem & hållbarhet',
+    title: 'Hem & hållbarhet – Hållbart boende med höns | Hönsgården',
+    description: 'Tips för ett hållbart hem med höns. Kompostering, självhushåll och smarta lösningar för den miljömedvetna hönsägaren.',
+    ogImage: '/blog-images/farm-kitchen.jpg',
+  },
+  friluftsliv: {
+    label: 'Friluftsliv & natur',
+    title: 'Friluftsliv & natur – Utomhuslivet med höns | Hönsgården',
+    description: 'Friluftsliv, naturupplevelser och livet utomhus. Guider för dig som älskar naturen och lantlivet.',
+    ogImage: '/blog-images/sunset-farm.jpg',
+  },
 };
 
-export default function Guides() {
+const categoryLabels: Record<string, string> = {
+  guide: 'Guide', recension: 'Recension', tips: 'Tips & tricks', halsa: 'Hälsa',
+  nyborjare: 'Nybörjare', tradgard: 'Trädgård & odling', hem: 'Hem & hållbarhet', friluftsliv: 'Friluftsliv & natur',
+};
+
+export default function BlogCategory() {
+  const { category } = useParams<{ category: string }>();
+  const meta = categoryMeta[category || ''];
+
   useSeo({
-    title: 'Blogg om höns – Guider, recensioner & tips | Hönsgården',
-    description: 'Expertguider, produktrecensioner och tips om höns, hönshus, foder och hälsa. Allt du behöver veta som hönsägare – testat och granskat av Hönsgården.',
-    path: '/blogg',
-    ogImage: '/blog-images/hens-garden.jpg',
-    ogImageAlt: 'Höns i en vacker trädgård – Hönsgårdens blogg',
+    title: meta?.title || `${category} | Hönsgården`,
+    description: meta?.description || '',
+    path: `/blogg/kategori/${category}`,
+    ogImage: meta?.ogImage,
+    ogImageAlt: meta?.label,
     jsonLd: [
       {
         '@type': 'CollectionPage',
-        '@id': 'https://honsgarden.se/blogg',
-        name: 'Bloggen – Guider, recensioner & tips om höns',
-        description: 'Expertguider, produktrecensioner och tips om höns, hönshus, foder och hälsa.',
-        url: 'https://honsgarden.se/blogg',
+        '@id': `https://honsgarden.se/blogg/kategori/${category}`,
+        name: meta?.label || category,
+        description: meta?.description || '',
+        url: `https://honsgarden.se/blogg/kategori/${category}`,
         isPartOf: { '@id': 'https://honsgarden.se/#website' },
         inLanguage: 'sv-SE',
       },
@@ -42,29 +90,42 @@ export default function Guides() {
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://honsgarden.se' },
           { '@type': 'ListItem', position: 2, name: 'Blogg', item: 'https://honsgarden.se/blogg' },
+          { '@type': 'ListItem', position: 3, name: meta?.label || category, item: `https://honsgarden.se/blogg/kategori/${category}` },
         ],
       },
     ],
   });
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ['public-blog-posts'],
+    queryKey: ['blog-posts-category', category],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_posts')
         .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
         .eq('is_published', true)
+        .eq('category', category!)
         .order('published_at', { ascending: false });
       if (error) throw error;
       return data;
     },
+    enabled: !!category,
   });
+
+  if (!meta) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-4">
+        <BookOpen className="h-10 w-10 text-muted-foreground/30" />
+        <h1 className="font-serif text-xl text-foreground">Kategorin hittades inte</h1>
+        <Link to="/blogg"><Button variant="outline" className="rounded-xl"><ArrowLeft className="h-4 w-4 mr-1" /> Tillbaka till bloggen</Button></Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <VisitorWelcomePopup />
 
-      {/* ItemList JSON-LD for blog listing */}
+      {/* ItemList JSON-LD */}
       {posts.length > 0 && (
         <script
           type="application/ld+json"
@@ -82,6 +143,7 @@ export default function Guides() {
           }}
         />
       )}
+
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -89,44 +151,56 @@ export default function Guides() {
             <span className="text-xl">🐔</span>
             <span className="font-serif text-lg text-foreground">Hönsgården</span>
           </Link>
-          <Link to="/login">
-            <Button size="sm" className="rounded-xl text-xs gap-1">
-              <Egg className="h-3 w-3" /> Kom igång
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/blogg">
+              <Button variant="ghost" size="sm" className="text-xs gap-1">
+                <BookOpen className="h-3 w-3" /> Alla inlägg
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button size="sm" className="rounded-xl text-xs gap-1">
+                <Egg className="h-3 w-3" /> Kom igång
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
         {/* Hero */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 text-primary text-xs font-medium mb-4">
-            <BookOpen className="h-3.5 w-3.5" /> Bloggen
-          </div>
+        <div className="text-center mb-8">
+          <Link to="/blogg" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4">
+            <ArrowLeft className="h-3 w-3" /> Tillbaka till bloggen
+          </Link>
           <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
-            Höns, hem, trädgård & friluftsliv
+            {meta.label}
           </h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Guider, recensioner och tips för dig som älskar höns, hemmet, trädgården och livet utomhus. Vi testar produkter och delar med oss av vår kunskap.
+          <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base">
+            {meta.description}
           </p>
         </div>
 
         {/* Category navigation */}
         <nav aria-label="Kategorier" className="flex flex-wrap justify-center gap-2 mb-10">
-          {Object.entries(categoryLabels).map(([key, label]) => (
+          {Object.entries(categoryMeta).map(([key, val]) => (
             <Link key={key} to={`/blogg/kategori/${key}`}>
-              <Badge variant="secondary" className="cursor-pointer text-xs hover:bg-primary hover:text-primary-foreground transition-colors">
-                {label}
+              <Badge
+                variant={key === category ? 'default' : 'secondary'}
+                className="cursor-pointer text-xs"
+              >
+                {val.label}
               </Badge>
             </Link>
           ))}
         </nav>
+
+        {/* Posts */}
         {isLoading ? (
           <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
         ) : !posts.length ? (
           <div className="text-center py-16">
             <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-            <p className="text-muted-foreground">Inga guider publicerade ännu. Kom tillbaka snart!</p>
+            <p className="text-muted-foreground">Inga inlägg i denna kategori ännu.</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -149,11 +223,9 @@ export default function Guides() {
                   )}
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      {post.category && (
-                        <Badge variant="secondary" className="text-[9px]">
-                          {categoryLabels[post.category] || post.category}
-                        </Badge>
-                      )}
+                      <Badge variant="secondary" className="text-[9px]">
+                        {categoryLabels[post.category || ''] || post.category}
+                      </Badge>
                       {post.published_at && (
                         <span className="text-[10px] text-muted-foreground">
                           {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -183,7 +255,7 @@ export default function Guides() {
             Håll koll på dina höns – helt gratis
           </h2>
           <p className="text-sm text-muted-foreground max-w-md mx-auto mb-5">
-            Med Hönsgården loggar du ägg, hälsa och foder på ett ställe. Perfekt för dig som vill ha full koll på din hönsgård.
+            Med Hönsgården loggar du ägg, hälsa och foder på ett ställe.
           </p>
           <Link to="/login">
             <Button size="lg" className="rounded-xl gap-2">
@@ -199,8 +271,8 @@ export default function Guides() {
           <span>© {new Date().getFullYear()} Hönsgården</span>
           <div className="flex gap-4">
             <Link to="/" className="hover:text-foreground transition-colors">Startsidan</Link>
+            <Link to="/blogg" className="hover:text-foreground transition-colors">Blogg</Link>
             <Link to="/terms" className="hover:text-foreground transition-colors">Villkor</Link>
-            <Link to="/login" className="hover:text-foreground transition-colors">Logga in</Link>
           </div>
         </div>
       </footer>
