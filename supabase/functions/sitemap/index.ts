@@ -81,6 +81,20 @@ Deno.serve(async (req) => {
 `;
   }
 
+  // Tag pages
+  for (const tag of allTags) {
+    const encoded = encodeURIComponent(tag);
+    xml += `  <url>
+    <loc>${BASE_URL}/blogg/tagg/${encoded}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}/blogg/tagg/${encoded}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/blogg/tagg/${encoded}" />
+  </url>
+`;
+  }
+
   // Blog posts
   if (posts) {
     for (const post of posts) {
