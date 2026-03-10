@@ -68,7 +68,7 @@ export default function Login() {
           // Non-blocking – referral is a bonus
         }
       }
-      toast({ title: 'Konto skapat!', description: referralCode.trim() ? 'Du har fått 7 dagars gratis Premium! 🎉' : 'Du kan nu logga in direkt.' });
+      toast({ title: 'Konto skapat!', description: referralCode.trim() ? 'Du har fått 14 dagars gratis Premium! 🎉 (7 dagar provperiod + 7 dagar värvningsbonus)' : 'Du har fått 7 dagars gratis Premium! 🎉' });
       setAuthMode('login');
     } catch (err: any) {
       toast({ title: 'Registrering misslyckades', description: err.message, variant: 'destructive' });
