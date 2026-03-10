@@ -553,7 +553,7 @@ export default function Index() {
           </div>
           {/* CTA after testimonials */}
           <FadeUp delay={400} className="text-center mt-10">
-            <p className="text-sm text-muted-foreground mb-4">Bli en av 340+ nöjda hönsägare</p>
+            <p className="text-sm text-muted-foreground mb-4">Bli en av tusentals nöjda hönsägare</p>
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
               <a href="/login?mode=register">
                 Skapa konto
