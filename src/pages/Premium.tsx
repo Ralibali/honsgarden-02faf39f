@@ -134,9 +134,14 @@ export default function Premium() {
           <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
             Uppgradera din hönsgård
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto">
+          <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto mb-4">
             Få full kontroll med avancerad statistik, smarta prognoser och automatiska påminnelser.
           </p>
+          {!isPremium && (
+            <div className="inline-flex items-center gap-2 bg-success/15 text-success-foreground border border-success/25 px-4 py-2 rounded-full text-sm font-medium">
+              🎁 Alla nya konton får 7 dagars Premium gratis!
+            </div>
+          )}
         </div>
       </div>
 

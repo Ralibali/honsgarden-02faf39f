@@ -155,7 +155,7 @@ const testimonials = [
 ];
 
 const faqs = [
-  { q: 'Kostar det något?', a: 'Nej, grundversionen är helt gratis – för alltid. Du kan logga ägg, hantera hönor och se statistik utan att betala. Premium med extra funktioner kostar från 19 kr/mån.' },
+  { q: 'Kostar det något?', a: 'Nej, grundversionen är helt gratis – för alltid. Alla nya konton får dessutom 7 dagars Premium helt gratis, så du kan testa alla funktioner direkt. Premium med extra funktioner kostar från 19 kr/mån efter provperioden.' },
   { q: 'Behöver jag ladda ner en app?', a: 'Nej! Hönsgården fungerar direkt i din webbläsare på mobilen. Du kan lägga till den på hemskärmen så känns det precis som en app.' },
   { q: 'Kan jag testa utan att skapa konto?', a: 'Registreringen tar bara 10 sekunder med e-post och lösenord. Vi behöver ett konto för att spara dina data säkert.' },
   { q: 'Är mina data säkra?', a: 'Absolut. All data lagras krypterat i EU. Vi följer GDPR och du kan när som helst radera ditt konto och all data.' },
@@ -284,6 +284,7 @@ export default function Index() {
           <FadeUp delay={400}>
             <div className="flex flex-wrap gap-x-6 gap-y-1 justify-center text-xs sm:text-sm text-primary-foreground/70 mt-6">
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Helt gratis att börja</span>
+              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 7 dagars Premium ingår</span>
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Fungerar i mobilen</span>
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 100% svensk 🇸🇪</span>
             </div>
