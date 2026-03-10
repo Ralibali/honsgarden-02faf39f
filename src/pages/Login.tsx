@@ -175,6 +175,10 @@ export default function Login() {
               <div>
                 <h3 className="font-serif text-3xl text-foreground mb-2">Skapa konto</h3>
                 <p className="text-muted-foreground">Kom igång med din hönsgård på några sekunder.</p>
+                <div className="mt-3 flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2">
+                  <Gift className="h-4 w-4 text-primary shrink-0" />
+                  <p className="text-sm text-primary font-medium">7 dagars Premium ingår gratis!</p>
+                </div>
               </div>
               <div className="space-y-4">
                 <div>
