@@ -87,7 +87,7 @@ Allow: /
 Disallow: /app/
 Disallow: /login
 
-Sitemap: https://honsgarden.se/sitemap.xml
+Sitemap: https://sikbymtrbhrofysgkqsj.supabase.co/functions/v1/sitemap
 
 # RSS Feed
 # https://honsgarden.se/rss.xml
