@@ -247,7 +247,7 @@ export default function Index() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
-              2 547 hönsägare har redan gått med
+              347 hönsägare har redan gått med
             </div>
           </FadeUp>
 
@@ -301,8 +301,8 @@ export default function Index() {
         <div className="container max-w-5xl mx-auto px-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
             {[
-              { target: 52340, suffix: '+', label: 'ägg loggade', icon: Egg },
-              { target: 2547, suffix: '', label: 'hönsägare', icon: Users },
+              { target: 4820, suffix: '+', label: 'ägg loggade', icon: Egg },
+              { target: 347, suffix: '', label: 'hönsägare', icon: Users },
               { target: 4, suffix: ',8 ★', label: 'snittbetyg', icon: Star },
               { target: 10, suffix: 's', label: 'att skapa konto', icon: Clock },
             ].map((s, i) => (
@@ -553,7 +553,7 @@ export default function Index() {
           </div>
           {/* CTA after testimonials */}
           <FadeUp delay={400} className="text-center mt-10">
-            <p className="text-sm text-muted-foreground mb-4">Bli en av 2 500+ nöjda hönsägare</p>
+            <p className="text-sm text-muted-foreground mb-4">Bli en av 340+ nöjda hönsägare</p>
             <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
               <a href="/login?mode=register">
                 Skapa konto
@@ -642,7 +642,7 @@ export default function Index() {
               <div className="text-5xl mb-4">🐔</div>
               <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Dina hönor förtjänar det bästa</h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-                Gå med 2 500+ svenska hönsägare som redan har full koll. Skapa ett konto på 10 sekunder.
+                Gå med 340+ svenska hönsägare som redan har full koll. Skapa ett konto på 10 sekunder.
               </p>
               <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:scale-[1.02] transition-all">
                 <a href="/login?mode=register">
