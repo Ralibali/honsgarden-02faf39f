@@ -11,6 +11,7 @@ import {
 import BlogEditor from '@/components/admin/BlogEditor';
 import GlossaryManager from '@/components/admin/GlossaryManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import UserDetailModal from '@/components/admin/UserDetailModal';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -24,6 +25,7 @@ import {
 export default function Admin() {
   const queryClient = useQueryClient();
   const [userSearch, setUserSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [premiumDurations, setPremiumDurations] = useState<Record<string, string>>({});
   const { data: adminCheck, isLoading: checkLoading, isError: checkError } = useQuery({
     queryKey: ['admin-check'],
@@ -220,6 +222,15 @@ export default function Admin() {
                     </div>
 
                     <div className="flex gap-1 shrink-0 items-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-primary/60 hover:text-primary shrink-0"
+                        onClick={() => setSelectedUser(user)}
+                        title="Visa detaljer"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
                       {user.subscription_status !== 'premium' ? (
                         <>
                           <Select value={premiumDurations[user.user_id] || '30'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
@@ -446,6 +457,14 @@ export default function Admin() {
           )}
         </TabsContent>
       </Tabs>
+
+      <UserDetailModal
+        userId={selectedUser?.user_id || null}
+        userName={selectedUser?.display_name || 'Namnlös'}
+        userEmail={selectedUser?.email || ''}
+        open={!!selectedUser}
+        onOpenChange={(open) => { if (!open) setSelectedUser(null); }}
+      />
     </div>
   );
 }
