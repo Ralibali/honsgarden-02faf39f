@@ -247,7 +247,7 @@ export default function Index() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
-              2 547 höns registrerade
+              100% gratis – kom igång på 10 sekunder
             </div>
           </FadeUp>
 
