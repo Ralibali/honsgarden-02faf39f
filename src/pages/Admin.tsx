@@ -222,6 +222,15 @@ export default function Admin() {
                     </div>
 
                     <div className="flex gap-1 shrink-0 items-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-primary/60 hover:text-primary shrink-0"
+                        onClick={() => setSelectedUser(user)}
+                        title="Visa detaljer"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
                       {user.subscription_status !== 'premium' ? (
                         <>
                           <Select value={premiumDurations[user.user_id] || '30'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
