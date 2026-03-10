@@ -457,6 +457,14 @@ export default function Admin() {
           )}
         </TabsContent>
       </Tabs>
+
+      <UserDetailModal
+        userId={selectedUser?.user_id || null}
+        userName={selectedUser?.display_name || 'Namnlös'}
+        userEmail={selectedUser?.email || ''}
+        open={!!selectedUser}
+        onOpenChange={(open) => { if (!open) setSelectedUser(null); }}
+      />
     </div>
   );
 }
