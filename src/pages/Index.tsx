@@ -247,7 +247,7 @@ export default function Index() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
-              347 hönsägare har redan gått med
+              2 547 höns registrerade
             </div>
           </FadeUp>
 
