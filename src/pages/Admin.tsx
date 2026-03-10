@@ -11,6 +11,7 @@ import {
 import BlogEditor from '@/components/admin/BlogEditor';
 import GlossaryManager from '@/components/admin/GlossaryManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import UserDetailModal from '@/components/admin/UserDetailModal';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
