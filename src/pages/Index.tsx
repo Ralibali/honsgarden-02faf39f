@@ -301,8 +301,8 @@ export default function Index() {
         <div className="container max-w-5xl mx-auto px-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
             {[
-              { target: 52340, suffix: '+', label: 'ägg loggade', icon: Egg },
-              { target: 2547, suffix: '', label: 'hönsägare', icon: Users },
+              { target: 4820, suffix: '+', label: 'ägg loggade', icon: Egg },
+              { target: 347, suffix: '', label: 'hönsägare', icon: Users },
               { target: 4, suffix: ',8 ★', label: 'snittbetyg', icon: Star },
               { target: 10, suffix: 's', label: 'att skapa konto', icon: Clock },
             ].map((s, i) => (
