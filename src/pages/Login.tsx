@@ -68,7 +68,7 @@ export default function Login() {
           // Non-blocking – referral is a bonus
         }
       }
-      toast({ title: 'Konto skapat!', description: referralCode.trim() ? 'Du har fått 14 dagars gratis Premium! 🎉 (7 dagar provperiod + 7 dagar värvningsbonus)' : 'Du har fått 7 dagars gratis Premium! 🎉' });
+      toast({ title: 'Konto skapat!', description: referralCode.trim() ? 'Du har fått 14 dagars gratis Premium! 🎉 (sju dagar provperiod + sju dagar värvningsbonus)' : 'Du har fått sju dagars gratis Premium! 🎉' });
       setAuthMode('login');
     } catch (err: any) {
       toast({ title: 'Registrering misslyckades', description: err.message, variant: 'destructive' });
@@ -177,7 +177,7 @@ export default function Login() {
                 <p className="text-muted-foreground">Kom igång med din hönsgård på några sekunder.</p>
                 <div className="mt-3 flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2">
                   <Gift className="h-4 w-4 text-primary shrink-0" />
-                  <p className="text-sm text-primary font-medium">7 dagars Premium ingår gratis!</p>
+                  <p className="text-sm text-primary font-medium">Sju dagars Premium ingår gratis!</p>
                 </div>
               </div>
               <div className="space-y-4">
@@ -208,7 +208,7 @@ export default function Login() {
                     <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input id="referral" type="text" placeholder="T.ex. A1B2C3" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} className="pl-10 h-11 uppercase" maxLength={6} />
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">Har du en kod från en vän? Ni får båda 7 dagars Premium!</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Har du en kod från en vän? Ni får båda sju dagars Premium!</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <input

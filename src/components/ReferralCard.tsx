@@ -53,7 +53,7 @@ export default function ReferralCard() {
       try {
         await navigator.share({
           title: 'Prova Hönsgården!',
-          text: `Använd min värvningskod ${code} och få 7 dagars gratis Premium! 🐔`,
+          text: `Använd min värvningskod ${code} och få sju dagars gratis Premium! 🐔`,
           url: shareUrl,
         });
       } catch {
@@ -75,7 +75,7 @@ export default function ReferralCard() {
           </div>
           <div>
             <h3 className="font-serif text-sm text-foreground">Tipsa en vän</h3>
-            <p className="text-[10px] text-muted-foreground">Ni får båda 7 dagars Premium!</p>
+            <p className="text-[10px] text-muted-foreground">Ni får båda sju dagars Premium!</p>
           </div>
         </div>
 
