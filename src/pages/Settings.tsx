@@ -547,3 +547,64 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+function FeedbackHistory() {
+  const { data: feedbackItems = [], isLoading } = useQuery({
+    queryKey: ['user-feedback'],
+    queryFn: () => api.getUserFeedback(),
+  });
+
+  if (isLoading) return <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>;
+  if (!(feedbackItems as any[]).length) return null;
+
+  const getStatusBadge = (status: string) => {
+    if (status === 'resolved') return <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5"><CheckCircle2 className="h-2.5 w-2.5" /> Besvarad</span>;
+    if (status === 'in_progress') return <span className="text-[9px] bg-warning/10 text-warning px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" /> Pågår</span>;
+    return <span className="text-[9px] bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded-full font-medium">Skickad</span>;
+  };
+
+  return (
+    <div className="space-y-2 pt-2 border-t border-border/50">
+      <p className="text-xs font-semibold text-muted-foreground">Dina ärenden</p>
+      {(feedbackItems as any[]).map((fb: any) => (
+        <div key={fb.id} className="rounded-xl border border-border/50 overflow-hidden">
+          {/* User's message */}
+          <div className="p-3 bg-card">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="text-[10px] text-muted-foreground">
+                {fb.created_at ? new Date(fb.created_at).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short', year: 'numeric' }) : '–'}
+              </span>
+              {getStatusBadge(fb.status)}
+            </div>
+            <p className="text-xs text-foreground leading-relaxed">{fb.message}</p>
+          </div>
+
+          {/* Admin reply */}
+          {fb.admin_reply && (
+            <div className="p-3 bg-primary/5 border-t border-primary/10">
+              <div className="flex items-center gap-1.5 mb-1">
+                <div className="w-4 h-4 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Send className="h-2 w-2 text-primary" />
+                </div>
+                <span className="text-[10px] font-semibold text-primary">Hönsgården svarade</span>
+                <span className="text-[9px] text-muted-foreground">
+                  {fb.admin_reply_at ? new Date(fb.admin_reply_at).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }) : ''}
+                </span>
+              </div>
+              <p className="text-xs text-foreground leading-relaxed">{fb.admin_reply}</p>
+            </div>
+          )}
+
+          {/* Waiting indicator */}
+          {!fb.admin_reply && fb.status !== 'resolved' && (
+            <div className="px-3 py-2 bg-muted/30 border-t border-border/30">
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Clock className="h-2.5 w-2.5" /> Inväntar svar...
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
