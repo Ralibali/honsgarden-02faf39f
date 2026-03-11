@@ -155,7 +155,7 @@ const testimonials = [
 ];
 
 const faqs = [
-  { q: 'Kostar det något?', a: 'Nej, grundversionen är helt gratis – för alltid. Alla nya konton får dessutom 7 dagars Premium helt gratis, så du kan testa alla funktioner direkt. Premium med extra funktioner kostar från 19 kr/mån efter provperioden.' },
+  { q: 'Kostar det något?', a: 'Nej, grundversionen är helt gratis – för alltid. Alla nya konton får dessutom sju dagars Premium helt gratis, så du kan testa alla funktioner direkt. Premium med extra funktioner kostar från 19 kr/mån efter provperioden.' },
   { q: 'Behöver jag ladda ner en app?', a: 'Nej! Hönsgården fungerar direkt i din webbläsare på mobilen. Du kan lägga till den på hemskärmen så känns det precis som en app.' },
   { q: 'Kan jag testa utan att skapa konto?', a: 'Registreringen tar bara 10 sekunder med e-post och lösenord. Vi behöver ett konto för att spara dina data säkert.' },
   { q: 'Är mina data säkra?', a: 'Absolut. All data lagras krypterat i EU. Vi följer GDPR och du kan när som helst radera ditt konto och all data.' },
