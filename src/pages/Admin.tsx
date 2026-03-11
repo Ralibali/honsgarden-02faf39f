@@ -73,6 +73,18 @@ export default function Admin() {
     },
   });
 
+  const replyFeedbackMutation = useMutation({
+    mutationFn: ({ feedbackId, userId, message }: { feedbackId: string; userId: string; message: string }) =>
+      api.adminReplyFeedback(feedbackId, userId, message),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-feedback'] });
+      toast({ title: 'Svar skickat! 📩' });
+      setReplyTexts((prev) => ({ ...prev, [vars.feedbackId]: '' }));
+      setReplyingTo(null);
+    },
+    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+  });
+
   const updateSubMutation = useMutation({
     mutationFn: ({ userId, data }: { userId: string; data: any }) =>
       api.adminUpdateSubscription(userId, data),
