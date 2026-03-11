@@ -121,7 +121,7 @@ export function QuickEggFAB() {
                 <SelectTrigger className="h-9 text-xs rounded-xl border-border/50">
                   <SelectValue placeholder="Alla (generellt)" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[90]">
                   <SelectItem value="all">🥚 Alla (generellt)</SelectItem>
                   {(flocks as any[]).map((flock: any) => {
                     const flockHens = activeHens.filter((h: any) => h.flock_id === flock.id);
