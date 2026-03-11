@@ -35,6 +35,7 @@ const Guides = React.lazy(() => import("./pages/Guides"));
 const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 const BlogCategory = React.lazy(() => import("./pages/BlogCategory"));
 const BlogTag = React.lazy(() => import("./pages/BlogTag"));
+const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,7 @@ const AppRoutes = () => (
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/guider" element={<Guides />} />
         <Route path="/guider/:slug" element={<GuideArticle />} />
         <Route path="/blogg" element={<Guides />} />
