@@ -46,8 +46,10 @@ export function QuickEggFAB() {
   });
 
   const handleSave = () => {
-    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
-    mutation.mutate({ count, hen_id });
+    const isFlockSelection = selectedHenId.startsWith('flock:');
+    const hen_id = !isFlockSelection && selectedHenId !== 'all' ? selectedHenId : undefined;
+    const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
+    mutation.mutate({ count, hen_id, flock_id });
   };
 
   return (
