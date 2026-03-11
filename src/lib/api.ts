@@ -279,7 +279,8 @@ export async function updateCoopSettings(settings: any) {
 // ==================== FLOCKS ====================
 
 export async function getFlocks() {
-  const { data, error } = await supabase.from('flocks').select('*').order('created_at', { ascending: false });
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('flocks').select('*').eq('user_id', userId).order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
