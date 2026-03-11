@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +16,7 @@ const PRICES = {
 
 const premiumFeatures = [
   { text: 'Obegränsat antal hönor', icon: '🐔' },
+  { text: 'Obegränsat antal flockar', icon: '🏡' },
   { text: 'Avancerad statistik & trender', icon: '📊' },
   { text: 'Smarta varningar & prognoser', icon: '🔔' },
   { text: 'Hälsologg & vaccinationer', icon: '💉' },
@@ -28,6 +29,7 @@ const premiumFeatures = [
 ];
 
 const highlights = [
+  { icon: Users, title: 'Obegränsade flockar', desc: 'Gratis = 1 flock. Premium = hur många du vill.' },
   { icon: Calculator, title: 'Kostnad per ägg', desc: 'Se exakt vad varje ägg kostar att producera.' },
   { icon: TrendingUp, title: 'Smarta prognoser', desc: 'Förväntat antal ägg baserat på dina data.' },
   { icon: Bell, title: 'Avmaskning & påminnelser', desc: 'Automatiska påminnelser för vaccination och veterinär.' },
