@@ -65,8 +65,37 @@ serve(async (req) => {
       }
       productId = subscription.items.data[0].price.product;
 
+      // Check if this is a new upgrade (was not premium before)
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('subscription_status')
+        .eq('user_id', user.id)
+        .single();
+
+      const wasNotPremium = profile?.subscription_status !== 'premium';
+
       // Update profile to premium
       await supabaseClient.from('profiles').update({ subscription_status: 'premium' }).eq('user_id', user.id);
+
+      // Send admin notification on new premium upgrade
+      if (wasNotPremium) {
+        const messageId = `premium-${user.id}-${Date.now()}`;
+        await supabaseClient.rpc('enqueue_email', {
+          queue_name: 'transactional_emails',
+          payload: {
+            to: 'info@auroramedia.se',
+            from: 'Hönsgården <noreply@notify.honsgarden.se>',
+            sender_domain: 'notify.honsgarden.se',
+            subject: 'Ny premiumbetalning på Hönsgården!',
+            html: `<h2>Ny premiummedlem! 🎉</h2><p><strong>E-post:</strong> ${user.email}</p><p><strong>Prenumeration:</strong> aktiv</p><p><strong>Slutdatum:</strong> ${subscriptionEnd || 'okänt'}</p>`,
+            text: `Ny premiumbetalning: ${user.email} (slutdatum: ${subscriptionEnd || 'okänt'})`,
+            purpose: 'transactional',
+            label: 'admin-premium-upgrade',
+            message_id: messageId,
+            queued_at: new Date().toISOString(),
+          },
+        });
+      }
     } else {
       await supabaseClient.from('profiles').update({ subscription_status: 'free' }).eq('user_id', user.id);
     }
