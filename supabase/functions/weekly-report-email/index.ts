@@ -20,7 +20,7 @@ Deno.serve(async (_req) => {
   // 1. Get all premium users
   const { data: premiumUsers, error: usersErr } = await supabase
     .from("profiles")
-    .select("user_id, email, display_name")
+    .select("user_id, email, display_name, preferences")
     .eq("subscription_status", "premium")
     .not("email", "is", null);
 

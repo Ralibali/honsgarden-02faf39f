@@ -360,6 +360,30 @@ export default function SettingsPage() {
             </div>
             <Switch checked={eveningReminder} onCheckedChange={setEveningReminder} />
           </div>
+          <div className="border-t border-border/30 pt-4 mt-2">
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-3">
+                <Mail className="h-4.5 w-4.5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Veckorapport via mejl</p>
+                  <p className="text-xs text-muted-foreground">Få en sammanfattning varje måndag med ägg, sysslor & tips</p>
+                  {!isPremium && <p className="text-[10px] text-warning mt-0.5">Kräver Premium</p>}
+                </div>
+              </div>
+              <Switch
+                checked={weeklyReportEmail}
+                disabled={!isPremium}
+                onCheckedChange={async (checked) => {
+                  setWeeklyReportEmail(checked);
+                  if (!user?.id) return;
+                  const { data: current } = await supabase.from('profiles').select('preferences').eq('user_id', user.id).maybeSingle();
+                  const prefs = (current?.preferences && typeof current.preferences === 'object' ? current.preferences : {}) as Record<string, unknown>;
+                  await supabase.from('profiles').update({ preferences: { ...prefs, weekly_report_email: checked } }).eq('user_id', user.id);
+                  toast({ title: checked ? 'Veckorapport aktiverad 📬' : 'Veckorapport avstängd' });
+                }}
+              />
+            </div>
+          </div>
           <Button variant="outline" onClick={() => saveReminderMutation.mutate({ morning_reminder: morningReminder, evening_reminder: eveningReminder })} disabled={saveReminderMutation.isPending} className="rounded-xl">
             {saveReminderMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Spara påminnelser
