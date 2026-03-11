@@ -690,9 +690,8 @@ export async function adminReplyFeedback(feedbackId: string, userId: string, rep
   const { data: profile } = await supabase.from('profiles').select('email, display_name').eq('user_id', userId).single();
   if (!profile?.email) throw new Error('Användaren har ingen e-postadress');
   
-  // Send reply via edge function invoke or email queue
   const { error } = await supabase.functions.invoke('reply-feedback', {
-    body: { feedback_id: feedbackId, to: profile.email, display_name: profile.display_name, message: replyMessage },
+    body: { feedback_id: feedbackId, to: profile.email, display_name: profile.display_name, message: replyMessage, user_id: userId },
   });
   if (error) throw new Error(error.message);
   return { success: true };
