@@ -35,6 +35,7 @@ const Guides = React.lazy(() => import("./pages/Guides"));
 const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 const BlogCategory = React.lazy(() => import("./pages/BlogCategory"));
 const BlogTag = React.lazy(() => import("./pages/BlogTag"));
+const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
