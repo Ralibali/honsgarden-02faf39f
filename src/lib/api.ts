@@ -203,6 +203,13 @@ export async function submitFeedback(feedbackData: any) {
   return data;
 }
 
+export async function getUserFeedback() {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 // ==================== DAILY CHORES ====================
 
 export async function getDailyChores() {
