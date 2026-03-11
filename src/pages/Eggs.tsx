@@ -37,7 +37,7 @@ export default function Eggs() {
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const createMutation = useMutation({
-    mutationFn: (data: { date: string; count: number; hen_id?: string }) => api.createEggRecord(data),
+    mutationFn: (data: { date: string; count: number; hen_id?: string; flock_id?: string }) => api.createEggRecord(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
       toast({ title: '🥚 Ägg registrerade!' });
