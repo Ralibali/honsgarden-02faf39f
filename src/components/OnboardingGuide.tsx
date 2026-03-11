@@ -70,25 +70,47 @@ export default function OnboardingGuide() {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Check localStorage first (fast), then DB as source of truth
-    const localDone = localStorage.getItem(ONBOARDING_KEY);
+    const scopedKey = getOnboardingKey(user.id);
+
+    // Legacy fallback for older key format
+    if (localStorage.getItem(ONBOARDING_KEY)) {
+      localStorage.setItem(scopedKey, '1');
+      return;
+    }
+
+    // Fast path from local cache
+    const localDone = localStorage.getItem(scopedKey);
     if (localDone) return;
 
-    // Check DB preference
-    supabase
+    let isCancelled = false;
+
+    void supabase
       .from('profiles')
       .select('preferences')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (isCancelled || error) return;
+
         const prefs = (data?.preferences as Record<string, any>) ?? {};
         if (prefs.onboarding_done) {
-          localStorage.setItem(ONBOARDING_KEY, '1');
+          localStorage.setItem(scopedKey, '1');
           return;
         }
-        // First time – show onboarding
-        setTimeout(() => setOpen(true), 800);
+
+        const timer = window.setTimeout(() => {
+          if (!isCancelled) {
+            setStep(0);
+            setOpen(true);
+          }
+        }, 800);
+
+        return () => window.clearTimeout(timer);
       });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [user?.id]);
 
   const finish = () => {
