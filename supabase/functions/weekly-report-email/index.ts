@@ -20,7 +20,7 @@ Deno.serve(async (_req) => {
   // 1. Get all premium users
   const { data: premiumUsers, error: usersErr } = await supabase
     .from("profiles")
-    .select("user_id, email, display_name")
+    .select("user_id, email, display_name, preferences")
     .eq("subscription_status", "premium")
     .not("email", "is", null);
 
@@ -42,6 +42,9 @@ Deno.serve(async (_req) => {
 
   for (const user of premiumUsers) {
     try {
+      // Skip users who opted out
+      const prefs = (user.preferences && typeof user.preferences === "object") ? user.preferences as Record<string, unknown> : {};
+      if (prefs.weekly_report_email === false) continue;
       // 2. Fetch egg data for this & last week
       const [eggsThisWeek, eggsLastWeek, hens, choresCompleted] = await Promise.all([
         supabase
