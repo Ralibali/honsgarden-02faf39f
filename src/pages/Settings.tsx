@@ -74,6 +74,17 @@ export default function SettingsPage() {
     }
   }, [reminderSettings]);
 
+  // Load weekly report preference from profile
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from('profiles').select('preferences').eq('user_id', user.id).maybeSingle().then(({ data }) => {
+      if (data?.preferences && typeof data.preferences === 'object') {
+        const prefs = data.preferences as Record<string, unknown>;
+        setWeeklyReportEmail(prefs.weekly_report_email !== false);
+      }
+    });
+  }, [user?.id]);
+
   useEffect(() => {
     setDisplayName(user?.name || '');
   }, [user?.name]);
