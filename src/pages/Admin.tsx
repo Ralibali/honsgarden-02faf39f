@@ -165,6 +165,9 @@ export default function Admin() {
           <TabsTrigger value="feedback" className="text-xs sm:text-sm gap-1 rounded-lg">
             <MessageSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Feedback</span><span className="sm:hidden">FB</span>
           </TabsTrigger>
+          <TabsTrigger value="notifications" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <Bell className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Notiser</span><span className="sm:hidden">🔔</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Analytics tab */}
