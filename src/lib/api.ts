@@ -138,7 +138,8 @@ export async function deleteHatching(id: string) {
 }
 
 export async function getHatchingAlerts() {
-  const { data, error } = await supabase.from('hatchings').select('*').eq('status', 'incubating');
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('hatchings').select('*').eq('user_id', userId).eq('status', 'incubating');
   if (error) throw new Error(error.message);
   const today = new Date();
   return (data || []).filter(h => {
