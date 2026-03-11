@@ -11,7 +11,8 @@ async function getUserId(): Promise<string> {
 // ==================== HENS ====================
 
 export async function getHens() {
-  const { data, error } = await supabase.from('hens').select('*').order('created_at', { ascending: false });
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('hens').select('*').eq('user_id', userId).order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
