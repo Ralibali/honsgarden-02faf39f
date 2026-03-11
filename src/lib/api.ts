@@ -665,8 +665,13 @@ export async function adminUsers() {
 }
 
 export async function adminFeedback() {
-  const { data, error } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
-  if (error) throw new Error(error.message);
+  const { data, error } = await supabase.from('feedback').select('*, profiles!feedback_user_id_profiles_user_id(display_name, email)').order('created_at', { ascending: false });
+  if (error) {
+    // Fallback without join if FK doesn't exist
+    const { data: fallback, error: err2 } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
+    if (err2) throw new Error(err2.message);
+    return fallback;
+  }
   return data;
 }
 
