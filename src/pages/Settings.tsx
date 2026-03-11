@@ -226,6 +226,42 @@ export default function SettingsPage() {
     }
   };
 
+  const replayOnboarding = async () => {
+    if (!user?.id) return;
+
+    const scopedKey = `honsgarden-onboarding-done-${user.id}`;
+    localStorage.removeItem(scopedKey);
+    localStorage.removeItem('honsgarden-onboarding-done');
+
+    const { data: profile, error: readError } = await supabase
+      .from('profiles')
+      .select('preferences')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (readError) {
+      toast({ title: 'Kunde inte återställa intro', description: readError.message, variant: 'destructive' });
+      return;
+    }
+
+    const prefs = (profile?.preferences && typeof profile.preferences === 'object'
+      ? profile.preferences
+      : {}) as Record<string, unknown>;
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ preferences: { ...prefs, onboarding_done: false } })
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      toast({ title: 'Kunde inte återställa intro', description: updateError.message, variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Introguiden återställd ✨', description: 'Vi visar den igen på startsidan.' });
+    navigate('/app');
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
