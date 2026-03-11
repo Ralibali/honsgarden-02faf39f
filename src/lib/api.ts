@@ -375,10 +375,11 @@ export async function getYearStats(year: number) {
 }
 
 export async function getSummaryStats() {
+  const userId = await getUserId();
   const [eggsRes, hensRes, txnsRes] = await Promise.all([
-    supabase.from('egg_logs').select('count, date'),
-    supabase.from('hens').select('id').eq('is_active', true),
-    supabase.from('transactions').select('amount, type'),
+    supabase.from('egg_logs').select('count, date').eq('user_id', userId),
+    supabase.from('hens').select('id').eq('user_id', userId).eq('is_active', true),
+    supabase.from('transactions').select('amount, type').eq('user_id', userId),
   ]);
   const eggs = eggsRes.data || [];
   const totalEggs = eggs.reduce((s, r) => s + r.count, 0);
