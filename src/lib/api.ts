@@ -346,11 +346,12 @@ export async function getTodayStats() {
 }
 
 export async function getMonthStats(year: number, month: number) {
+  const userId = await getUserId();
   const start = format(startOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd');
   const end = format(endOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd');
-  const { data: eggs } = await supabase.from('egg_logs').select('*').gte('date', start).lte('date', end).order('date');
-  const { data: feed } = await supabase.from('feed_records').select('*').gte('date', start).lte('date', end);
-  const { data: txns } = await supabase.from('transactions').select('*').gte('date', start).lte('date', end);
+  const { data: eggs } = await supabase.from('egg_logs').select('*').eq('user_id', userId).gte('date', start).lte('date', end).order('date');
+  const { data: feed } = await supabase.from('feed_records').select('*').eq('user_id', userId).gte('date', start).lte('date', end);
+  const { data: txns } = await supabase.from('transactions').select('*').eq('user_id', userId).gte('date', start).lte('date', end);
   return {
     eggs: eggs || [],
     feed: feed || [],
