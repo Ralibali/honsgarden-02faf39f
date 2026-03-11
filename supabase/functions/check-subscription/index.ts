@@ -181,8 +181,10 @@ serve(async (req) => {
       }
     }
 
+    const subscribed = hasActiveSub || hasUnexpiredPremium;
+
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
+      subscribed,
       product_id: productId,
       subscription_end: subscriptionEnd,
     }), {
