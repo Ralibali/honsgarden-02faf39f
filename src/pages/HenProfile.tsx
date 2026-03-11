@@ -231,6 +231,10 @@ export default function HenProfile() {
               <span className="text-6xl block mb-3">{isRooster ? '🐓' : '🐔'}</span>
               <h1 className="text-2xl font-serif text-foreground mb-1">{hen.name}</h1>
               <div className="flex items-center justify-center gap-2 flex-wrap">
+                {hen.flock_id && (() => {
+                  const flock = (flocks as any[]).find((f: any) => f.id === hen.flock_id);
+                  return flock ? <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">🏠 {flock.name}</Badge> : null;
+                })()}
                 {hen.breed && <Badge variant="secondary" className="text-xs">{hen.breed}</Badge>}
                 {hen.color && <Badge variant="secondary" className="text-xs">{hen.color}</Badge>}
                 <Badge variant="secondary" className={`text-xs ${hen.is_active ? 'bg-success/10 text-success border-success/20' : 'bg-destructive/10 text-destructive border-destructive/20'}`}>
