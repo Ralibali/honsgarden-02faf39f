@@ -28,6 +28,12 @@ export default function Eggs() {
     staleTime: 60_000,
   });
 
+  const { data: flocks = [] } = useQuery({
+    queryKey: ['flocks'],
+    queryFn: () => api.getFlocks(),
+    staleTime: 60_000,
+  });
+
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const createMutation = useMutation({
