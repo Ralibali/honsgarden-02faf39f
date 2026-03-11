@@ -759,7 +759,7 @@ export const api = {
   getHatchings, createHatching, updateHatching, deleteHatching, getHatchingAlerts,
   getTransactions, createTransaction, deleteTransaction,
   getHealthLogs, createHealthLog, getHenHealthLogs,
-  submitFeedback,
+  submitFeedback, getUserFeedback,
   getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
   getCoopSettings, updateCoopSettings,
   getFlocks, createFlock, updateFlock, deleteFlock,
