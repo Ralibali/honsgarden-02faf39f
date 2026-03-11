@@ -66,7 +66,7 @@ function PremiumUpsellCard({ feature }: { feature?: string }) {
             {feature ? `${feature} kräver Premium` : 'Premium-funktion'}
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Lås upp alla funktioner med Premium. Prova 7 dagar gratis – sedan bara 19 kr/mån.
+            Lås upp alla funktioner med Premium. Prova sju dagar gratis – sedan bara 19 kr/mån.
           </p>
         </div>
         <Button
