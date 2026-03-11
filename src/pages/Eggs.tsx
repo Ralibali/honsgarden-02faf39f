@@ -199,6 +199,7 @@ export default function Eggs() {
             {eggs.slice(0, 20).map((entry: any) => {
               const entryId = entry._id || entry.id;
               const henName = entry.hen_id ? henNameMap[entry.hen_id] : null;
+              const flockName = entry.flock_id ? flockNameMap[entry.flock_id] : null;
               return (
                 <div key={entryId} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-secondary/50 transition-colors">
                   <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -206,9 +207,12 @@ export default function Eggs() {
                       <EggIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
                         <p className="text-xs sm:text-sm text-muted-foreground">{entry.date}</p>
+                        {flockName && (
+                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-medium">👥 {flockName}</span>
+                        )}
                         {henName && (
                           <span className="text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-md font-medium">🐔 {henName}</span>
                         )}
