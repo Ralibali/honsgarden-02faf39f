@@ -626,7 +626,7 @@ export default function Index() {
               </div>
               <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
                 <a href="/login?mode=register">
-                  Prova 7 dagar gratis
+                  Prova sju dagar gratis
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>

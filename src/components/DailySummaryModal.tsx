@@ -119,7 +119,7 @@ export function DailySummaryModal() {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-[10px] font-semibold text-foreground">Smartare insikter med Premium</p>
-                  <p className="text-[9px] text-muted-foreground">7 dagar gratis – sedan 19 kr/mån</p>
+                  <p className="text-[9px] text-muted-foreground">Sju dagar gratis – sedan 19 kr/mån</p>
                 </div>
                 <Sparkles className="h-3 w-3 text-warning shrink-0" />
               </button>
