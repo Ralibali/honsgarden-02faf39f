@@ -156,7 +156,7 @@ export default function Premium() {
               <span className="text-4xl font-bold text-foreground">19</span>
               <span className="text-lg text-muted-foreground ml-1">kr/mån</span>
             </div>
-            <p className="text-xs text-muted-foreground mb-4">7 dagar gratis provperiod</p>
+            <p className="text-xs text-muted-foreground mb-4">Sju dagar gratis provperiod</p>
             <Button 
               variant="outline"
               className="w-full h-11 gap-2 active:scale-95 transition-transform"

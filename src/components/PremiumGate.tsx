@@ -66,7 +66,7 @@ function PremiumUpsellCard({ feature }: { feature?: string }) {
             {feature ? `${feature} kräver Premium` : 'Premium-funktion'}
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Lås upp alla funktioner med Premium. Prova 7 dagar gratis – sedan bara 19 kr/mån.
+            Lås upp alla funktioner med Premium. Prova sju dagar gratis – sedan bara 19 kr/mån.
           </p>
         </div>
         <Button
@@ -99,7 +99,7 @@ function PremiumBannerInline({ feature }: { feature?: string }) {
         <p className="text-xs font-semibold text-foreground">
           {feature ? `Lås upp ${feature.toLowerCase()} med Premium` : 'Uppgradera till Premium'}
         </p>
-        <p className="text-[10px] text-muted-foreground">7 dagar gratis – sedan 19 kr/mån</p>
+        <p className="text-[10px] text-muted-foreground">Sju dagar gratis – sedan 19 kr/mån</p>
       </div>
       <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
     </button>
@@ -134,7 +134,7 @@ export function PremiumNudge() {
               <span className="text-[9px] font-bold uppercase tracking-wider text-warning bg-warning/12 px-2 py-0.5 rounded-full">Nytt</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-              Statistik, prognoser, kläckning, foderspårning och mycket mer. Prova 7 dagar helt gratis!
+              Statistik, prognoser, kläckning, foderspårning och mycket mer. Prova sju dagar helt gratis!
             </p>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-primary group-hover:text-primary/80 transition-colors">
