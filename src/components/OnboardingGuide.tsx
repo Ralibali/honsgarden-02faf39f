@@ -83,6 +83,7 @@ export default function OnboardingGuide() {
     if (localDone) return;
 
     let isCancelled = false;
+    let timer: number | null = null;
 
     void supabase
       .from('profiles')
@@ -98,18 +99,17 @@ export default function OnboardingGuide() {
           return;
         }
 
-        const timer = window.setTimeout(() => {
+        timer = window.setTimeout(() => {
           if (!isCancelled) {
             setStep(0);
             setOpen(true);
           }
         }, 800);
-
-        return () => window.clearTimeout(timer);
       });
 
     return () => {
       isCancelled = true;
+      if (timer) window.clearTimeout(timer);
     };
   }, [user?.id]);
 
