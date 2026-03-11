@@ -284,7 +284,7 @@ export default function Index() {
           <FadeUp delay={400}>
             <div className="flex flex-wrap gap-x-6 gap-y-1 justify-center text-xs sm:text-sm text-primary-foreground/70 mt-6">
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Helt gratis att börja</span>
-              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 7 dagars Premium ingår</span>
+              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Sju dagars Premium ingår</span>
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Fungerar i mobilen</span>
               <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> 100% svensk 🇸🇪</span>
             </div>

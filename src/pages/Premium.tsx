@@ -139,7 +139,7 @@ export default function Premium() {
           </p>
           {!isPremium && (
             <div className="inline-flex items-center gap-2 bg-success/15 text-success-foreground border border-success/25 px-4 py-2 rounded-full text-sm font-medium">
-              🎁 Alla nya konton får 7 dagars Premium gratis!
+              🎁 Alla nya konton får sju dagars Premium gratis!
             </div>
           )}
         </div>

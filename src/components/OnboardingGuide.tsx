@@ -54,7 +54,7 @@ const steps = [
       { icon: Egg, text: 'Logga ägg varje dag', desc: 'Bygg en streak!' },
       { icon: Coins, text: 'Följ ekonomin', desc: 'Se om du går plus' },
       { icon: Sparkles, text: 'Få smarta tips', desc: 'AI-drivna insikter' },
-      { icon: Bird, text: 'Bjud in en vän', desc: 'Få 7 dagars premium' },
+      { icon: Bird, text: 'Bjud in en vän', desc: 'Få sju dagars premium' },
     ],
     color: 'from-success/15 to-warning/10',
   },
