@@ -69,7 +69,8 @@ export async function deleteEggRecord(id: string) {
 // ==================== FEED ====================
 
 export async function getFeedRecords() {
-  const { data, error } = await supabase.from('feed_records').select('*').order('date', { ascending: false });
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('feed_records').select('*').eq('user_id', userId).order('date', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
