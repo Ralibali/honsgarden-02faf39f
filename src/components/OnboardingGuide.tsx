@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 const ONBOARDING_KEY = 'honsgarden-onboarding-done';
 
+const getOnboardingKey = (userId: string) => `${ONBOARDING_KEY}-${userId}`;
+
 const steps = [
   {
     image: heroCoop,
