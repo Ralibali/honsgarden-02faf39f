@@ -9,6 +9,7 @@ import {
   Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye
 } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
+import NotificationSender from '@/components/admin/NotificationSender';
 import GlossaryManager from '@/components/admin/GlossaryManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserDetailModal from '@/components/admin/UserDetailModal';
