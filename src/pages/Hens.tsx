@@ -385,29 +385,59 @@ export default function Hens() {
 
       {/* Selected flock header */}
       {selectedFlock && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="ghost" size="sm" className="rounded-xl text-xs gap-1 text-muted-foreground" onClick={() => setSelectedFlock(null)}>
-            ← Alla
-          </Button>
-          <Badge variant="secondary" className="rounded-lg text-[10px]">
-            {displayHens.length} medlemmar
-          </Badge>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="rounded-xl text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/8 ml-auto"
-            onClick={() => {
-              if (confirm('Ta bort denna flock? Hönorna och tupparna behålls.')) {
-                displayHens.forEach((h: any) => {
-                  updateHenMutation.mutate({ id: h.id, data: { flock_id: null } });
-                });
-                deleteFlockMutation.mutate(selectedFlock);
-              }
-            }}
-          >
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
-            Ta bort flock
-          </Button>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="ghost" size="sm" className="rounded-xl text-xs gap-1 text-muted-foreground" onClick={() => setSelectedFlock(null)}>
+              ← Alla
+            </Button>
+            <Badge variant="secondary" className="rounded-lg text-[10px]">
+              {displayHens.length} medlemmar
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-xl text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/8 ml-auto"
+              onClick={() => {
+                if (confirm('Ta bort denna flock? Hönorna och tupparna behålls.')) {
+                  displayHens.forEach((h: any) => {
+                    updateHenMutation.mutate({ id: h.id, data: { flock_id: null } });
+                  });
+                  deleteFlockMutation.mutate(selectedFlock);
+                }
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              Ta bort flock
+            </Button>
+          </div>
+
+          {/* Quick-assign unassigned hens to this flock */}
+          {(() => {
+            const unassigned = filteredHens.filter((h: any) => !h.flock_id || h.flock_id !== selectedFlock);
+            const otherHens = filteredHens.filter((h: any) => h.flock_id !== selectedFlock);
+            if (!otherHens.length) return null;
+            return (
+              <Card className="border-dashed border-primary/30 bg-primary/4">
+                <CardContent className="p-3">
+                  <p className="text-[11px] font-medium text-foreground mb-2 flex items-center gap-1.5">
+                    <Plus className="h-3.5 w-3.5 text-primary" />
+                    Lägg till i flocken
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {otherHens.map((hen: any) => (
+                      <button
+                        key={hen.id}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border/50 text-[11px] text-foreground hover:border-primary hover:bg-primary/8 transition-all"
+                        onClick={() => updateHenMutation.mutate({ id: hen.id, data: { flock_id: selectedFlock } })}
+                      >
+                        {getEmoji(hen.hen_type)} {hen.name}
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       )}
 
