@@ -36,9 +36,10 @@ export async function deleteHen(id: string) {
 }
 
 export async function getHenProfile(id: string) {
-  const { data: hen, error } = await supabase.from('hens').select('*').eq('id', id).single();
+  const userId = await getUserId();
+  const { data: hen, error } = await supabase.from('hens').select('*').eq('id', id).eq('user_id', userId).single();
   if (error) throw new Error(error.message);
-  const { data: healthLogs } = await supabase.from('health_logs').select('*').eq('hen_id', id).order('date', { ascending: false });
+  const { data: healthLogs } = await supabase.from('health_logs').select('*').eq('hen_id', id).eq('user_id', userId).order('date', { ascending: false });
   return { ...hen, health_logs: healthLogs || [] };
 }
 
@@ -532,11 +533,12 @@ function calculateStreakFromEggs(eggs: any[]): number {
 // ==================== STATISTICS INSIGHTS (real) ====================
 
 export async function getStatisticsInsights() {
+  const userId = await getUserId();
   const [eggsRes, txnsRes, feedRes, hensRes] = await Promise.all([
-    supabase.from('egg_logs').select('count, date, hen_id'),
-    supabase.from('transactions').select('amount, type, date'),
-    supabase.from('feed_records').select('cost, amount_kg, date'),
-    supabase.from('hens').select('id, name, is_active, hen_type'),
+    supabase.from('egg_logs').select('count, date, hen_id').eq('user_id', userId),
+    supabase.from('transactions').select('amount, type, date').eq('user_id', userId),
+    supabase.from('feed_records').select('cost, amount_kg, date').eq('user_id', userId),
+    supabase.from('hens').select('id, name, is_active, hen_type').eq('user_id', userId),
   ]);
 
   const eggs = eggsRes.data || [];
@@ -607,9 +609,10 @@ export async function getStatisticsInsights() {
 
 /** Get hens with computed egg totals from egg_logs */
 export async function getHensWithEggTotals() {
+  const userId = await getUserId();
   const [hensRes, eggsRes] = await Promise.all([
-    supabase.from('hens').select('*').order('created_at', { ascending: false }),
-    supabase.from('egg_logs').select('hen_id, count'),
+    supabase.from('hens').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('egg_logs').select('hen_id, count').eq('user_id', userId),
   ]);
   if (hensRes.error) throw new Error(hensRes.error.message);
   const hens = hensRes.data || [];
