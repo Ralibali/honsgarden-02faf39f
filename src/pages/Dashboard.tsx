@@ -159,8 +159,8 @@ export default function Dashboard() {
   const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const eggMutation = useMutation({
-    mutationFn: ({ count, hen_id }: { count: number; hen_id?: string }) =>
-      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined }),
+    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) =>
+      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined, flock_id: flock_id || undefined }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['eggs'] }); toast({ title: '🥚 Ägg registrerade!' }); },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
