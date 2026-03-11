@@ -29,6 +29,7 @@ const premiumFeatures = [
 ];
 
 const highlights = [
+  { icon: Users, title: 'Obegränsade flockar', desc: 'Gratis = 1 flock. Premium = hur många du vill.' },
   { icon: Calculator, title: 'Kostnad per ägg', desc: 'Se exakt vad varje ägg kostar att producera.' },
   { icon: TrendingUp, title: 'Smarta prognoser', desc: 'Förväntat antal ägg baserat på dina data.' },
   { icon: Bell, title: 'Avmaskning & påminnelser', desc: 'Automatiska påminnelser för vaccination och veterinär.' },
