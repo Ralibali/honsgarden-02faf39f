@@ -135,18 +135,31 @@ export default function Eggs() {
                 <Input type="number" placeholder="0" value={count} onChange={(e) => setCount(e.target.value)} className="h-11" />
               </div>
             </div>
-            {activeHens.length > 0 && (
+            {(activeHens.length > 0 || (flocks as any[]).length > 0) && (
               <div>
-                <label className="data-label mb-1.5 block">Höna (valfritt)</label>
+                <label className="data-label mb-1.5 block">Flock / höna (valfritt)</label>
                 <Select value={selectedHenId} onValueChange={setSelectedHenId}>
                   <SelectTrigger className="h-11">
-                    <SelectValue placeholder="Alla hönor" />
+                    <SelectValue placeholder="Alla (generellt)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Alla hönor (generellt)</SelectItem>
-                    {activeHens.map((hen: any) => (
-                      <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
-                    ))}
+                    <SelectItem value="all">Alla (generellt)</SelectItem>
+                    {(flocks as any[]).length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Flockar</div>
+                        {(flocks as any[]).map((flock: any) => (
+                          <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>👥 {flock.name}</SelectItem>
+                        ))}
+                      </>
+                    )}
+                    {activeHens.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Enskilda höns</div>
+                        {activeHens.map((hen: any) => (
+                          <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
