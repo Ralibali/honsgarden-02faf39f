@@ -768,6 +768,6 @@ export const api = {
   getRankingSummary, getFlockStatistics, getFlockHealth,
   getInsights, getAgdaInboxToday,
   adminCheck, adminStats, adminUsers, adminSubscriptions,
-  adminFeedback, adminUpdateFeedbackStatus, adminDeleteUser, adminUpdateSubscription,
+  adminFeedback, adminUpdateFeedbackStatus, adminReplyFeedback, adminDeleteUser, adminUpdateSubscription,
   adminAcceptTerms,
 };
