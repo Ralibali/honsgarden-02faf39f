@@ -458,6 +458,8 @@ export type Database = {
       }
       feedback: {
         Row: {
+          admin_reply: string | null
+          admin_reply_at: string | null
           created_at: string
           id: string
           message: string
@@ -465,6 +467,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_reply?: string | null
+          admin_reply_at?: string | null
           created_at?: string
           id?: string
           message: string
@@ -472,6 +476,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_reply?: string | null
+          admin_reply_at?: string | null
           created_at?: string
           id?: string
           message?: string
