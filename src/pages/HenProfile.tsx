@@ -24,7 +24,7 @@ export default function HenProfile() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '' });
+  const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '', flock_id: 'none' });
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
 
@@ -43,6 +43,12 @@ export default function HenProfile() {
   const { data: allEggs = [] } = useQuery({
     queryKey: ['eggs'],
     queryFn: () => api.getEggs(),
+    staleTime: 60_000,
+  });
+
+  const { data: flocks = [] } = useQuery({
+    queryKey: ['flocks'],
+    queryFn: () => api.getFlocks(),
     staleTime: 60_000,
   });
 
@@ -65,6 +71,7 @@ export default function HenProfile() {
       color: hen.color || '',
       birth_date: hen.birth_date || '',
       notes: hen.notes || '',
+      flock_id: hen.flock_id || 'none',
     });
     setEditing(true);
   };
@@ -76,6 +83,7 @@ export default function HenProfile() {
       color: editForm.color || null,
       birth_date: editForm.birth_date || null,
       notes: editForm.notes || null,
+      flock_id: editForm.flock_id === 'none' ? null : editForm.flock_id,
     });
   };
 
