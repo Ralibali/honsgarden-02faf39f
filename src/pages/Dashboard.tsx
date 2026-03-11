@@ -225,8 +225,10 @@ export default function Dashboard() {
     }));
 
   const addEggs = (count: number) => {
-    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
-    eggMutation.mutate({ count, hen_id });
+    const isFlockSelection = selectedHenId.startsWith('flock:');
+    const hen_id = !isFlockSelection && selectedHenId !== 'all' ? selectedHenId : undefined;
+    const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
+    eggMutation.mutate({ count, hen_id, flock_id });
   };
 
   const stats = [
