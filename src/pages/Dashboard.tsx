@@ -154,12 +154,13 @@ export default function Dashboard() {
   const { data: transactions = [] } = useQuery({ queryKey: ['transactions'], queryFn: () => api.getTransactions(), staleTime: 60_000 });
   const { data: weatherData, isLoading: weatherLoading } = useQuery({ queryKey: ['weather'], queryFn: fetchWeather, staleTime: 30 * 60 * 1000, retry: 2 });
   const { data: aiTip } = useQuery({ queryKey: ['daily-tip'], queryFn: () => api.getDailyTip(), staleTime: 60 * 60 * 1000, retry: 1 });
+  const { data: flocks = [] } = useQuery({ queryKey: ['flocks'], queryFn: () => api.getFlocks(), staleTime: 60_000 });
 
   const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const eggMutation = useMutation({
-    mutationFn: ({ count, hen_id }: { count: number; hen_id?: string }) =>
-      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined }),
+    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) =>
+      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined, flock_id: flock_id || undefined }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['eggs'] }); toast({ title: '🥚 Ägg registrerade!' }); },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
@@ -224,8 +225,10 @@ export default function Dashboard() {
     }));
 
   const addEggs = (count: number) => {
-    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
-    eggMutation.mutate({ count, hen_id });
+    const isFlockSelection = selectedHenId.startsWith('flock:');
+    const hen_id = !isFlockSelection && selectedHenId !== 'all' ? selectedHenId : undefined;
+    const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
+    eggMutation.mutate({ count, hen_id, flock_id });
   };
 
   const stats = [
@@ -392,17 +395,30 @@ export default function Dashboard() {
           </div>
 
           {/* Hen selector */}
-          {activeHensList.length > 0 && (
+          {(activeHensList.length > 0 || (flocks as any[]).length > 0) && (
             <div className="mb-3">
               <Select value={selectedHenId} onValueChange={setSelectedHenId}>
                 <SelectTrigger className="h-8 text-[11px] rounded-lg border-border/50">
-                  <SelectValue placeholder="Alla hönor" />
+                  <SelectValue placeholder="Alla (generellt)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alla hönor (generellt)</SelectItem>
-                  {activeHensList.map((hen: any) => (
-                    <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
-                  ))}
+                  <SelectItem value="all">Alla (generellt)</SelectItem>
+                  {(flocks as any[]).length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Flockar</div>
+                      {(flocks as any[]).map((flock: any) => (
+                        <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>👥 {flock.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
+                  {activeHensList.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Enskilda höns</div>
+                      {activeHensList.map((hen: any) => (
+                        <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>

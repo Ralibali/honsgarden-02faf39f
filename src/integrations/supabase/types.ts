@@ -293,6 +293,7 @@ export type Database = {
           count: number
           created_at: string
           date: string
+          flock_id: string | null
           hen_id: string | null
           id: string
           notes: string | null
@@ -302,6 +303,7 @@ export type Database = {
           count?: number
           created_at?: string
           date: string
+          flock_id?: string | null
           hen_id?: string | null
           id?: string
           notes?: string | null
@@ -311,12 +313,20 @@ export type Database = {
           count?: number
           created_at?: string
           date?: string
+          flock_id?: string | null
           hen_id?: string | null
           id?: string
           notes?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "egg_logs_flock_id_fkey"
+            columns: ["flock_id"]
+            isOneToOne: false
+            referencedRelation: "flocks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "egg_logs_hen_id_fkey"
             columns: ["hen_id"]

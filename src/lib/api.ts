@@ -52,11 +52,12 @@ export async function getEggs() {
   return data;
 }
 
-export async function createEggRecord(record: { date: string; count: number; notes?: string; hen_id?: string }) {
+export async function createEggRecord(record: { date: string; count: number; notes?: string; hen_id?: string; flock_id?: string }) {
   const userId = await getUserId();
   const insertData: any = { date: record.date, count: record.count, user_id: userId };
   if (record.notes) insertData.notes = record.notes;
   if (record.hen_id) insertData.hen_id = record.hen_id;
+  if (record.flock_id) insertData.flock_id = record.flock_id;
   const { data, error } = await supabase.from('egg_logs').insert(insertData).select().single();
   if (error) throw new Error(error.message);
   return data;

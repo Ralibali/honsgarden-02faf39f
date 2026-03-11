@@ -18,14 +18,21 @@ export function QuickEggFAB() {
     staleTime: 60_000,
   });
 
+  const { data: flocks = [] } = useQuery({
+    queryKey: ['flocks'],
+    queryFn: () => api.getFlocks(),
+    staleTime: 60_000,
+  });
+
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const mutation = useMutation({
-    mutationFn: ({ count, hen_id }: { count: number; hen_id?: string }) =>
+    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) =>
       api.createEggRecord({
         date: new Date().toISOString().split('T')[0],
         count,
         hen_id: hen_id || undefined,
+        flock_id: flock_id || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
@@ -39,8 +46,10 @@ export function QuickEggFAB() {
   });
 
   const handleSave = () => {
-    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
-    mutation.mutate({ count, hen_id });
+    const isFlockSelection = selectedHenId.startsWith('flock:');
+    const hen_id = !isFlockSelection && selectedHenId !== 'all' ? selectedHenId : undefined;
+    const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
+    mutation.mutate({ count, hen_id, flock_id });
   };
 
   return (
@@ -106,17 +115,30 @@ export function QuickEggFAB() {
               ))}
             </div>
 
-            {/* Hen selector */}
-            {activeHens.length > 0 && (
+            {/* Flock / Hen selector */}
+            {(activeHens.length > 0 || (flocks as any[]).length > 0) && (
               <Select value={selectedHenId} onValueChange={setSelectedHenId}>
                 <SelectTrigger className="h-9 text-xs rounded-xl border-border/50">
-                  <SelectValue placeholder="Alla hönor" />
+                  <SelectValue placeholder="Alla (generellt)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alla hönor</SelectItem>
-                  {activeHens.map((hen: any) => (
-                    <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
-                  ))}
+                  <SelectItem value="all">Alla (generellt)</SelectItem>
+                  {(flocks as any[]).length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Flockar</div>
+                      {(flocks as any[]).map((flock: any) => (
+                        <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>👥 {flock.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
+                  {activeHens.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Enskilda höns</div>
+                      {activeHens.map((hen: any) => (
+                        <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             )}
