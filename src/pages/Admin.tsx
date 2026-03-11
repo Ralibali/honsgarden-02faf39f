@@ -445,12 +445,14 @@ export default function Admin() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <p className="text-xs font-semibold text-foreground">
-                            {fb.profile?.display_name || 'Okänd användare'}
+                            {fb.sender_label || fb.profile?.display_name || `Användare ${String(fb.user_id).slice(0, 8)}`}
                           </p>
-                          {fb.profile?.email && (
+                          {fb.profile?.email ? (
                             <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                               <Mail className="h-2.5 w-2.5" /> {fb.profile.email}
                             </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">ID: {String(fb.user_id).slice(0, 8)}…</span>
                           )}
                           {fb.status === 'support' && (
                             <Badge variant="secondary" className="text-[9px] bg-primary/10 text-primary border-primary/20">Support</Badge>
