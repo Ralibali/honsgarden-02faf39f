@@ -36,9 +36,10 @@ export async function deleteHen(id: string) {
 }
 
 export async function getHenProfile(id: string) {
-  const { data: hen, error } = await supabase.from('hens').select('*').eq('id', id).single();
+  const userId = await getUserId();
+  const { data: hen, error } = await supabase.from('hens').select('*').eq('id', id).eq('user_id', userId).single();
   if (error) throw new Error(error.message);
-  const { data: healthLogs } = await supabase.from('health_logs').select('*').eq('hen_id', id).order('date', { ascending: false });
+  const { data: healthLogs } = await supabase.from('health_logs').select('*').eq('hen_id', id).eq('user_id', userId).order('date', { ascending: false });
   return { ...hen, health_logs: healthLogs || [] };
 }
 
