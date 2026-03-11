@@ -115,17 +115,30 @@ export function QuickEggFAB() {
               ))}
             </div>
 
-            {/* Hen selector */}
-            {activeHens.length > 0 && (
+            {/* Flock / Hen selector */}
+            {(activeHens.length > 0 || (flocks as any[]).length > 0) && (
               <Select value={selectedHenId} onValueChange={setSelectedHenId}>
                 <SelectTrigger className="h-9 text-xs rounded-xl border-border/50">
-                  <SelectValue placeholder="Alla hönor" />
+                  <SelectValue placeholder="Alla (generellt)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alla hönor</SelectItem>
-                  {activeHens.map((hen: any) => (
-                    <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
-                  ))}
+                  <SelectItem value="all">Alla (generellt)</SelectItem>
+                  {(flocks as any[]).length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Flockar</div>
+                      {(flocks as any[]).map((flock: any) => (
+                        <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>👥 {flock.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
+                  {activeHens.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Enskilda höns</div>
+                      {activeHens.map((hen: any) => (
+                        <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             )}

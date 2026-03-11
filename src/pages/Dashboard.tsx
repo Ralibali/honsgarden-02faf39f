@@ -395,17 +395,30 @@ export default function Dashboard() {
           </div>
 
           {/* Hen selector */}
-          {activeHensList.length > 0 && (
+          {(activeHensList.length > 0 || (flocks as any[]).length > 0) && (
             <div className="mb-3">
               <Select value={selectedHenId} onValueChange={setSelectedHenId}>
                 <SelectTrigger className="h-8 text-[11px] rounded-lg border-border/50">
-                  <SelectValue placeholder="Alla hönor" />
+                  <SelectValue placeholder="Alla (generellt)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alla hönor (generellt)</SelectItem>
-                  {activeHensList.map((hen: any) => (
-                    <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
-                  ))}
+                  <SelectItem value="all">Alla (generellt)</SelectItem>
+                  {(flocks as any[]).length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Flockar</div>
+                      {(flocks as any[]).map((flock: any) => (
+                        <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>👥 {flock.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
+                  {activeHensList.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Enskilda höns</div>
+                      {activeHensList.map((hen: any) => (
+                        <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
