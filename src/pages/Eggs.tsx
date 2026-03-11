@@ -58,8 +58,10 @@ export default function Eggs() {
 
   const handleSubmit = () => {
     if (!count || Number(count) <= 0) return;
-    const hen_id = selectedHenId !== 'all' ? selectedHenId : undefined;
-    createMutation.mutate({ date, count: Number(count), hen_id });
+    const isFlockSelection = selectedHenId.startsWith('flock:');
+    const hen_id = !isFlockSelection && selectedHenId !== 'all' ? selectedHenId : undefined;
+    const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
+    createMutation.mutate({ date, count: Number(count), hen_id, flock_id });
   };
 
   const todayEggs = eggs.filter((e: any) => e.date === new Date().toISOString().split('T')[0]).reduce((s: number, e: any) => s + (e.count || 0), 0);
