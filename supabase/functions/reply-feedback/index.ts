@@ -1,0 +1,98 @@
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+
+const LOGO_URL = "https://sikbymtrbhrofysgkqsj.supabase.co/storage/v1/object/public/email-assets/logo-honsgarden.png";
+
+Deno.serve(async (req) => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+  if (!serviceKey) {
+    return new Response(JSON.stringify({ error: "config" }), { status: 500 });
+  }
+
+  // Verify caller is admin
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false },
+  });
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
+  const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+
+  // Check admin role
+  const { data: roleCheck } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .maybeSingle();
+
+  if (!roleCheck) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
+  }
+
+  const { feedback_id, to, display_name, message } = await req.json();
+
+  if (!to || !message) {
+    return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
+  }
+
+  const displayName = display_name || to.split("@")[0];
+  const messageId = `feedback-reply-${feedback_id}-${Date.now()}`;
+
+  const html = `
+<div style="font-family: 'Inter', Arial, sans-serif; max-width: 540px; padding: 36px 28px; background: #ffffff;">
+  <img src="${LOGO_URL}" width="140" alt="Hönsgården" style="margin: 0 0 28px;" />
+
+  <h1 style="font-family: 'Young Serif', Georgia, serif; font-size: 22px; color: hsl(22,18%,12%); margin: 0 0 20px;">
+    Svar på din feedback 💬
+  </h1>
+
+  <p style="font-size: 15px; color: hsl(22,12%,44%); line-height: 1.6; margin: 0 0 16px;">
+    Hej <strong>${displayName}</strong>!
+  </p>
+
+  <p style="font-size: 14px; color: hsl(22,12%,44%); line-height: 1.6; margin: 0 0 24px;">
+    Tack för att du hörde av dig till oss. Här kommer ett svar från Hönsgården-teamet:
+  </p>
+
+  <div style="background: hsl(142,32%,96%); border-left: 4px solid hsl(142,32%,34%); border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 0 0 24px;">
+    <p style="font-size: 14px; color: hsl(22,12%,25%); line-height: 1.7; margin: 0; white-space: pre-wrap;">${message}</p>
+  </div>
+
+  <a href="https://honsgarden.lovable.app/app" style="background-color: hsl(142,32%,34%); color: hsl(35,32%,97%); font-size: 15px; font-weight: 600; border-radius: 14px; padding: 14px 28px; text-decoration: none; display: inline-block;">
+    Tillbaka till appen →
+  </a>
+
+  <p style="font-size: 12px; color: #999; margin: 32px 0 0; line-height: 1.5;">
+    Du får detta mejl för att du skickade feedback via Hönsgården.
+  </p>
+</div>`;
+
+  await supabase.rpc("enqueue_email", {
+    queue_name: "transactional_emails",
+    payload: {
+      to,
+      from: "Hönsgården <noreply@notify.honsgarden.se>",
+      sender_domain: "notify.honsgarden.se",
+      subject: "Svar på din feedback – Hönsgården 💬",
+      html,
+      text: `Hej ${displayName}! Tack för din feedback. Svar: ${message}`,
+      purpose: "transactional",
+      label: "feedback-reply",
+      message_id: messageId,
+      queued_at: new Date().toISOString(),
+    },
+  });
+
+  // Mark feedback as in_progress
+  await supabase.from("feedback").update({ status: "in_progress" }).eq("id", feedback_id);
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { "Content-Type": "application/json" },
+  });
+});
