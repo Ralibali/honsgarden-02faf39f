@@ -665,9 +665,30 @@ export async function adminUsers() {
 }
 
 export async function adminFeedback() {
-  const { data, error } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
+  const { data: feedbackData, error } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return data;
+  // Enrich with profile info
+  const userIds = [...new Set((feedbackData || []).map((f: any) => f.user_id))];
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, email').in('user_id', userIds);
+    const profileMap: Record<string, any> = {};
+    (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+    return (feedbackData || []).map((f: any) => ({ ...f, profile: profileMap[f.user_id] || null }));
+  }
+  return feedbackData;
+}
+
+export async function adminReplyFeedback(feedbackId: string, userId: string, replyMessage: string) {
+  // Look up user email
+  const { data: profile } = await supabase.from('profiles').select('email, display_name').eq('user_id', userId).single();
+  if (!profile?.email) throw new Error('Användaren har ingen e-postadress');
+  
+  // Send reply via edge function invoke or email queue
+  const { error } = await supabase.functions.invoke('reply-feedback', {
+    body: { feedback_id: feedbackId, to: profile.email, display_name: profile.display_name, message: replyMessage },
+  });
+  if (error) throw new Error(error.message);
+  return { success: true };
 }
 
 export async function adminUpdateFeedbackStatus(feedbackId: string, statusData: any) {
@@ -747,6 +768,6 @@ export const api = {
   getRankingSummary, getFlockStatistics, getFlockHealth,
   getInsights, getAgdaInboxToday,
   adminCheck, adminStats, adminUsers, adminSubscriptions,
-  adminFeedback, adminUpdateFeedbackStatus, adminDeleteUser, adminUpdateSubscription,
+  adminFeedback, adminUpdateFeedbackStatus, adminReplyFeedback, adminDeleteUser, adminUpdateSubscription,
   adminAcceptTerms,
 };

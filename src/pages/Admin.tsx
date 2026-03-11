@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell, Send, Mail
 } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
 import NotificationSender from '@/components/admin/NotificationSender';
@@ -28,6 +29,8 @@ export default function Admin() {
   const [userSearch, setUserSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [premiumDurations, setPremiumDurations] = useState<Record<string, string>>({});
+  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const { data: adminCheck, isLoading: checkLoading, isError: checkError } = useQuery({
     queryKey: ['admin-check'],
     queryFn: () => api.adminCheck(),
@@ -68,6 +71,18 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ['admin-feedback'] });
       toast({ title: 'Feedback uppdaterad' });
     },
+  });
+
+  const replyFeedbackMutation = useMutation({
+    mutationFn: ({ feedbackId, userId, message }: { feedbackId: string; userId: string; message: string }) =>
+      api.adminReplyFeedback(feedbackId, userId, message),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-feedback'] });
+      toast({ title: 'Svar skickat! 📩' });
+      setReplyTexts((prev) => ({ ...prev, [vars.feedbackId]: '' }));
+      setReplyingTo(null);
+    },
+    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
 
   const updateSubMutation = useMutation({
@@ -429,7 +444,14 @@ export default function Admin() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="text-xs font-medium text-foreground">{fb.user_id || 'Anonym'}</p>
+                          <p className="text-xs font-semibold text-foreground">
+                            {fb.profile?.display_name || 'Okänd användare'}
+                          </p>
+                          {fb.profile?.email && (
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                              <Mail className="h-2.5 w-2.5" /> {fb.profile.email}
+                            </span>
+                          )}
                           {fb.status === 'support' && (
                             <Badge variant="secondary" className="text-[9px] bg-primary/10 text-primary border-primary/20">Support</Badge>
                           )}
@@ -440,7 +462,38 @@ export default function Admin() {
                         </p>
                       </div>
                     </div>
+
+                    {/* Reply form */}
+                    {replyingTo === fb.id && (
+                      <div className="mt-3 space-y-2 animate-fade-in">
+                        <Textarea
+                          placeholder="Skriv ditt svar till användaren..."
+                          value={replyTexts[fb.id] || ''}
+                          onChange={(e) => setReplyTexts((prev) => ({ ...prev, [fb.id]: e.target.value }))}
+                          rows={3}
+                          className="text-xs rounded-xl"
+                        />
+                        <div className="flex gap-1.5 justify-end">
+                          <Button variant="outline" size="sm" className="text-[10px] h-7 rounded-lg" onClick={() => setReplyingTo(null)}>
+                            Avbryt
+                          </Button>
+                          <Button size="sm" className="text-[10px] h-7 rounded-lg gap-1"
+                            disabled={!replyTexts[fb.id]?.trim() || replyFeedbackMutation.isPending}
+                            onClick={() => replyFeedbackMutation.mutate({ feedbackId: fb.id, userId: fb.user_id, message: replyTexts[fb.id].trim() })}>
+                            {replyFeedbackMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                            Skicka svar
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-1.5 mt-3 justify-end">
+                      {replyingTo !== fb.id && fb.profile?.email && (
+                        <Button variant="outline" size="sm" className="text-[10px] h-7 rounded-lg gap-1 text-primary"
+                          onClick={() => setReplyingTo(fb.id)}>
+                          <Send className="h-3 w-3" /> Svara
+                        </Button>
+                      )}
                       {fb.status !== 'in_progress' && (
                         <Button variant="outline" size="sm" className="text-[10px] h-7 rounded-lg"
                           onClick={() => updateFeedbackMutation.mutate({ id: fb.id, status: 'in_progress' })}>
