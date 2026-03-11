@@ -53,7 +53,7 @@ export default function ReferralCard() {
       try {
         await navigator.share({
           title: 'Prova Hönsgården!',
-          text: `Använd min värvningskod ${code} och få 7 dagars gratis Premium! 🐔`,
+          text: `Använd min värvningskod ${code} och få sju dagars gratis Premium! 🐔`,
           url: shareUrl,
         });
       } catch {
