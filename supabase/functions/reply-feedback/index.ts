@@ -2,12 +2,21 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const LOGO_URL = "https://sikbymtrbhrofysgkqsj.supabase.co/storage/v1/object/public/email-assets/logo-honsgarden.png";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+};
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
   if (!serviceKey) {
-    return new Response(JSON.stringify({ error: "config" }), { status: 500 });
+    return new Response(JSON.stringify({ error: "config" }), { status: 500, headers: corsHeaders });
   }
 
   // Verify caller is admin
@@ -18,7 +27,7 @@ Deno.serve(async (req) => {
   });
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
   }
 
   const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
@@ -32,13 +41,13 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (!roleCheck) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
+    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
   }
 
   const { feedback_id, to, display_name, message } = await req.json();
 
   if (!to || !message) {
-    return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: corsHeaders });
   }
 
   const displayName = display_name || to.split("@")[0];
@@ -93,6 +102,6 @@ Deno.serve(async (req) => {
   await supabase.from("feedback").update({ status: "in_progress" }).eq("id", feedback_id);
 
   return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });

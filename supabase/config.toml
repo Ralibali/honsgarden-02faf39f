@@ -11,3 +11,5 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = false
   [functions.weekly-report-email]
     verify_jwt = false
+  [functions.reply-feedback]
+    verify_jwt = false
