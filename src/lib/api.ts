@@ -683,15 +683,31 @@ export async function adminUsers() {
 export async function adminFeedback() {
   const { data: feedbackData, error } = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  // Enrich with profile info
-  const userIds = [...new Set((feedbackData || []).map((f: any) => f.user_id))];
-  if (userIds.length > 0) {
-    const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, email').in('user_id', userIds);
-    const profileMap: Record<string, any> = {};
-    (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
-    return (feedbackData || []).map((f: any) => ({ ...f, profile: profileMap[f.user_id] || null }));
+
+  const userIds = [...new Set((feedbackData || []).map((f: any) => f.user_id).filter(Boolean))];
+  if (!userIds.length) return feedbackData || [];
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('user_id, display_name, email')
+    .in('user_id', userIds);
+
+  if (profilesError) {
+    return (feedbackData || []).map((f: any) => ({
+      ...f,
+      profile: null,
+      sender_label: `Användare ${String(f.user_id).slice(0, 8)}`,
+    }));
   }
-  return feedbackData;
+
+  const profileMap: Record<string, any> = {};
+  (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+
+  return (feedbackData || []).map((f: any) => ({
+    ...f,
+    profile: profileMap[f.user_id] || null,
+    sender_label: profileMap[f.user_id]?.display_name || `Användare ${String(f.user_id).slice(0, 8)}`,
+  }));
 }
 
 export async function adminReplyFeedback(feedbackId: string, userId: string, replyMessage: string) {
