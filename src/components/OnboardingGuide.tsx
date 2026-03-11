@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 const ONBOARDING_KEY = 'honsgarden-onboarding-done';
 
+const getOnboardingKey = (userId: string) => `${ONBOARDING_KEY}-${userId}`;
+
 const steps = [
   {
     image: heroCoop,
@@ -68,45 +70,72 @@ export default function OnboardingGuide() {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Check localStorage first (fast), then DB as source of truth
-    const localDone = localStorage.getItem(ONBOARDING_KEY);
+    const scopedKey = getOnboardingKey(user.id);
+
+    // Legacy fallback for older key format
+    if (localStorage.getItem(ONBOARDING_KEY)) {
+      localStorage.setItem(scopedKey, '1');
+      return;
+    }
+
+    // Fast path from local cache
+    const localDone = localStorage.getItem(scopedKey);
     if (localDone) return;
 
-    // Check DB preference
-    supabase
+    let isCancelled = false;
+    let timer: number | null = null;
+
+    void supabase
       .from('profiles')
       .select('preferences')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (isCancelled || error) return;
+
         const prefs = (data?.preferences as Record<string, any>) ?? {};
         if (prefs.onboarding_done) {
-          localStorage.setItem(ONBOARDING_KEY, '1');
+          localStorage.setItem(scopedKey, '1');
           return;
         }
-        // First time – show onboarding
-        setTimeout(() => setOpen(true), 800);
+
+        timer = window.setTimeout(() => {
+          if (!isCancelled) {
+            setStep(0);
+            setOpen(true);
+          }
+        }, 800);
       });
+
+    return () => {
+      isCancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
   }, [user?.id]);
 
   const finish = () => {
     setOpen(false);
-    localStorage.setItem(ONBOARDING_KEY, '1');
-    // Persist to DB so it never shows again, even on new devices
-    if (user?.id) {
-      supabase
-        .from('profiles')
-        .select('preferences')
-        .eq('user_id', user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          const prefs = (data?.preferences as Record<string, any>) ?? {};
-          void supabase
-            .from('profiles')
-            .update({ preferences: { ...prefs, onboarding_done: true } })
-            .eq('user_id', user.id);
-        });
-    }
+
+    if (!user?.id) return;
+
+    const scopedKey = getOnboardingKey(user.id);
+    localStorage.setItem(scopedKey, '1');
+    localStorage.removeItem(ONBOARDING_KEY);
+
+    void supabase
+      .from('profiles')
+      .select('preferences')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) return;
+
+        const prefs = (data?.preferences as Record<string, any>) ?? {};
+        return supabase
+          .from('profiles')
+          .update({ preferences: { ...prefs, onboarding_done: true } })
+          .eq('user_id', user.id);
+      });
   };
 
   const next = () => {

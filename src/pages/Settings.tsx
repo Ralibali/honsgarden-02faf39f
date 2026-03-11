@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import {
   User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail,
   FileText, HelpCircle, Crown, Download, Palette, Moon, Sun,
-  Heart, ExternalLink, Info, Trash2, CheckCircle2, Clock, Send,
+  Heart, ExternalLink, Info, Trash2, CheckCircle2, Clock, Send, RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -226,6 +226,42 @@ export default function SettingsPage() {
     }
   };
 
+  const replayOnboarding = async () => {
+    if (!user?.id) return;
+
+    const scopedKey = `honsgarden-onboarding-done-${user.id}`;
+    localStorage.removeItem(scopedKey);
+    localStorage.removeItem('honsgarden-onboarding-done');
+
+    const { data: profile, error: readError } = await supabase
+      .from('profiles')
+      .select('preferences')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (readError) {
+      toast({ title: 'Kunde inte återställa intro', description: readError.message, variant: 'destructive' });
+      return;
+    }
+
+    const prefs = (profile?.preferences && typeof profile.preferences === 'object'
+      ? profile.preferences
+      : {}) as Record<string, unknown>;
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ preferences: { ...prefs, onboarding_done: false } })
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      toast({ title: 'Kunde inte återställa intro', description: updateError.message, variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Introguiden återställd ✨', description: 'Vi visar den igen på startsidan.' });
+    navigate('/app');
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -313,6 +349,13 @@ export default function SettingsPage() {
             {saveCoopMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Spara gårdsinställningar
           </Button>
+
+          <div className="pt-1">
+            <Button variant="outline" className="rounded-xl gap-2" onClick={replayOnboarding}>
+              <RotateCcw className="h-4 w-4" />
+              Visa introduktionen igen
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
