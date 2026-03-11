@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Bird, Loader2, Trash2, Users, ChevronRight, Feather } from 'lucide-react';
+import { Plus, Bird, Loader2, Trash2, ChevronRight, Feather, FolderPlus } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -31,6 +31,10 @@ export default function Hens() {
   const [flockDialogOpen, setFlockDialogOpen] = useState(false);
   const [flockForm, setFlockForm] = useState({ name: '', description: '' });
 
+  // Quick add flock inline
+  const [quickFlockName, setQuickFlockName] = useState('');
+  const [showQuickFlock, setShowQuickFlock] = useState(false);
+
   // Edit flock dialog
   const [editFlockId, setEditFlockId] = useState<string | null>(null);
 
@@ -47,9 +51,17 @@ export default function Hens() {
   const isLoading = hensLoading || flocksLoading;
 
   const createHenMutation = useMutation({
-    mutationFn: (data: any) => api.createHen(data),
+    mutationFn: async (data: any) => {
+      // Auto-assign to default flock if no flock selected
+      if (!data.flock_id) {
+        const defaultFlock = await api.getOrCreateDefaultFlock();
+        data.flock_id = defaultFlock.id;
+      }
+      return api.createHen(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hens'] });
+      queryClient.invalidateQueries({ queryKey: ['flocks'] });
       toast({ title: henForm.hen_type === 'rooster' ? 'Tupp tillagd! 🐓' : 'Höna tillagd! 🐔' });
       setHenDialogOpen(false);
       setHenForm({ name: '', breed: '', color: '', birth_date: '', notes: '', hen_type: 'hen', flock_id: '' });
@@ -80,6 +92,8 @@ export default function Hens() {
       toast({ title: 'Flock skapad! 🐔' });
       setFlockDialogOpen(false);
       setFlockForm({ name: '', description: '' });
+      setQuickFlockName('');
+      setShowQuickFlock(false);
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
@@ -115,6 +129,11 @@ export default function Hens() {
       name: flockForm.name,
       description: flockForm.description || null,
     });
+  };
+
+  const handleQuickCreateFlock = () => {
+    if (!quickFlockName.trim()) return;
+    createFlockMutation.mutate({ name: quickFlockName.trim(), description: null });
   };
 
   const activeHens = hens.filter((h: any) => h.is_active);
@@ -162,8 +181,9 @@ export default function Hens() {
           <Dialog open={flockDialogOpen} onOpenChange={setFlockDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2 rounded-xl">
-                <Users className="h-4 w-4" />
+                <FolderPlus className="h-4 w-4" />
                 <span className="hidden sm:inline">Ny flock</span>
+                <span className="sm:hidden">Flock</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="rounded-2xl">
@@ -245,17 +265,18 @@ export default function Hens() {
 
                 <div>
                   <Label>Flock</Label>
-                  <Select value={henForm.flock_id} onValueChange={(v) => setHenForm({ ...henForm, flock_id: v === 'none' ? '' : v })}>
+                  <Select value={henForm.flock_id} onValueChange={(v) => setHenForm({ ...henForm, flock_id: v === 'auto' ? '' : v })}>
                     <SelectTrigger className="mt-1.5 rounded-xl">
-                      <SelectValue placeholder="Ingen flock" />
+                      <SelectValue placeholder="Automatisk (Min flock)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Ingen flock</SelectItem>
+                      <SelectItem value="auto">🏠 Automatisk (Min flock)</SelectItem>
                       {(flocks as any[]).map((f: any) => (
-                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                        <SelectItem key={f.id} value={f.id}>🐔 {f.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-[10px] text-muted-foreground mt-1">Lämna som automatisk för att placera i standardflocken</p>
                 </div>
 
                 <div>
@@ -278,13 +299,54 @@ export default function Hens() {
         </div>
       </div>
 
+      {/* Quick add flock inline */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {!showQuickFlock ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-xl text-xs gap-1.5 text-muted-foreground hover:text-primary"
+            onClick={() => setShowQuickFlock(true)}
+          >
+            <FolderPlus className="h-3.5 w-3.5" />
+            Snabbskapa flock
+          </Button>
+        ) : (
+          <div className="flex items-center gap-2 bg-card border border-border/50 rounded-xl p-1.5 pl-3 shadow-sm">
+            <Input
+              className="h-7 text-xs rounded-lg border-0 bg-transparent p-0 w-36 focus-visible:ring-0"
+              placeholder="Flocknamn..."
+              value={quickFlockName}
+              onChange={(e) => setQuickFlockName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickCreateFlock(); if (e.key === 'Escape') { setShowQuickFlock(false); setQuickFlockName(''); } }}
+              autoFocus
+            />
+            <Button
+              size="sm"
+              className="h-7 text-[10px] rounded-lg px-3"
+              disabled={!quickFlockName.trim() || createFlockMutation.isPending}
+              onClick={handleQuickCreateFlock}
+            >
+              {createFlockMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Skapa'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 rounded-lg text-muted-foreground"
+              onClick={() => { setShowQuickFlock(false); setQuickFlockName(''); }}
+            >
+              ✕
+            </Button>
+          </div>
+        )}
+      </div>
+
       {/* Flocks section */}
       {(flocks as any[]).length > 0 && !selectedFlock && (
         <div className="space-y-2">
           <h2 className="data-label">Flockar</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 stagger-children">
             {(flocks as any[]).map((flock: any) => {
-              const memberCount = getFlockMemberCount(flock.id);
               const flockHens = filteredHens.filter((h: any) => h.flock_id === flock.id);
               const flockRoosters = flockHens.filter((h: any) => h.hen_type === 'rooster').length;
               const flockHensCount = flockHens.filter((h: any) => h.hen_type !== 'rooster').length;
@@ -298,8 +360,8 @@ export default function Hens() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-                          <Users className="h-5 w-5 text-primary" />
+                        <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 text-xl">
+                          🐔
                         </div>
                         <div className="min-w-0">
                           <h3 className="font-serif text-sm text-foreground truncate">{flock.name}</h3>
@@ -336,7 +398,6 @@ export default function Hens() {
             className="rounded-xl text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/8 ml-auto"
             onClick={() => {
               if (confirm('Ta bort denna flock? Hönorna och tupparna behålls.')) {
-                // Unassign hens first
                 displayHens.forEach((h: any) => {
                   updateHenMutation.mutate({ id: h.id, data: { flock_id: null } });
                 });
@@ -390,7 +451,8 @@ export default function Hens() {
                     </div>
                     <p className="text-[11px] text-muted-foreground">{hen.breed || 'Okänd ras'}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground/50 hover:text-destructive shrink-0" onClick={() => {
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground/50 hover:text-destructive shrink-0" onClick={(e) => {
+                    e.stopPropagation();
                     if (confirm(`Ta bort ${hen.name}?`)) deleteHenMutation.mutate(hen.id);
                   }}>
                     <Trash2 className="h-3.5 w-3.5" />
@@ -398,7 +460,7 @@ export default function Hens() {
                 </div>
 
                 {/* Flock assignment */}
-                <div className="mb-3">
+                <div className="mb-3" onClick={(e) => e.stopPropagation()}>
                   <Select
                     value={hen.flock_id || 'none'}
                     onValueChange={(v) => {
@@ -414,7 +476,7 @@ export default function Hens() {
                     <SelectContent>
                       <SelectItem value="none">Ingen flock</SelectItem>
                       {(flocks as any[]).map((f: any) => (
-                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                        <SelectItem key={f.id} value={f.id}>🐔 {f.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

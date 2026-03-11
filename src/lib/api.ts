@@ -294,6 +294,15 @@ export async function getFlocks() {
   return data;
 }
 
+export async function getOrCreateDefaultFlock() {
+  const userId = await getUserId();
+  const { data: existing } = await supabase.from('flocks').select('*').eq('user_id', userId).eq('name', 'Min flock').maybeSingle();
+  if (existing) return existing;
+  const { data, error } = await supabase.from('flocks').insert({ name: 'Min flock', description: 'Standardflock', user_id: userId }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function createFlock(flockData: any) {
   const userId = await getUserId();
   const { data, error } = await supabase.from('flocks').insert({ ...flockData, user_id: userId }).select().single();
@@ -761,7 +770,7 @@ export const api = {
   submitFeedback, getUserFeedback,
   getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
   getCoopSettings, updateCoopSettings,
-  getFlocks, createFlock, updateFlock, deleteFlock,
+  getFlocks, getOrCreateDefaultFlock, createFlock, updateFlock, deleteFlock,
   getReminderSettings, updateReminderSettings,
   getTodayStats, getMonthStats, getYearStats, getSummaryStats,
   getStatisticsInsights, getAdvancedInsights, getTrendAnalysis,
