@@ -203,6 +203,13 @@ export async function submitFeedback(feedbackData: any) {
   return data;
 }
 
+export async function getUserFeedback() {
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 // ==================== DAILY CHORES ====================
 
 export async function getDailyChores() {
@@ -683,9 +690,8 @@ export async function adminReplyFeedback(feedbackId: string, userId: string, rep
   const { data: profile } = await supabase.from('profiles').select('email, display_name').eq('user_id', userId).single();
   if (!profile?.email) throw new Error('Användaren har ingen e-postadress');
   
-  // Send reply via edge function invoke or email queue
   const { error } = await supabase.functions.invoke('reply-feedback', {
-    body: { feedback_id: feedbackId, to: profile.email, display_name: profile.display_name, message: replyMessage },
+    body: { feedback_id: feedbackId, to: profile.email, display_name: profile.display_name, message: replyMessage, user_id: userId },
   });
   if (error) throw new Error(error.message);
   return { success: true };
@@ -752,7 +758,7 @@ export const api = {
   getHatchings, createHatching, updateHatching, deleteHatching, getHatchingAlerts,
   getTransactions, createTransaction, deleteTransaction,
   getHealthLogs, createHealthLog, getHenHealthLogs,
-  submitFeedback,
+  submitFeedback, getUserFeedback,
   getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
   getCoopSettings, updateCoopSettings,
   getFlocks, createFlock, updateFlock, deleteFlock,

@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
   }
 
-  const { feedback_id, to, display_name, message } = await req.json();
+  const { feedback_id, to, display_name, message, user_id } = await req.json();
 
   if (!to || !message) {
     return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: corsHeaders });
@@ -53,6 +53,23 @@ Deno.serve(async (req) => {
   const displayName = display_name || to.split("@")[0];
   const messageId = `feedback-reply-${feedback_id}-${Date.now()}`;
 
+  // 1. Save reply to feedback table
+  await supabase.from("feedback").update({
+    admin_reply: message,
+    admin_reply_at: new Date().toISOString(),
+    status: "resolved",
+  }).eq("id", feedback_id);
+
+  // 2. Create in-app notification for the user
+  if (user_id) {
+    await supabase.from("notifications").insert({
+      title: "Svar på din feedback 💬",
+      message: message.length > 120 ? message.slice(0, 120) + "…" : message,
+      author_id: user.id,
+    });
+  }
+
+  // 3. Send email
   const html = `
 <div style="font-family: 'Inter', Arial, sans-serif; max-width: 540px; padding: 36px 28px; background: #ffffff;">
   <img src="${LOGO_URL}" width="140" alt="Hönsgården" style="margin: 0 0 28px;" />
@@ -73,8 +90,8 @@ Deno.serve(async (req) => {
     <p style="font-size: 14px; color: hsl(22,12%,25%); line-height: 1.7; margin: 0; white-space: pre-wrap;">${message}</p>
   </div>
 
-  <a href="https://honsgarden.lovable.app/app" style="background-color: hsl(142,32%,34%); color: hsl(35,32%,97%); font-size: 15px; font-weight: 600; border-radius: 14px; padding: 14px 28px; text-decoration: none; display: inline-block;">
-    Tillbaka till appen →
+  <a href="https://honsgarden.lovable.app/app/settings" style="background-color: hsl(142,32%,34%); color: hsl(35,32%,97%); font-size: 15px; font-weight: 600; border-radius: 14px; padding: 14px 28px; text-decoration: none; display: inline-block;">
+    Se ditt ärende i appen →
   </a>
 
   <p style="font-size: 12px; color: #999; margin: 32px 0 0; line-height: 1.5;">
@@ -97,9 +114,6 @@ Deno.serve(async (req) => {
       queued_at: new Date().toISOString(),
     },
   });
-
-  // Mark feedback as in_progress
-  await supabase.from("feedback").update({ status: "in_progress" }).eq("id", feedback_id);
 
   return new Response(JSON.stringify({ success: true }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
