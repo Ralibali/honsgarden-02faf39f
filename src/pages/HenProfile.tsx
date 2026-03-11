@@ -195,6 +195,20 @@ export default function HenProfile() {
                 </div>
               </div>
               <div>
+                <Label>Flock</Label>
+                <Select value={editForm.flock_id} onValueChange={(v) => setEditForm({ ...editForm, flock_id: v })}>
+                  <SelectTrigger className="mt-1.5 rounded-xl">
+                    <SelectValue placeholder="Ingen flock" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Ingen flock</SelectItem>
+                    {(flocks as any[]).map((flock: any) => (
+                      <SelectItem key={flock.id} value={flock.id}>{flock.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Födelsedatum</Label>
                 <Input className="mt-1.5 rounded-xl" type="date" value={editForm.birth_date} onChange={(e) => setEditForm({ ...editForm, birth_date: e.target.value })} />
               </div>
