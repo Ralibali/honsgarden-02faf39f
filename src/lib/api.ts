@@ -241,8 +241,9 @@ export async function completeChore(choreId: string) {
 }
 
 export async function uncompleteChore(choreId: string) {
+  const userId = await getUserId();
   const today = format(new Date(), 'yyyy-MM-dd');
-  const { error } = await supabase.from('chore_completions').delete().eq('chore_id', choreId).eq('completed_date', today);
+  const { error } = await supabase.from('chore_completions').delete().eq('chore_id', choreId).eq('user_id', userId).eq('completed_date', today);
   if (error) throw new Error(error.message);
 }
 
