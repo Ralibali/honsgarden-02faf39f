@@ -349,6 +349,13 @@ export default function SettingsPage() {
             {saveCoopMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Spara gårdsinställningar
           </Button>
+
+          <div className="pt-1">
+            <Button variant="outline" className="rounded-xl gap-2" onClick={replayOnboarding}>
+              <RotateCcw className="h-4 w-4" />
+              Visa introduktionen igen
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
