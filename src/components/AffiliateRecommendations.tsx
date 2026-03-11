@@ -236,7 +236,7 @@ export function PremiumUpsellBanner({ variant = 'compact' }: { variant?: 'compac
             </p>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">
-                ✓ 7 dagar gratis
+                ✓ Sju dagar gratis
               </span>
               <span className="text-xs text-muted-foreground">sedan 19 kr/mån</span>
             </div>

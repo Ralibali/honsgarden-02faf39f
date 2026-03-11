@@ -134,7 +134,7 @@ export function PremiumNudge() {
               <span className="text-[9px] font-bold uppercase tracking-wider text-warning bg-warning/12 px-2 py-0.5 rounded-full">Nytt</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-              Statistik, prognoser, kläckning, foderspårning och mycket mer. Prova 7 dagar helt gratis!
+              Statistik, prognoser, kläckning, foderspårning och mycket mer. Prova sju dagar helt gratis!
             </p>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-primary group-hover:text-primary/80 transition-colors">
