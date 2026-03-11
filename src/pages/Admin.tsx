@@ -6,9 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell
 } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
+import NotificationSender from '@/components/admin/NotificationSender';
 import GlossaryManager from '@/components/admin/GlossaryManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserDetailModal from '@/components/admin/UserDetailModal';
@@ -163,6 +164,9 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="feedback" className="text-xs sm:text-sm gap-1 rounded-lg">
             <MessageSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Feedback</span><span className="sm:hidden">FB</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <Bell className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Notiser</span><span className="sm:hidden">🔔</span>
           </TabsTrigger>
         </TabsList>
 
@@ -455,6 +459,11 @@ export default function Admin() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Notifications tab */}
+        <TabsContent value="notifications" className="space-y-3">
+          <NotificationSender />
         </TabsContent>
       </Tabs>
 
