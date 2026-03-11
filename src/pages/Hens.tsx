@@ -314,7 +314,7 @@ export default function Hens() {
         ) : (
           <div className="flex items-center gap-2 bg-card border border-border/50 rounded-xl p-1.5 pl-3 shadow-sm">
             <Input
-              className="h-7 text-xs rounded-lg border-0 bg-transparent p-0 w-36 focus-visible:ring-0"
+              className="h-7 text-xs rounded-lg border-0 bg-transparent p-0 w-36 sm:w-52 focus-visible:ring-0"
               placeholder="Flocknamn..."
               value={quickFlockName}
               onChange={(e) => setQuickFlockName(e.target.value)}
