@@ -443,21 +443,28 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="font-serif text-lg flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            Skicka feedback
+            Feedback & ärenden
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <Textarea
-            placeholder="Berätta vad du tycker, önskar eller vill förbättra..."
-            value={feedbackMsg}
-            onChange={(e) => setFeedbackMsg(e.target.value)}
-            rows={3}
-            className="rounded-xl"
-          />
-          <Button variant="outline" onClick={() => { if (feedbackMsg.trim()) feedbackMutation.mutate({ message: feedbackMsg.trim() }); }} disabled={feedbackMutation.isPending || !feedbackMsg.trim()} className="rounded-xl">
-            {feedbackMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Skicka
-          </Button>
+        <CardContent className="space-y-4">
+          {/* New feedback form */}
+          <div className="space-y-3">
+            <Textarea
+              placeholder="Berätta vad du tycker, önskar eller vill förbättra..."
+              value={feedbackMsg}
+              onChange={(e) => setFeedbackMsg(e.target.value)}
+              rows={3}
+              className="rounded-xl"
+            />
+            <Button variant="outline" onClick={() => { if (feedbackMsg.trim()) feedbackMutation.mutate({ message: feedbackMsg.trim() }); }} disabled={feedbackMutation.isPending || !feedbackMsg.trim()} className="rounded-xl gap-2">
+              {feedbackMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Send className="h-4 w-4" />
+              Skicka feedback
+            </Button>
+          </div>
+
+          {/* Feedback history */}
+          <FeedbackHistory />
         </CardContent>
       </Card>
 
