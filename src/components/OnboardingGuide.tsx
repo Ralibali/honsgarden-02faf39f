@@ -115,22 +115,27 @@ export default function OnboardingGuide() {
 
   const finish = () => {
     setOpen(false);
-    localStorage.setItem(ONBOARDING_KEY, '1');
-    // Persist to DB so it never shows again, even on new devices
-    if (user?.id) {
-      supabase
-        .from('profiles')
-        .select('preferences')
-        .eq('user_id', user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          const prefs = (data?.preferences as Record<string, any>) ?? {};
-          void supabase
-            .from('profiles')
-            .update({ preferences: { ...prefs, onboarding_done: true } })
-            .eq('user_id', user.id);
-        });
-    }
+
+    if (!user?.id) return;
+
+    const scopedKey = getOnboardingKey(user.id);
+    localStorage.setItem(scopedKey, '1');
+    localStorage.removeItem(ONBOARDING_KEY);
+
+    void supabase
+      .from('profiles')
+      .select('preferences')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) return;
+
+        const prefs = (data?.preferences as Record<string, any>) ?? {};
+        return supabase
+          .from('profiles')
+          .update({ preferences: { ...prefs, onboarding_done: true } })
+          .eq('user_id', user.id);
+      });
   };
 
   const next = () => {
