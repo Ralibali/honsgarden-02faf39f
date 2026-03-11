@@ -173,7 +173,8 @@ export async function deleteTransaction(id: string) {
 // ==================== HEALTH LOGS ====================
 
 export async function getHealthLogs() {
-  const { data, error } = await supabase.from('health_logs').select('*').order('date', { ascending: false });
+  const userId = await getUserId();
+  const { data, error } = await supabase.from('health_logs').select('*').eq('user_id', userId).order('date', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
