@@ -444,7 +444,14 @@ export default function Admin() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="text-xs font-medium text-foreground">{fb.user_id || 'Anonym'}</p>
+                          <p className="text-xs font-semibold text-foreground">
+                            {fb.profile?.display_name || 'Okänd användare'}
+                          </p>
+                          {fb.profile?.email && (
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                              <Mail className="h-2.5 w-2.5" /> {fb.profile.email}
+                            </span>
+                          )}
                           {fb.status === 'support' && (
                             <Badge variant="secondary" className="text-[9px] bg-primary/10 text-primary border-primary/20">Support</Badge>
                           )}
@@ -455,7 +462,38 @@ export default function Admin() {
                         </p>
                       </div>
                     </div>
+
+                    {/* Reply form */}
+                    {replyingTo === fb.id && (
+                      <div className="mt-3 space-y-2 animate-fade-in">
+                        <Textarea
+                          placeholder="Skriv ditt svar till användaren..."
+                          value={replyTexts[fb.id] || ''}
+                          onChange={(e) => setReplyTexts((prev) => ({ ...prev, [fb.id]: e.target.value }))}
+                          rows={3}
+                          className="text-xs rounded-xl"
+                        />
+                        <div className="flex gap-1.5 justify-end">
+                          <Button variant="outline" size="sm" className="text-[10px] h-7 rounded-lg" onClick={() => setReplyingTo(null)}>
+                            Avbryt
+                          </Button>
+                          <Button size="sm" className="text-[10px] h-7 rounded-lg gap-1"
+                            disabled={!replyTexts[fb.id]?.trim() || replyFeedbackMutation.isPending}
+                            onClick={() => replyFeedbackMutation.mutate({ feedbackId: fb.id, userId: fb.user_id, message: replyTexts[fb.id].trim() })}>
+                            {replyFeedbackMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                            Skicka svar
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-1.5 mt-3 justify-end">
+                      {replyingTo !== fb.id && fb.profile?.email && (
+                        <Button variant="outline" size="sm" className="text-[10px] h-7 rounded-lg gap-1 text-primary"
+                          onClick={() => setReplyingTo(fb.id)}>
+                          <Send className="h-3 w-3" /> Svara
+                        </Button>
+                      )}
                       {fb.status !== 'in_progress' && (
                         <Button variant="outline" size="sm" className="text-[10px] h-7 rounded-lg"
                           onClick={() => updateFeedbackMutation.mutate({ id: fb.id, status: 'in_progress' })}>
