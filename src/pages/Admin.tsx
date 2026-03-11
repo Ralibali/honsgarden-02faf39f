@@ -460,6 +460,11 @@ export default function Admin() {
             </div>
           )}
         </TabsContent>
+
+        {/* Notifications tab */}
+        <TabsContent value="notifications" className="space-y-3">
+          <NotificationSender />
+        </TabsContent>
       </Tabs>
 
       <UserDetailModal
