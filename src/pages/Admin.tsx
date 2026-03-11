@@ -252,7 +252,7 @@ export default function Admin() {
                       </Button>
                       {user.subscription_status !== 'premium' ? (
                         <>
-                          <Select value={premiumDurations[user.user_id] || '30'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
+                          <Select value={premiumDurations[user.user_id] || '7'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
                             <SelectTrigger className="h-7 w-[90px] text-[10px] rounded-lg">
                               <SelectValue />
                             </SelectTrigger>
@@ -269,7 +269,7 @@ export default function Admin() {
                             variant="outline"
                             size="sm"
                             className="text-[10px] h-7 rounded-lg"
-                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '30' } })}
+                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '7' } })}
                           >
                             <Crown className="h-3 w-3 mr-1" /> Ge
                           </Button>
@@ -359,7 +359,7 @@ export default function Admin() {
                       <div className="flex gap-1 shrink-0 items-center">
                         {user.subscription_status !== 'premium' ? (
                           <>
-                            <Select value={premiumDurations[user.user_id] || '30'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
+                            <Select value={premiumDurations[user.user_id] || '7'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
                               <SelectTrigger className="h-7 w-[90px] text-[10px] rounded-lg">
                                 <SelectValue />
                               </SelectTrigger>
@@ -376,7 +376,7 @@ export default function Admin() {
                               variant="outline"
                               size="sm"
                               className="text-[10px] h-7 rounded-lg"
-                              onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '30' } })}
+                              onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '7' } })}
                             >
                               <Crown className="h-3 w-3 mr-1" /> Ge
                             </Button>

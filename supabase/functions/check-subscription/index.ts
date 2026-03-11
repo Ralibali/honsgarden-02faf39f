@@ -34,10 +34,30 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('subscription_status, premium_expires_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const now = new Date();
+    const hasUnexpiredPremium =
+      profile?.subscription_status === 'premium' &&
+      (!profile.premium_expires_at || new Date(profile.premium_expires_at) > now);
+
     if (customers.data.length === 0) {
-      // Update profile to free
-      await supabaseClient.from('profiles').update({ subscription_status: 'free' }).eq('user_id', user.id);
-      return new Response(JSON.stringify({ subscribed: false }), {
+      // Keep manual/trial/admin premium intact; only auto-downgrade if premium has expired.
+      if (profile?.subscription_status === 'premium' && profile.premium_expires_at && new Date(profile.premium_expires_at) <= now) {
+        await supabaseClient
+          .from('profiles')
+          .update({ subscription_status: 'free', premium_expires_at: null })
+          .eq('user_id', user.id);
+      }
+
+      return new Response(JSON.stringify({
+        subscribed: hasUnexpiredPremium,
+        subscription_end: profile?.premium_expires_at ?? null,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -50,7 +70,7 @@ serve(async (req) => {
     });
 
     const hasActiveSub = subscriptions.data.length > 0;
-    let subscriptionEnd = null;
+    let subscriptionEnd = profile?.premium_expires_at ?? null;
     let productId = null;
 
     if (hasActiveSub) {
@@ -65,17 +85,13 @@ serve(async (req) => {
       }
       productId = subscription.items.data[0].price.product;
 
-      // Check if this is a new upgrade (was not premium before)
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('subscription_status')
-        .eq('user_id', user.id)
-        .single();
-
       const wasNotPremium = profile?.subscription_status !== 'premium';
 
-      // Update profile to premium
-      await supabaseClient.from('profiles').update({ subscription_status: 'premium' }).eq('user_id', user.id);
+      // Active Stripe subscription should always set premium and its period end
+      await supabaseClient
+        .from('profiles')
+        .update({ subscription_status: 'premium', premium_expires_at: subscriptionEnd })
+        .eq('user_id', user.id);
 
       // Send admin notification on new premium upgrade
       if (wasNotPremium) {
@@ -155,11 +171,20 @@ serve(async (req) => {
         });
       }
     } else {
-      await supabaseClient.from('profiles').update({ subscription_status: 'free' }).eq('user_id', user.id);
+      // If Stripe has no active subscription, preserve manual/trial premium while valid.
+      if (profile?.subscription_status === 'premium' && profile.premium_expires_at && new Date(profile.premium_expires_at) <= now) {
+        await supabaseClient
+          .from('profiles')
+          .update({ subscription_status: 'free', premium_expires_at: null })
+          .eq('user_id', user.id);
+        subscriptionEnd = null;
+      }
     }
 
+    const subscribed = hasActiveSub || hasUnexpiredPremium;
+
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
+      subscribed,
       product_id: productId,
       subscription_end: subscriptionEnd,
     }), {
