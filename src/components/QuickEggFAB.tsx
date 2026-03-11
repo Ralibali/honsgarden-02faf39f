@@ -27,11 +27,12 @@ export function QuickEggFAB() {
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const mutation = useMutation({
-    mutationFn: ({ count, hen_id }: { count: number; hen_id?: string }) =>
+    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) =>
       api.createEggRecord({
         date: new Date().toISOString().split('T')[0],
         count,
         hen_id: hen_id || undefined,
+        flock_id: flock_id || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
