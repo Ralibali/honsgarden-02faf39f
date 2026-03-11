@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Calendar, Egg as EggIcon, Loader2, Trash2, Download } from 'lucide-react';
+import { Plus, Calendar, Egg as EggIcon, Loader2, Trash2, Download, Users } from 'lucide-react';
 import { downloadCSV, downloadPDF } from '@/lib/exportUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
