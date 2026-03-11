@@ -770,7 +770,7 @@ export const api = {
   submitFeedback, getUserFeedback,
   getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
   getCoopSettings, updateCoopSettings,
-  getFlocks, createFlock, updateFlock, deleteFlock,
+  getFlocks, getOrCreateDefaultFlock, createFlock, updateFlock, deleteFlock,
   getReminderSettings, updateReminderSettings,
   getTodayStats, getMonthStats, getYearStats, getSummaryStats,
   getStatisticsInsights, getAdvancedInsights, getTrendAnalysis,
