@@ -811,12 +811,16 @@ export async function adminUpdateSubscription(userId: string, data: any) {
   const status = data.is_premium ? 'premium' : 'free';
   let premium_expires_at: string | null = null;
 
-  if (data.is_premium && data.days) {
-    if (data.days === 'lifetime') {
+  if (data.is_premium) {
+    const selectedDays = data.days ?? '7';
+
+    if (selectedDays === 'lifetime') {
       premium_expires_at = null;
     } else {
+      const days = Number(selectedDays);
+      const safeDays = Number.isFinite(days) && days > 0 ? days : 7;
       const expires = new Date();
-      expires.setDate(expires.getDate() + Number(data.days));
+      expires.setDate(expires.getDate() + safeDays);
       premium_expires_at = expires.toISOString();
     }
   }

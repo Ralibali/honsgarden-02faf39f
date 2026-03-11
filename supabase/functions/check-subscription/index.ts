@@ -41,9 +41,18 @@ serve(async (req) => {
       .maybeSingle();
 
     const now = new Date();
-    const hasUnexpiredPremium =
-      profile?.subscription_status === 'premium' &&
-      (!profile.premium_expires_at || new Date(profile.premium_expires_at) > now);
+    const premiumExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
+    const hasLifetimePremium = profile?.subscription_status === 'premium' && !profile.premium_expires_at;
+    const hasDatePremium = !!premiumExpiry && premiumExpiry > now;
+    const hasUnexpiredPremium = hasLifetimePremium || hasDatePremium;
+
+    // Heal status drift: if expiry is in the future, user should be premium
+    if (hasDatePremium && profile?.subscription_status !== 'premium') {
+      await supabaseClient
+        .from('profiles')
+        .update({ subscription_status: 'premium' })
+        .eq('user_id', user.id);
+    }
 
     if (customers.data.length === 0) {
       // Keep manual/trial/admin premium intact; only auto-downgrade if premium has expired.

@@ -51,15 +51,22 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
     .eq('user_id', supaUser.id)
     .maybeSingle();
 
-  // Check if premium has expired
+  const now = new Date();
+  const expiryDate = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
+  const hasValidExpiry = !!expiryDate && expiryDate > now;
+
   let subStatus = profile?.subscription_status ?? 'free';
-  if (subStatus === 'premium' && profile?.premium_expires_at) {
-    const expiresAt = new Date(profile.premium_expires_at);
-    if (expiresAt < new Date()) {
-      subStatus = 'free';
-      // Auto-downgrade in DB (fire-and-forget)
-      void supabase.from('profiles').update({ subscription_status: 'free', premium_expires_at: null }).eq('user_id', supaUser.id);
-    }
+
+  // Heal status drift: future expiry should always be premium
+  if (hasValidExpiry && subStatus !== 'premium') {
+    subStatus = 'premium';
+    void supabase.from('profiles').update({ subscription_status: 'premium' }).eq('user_id', supaUser.id);
+  }
+
+  // Auto-downgrade only when expired
+  if (subStatus === 'premium' && expiryDate && expiryDate < now) {
+    subStatus = 'free';
+    void supabase.from('profiles').update({ subscription_status: 'free', premium_expires_at: null }).eq('user_id', supaUser.id);
   }
 
   return {
