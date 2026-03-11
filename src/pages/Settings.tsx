@@ -174,6 +174,7 @@ export default function SettingsPage() {
     onSuccess: () => {
       toast({ title: 'Tack för din feedback! 💚' });
       setFeedbackMsg('');
+      queryClient.invalidateQueries({ queryKey: ['user-feedback'] });
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
   });
