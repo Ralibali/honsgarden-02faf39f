@@ -362,10 +362,11 @@ export async function getMonthStats(year: number, month: number) {
 }
 
 export async function getYearStats(year: number) {
+  const userId = await getUserId();
   const start = format(startOfYear(new Date(year, 0)), 'yyyy-MM-dd');
   const end = format(endOfYear(new Date(year, 0)), 'yyyy-MM-dd');
-  const { data: eggs } = await supabase.from('egg_logs').select('*').gte('date', start).lte('date', end);
-  const { data: txns } = await supabase.from('transactions').select('*').gte('date', start).lte('date', end);
+  const { data: eggs } = await supabase.from('egg_logs').select('*').eq('user_id', userId).gte('date', start).lte('date', end);
+  const { data: txns } = await supabase.from('transactions').select('*').eq('user_id', userId).gte('date', start).lte('date', end);
   return {
     total_eggs: (eggs || []).reduce((s, r) => s + r.count, 0),
     transactions: txns || [],
