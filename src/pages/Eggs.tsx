@@ -69,9 +69,11 @@ export default function Eggs() {
   const weekEggs = eggs.filter((e: any) => new Date(e.date) >= weekAgo).reduce((s: number, e: any) => s + (e.count || 0), 0);
   const monthEggs = eggs.filter((e: any) => new Date(e.date).getMonth() === new Date().getMonth()).reduce((s: number, e: any) => s + (e.count || 0), 0);
 
-  // Build hen name lookup
+  // Build hen & flock name lookups
   const henNameMap: Record<string, string> = {};
   (hens as any[]).forEach((h: any) => { henNameMap[h.id] = h.name; });
+  const flockNameMap: Record<string, string> = {};
+  (flocks as any[]).forEach((f: any) => { flockNameMap[f.id] = f.name; });
 
   if (isLoading) {
     return (
