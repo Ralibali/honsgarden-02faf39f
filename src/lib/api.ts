@@ -651,7 +651,74 @@ export async function getTrendAnalysis() { return { trends: [] }; }
 export async function getAlerts() { return []; }
 export async function dismissAlert(_id: string) { return {}; }
 export async function getRankingSummary() { return { rank: 1, total: 1 }; }
-export async function getFlockStatistics() { return {}; }
+
+/** Flock statistics – egg totals, weekly/monthly breakdown per flock */
+export async function getFlockStatistics() {
+  const userId = await getUserId();
+  const [flocksRes, eggsRes, hensRes] = await Promise.all([
+    supabase.from('flocks').select('*').eq('user_id', userId),
+    supabase.from('egg_logs').select('count, date, flock_id, hen_id').eq('user_id', userId),
+    supabase.from('hens').select('id, name, flock_id, is_active, hen_type').eq('user_id', userId),
+  ]);
+
+  const flocks = flocksRes.data || [];
+  const eggs = eggsRes.data || [];
+  const hens = hensRes.data || [];
+  const now = new Date();
+
+  const flockStats = flocks.map(flock => {
+    // Eggs directly logged to this flock
+    const directEggs = eggs.filter(e => e.flock_id === flock.id);
+    // Eggs logged to hens in this flock (but not already with flock_id)
+    const flockHenIds = new Set(hens.filter(h => h.flock_id === flock.id).map(h => h.id));
+    const henEggs = eggs.filter(e => !e.flock_id && e.hen_id && flockHenIds.has(e.hen_id));
+    const allFlockEggs = [...directEggs, ...henEggs];
+
+    const totalEggs = allFlockEggs.reduce((s, e) => s + e.count, 0);
+
+    const weekEggs = allFlockEggs.filter(e => {
+      const diff = (now.getTime() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+      return diff <= 7;
+    }).reduce((s, e) => s + e.count, 0);
+
+    const monthEggs = allFlockEggs.filter(e => {
+      const diff = (now.getTime() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+      return diff <= 30;
+    }).reduce((s, e) => s + e.count, 0);
+
+    const prevWeekEggs = allFlockEggs.filter(e => {
+      const diff = (now.getTime() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+      return diff > 7 && diff <= 14;
+    }).reduce((s, e) => s + e.count, 0);
+
+    const weekChange = prevWeekEggs > 0 ? Math.round(((weekEggs - prevWeekEggs) / prevWeekEggs) * 100) : null;
+
+    const activeHensCount = hens.filter(h => h.flock_id === flock.id && h.is_active && h.hen_type !== 'rooster').length;
+    const dailyCounts: Record<string, number> = {};
+    allFlockEggs.forEach(e => { dailyCounts[e.date] = (dailyCounts[e.date] || 0) + e.count; });
+    const days = Object.keys(dailyCounts).length;
+    const avgPerDay = days > 0 ? totalEggs / days : 0;
+
+    return {
+      id: flock.id,
+      name: flock.name,
+      total_eggs: totalEggs,
+      week_eggs: weekEggs,
+      month_eggs: monthEggs,
+      week_change: weekChange,
+      active_hens: activeHensCount,
+      avg_per_day: Math.round(avgPerDay * 10) / 10,
+    };
+  });
+
+  // Unassigned eggs (no flock_id and hen not in any flock)
+  const allFlockHenIds = new Set(hens.filter(h => h.flock_id).map(h => h.id));
+  const unassigned = eggs.filter(e => !e.flock_id && (!e.hen_id || !allFlockHenIds.has(e.hen_id)));
+  const unassignedTotal = unassigned.reduce((s, e) => s + e.count, 0);
+
+  return { flocks: flockStats.sort((a, b) => b.total_eggs - a.total_eggs), unassigned_eggs: unassignedTotal };
+}
+
 export async function getFlockHealth() { return {}; }
 export async function getInsights() { return { insights: [] }; }
 export async function getAgdaInboxToday() { return { messages: [] }; }
