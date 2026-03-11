@@ -38,6 +38,7 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState('');
   const [morningReminder, setMorningReminder] = useState(true);
   const [eveningReminder, setEveningReminder] = useState(true);
+  const [weeklyReportEmail, setWeeklyReportEmail] = useState(true);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
   const [darkMode, setDarkMode] = useState(false);
