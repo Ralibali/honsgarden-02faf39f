@@ -143,19 +143,20 @@ export default function Eggs() {
                     <SelectValue placeholder="Alla (generellt)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Alla (generellt)</SelectItem>
-                    {(flocks as any[]).length > 0 && (
+                    <SelectItem value="all">🥚 Alla (generellt)</SelectItem>
+                    {(flocks as any[]).map((flock: any) => {
+                      const flockHens = activeHens.filter((h: any) => h.flock_id === flock.id);
+                      return (
+                        <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>
+                          <span className="font-semibold">👥 {flock.name}</span>
+                          <span className="text-muted-foreground ml-1 text-[10px]">({flockHens.length} höns)</span>
+                        </SelectItem>
+                      );
+                    })}
+                    {activeHens.filter((h: any) => !h.flock_id).length > 0 && (
                       <>
-                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Flockar</div>
-                        {(flocks as any[]).map((flock: any) => (
-                          <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>👥 {flock.name}</SelectItem>
-                        ))}
-                      </>
-                    )}
-                    {activeHens.length > 0 && (
-                      <>
-                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Enskilda höns</div>
-                        {activeHens.map((hen: any) => (
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/30 mt-1 pt-2">Utan flock</div>
+                        {activeHens.filter((h: any) => !h.flock_id).map((hen: any) => (
                           <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
                         ))}
                       </>
