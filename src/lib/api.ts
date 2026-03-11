@@ -691,6 +691,12 @@ export async function adminReplyFeedback(feedbackId: string, userId: string, rep
   return { success: true };
 }
 
+export async function adminUpdateFeedbackStatus(feedbackId: string, statusData: any) {
+  const { data, error } = await supabase.from('feedback').update(statusData).eq('id', feedbackId).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function adminSubscriptions() {
   const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
