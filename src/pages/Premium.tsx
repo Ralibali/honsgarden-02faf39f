@@ -16,6 +16,7 @@ const PRICES = {
 
 const premiumFeatures = [
   { text: 'Obegränsat antal hönor', icon: '🐔' },
+  { text: 'Obegränsat antal flockar', icon: '🏡' },
   { text: 'Avancerad statistik & trender', icon: '📊' },
   { text: 'Smarta varningar & prognoser', icon: '🔔' },
   { text: 'Hälsologg & vaccinationer', icon: '💉' },
