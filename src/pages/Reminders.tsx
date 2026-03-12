@@ -6,6 +6,7 @@ import { Plus, Syringe, Bug, Stethoscope, Calendar, Check, Bell, AlertTriangle }
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { PremiumGate } from '@/components/PremiumGate';
 
 interface Reminder {
   id: number;
