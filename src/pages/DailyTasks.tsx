@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PremiumGate } from '@/components/PremiumGate';
 
 const SUGGESTED_CHORES = [
   { title: 'Samla ägg', description: 'Kolla boet och plocka dagens ägg' },
