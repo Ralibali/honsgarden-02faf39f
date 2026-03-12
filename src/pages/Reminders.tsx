@@ -99,6 +99,10 @@ export default function Reminders() {
         </Dialog>
       </div>
 
+      <PremiumGate soft feature="push-notiser & hälsohistorik">
+        <div />
+      </PremiumGate>
+
       {/* Urgent alerts */}
       {upcoming.filter(r => daysUntil(r.date) <= 3 && daysUntil(r.date) >= 0).length > 0 && (
         <Card className="bg-destructive/5 border-destructive/30 shadow-sm">
