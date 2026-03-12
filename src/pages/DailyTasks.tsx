@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PremiumGate } from '@/components/PremiumGate';
 
 const SUGGESTED_CHORES = [
   { title: 'Samla ägg', description: 'Kolla boet och plocka dagens ägg' },
@@ -273,15 +274,9 @@ export default function DailyTasks() {
         </Card>
       )}
 
-      <Card className="bg-primary/5 border-primary/20 shadow-sm">
-        <CardContent className="p-4 flex items-center gap-3">
-          <Sparkles className="h-5 w-5 text-warning shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">Premium: Automatiska påminnelser</p>
-            <p className="text-xs text-muted-foreground">Få push-notiser när det är dags att stänga luckan</p>
-          </div>
-        </CardContent>
-      </Card>
+      <PremiumGate soft feature="automatiska påminnelser & obegränsade uppgifter">
+        <div />
+      </PremiumGate>
     </motion.div>
   );
 }

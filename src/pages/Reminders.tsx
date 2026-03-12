@@ -6,6 +6,7 @@ import { Plus, Syringe, Bug, Stethoscope, Calendar, Check, Bell, AlertTriangle }
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { PremiumGate } from '@/components/PremiumGate';
 
 interface Reminder {
   id: number;
@@ -97,6 +98,10 @@ export default function Reminders() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <PremiumGate soft feature="push-notiser & hälsohistorik">
+        <div />
+      </PremiumGate>
 
       {/* Urgent alerts */}
       {upcoming.filter(r => daysUntil(r.date) <= 3 && daysUntil(r.date) >= 0).length > 0 && (
