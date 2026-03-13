@@ -277,7 +277,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Subscription status */}
-      <Card className={`shadow-sm overflow-hidden ${isPremium ? 'border-primary/30 bg-primary/3' : 'border-warning/20 bg-warning/3'}`}>
+      {!isPremium && <Card className="shadow-sm overflow-hidden border-warning/20 bg-warning/3">}
         <CardContent className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPremium ? 'bg-primary/10' : 'bg-warning/10'}`}>

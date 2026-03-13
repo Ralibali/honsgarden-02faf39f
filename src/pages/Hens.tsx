@@ -86,8 +86,14 @@ export default function Hens() {
 
   const deleteHenMutation = useMutation({
     mutationFn: (id: string) => api.deleteHen(id),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['hens'] });
+      queryClient.invalidateQueries({ queryKey: ['coop-settings'] });
+      try {
+        const allHens = await api.getHens();
+        const activeCount = (allHens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster').length;
+        await api.updateCoopSettings({ hen_count: activeCount });
+      } catch {}
       toast({ title: 'Borttagen' });
     },
   });
