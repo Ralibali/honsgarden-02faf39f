@@ -277,29 +277,25 @@ export default function SettingsPage() {
       </div>
 
       {/* Subscription status */}
-      <Card className={`shadow-sm overflow-hidden ${isPremium ? 'border-primary/30 bg-primary/3' : 'border-warning/20 bg-warning/3'}`}>
-        <CardContent className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPremium ? 'bg-primary/10' : 'bg-warning/10'}`}>
-              <Crown className={`h-5 w-5 ${isPremium ? 'text-primary' : 'text-warning'}`} />
+      {!isPremium && (
+        <Card className="shadow-sm overflow-hidden border-warning/20 bg-warning/3">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-warning/10">
+                <Crown className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Gratisplan</p>
+                <p className="text-[11px] text-muted-foreground">Uppgradera för full funktionalitet</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {isPremium ? 'Premium-medlem' : 'Gratisplan'}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                {isPremium ? 'Du har tillgång till alla funktioner' : 'Uppgradera för full funktionalitet'}
-              </p>
-            </div>
-          </div>
-          {!isPremium && (
             <Button size="sm" className="rounded-xl gap-1.5 text-xs" onClick={() => navigate('/app/premium')}>
               <Crown className="h-3.5 w-3.5" />
               Uppgradera
             </Button>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Profile */}
       <Card className="border-border/50 shadow-sm">
