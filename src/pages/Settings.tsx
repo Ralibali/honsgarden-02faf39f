@@ -287,9 +287,11 @@ export default function SettingsPage() {
               <p className="text-sm font-semibold text-foreground">
                 {isPremium ? 'Premium-medlem' : 'Gratisplan'}
               </p>
-              <p className="text-[11px] text-muted-foreground">
-                {isPremium ? 'Du har tillgång till alla funktioner' : 'Uppgradera för full funktionalitet'}
-              </p>
+              {!isPremium && (
+                <p className="text-[11px] text-muted-foreground">
+                  Uppgradera för full funktionalitet
+                </p>
+              )}
             </div>
           </div>
           {!isPremium && (
