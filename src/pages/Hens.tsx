@@ -59,9 +59,16 @@ export default function Hens() {
       }
       return api.createHen(data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['hens'] });
       queryClient.invalidateQueries({ queryKey: ['flocks'] });
+      queryClient.invalidateQueries({ queryKey: ['coop-settings'] });
+      // Sync hen count to coop settings
+      try {
+        const allHens = await api.getHens();
+        const activeCount = (allHens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster').length;
+        await api.updateCoopSettings({ hen_count: activeCount });
+      } catch {}
       toast({ title: henForm.hen_type === 'rooster' ? 'Tupp tillagd! 🐓' : 'Höna tillagd! 🐔' });
       setHenDialogOpen(false);
       setHenForm({ name: '', breed: '', color: '', birth_date: '', notes: '', hen_type: 'hen', flock_id: '' });
