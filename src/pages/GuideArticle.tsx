@@ -290,7 +290,10 @@ export default function GuideArticle() {
         image: { '@type': 'ImageObject', url: imageUrl },
         datePublished: post.published_at,
         dateModified: post.updated_at || post.published_at,
-        author: { '@type': 'Organization', name: 'Hönsgården', url: BASE, '@id': `${BASE}/#organization` },
+        author: [
+          { '@type': 'Organization', name: 'Hönsgården', url: BASE, '@id': `${BASE}/#organization` },
+          ...(post.author_name && post.author_name !== 'Hönsgården' ? [{ '@type': 'Person', name: post.author_name }] : []),
+        ],
         publisher: {
           '@type': 'Organization',
           name: 'Hönsgården',
