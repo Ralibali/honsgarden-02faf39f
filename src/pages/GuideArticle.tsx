@@ -498,8 +498,14 @@ export default function GuideArticle() {
             </span>
           )}
           {post.author_name && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px]">✍️</span>
               av <span className="font-medium text-foreground/80">{post.author_name}</span>
+            </span>
+          )}
+          {post.updated_at && post.published_at && post.updated_at > post.published_at && (
+            <span className="text-[10px] text-muted-foreground italic">
+              (Uppdaterad {new Date(post.updated_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })})
             </span>
           )}
         </div>
