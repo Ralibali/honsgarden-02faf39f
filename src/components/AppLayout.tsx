@@ -8,6 +8,18 @@ import { Menu, Feather } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 
 export default function AppLayout() {
+  // Ensure app routes are not indexed by search engines
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'robots';
+      document.head.appendChild(meta);
+    }
+    meta.content = 'noindex, nofollow';
+    return () => { meta.content = 'index, follow'; };
+  }, []);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full noise-bg">
