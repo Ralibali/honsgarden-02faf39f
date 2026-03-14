@@ -201,6 +201,8 @@ export default function Guides() {
           <span>© {new Date().getFullYear()} Hönsgården</span>
           <div className="flex gap-4">
             <Link to="/" className="hover:text-foreground transition-colors">Startsidan</Link>
+            <Link to="/om-oss" className="hover:text-foreground transition-colors">Om oss</Link>
+            <Link to="/verktyg/aggkalkylator" className="hover:text-foreground transition-colors">Äggkalkylator</Link>
             <Link to="/terms" className="hover:text-foreground transition-colors">Villkor</Link>
             <Link to="/login" className="hover:text-foreground transition-colors">Logga in</Link>
           </div>

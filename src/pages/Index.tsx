@@ -667,22 +667,51 @@ export default function Index() {
       </section>
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer className="relative z-10 border-t border-border py-8 mb-14 sm:mb-0">
+      <footer className="relative z-10 border-t border-border py-10 mb-14 sm:mb-0">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
+            <div>
+              <h3 className="font-serif text-sm text-foreground mb-3">Appen</h3>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <a href="/login?mode=register" className="block hover:text-foreground transition-colors">Skapa konto</a>
+                <a href="/login?mode=login" className="block hover:text-foreground transition-colors">Logga in</a>
+                <a href="/verktyg/aggkalkylator" className="block hover:text-foreground transition-colors">Äggkalkylator</a>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-serif text-sm text-foreground mb-3">Blogg</h3>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <a href="/blogg" className="block hover:text-foreground transition-colors">Alla artiklar</a>
+                <a href="/blogg/kategori/nyborjare" className="block hover:text-foreground transition-colors">Nybörjarguider</a>
+                <a href="/blogg/kategori/halsa" className="block hover:text-foreground transition-colors">Hönshälsa</a>
+                <a href="/blogg/kategori/recension" className="block hover:text-foreground transition-colors">Recensioner</a>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-serif text-sm text-foreground mb-3">Kategorier</h3>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <a href="/blogg/kategori/tradgard" className="block hover:text-foreground transition-colors">Trädgård</a>
+                <a href="/blogg/kategori/hem" className="block hover:text-foreground transition-colors">Hem & hållbarhet</a>
+                <a href="/blogg/kategori/friluftsliv" className="block hover:text-foreground transition-colors">Friluftsliv</a>
+                <a href="/blogg/kategori/tips" className="block hover:text-foreground transition-colors">Tips & tricks</a>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-serif text-sm text-foreground mb-3">Hönsgården</h3>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <a href="/om-oss" className="block hover:text-foreground transition-colors">Om oss</a>
+                <a href="/terms" className="block hover:text-foreground transition-colors">Villkor & Integritet</a>
+                <a href="mailto:support@honsgarden.se" className="block text-primary hover:underline">support@honsgarden.se</a>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border/50">
             <div className="flex items-center gap-2">
               <span className="text-base">🥚</span>
               <span className="font-serif text-foreground">Hönsgården</span>
             </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <a href="/blogg" className="hover:text-foreground transition-colors">Blogg</a>
-              <span>·</span>
-              <a href="/terms" className="hover:text-foreground transition-colors">Villkor & Integritet</a>
-              <span>·</span>
-              <a href="mailto:support@honsgarden.se" className="text-primary hover:underline">support@honsgarden.se</a>
-            </div>
             <p className="text-xs text-muted-foreground">
-              © 2026 Hönsgården
+              © 2026 Hönsgården · Gjord med ❤️ i Sverige
             </p>
           </div>
         </div>

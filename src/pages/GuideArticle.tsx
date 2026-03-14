@@ -290,7 +290,10 @@ export default function GuideArticle() {
         image: { '@type': 'ImageObject', url: imageUrl },
         datePublished: post.published_at,
         dateModified: post.updated_at || post.published_at,
-        author: { '@type': 'Organization', name: 'Hönsgården', url: BASE, '@id': `${BASE}/#organization` },
+        author: [
+          { '@type': 'Organization', name: 'Hönsgården', url: BASE, '@id': `${BASE}/#organization` },
+          ...(post.author_name && post.author_name !== 'Hönsgården' ? [{ '@type': 'Person', name: post.author_name }] : []),
+        ],
         publisher: {
           '@type': 'Organization',
           name: 'Hönsgården',
@@ -498,8 +501,14 @@ export default function GuideArticle() {
             </span>
           )}
           {post.author_name && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px]">✍️</span>
               av <span className="font-medium text-foreground/80">{post.author_name}</span>
+            </span>
+          )}
+          {post.updated_at && post.published_at && post.updated_at > post.published_at && (
+            <span className="text-[10px] text-muted-foreground italic">
+              (Uppdaterad {new Date(post.updated_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })})
             </span>
           )}
         </div>
@@ -633,6 +642,8 @@ export default function GuideArticle() {
           <div className="flex gap-4">
             <Link to="/" className="hover:text-foreground transition-colors">Startsidan</Link>
             <Link to="/blogg" className="hover:text-foreground transition-colors">Blogg</Link>
+            <Link to="/om-oss" className="hover:text-foreground transition-colors">Om oss</Link>
+            <Link to="/verktyg/aggkalkylator" className="hover:text-foreground transition-colors">Äggkalkylator</Link>
             <Link to="/terms" className="hover:text-foreground transition-colors">Villkor</Link>
           </div>
         </div>
