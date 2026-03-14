@@ -36,6 +36,8 @@ const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 const BlogCategory = React.lazy(() => import("./pages/BlogCategory"));
 const BlogTag = React.lazy(() => import("./pages/BlogTag"));
 const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
+const About = React.lazy(() => import("./pages/About"));
+const EggCalculator = React.lazy(() => import("./pages/EggCalculator"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
