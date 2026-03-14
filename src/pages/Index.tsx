@@ -65,20 +65,19 @@ function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: stri
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-muted/50 transition-colors"
-      >
+    <details
+      className="border border-border rounded-xl overflow-hidden group"
+      open={open}
+      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+    >
+      <summary className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-muted/50 transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
         <span className="text-sm sm:text-base font-medium text-foreground pr-4">{q}</span>
         <ChevronRight className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} />
-      </button>
-      {open && (
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5 -mt-1">
-          <p className="text-sm text-muted-foreground leading-relaxed">{a}</p>
-        </div>
-      )}
-    </div>
+      </summary>
+      <div className="px-4 sm:px-5 pb-4 sm:pb-5 -mt-1">
+        <p className="text-sm text-muted-foreground leading-relaxed">{a}</p>
+      </div>
+    </details>
   );
 }
 
