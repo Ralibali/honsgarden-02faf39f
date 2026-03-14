@@ -393,6 +393,8 @@ export default function Index() {
                       key={screen.title}
                       src={screen.img}
                       alt={`Hönsgården app – ${screen.title}`}
+                      width={320}
+                      height={640}
                       className={`w-full transition-all duration-500 ${
                         activeDemo === i
                           ? 'opacity-100 scale-100'
