@@ -507,6 +507,8 @@ export default function Index() {
                   <img
                     src={henPortrait}
                     alt="Höna i mysigt hönshus"
+                    width={600}
+                    height={420}
                     className="w-full h-72 sm:h-80 lg:h-[420px] object-cover"
                     loading="lazy"
                   />
