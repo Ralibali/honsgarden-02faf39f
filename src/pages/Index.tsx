@@ -65,20 +65,19 @@ function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: stri
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-muted/50 transition-colors"
-      >
+    <details
+      className="border border-border rounded-xl overflow-hidden group"
+      open={open}
+      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+    >
+      <summary className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-muted/50 transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
         <span className="text-sm sm:text-base font-medium text-foreground pr-4">{q}</span>
         <ChevronRight className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} />
-      </button>
-      {open && (
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5 -mt-1">
-          <p className="text-sm text-muted-foreground leading-relaxed">{a}</p>
-        </div>
-      )}
-    </div>
+      </summary>
+      <div className="px-4 sm:px-5 pb-4 sm:pb-5 -mt-1">
+        <p className="text-sm text-muted-foreground leading-relaxed">{a}</p>
+      </div>
+    </details>
   );
 }
 
@@ -217,8 +216,12 @@ export default function Index() {
           <img
             src="/hero-home.jpg"
             alt="Kvinna med höna på en svensk gård"
+            width={1600}
+            height={900}
             className="w-full h-full object-cover object-[50%_45%] animate-hero-zoom scale-110"
             loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/50 to-background" />
@@ -389,6 +392,8 @@ export default function Index() {
                       key={screen.title}
                       src={screen.img}
                       alt={`Hönsgården app – ${screen.title}`}
+                      width={320}
+                      height={640}
                       className={`w-full transition-all duration-500 ${
                         activeDemo === i
                           ? 'opacity-100 scale-100'
@@ -501,6 +506,8 @@ export default function Index() {
                   <img
                     src={henPortrait}
                     alt="Höna i mysigt hönshus"
+                    width={600}
+                    height={420}
                     className="w-full h-72 sm:h-80 lg:h-[420px] object-cover"
                     loading="lazy"
                   />
@@ -593,6 +600,8 @@ export default function Index() {
                 <img
                   src={eggsBasket}
                   alt="Korg med färska ägg"
+                  width={600}
+                  height={320}
                   className="w-full h-64 sm:h-80 object-cover"
                   loading="lazy"
                 />

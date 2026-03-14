@@ -21,6 +21,12 @@
     <link rel="preconnect" href="https://sikbymtrbhrofysgkqsj.supabase.co" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
 
+    <!-- Preload hero image for LCP -->
+    <link rel="preload" as="image" href="/hero-home.jpg" fetchpriority="high" />
+
+    <!-- Prerendering hints for crawlers -->
+    <meta name="fragment" content="!" />
+
     <!-- RSS & Open Search -->
     <link rel="alternate" type="application/rss+xml" title="Hönsgården Blogg" href="https://honsgarden.se/rss.xml" />
     <link rel="search" type="application/opensearchdescription+xml" title="Hönsgården" href="/opensearch.xml" />
