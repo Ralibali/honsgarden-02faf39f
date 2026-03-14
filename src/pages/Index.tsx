@@ -217,8 +217,12 @@ export default function Index() {
           <img
             src="/hero-home.jpg"
             alt="Kvinna med höna på en svensk gård"
+            width={1600}
+            height={900}
             className="w-full h-full object-cover object-[50%_45%] animate-hero-zoom scale-110"
             loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/50 to-background" />
