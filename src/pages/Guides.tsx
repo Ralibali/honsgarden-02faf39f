@@ -138,6 +138,8 @@ export default function Guides() {
                       <img
                         src={post.cover_image_url}
                         alt={post.title}
+                        width={600}
+                        height={338}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />

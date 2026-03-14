@@ -601,6 +601,8 @@ export default function Index() {
                 <img
                   src={eggsBasket}
                   alt="Korg med färska ägg"
+                  width={600}
+                  height={320}
                   className="w-full h-64 sm:h-80 object-cover"
                   loading="lazy"
                 />
