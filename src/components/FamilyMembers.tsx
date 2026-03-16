@@ -71,7 +71,18 @@ export function FamilyMembers() {
       const { data, error } = await supabase.functions.invoke('manage-farm', {
         body: { action: 'invite', email },
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        // Try to parse the error body for a user-friendly message
+        const errorBody = typeof error === 'object' && 'context' in error ? (error as any).context : null;
+        let msg = 'Kunde inte bjuda in';
+        try {
+          if (errorBody?.body) {
+            const parsed = JSON.parse(await errorBody.body.text());
+            msg = parsed.error || msg;
+          }
+        } catch {}
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
