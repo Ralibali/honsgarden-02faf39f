@@ -628,10 +628,10 @@ export async function getStatisticsInsights() {
 
 /** Get hens with computed egg totals from egg_logs */
 export async function getHensWithEggTotals() {
-  const userId = await getUserId();
+  await getUserId();
   const [hensRes, eggsRes] = await Promise.all([
-    supabase.from('hens').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-    supabase.from('egg_logs').select('hen_id, count').eq('user_id', userId),
+    supabase.from('hens').select('*').order('created_at', { ascending: false }),
+    supabase.from('egg_logs').select('hen_id, count'),
   ]);
   if (hensRes.error) throw new Error(hensRes.error.message);
   const hens = hensRes.data || [];
