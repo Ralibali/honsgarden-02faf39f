@@ -6,10 +6,11 @@ interface EggListViewProps {
   eggs: any[];
   henNameMap: Record<string, string>;
   flockNameMap: Record<string, string>;
+  henFlockMap?: Record<string, string>;
   onDelete: (id: string) => void;
 }
 
-export function EggListView({ eggs, henNameMap, flockNameMap, onDelete }: EggListViewProps) {
+export function EggListView({ eggs, henNameMap, flockNameMap, henFlockMap = {}, onDelete }: EggListViewProps) {
   if (eggs.length === 0) {
     return <div className="p-8 text-center text-muted-foreground text-sm">Inga ägg registrerade ännu</div>;
   }
@@ -19,7 +20,9 @@ export function EggListView({ eggs, henNameMap, flockNameMap, onDelete }: EggLis
       {eggs.slice(0, 30).map((entry: any) => {
         const entryId = entry._id || entry.id;
         const henName = entry.hen_id ? henNameMap[entry.hen_id] : null;
-        const flockName = entry.flock_id ? flockNameMap[entry.flock_id] : null;
+        const flockName = entry.flock_id
+          ? flockNameMap[entry.flock_id]
+          : (entry.hen_id && henFlockMap[entry.hen_id] ? flockNameMap[henFlockMap[entry.hen_id]] : null);
         return (
           <div key={entryId} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-secondary/50 transition-colors">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">

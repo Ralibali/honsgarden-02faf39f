@@ -61,11 +61,23 @@ export default function Eggs() {
     return map;
   }, [hens]);
 
+  const henFlockMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    (hens as any[]).forEach((h: any) => { if (h.flock_id) map[h.id] = h.flock_id; });
+    return map;
+  }, [hens]);
+
   const flockNameMap = useMemo(() => {
     const map: Record<string, string> = {};
     (flocks as any[]).forEach((f: any) => { map[f.id] = f.name; });
     return map;
   }, [flocks]);
+
+  const resolveFlockName = (e: any) => {
+    if (e.flock_id) return flockNameMap[e.flock_id] || '';
+    if (e.hen_id && henFlockMap[e.hen_id]) return flockNameMap[henFlockMap[e.hen_id]] || '';
+    return '';
+  };
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayEggs = eggs.filter((e: any) => e.date === todayStr).reduce((s: number, e: any) => s + (e.count || 0), 0);
@@ -95,7 +107,7 @@ export default function Eggs() {
             const rows = eggs.map((e: any) => ({
               Datum: e.date,
               Antal: e.count,
-              Flock: e.flock_id ? flockNameMap[e.flock_id] || '' : '',
+              Flock: resolveFlockName(e),
               Höna: e.hen_id ? henNameMap[e.hen_id] || '' : '',
               Anteckningar: e.notes || '',
             }));
@@ -107,7 +119,7 @@ export default function Eggs() {
             downloadPDF(
               'Ägglogg',
               ['Datum', 'Antal', 'Flock', 'Höna', 'Anteckningar'],
-              eggs.map((e: any) => [e.date, String(e.count), e.flock_id ? flockNameMap[e.flock_id] || '' : '', e.hen_id ? henNameMap[e.hen_id] || '' : '', e.notes || '']),
+              eggs.map((e: any) => [e.date, String(e.count), resolveFlockName(e), e.hen_id ? henNameMap[e.hen_id] || '' : '', e.notes || '']),
               'agglogg'
             );
           }}>
@@ -171,6 +183,7 @@ export default function Eggs() {
               eggs={eggs}
               henNameMap={henNameMap}
               flockNameMap={flockNameMap}
+              henFlockMap={henFlockMap}
               onDelete={(id) => deleteMutation.mutate(id)}
             />
           ) : (
@@ -178,6 +191,7 @@ export default function Eggs() {
               eggs={eggs}
               henNameMap={henNameMap}
               flockNameMap={flockNameMap}
+              henFlockMap={henFlockMap}
               onDelete={(id) => deleteMutation.mutate(id)}
             />
           )}
