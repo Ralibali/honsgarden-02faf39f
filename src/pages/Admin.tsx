@@ -394,10 +394,7 @@ export default function Admin() {
                               Ta bort Premium
                             </Button>
                           </div>
-                        )}
-                            </Button>
-                          </div>
-                        )}
+
                       </div>
                     </div>
                   </CardContent>
