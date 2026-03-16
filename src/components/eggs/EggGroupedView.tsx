@@ -10,7 +10,7 @@ interface EggGroupedViewProps {
   onDelete: (id: string) => void;
 }
 
-export function EggGroupedView({ eggs, henNameMap, flockNameMap, onDelete }: EggGroupedViewProps) {
+export function EggGroupedView({ eggs, henNameMap, flockNameMap, henFlockMap = {}, onDelete }: EggGroupedViewProps) {
   const groupedByDate = useMemo(() => {
     const groups: Record<string, any[]> = {};
     eggs.slice(0, 100).forEach((e: any) => {
