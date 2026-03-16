@@ -266,18 +266,18 @@ export async function deleteChore(choreId: string) {
 
 export async function getCoopSettings() {
   const userId = await getUserId();
-  const { data, error } = await supabase.from('coop_settings').select('*').eq('user_id', userId).single();
-  if (error && error.code === 'PGRST116') {
-    const { data: newData, error: insertError } = await supabase
-      .from('coop_settings')
-      .insert({ user_id: userId })
-      .select()
-      .single();
-    if (insertError) throw new Error(insertError.message);
-    return newData;
-  }
-  if (error) throw new Error(error.message);
-  return data;
+  // First try to find any coop we have access to (via farm membership)
+  const { data, error } = await supabase.from('coop_settings').select('*').limit(1).maybeSingle();
+  if (error && error.code !== 'PGRST116') throw new Error(error.message);
+  if (data) return data;
+  // If none, create one for this user
+  const { data: newData, error: insertError } = await supabase
+    .from('coop_settings')
+    .insert({ user_id: userId })
+    .select()
+    .single();
+  if (insertError) throw new Error(insertError.message);
+  return newData;
 }
 
 export async function updateCoopSettings(settings: any) {
