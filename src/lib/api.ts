@@ -351,12 +351,12 @@ export async function updateReminderSettings(settings: any) {
 // ==================== STATISTICS (computed client-side) ====================
 
 export async function getTodayStats() {
-  const userId = await getUserId();
+  await getUserId();
   const today = format(new Date(), 'yyyy-MM-dd');
   const [eggs, hens, feed] = await Promise.all([
-    supabase.from('egg_logs').select('count').eq('user_id', userId).eq('date', today),
-    supabase.from('hens').select('id').eq('user_id', userId).eq('is_active', true),
-    supabase.from('feed_records').select('amount_kg, cost').eq('user_id', userId).eq('date', today),
+    supabase.from('egg_logs').select('count').eq('date', today),
+    supabase.from('hens').select('id').eq('is_active', true),
+    supabase.from('feed_records').select('amount_kg, cost').eq('date', today),
   ]);
   const eggCount = (eggs.data || []).reduce((s, r) => s + r.count, 0);
   const henCount = (hens.data || []).length;
