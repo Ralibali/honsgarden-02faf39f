@@ -10,6 +10,7 @@ import {
   Heart, ExternalLink, Info, Trash2, CheckCircle2, Clock, Send, RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { FamilyMembers } from '@/components/FamilyMembers';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
