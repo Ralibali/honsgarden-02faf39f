@@ -207,49 +207,90 @@ export default function Admin() {
           ) : !filteredUsers.length ? (
             <p className="text-sm text-muted-foreground text-center py-8">Inga användare hittades.</p>
           ) : (
-            <div className="space-y-2">
+             <div className="space-y-2">
               {filteredUsers.map((user: any) => (
                 <Card key={user.id} className="border-border/50">
-                  <CardContent className="p-3 sm:p-4 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-primary">
-                        {(user.display_name || user.email || '?')[0].toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{user.display_name || 'Namnlös'}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {user.subscription_status === 'premium' && (
-                          <Badge variant="secondary" className="text-[9px] bg-warning/10 text-warning border-warning/20">
-                            <Crown className="h-2.5 w-2.5 mr-0.5" /> Premium
-                          </Badge>
-                        )}
-                        {user.terms_accepted_at ? (
-                          <Badge variant="secondary" className="text-[9px] bg-success/10 text-success border-success/20">
-                            <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" /> Villkor godkända
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-[9px] bg-destructive/10 text-destructive border-destructive/20">
-                            <XCircle className="h-2.5 w-2.5 mr-0.5" /> Ej godkänt
-                          </Badge>
-                        )}
-                        <span className="text-[10px] text-muted-foreground">
-                          {user.created_at ? new Date(user.created_at).toLocaleDateString('sv-SE') : '–'}
+                  <CardContent className="p-3 sm:p-4 space-y-2.5">
+                    {/* Top row: avatar + info + action icons */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-primary">
+                          {(user.display_name || user.email || '?')[0].toUpperCase()}
                         </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{user.display_name || 'Namnlös'}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-primary/60 hover:text-primary"
+                          onClick={() => setSelectedUser(user)}
+                          title="Visa detaljer"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/50 hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-2xl">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="font-serif">Radera användare?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Detta raderar <strong>{user.email}</strong> och all deras data permanent.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-xl">Avbryt</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                                onClick={() => deleteUserMutation.mutate(user.user_id)}
+                              >
+                                Radera
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
 
-                    <div className="flex gap-1 shrink-0 items-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-primary/60 hover:text-primary shrink-0"
-                        onClick={() => setSelectedUser(user)}
-                        title="Visa detaljer"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button>
+                    {/* Badges row */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {user.subscription_status === 'premium' && (
+                        <Badge variant="secondary" className="text-[9px] bg-warning/10 text-warning border-warning/20">
+                          <Crown className="h-2.5 w-2.5 mr-0.5" /> Premium
+                        </Badge>
+                      )}
+                      {user.terms_accepted_at ? (
+                        <Badge variant="secondary" className="text-[9px] bg-success/10 text-success border-success/20">
+                          <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" /> Godkänt
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-[9px] bg-destructive/10 text-destructive border-destructive/20">
+                          <XCircle className="h-2.5 w-2.5 mr-0.5" /> Ej godkänt
+                        </Badge>
+                      )}
+                      {user.subscription_status === 'premium' && user.premium_expires_at && (
+                        <span className="text-[9px] text-muted-foreground flex items-center gap-1">
+                          <CalendarDays className="h-2.5 w-2.5" />
+                          Går ut {new Date(user.premium_expires_at).toLocaleDateString('sv-SE')}
+                        </span>
+                      )}
+                      {user.subscription_status === 'premium' && !user.premium_expires_at && (
+                        <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
+                      )}
+                      <span className="text-[10px] text-muted-foreground ml-auto">
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString('sv-SE') : '–'}
+                      </span>
+                    </div>
+
+                    {/* Premium actions row */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <Select value={premiumDurations[user.user_id] || '7'} onValueChange={(v) => setPremiumDurations(prev => ({ ...prev, [user.user_id]: v }))}>
                         <SelectTrigger className="h-7 w-[90px] text-[10px] rounded-lg">
                           <SelectValue />
@@ -269,53 +310,18 @@ export default function Admin() {
                         className="text-[10px] h-7 rounded-lg"
                         onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: true, days: premiumDurations[user.user_id] || '7' } })}
                       >
-                        <Crown className="h-3 w-3 mr-1" /> {user.subscription_status === 'premium' ? '+' : 'Ge'}
+                        <Crown className="h-3 w-3 mr-1" /> {user.subscription_status === 'premium' ? '+' : 'Ge Premium'}
                       </Button>
                       {user.subscription_status === 'premium' && (
-                        <div className="flex flex-col items-end gap-1">
-                          {user.premium_expires_at ? (
-                            <span className="text-[9px] text-muted-foreground flex items-center gap-1">
-                              <CalendarDays className="h-2.5 w-2.5" />
-                              Går ut {new Date(user.premium_expires_at).toLocaleDateString('sv-SE')}
-                            </span>
-                          ) : (
-                            <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-[10px] h-7 text-destructive rounded-lg"
-                            onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: false } })}
-                          >
-                            Ta bort Premium
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-[10px] h-7 text-destructive rounded-lg"
+                          onClick={() => updateSubMutation.mutate({ userId: user.user_id, data: { is_premium: false } })}
+                        >
+                          Ta bort
+                        </Button>
                       )}
-
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/50 hover:text-destructive shrink-0">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="font-serif">Radera användare?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Detta raderar <strong>{user.email}</strong> och all deras data permanent.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-xl">Avbryt</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
-                              onClick={() => deleteUserMutation.mutate(user.user_id)}
-                            >
-                              Radera
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </div>
                   </CardContent>
                 </Card>
