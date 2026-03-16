@@ -298,7 +298,7 @@ export async function getFlocks() {
 
 export async function getOrCreateDefaultFlock() {
   const userId = await getUserId();
-  const { data: existing } = await supabase.from('flocks').select('*').eq('user_id', userId).eq('name', 'Min flock').maybeSingle();
+  const { data: existing } = await supabase.from('flocks').select('*').eq('name', 'Min flock').maybeSingle();
   if (existing) return existing;
   const { data, error } = await supabase.from('flocks').insert({ name: 'Min flock', description: 'Standardflock', user_id: userId }).select().single();
   if (error) throw new Error(error.message);
