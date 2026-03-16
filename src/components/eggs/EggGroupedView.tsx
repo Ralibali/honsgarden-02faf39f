@@ -57,7 +57,9 @@ export function EggGroupedView({ eggs, henNameMap, flockNameMap, henFlockMap = {
             <div className="divide-y divide-border/50">
               {entries.map((entry: any) => {
                 const entryId = entry._id || entry.id;
-                const flockName = entry.flock_id ? flockNameMap[entry.flock_id] : null;
+                const flockName = entry.flock_id
+                  ? flockNameMap[entry.flock_id]
+                  : (entry.hen_id && henFlockMap[entry.hen_id] ? flockNameMap[henFlockMap[entry.hen_id]] : null);
                 const henName = entry.hen_id ? henNameMap[entry.hen_id] : null;
                 const label = flockName || henName || 'Utan grupp';
 
