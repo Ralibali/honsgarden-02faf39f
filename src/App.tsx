@@ -38,6 +38,7 @@ const BlogTag = React.lazy(() => import("./pages/BlogTag"));
 const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
 const About = React.lazy(() => import("./pages/About"));
 const EggCalculator = React.lazy(() => import("./pages/EggCalculator"));
+const AcceptInvite = React.lazy(() => import("./pages/AcceptInvite"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,6 +98,7 @@ const AppRoutes = () => (
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/om-oss" element={<About />} />
         <Route path="/verktyg/aggkalkylator" element={<EggCalculator />} />
+        <Route path="/inbjudan/:token" element={<AcceptInvite />} />
         <Route path="/guider" element={<Guides />} />
         <Route path="/guider/:slug" element={<GuideArticle />} />
         <Route path="/blogg" element={<Guides />} />
