@@ -46,8 +46,8 @@ export async function getHenProfile(id: string) {
 // ==================== EGGS ====================
 
 export async function getEggs() {
-  const userId = await getUserId();
-  const { data, error } = await supabase.from('egg_logs').select('*').eq('user_id', userId).order('date', { ascending: false });
+  await getUserId();
+  const { data, error } = await supabase.from('egg_logs').select('*').order('date', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
