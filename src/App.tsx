@@ -38,6 +38,7 @@ const BlogTag = React.lazy(() => import("./pages/BlogTag"));
 const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
 const About = React.lazy(() => import("./pages/About"));
 const EggCalculator = React.lazy(() => import("./pages/EggCalculator"));
+const AcceptInvite = React.lazy(() => import("./pages/AcceptInvite"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
