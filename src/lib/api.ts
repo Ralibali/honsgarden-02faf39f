@@ -257,8 +257,8 @@ export async function createChore(title: string, description?: string) {
 }
 
 export async function deleteChore(choreId: string) {
-  const userId = await getUserId();
-  const { error } = await supabase.from('daily_chores').delete().eq('id', choreId).eq('user_id', userId);
+  await getUserId();
+  const { error } = await supabase.from('daily_chores').delete().eq('id', choreId);
   if (error) throw new Error(error.message);
 }
 
