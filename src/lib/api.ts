@@ -429,9 +429,9 @@ export async function getSummaryStats() {
 }
 
 export async function getYesterdaySummary() {
-  const userId = await getUserId();
+  await getUserId();
   const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-  const { data: eggs } = await supabase.from('egg_logs').select('count').eq('user_id', userId).eq('date', yesterday);
+  const { data: eggs } = await supabase.from('egg_logs').select('count').eq('date', yesterday);
   const eggCount = (eggs || []).reduce((s, r) => s + r.count, 0);
   return { date: yesterday, eggs: eggCount };
 }
