@@ -54,7 +54,7 @@ export function FamilyMembers() {
     queryKey: ['farm-invitations'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('farm_invitations' as any)
+        .from('farm_invitations')
         .select('id, email, status, created_at, expires_at')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });

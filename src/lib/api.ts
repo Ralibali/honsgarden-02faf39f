@@ -281,8 +281,11 @@ export async function getCoopSettings() {
 }
 
 export async function updateCoopSettings(settings: any) {
-  const userId = await getUserId();
-  const { data, error } = await supabase.from('coop_settings').update(settings).eq('user_id', userId).select().single();
+  await getUserId();
+  // Get the coop we have access to (via farm membership RLS)
+  const { data: coop } = await supabase.from('coop_settings').select('id').limit(1).maybeSingle();
+  if (!coop) throw new Error('Ingen gård hittades');
+  const { data, error } = await supabase.from('coop_settings').update(settings).eq('id', coop.id).select().single();
   if (error) throw new Error(error.message);
   return data;
 }
