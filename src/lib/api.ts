@@ -154,8 +154,8 @@ export async function getHatchingAlerts() {
 // ==================== TRANSACTIONS ====================
 
 export async function getTransactions() {
-  const userId = await getUserId();
-  const { data, error } = await supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false });
+  await getUserId();
+  const { data, error } = await supabase.from('transactions').select('*').order('date', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
