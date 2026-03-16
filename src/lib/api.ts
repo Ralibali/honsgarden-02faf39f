@@ -552,12 +552,12 @@ function calculateStreakFromEggs(eggs: any[]): number {
 // ==================== STATISTICS INSIGHTS (real) ====================
 
 export async function getStatisticsInsights() {
-  const userId = await getUserId();
+  await getUserId();
   const [eggsRes, txnsRes, feedRes, hensRes] = await Promise.all([
-    supabase.from('egg_logs').select('count, date, hen_id').eq('user_id', userId),
-    supabase.from('transactions').select('amount, type, date').eq('user_id', userId),
-    supabase.from('feed_records').select('cost, amount_kg, date').eq('user_id', userId),
-    supabase.from('hens').select('id, name, is_active, hen_type').eq('user_id', userId),
+    supabase.from('egg_logs').select('count, date, hen_id'),
+    supabase.from('transactions').select('amount, type, date'),
+    supabase.from('feed_records').select('cost, amount_kg, date'),
+    supabase.from('hens').select('id, name, is_active, hen_type'),
   ]);
 
   const eggs = eggsRes.data || [];
