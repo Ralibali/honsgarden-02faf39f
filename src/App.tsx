@@ -98,6 +98,7 @@ const AppRoutes = () => (
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/om-oss" element={<About />} />
         <Route path="/verktyg/aggkalkylator" element={<EggCalculator />} />
+        <Route path="/inbjudan/:token" element={<AcceptInvite />} />
         <Route path="/guider" element={<Guides />} />
         <Route path="/guider/:slug" element={<GuideArticle />} />
         <Route path="/blogg" element={<Guides />} />

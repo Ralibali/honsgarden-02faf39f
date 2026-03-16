@@ -356,6 +356,9 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Family members */}
+      <FamilyMembers />
+
       {/* Appearance */}
       <Card className="border-border/50 shadow-sm">
         <CardHeader>
