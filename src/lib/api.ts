@@ -98,10 +98,10 @@ export async function getFeedInventory() {
 }
 
 export async function getFeedStatistics() {
-  const userId = await getUserId();
+  await getUserId();
   const [feedRes, eggRes] = await Promise.all([
-    supabase.from('feed_records').select('*').eq('user_id', userId).order('date', { ascending: false }),
-    supabase.from('egg_logs').select('count').eq('user_id', userId),
+    supabase.from('feed_records').select('*').order('date', { ascending: false }),
+    supabase.from('egg_logs').select('count'),
   ]);
   if (feedRes.error) throw new Error(feedRes.error.message);
   const feed = feedRes.data || [];
