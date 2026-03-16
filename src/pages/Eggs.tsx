@@ -183,6 +183,7 @@ export default function Eggs() {
               eggs={eggs}
               henNameMap={henNameMap}
               flockNameMap={flockNameMap}
+              henFlockMap={henFlockMap}
               onDelete={(id) => deleteMutation.mutate(id)}
             />
           ) : (
@@ -190,6 +191,7 @@ export default function Eggs() {
               eggs={eggs}
               henNameMap={henNameMap}
               flockNameMap={flockNameMap}
+              henFlockMap={henFlockMap}
               onDelete={(id) => deleteMutation.mutate(id)}
             />
           )}
