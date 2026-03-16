@@ -115,8 +115,8 @@ export async function getFeedStatistics() {
 // ==================== HATCHING ====================
 
 export async function getHatchings() {
-  const userId = await getUserId();
-  const { data, error } = await supabase.from('hatchings').select('*').eq('user_id', userId).order('start_date', { ascending: false });
+  await getUserId();
+  const { data, error } = await supabase.from('hatchings').select('*').order('start_date', { ascending: false });
   if (error) throw new Error(error.message);
   return data;
 }
