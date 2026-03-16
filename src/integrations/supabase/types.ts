@@ -423,6 +423,79 @@ export type Database = {
         }
         Relationships: []
       }
+      farm_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          farm_id: string
+          id: string
+          invited_by: string
+          status: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          farm_id: string
+          id?: string
+          invited_by: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          farm_id?: string
+          id?: string
+          invited_by?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_invitations_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "coop_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farm_members: {
+        Row: {
+          farm_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          farm_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          farm_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_members_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "coop_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feed_records: {
         Row: {
           amount_kg: number | null
@@ -958,6 +1031,8 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_farm_user_ids: { Args: { _uid: string }; Returns: string[] }
+      get_user_farm_ids: { Args: { _uid: string }; Returns: string[] }
       grant_premium_days: {
         Args: { _days: number; _user_id: string }
         Returns: undefined
