@@ -90,8 +90,8 @@ export async function deleteFeedRecord(id: string) {
 }
 
 export async function getFeedInventory() {
-  const userId = await getUserId();
-  const { data, error } = await supabase.from('feed_records').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(50);
+  await getUserId();
+  const { data, error } = await supabase.from('feed_records').select('*').order('date', { ascending: false }).limit(50);
   if (error) throw new Error(error.message);
   const totalKg = (data || []).reduce((sum, r) => sum + (r.amount_kg || 0), 0);
   return { total_kg: totalKg, records: data };
