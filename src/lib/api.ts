@@ -213,20 +213,18 @@ export async function getUserFeedback() {
 // ==================== DAILY CHORES ====================
 
 export async function getDailyChores() {
-  const userId = await getUserId();
+  await getUserId();
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: chores, error } = await supabase
     .from('daily_chores')
     .select('*')
-    .eq('user_id', userId)
     .order('sort_order');
   if (error) throw new Error(error.message);
 
   const { data: completions } = await supabase
     .from('chore_completions')
     .select('chore_id')
-    .eq('user_id', userId)
     .eq('completed_date', today);
 
   const completedIds = new Set((completions || []).map(c => c.chore_id));
