@@ -26,7 +26,7 @@ export function FamilyMembers() {
     queryKey: ['farm-members'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('farm_members' as any)
+        .from('farm_members')
         .select('id, user_id, role, joined_at')
         .order('joined_at');
       if (error) throw error;
