@@ -20,10 +20,12 @@ export interface Achievement {
 
 export const TIER_PREMIUM_DAYS: Record<Achievement['tier'], number> = {
   bronze: 1,
-  silver: 3,
-  gold: 5,
-  diamond: 7,
+  silver: 2,
+  gold: 3,
+  diamond: 5,
 };
+
+export const MAX_ACHIEVEMENT_PREMIUM_DAYS = 7;
 
 const TIER_LABELS: Record<Achievement['tier'], string> = {
   bronze: 'Brons',
@@ -205,38 +207,38 @@ export function buildAchievements(eggs: any[], hens: any[], streak: number): Ach
     {
       id: 'dedicated',
       title: 'Hängiven hönsbonde',
-      description: 'Logga ägg minst 30 olika dagar',
+      description: 'Logga ägg minst 60 olika dagar',
       emoji: '📅',
       icon: Target,
-      unlocked: uniqueDays >= 30,
-      progress: Math.min(100, (uniqueDays / 30) * 100),
-      current: Math.min(uniqueDays, 30),
-      target: 30,
-      tier: 'silver',
+      unlocked: uniqueDays >= 60,
+      progress: Math.min(100, (uniqueDays / 60) * 100),
+      current: Math.min(uniqueDays, 60),
+      target: 60,
+      tier: 'gold',
     },
     {
       id: 'tracker',
       title: 'Detektivhöna',
-      description: 'Koppla ägg till minst 3 specifika hönor',
+      description: 'Koppla ägg till minst 5 specifika hönor',
       emoji: '🔍',
       icon: Star,
-      unlocked: hensWithEggs >= 3,
-      progress: Math.min(100, (hensWithEggs / 3) * 100),
-      current: Math.min(hensWithEggs, 3),
-      target: 3,
+      unlocked: hensWithEggs >= 5,
+      progress: Math.min(100, (hensWithEggs / 5) * 100),
+      current: Math.min(hensWithEggs, 5),
+      target: 5,
       tier: 'silver',
     },
     {
       id: 'weekend-warrior',
       title: 'Helghjälte',
-      description: 'Logga ägg 10 helgdagar',
+      description: 'Logga ägg 20 helgdagar',
       emoji: '🎉',
       icon: Calendar,
-      unlocked: weekendDays >= 10,
-      progress: Math.min(100, (weekendDays / 10) * 100),
-      current: Math.min(weekendDays, 10),
-      target: 10,
-      tier: 'bronze',
+      unlocked: weekendDays >= 20,
+      progress: Math.min(100, (weekendDays / 20) * 100),
+      current: Math.min(weekendDays, 20),
+      target: 20,
+      tier: 'silver',
     },
     {
       id: 'super-day',
@@ -253,14 +255,14 @@ export function buildAchievements(eggs: any[], hens: any[], streak: number): Ach
     {
       id: 'collector',
       title: 'Samlaren',
-      description: 'Registrera 10 olika hönor totalt',
+      description: 'Registrera 15 olika hönor totalt',
       emoji: '📋',
       icon: Users,
-      unlocked: totalHens >= 10,
-      progress: Math.min(100, (totalHens / 10) * 100),
-      current: Math.min(totalHens, 10),
-      target: 10,
-      tier: 'silver',
+      unlocked: totalHens >= 15,
+      progress: Math.min(100, (totalHens / 15) * 100),
+      current: Math.min(totalHens, 15),
+      target: 15,
+      tier: 'gold',
     },
   ];
 
@@ -291,16 +293,36 @@ export default function Achievements({ eggs, hens, streak }: AchievementsProps) 
         .eq('user_id', user.id);
       
       const alreadyRewarded = new Set((existing || []).map(r => r.achievement_id));
+      
+      // Calculate total days already granted from achievements
+      let totalGranted = 0;
+      for (const id of alreadyRewarded) {
+        const a = achievements.find(x => x.id === id);
+        if (a) totalGranted += TIER_PREMIUM_DAYS[a.tier] || 0;
+      }
 
       for (const achievement of unlocked) {
         if (alreadyRewarded.has(achievement.id) || rewardedRef.current.has(achievement.id)) continue;
-        rewardedRef.current.add(achievement.id);
-
+        
         const days = TIER_PREMIUM_DAYS[achievement.tier] || 1;
+        
+        // Check if granting would exceed the cap
+        if (totalGranted + days > MAX_ACHIEVEMENT_PREMIUM_DAYS) {
+          // Record that it was unlocked but don't grant more days
+          rewardedRef.current.add(achievement.id);
+          await supabase.from('achievement_rewards').insert({ user_id: user.id, achievement_id: achievement.id });
+          toast({ title: `🏆 ${achievement.title} – upplåst!`, description: 'Grattis! Du har nått maxgränsen för gratis premiumdagar från achievements.' });
+          totalGranted += 0; // Don't add
+          continue;
+        }
+        
+        rewardedRef.current.add(achievement.id);
         const { error } = await supabase.from('achievement_rewards').insert({ user_id: user.id, achievement_id: achievement.id });
         if (!error) {
           await supabase.rpc('grant_premium_days', { _user_id: user.id, _days: days });
-          toast({ title: `🏆 ${achievement.title} – upplåst!`, description: `Du har fått ${days} dag${days > 1 ? 'ar' : ''} gratis Premium som belöning!` });
+          totalGranted += days;
+          const remaining = MAX_ACHIEVEMENT_PREMIUM_DAYS - totalGranted;
+          toast({ title: `🏆 ${achievement.title} – upplåst!`, description: `Du har fått ${days} dag${days > 1 ? 'ar' : ''} gratis Premium!${remaining > 0 ? ` (${remaining} dagar kvar att låsa upp)` : ''}` });
         }
       }
     };
