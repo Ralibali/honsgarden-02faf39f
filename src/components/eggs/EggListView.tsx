@@ -10,7 +10,7 @@ interface EggListViewProps {
   onDelete: (id: string) => void;
 }
 
-export function EggListView({ eggs, henNameMap, flockNameMap, onDelete }: EggListViewProps) {
+export function EggListView({ eggs, henNameMap, flockNameMap, henFlockMap = {}, onDelete }: EggListViewProps) {
   if (eggs.length === 0) {
     return <div className="p-8 text-center text-muted-foreground text-sm">Inga ägg registrerade ännu</div>;
   }
