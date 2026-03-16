@@ -6,6 +6,7 @@ interface EggListViewProps {
   eggs: any[];
   henNameMap: Record<string, string>;
   flockNameMap: Record<string, string>;
+  henFlockMap?: Record<string, string>;
   onDelete: (id: string) => void;
 }
 
