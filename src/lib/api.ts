@@ -656,11 +656,11 @@ export async function getRankingSummary() { return { rank: 1, total: 1 }; }
 
 /** Flock statistics – egg totals, weekly/monthly breakdown per flock */
 export async function getFlockStatistics() {
-  const userId = await getUserId();
+  await getUserId();
   const [flocksRes, eggsRes, hensRes] = await Promise.all([
-    supabase.from('flocks').select('*').eq('user_id', userId),
-    supabase.from('egg_logs').select('count, date, flock_id, hen_id').eq('user_id', userId),
-    supabase.from('hens').select('id, name, flock_id, is_active, hen_type').eq('user_id', userId),
+    supabase.from('flocks').select('*'),
+    supabase.from('egg_logs').select('count, date, flock_id, hen_id'),
+    supabase.from('hens').select('id, name, flock_id, is_active, hen_type'),
   ]);
 
   const flocks = flocksRes.data || [];
