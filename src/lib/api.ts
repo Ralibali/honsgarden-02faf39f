@@ -437,11 +437,11 @@ export async function getYesterdaySummary() {
 }
 
 export async function getFarmToday() {
-  const userId = await getUserId();
+  await getUserId();
   const today = format(new Date(), 'yyyy-MM-dd');
   const [eggs, hens, chores] = await Promise.all([
-    supabase.from('egg_logs').select('count').eq('user_id', userId).eq('date', today),
-    supabase.from('hens').select('id, name').eq('user_id', userId).eq('is_active', true),
+    supabase.from('egg_logs').select('count').eq('date', today),
+    supabase.from('hens').select('id, name').eq('is_active', true),
     getDailyChores(),
   ]);
   return {
