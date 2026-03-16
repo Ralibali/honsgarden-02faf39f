@@ -84,10 +84,11 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
+      let stripeEnd: string | null = null;
       try {
         const endTimestamp = subscription.current_period_end;
         if (endTimestamp && typeof endTimestamp === 'number') {
-          subscriptionEnd = new Date(endTimestamp * 1000).toISOString();
+          stripeEnd = new Date(endTimestamp * 1000).toISOString();
         }
       } catch {
         // Skip if date parsing fails
@@ -96,7 +97,17 @@ serve(async (req) => {
 
       const wasNotPremium = profile?.subscription_status !== 'premium';
 
-      // Active Stripe subscription should always set premium and its period end
+      // Keep the LATER of Stripe period end vs existing premium expiry
+      // (so trial/admin/achievement days are not overwritten)
+      const existingExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
+      const stripeExpiry = stripeEnd ? new Date(stripeEnd) : null;
+      
+      if (existingExpiry && stripeExpiry && existingExpiry > stripeExpiry) {
+        subscriptionEnd = profile!.premium_expires_at;
+      } else if (stripeEnd) {
+        subscriptionEnd = stripeEnd;
+      }
+
       await supabaseClient
         .from('profiles')
         .update({ subscription_status: 'premium', premium_expires_at: subscriptionEnd })

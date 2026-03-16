@@ -813,31 +813,31 @@ export async function adminDeleteUser(userId: string) {
 }
 
 export async function adminUpdateSubscription(userId: string, data: any) {
-  const status = data.is_premium ? 'premium' : 'free';
-  let premium_expires_at: string | null = null;
-
-  if (data.is_premium) {
-    const selectedDays = data.days ?? '7';
-
-    if (selectedDays === 'lifetime') {
-      premium_expires_at = null;
-    } else {
-      const days = Number(selectedDays);
-      const safeDays = Number.isFinite(days) && days > 0 ? days : 7;
-      const expires = new Date();
-      expires.setDate(expires.getDate() + safeDays);
-      premium_expires_at = expires.toISOString();
-    }
+  if (!data.is_premium) {
+    // Remove premium
+    const { error } = await supabase.from('profiles').update({
+      subscription_status: 'free',
+      premium_expires_at: null,
+    }).eq('user_id', userId);
+    if (error) throw new Error(error.message);
+    return {};
   }
 
-  const updateData: any = { subscription_status: status };
-  if (data.is_premium) {
-    updateData.premium_expires_at = premium_expires_at;
-  } else {
-    updateData.premium_expires_at = null;
+  const selectedDays = data.days ?? '7';
+
+  if (selectedDays === 'lifetime') {
+    const { error } = await supabase.from('profiles').update({
+      subscription_status: 'premium',
+      premium_expires_at: null,
+    }).eq('user_id', userId);
+    if (error) throw new Error(error.message);
+    return {};
   }
 
-  const { error } = await supabase.from('profiles').update(updateData).eq('user_id', userId);
+  // Use grant_premium_days RPC to properly ADD days on top of existing premium
+  const days = Number(selectedDays);
+  const safeDays = Number.isFinite(days) && days > 0 ? days : 7;
+  const { error } = await supabase.rpc('grant_premium_days', { _user_id: userId, _days: safeDays });
   if (error) throw new Error(error.message);
   return {};
 }
