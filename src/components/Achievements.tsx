@@ -20,10 +20,12 @@ export interface Achievement {
 
 export const TIER_PREMIUM_DAYS: Record<Achievement['tier'], number> = {
   bronze: 1,
-  silver: 3,
-  gold: 5,
-  diamond: 7,
+  silver: 2,
+  gold: 3,
+  diamond: 5,
 };
+
+export const MAX_ACHIEVEMENT_PREMIUM_DAYS = 7;
 
 const TIER_LABELS: Record<Achievement['tier'], string> = {
   bronze: 'Brons',
