@@ -221,6 +221,9 @@ export default function Admin() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{user.display_name || 'Namnlös'}</p>
                         <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+                        {user.coop_name && (
+                          <p className="text-[10px] text-primary/70 truncate">🏡 {user.coop_name}</p>
+                        )}
                       </div>
                       <div className="flex gap-1 shrink-0">
                         <Button
