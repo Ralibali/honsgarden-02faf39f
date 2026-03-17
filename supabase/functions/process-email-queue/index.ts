@@ -7,14 +7,49 @@ const DEFAULT_SEND_DELAY_MS = 200
 const DEFAULT_AUTH_TTL_MINUTES = 15
 const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
 
+const RESEND_API_URL = 'https://api.resend.com/emails'
+
+// Send a transactional email via Resend API
+async function sendViaResend(payload: Record<string, unknown>): Promise<void> {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY')
+  if (!resendApiKey) {
+    throw new Error('RESEND_API_KEY not configured')
+  }
+
+  const response = await fetch(RESEND_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: payload.from,
+      to: [payload.to],
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    }),
+  })
+
+  if (!response.ok) {
+    const body = await response.text()
+    const status = response.status
+    throw new Error(`Resend API error: ${status} ${body}`)
+  }
+
+  // Consume the body to prevent resource leak
+  await response.json()
+}
+
 // Check if an error is a rate-limit (429) response.
-// Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
-// falls back to parsing the error message for older versions.
 function isRateLimited(error: unknown): boolean {
   if (error && typeof error === 'object' && 'status' in error) {
     return (error as { status: number }).status === 429
   }
-  return error instanceof Error && error.message.includes('429')
+  if (error instanceof Error) {
+    return error.message.includes('429')
+  }
+  return false
 }
 
 // Extract Retry-After seconds from a structured EmailAPIError, or default to 60s.
@@ -117,8 +152,6 @@ Deno.serve(async (req) => {
     if (!messages?.length) continue
 
     // Retry budget is based on real send failures, not pgmq read_ct.
-    // read_ct increments for every message in a claimed batch, including
-    // messages not attempted when a 429 stops processing early.
     const messageIds = Array.from(
       new Set(
         messages
@@ -242,36 +275,31 @@ Deno.serve(async (req) => {
       }
 
       try {
-        // Build the email payload. For transactional emails queued from DB
-        // triggers, run_id is a random UUID that the Lovable Email API does
-        // not recognise (404 run_not_found). Only include run_id when it
-        // originates from an auth webhook (auth_emails queue).
-        const emailPayload: Record<string, unknown> = {
-          to: payload.to,
-          from: payload.from,
-          sender_domain: payload.sender_domain,
-          subject: payload.subject,
-          html: payload.html,
-          text: payload.text,
-          purpose: payload.purpose,
-          label: payload.label,
-          idempotency_key: payload.idempotency_key,
-          unsubscribe_token: payload.unsubscribe_token,
-          message_id: payload.message_id,
+        // Auth emails use Lovable's built-in email API (requires valid run_id
+        // from webhook). Transactional emails use Resend API directly since
+        // DB triggers cannot produce a valid Lovable run_id.
+        if (queue === 'auth_emails') {
+          await sendLovableEmail(
+            {
+              run_id: payload.run_id,
+              to: payload.to,
+              from: payload.from,
+              sender_domain: payload.sender_domain,
+              subject: payload.subject,
+              html: payload.html,
+              text: payload.text,
+              purpose: payload.purpose,
+              label: payload.label,
+              idempotency_key: payload.idempotency_key,
+              unsubscribe_token: payload.unsubscribe_token,
+              message_id: payload.message_id,
+            },
+            { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
+          )
+        } else {
+          // Transactional emails via Resend
+          await sendViaResend(payload)
         }
-
-        // Only include run_id for auth emails where it's a real webhook run
-        if (queue === 'auth_emails' && payload.run_id) {
-          emailPayload.run_id = payload.run_id
-        }
-
-        await sendLovableEmail(
-          emailPayload as any,
-          // sendUrl is optional — when LOVABLE_SEND_URL is not set, the library
-          // falls back to the default Lovable API endpoint (https://api.lovable.dev).
-          // Set LOVABLE_SEND_URL as a Supabase secret to override (e.g. for local dev).
-          { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
-        )
 
         // Log success
         await supabase.from('email_send_log').insert({
