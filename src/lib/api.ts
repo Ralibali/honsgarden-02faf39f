@@ -747,9 +747,13 @@ export async function adminStats() {
 }
 
 export async function adminUsers() {
-  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-  if (error) throw new Error(error.message);
-  return data;
+  const [profilesRes, coopsRes] = await Promise.all([
+    supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+    supabase.from('coop_settings').select('user_id, coop_name'),
+  ]);
+  if (profilesRes.error) throw new Error(profilesRes.error.message);
+  const coopMap = new Map((coopsRes.data || []).map((c: any) => [c.user_id, c.coop_name]));
+  return (profilesRes.data || []).map((p: any) => ({ ...p, coop_name: coopMap.get(p.user_id) || null }));
 }
 
 export async function adminFeedback() {
