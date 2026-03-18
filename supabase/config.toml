@@ -13,3 +13,7 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = false
   [functions.reply-feedback]
     verify_jwt = false
+  [functions.premium-expiry-notify]
+    verify_jwt = false
+  [functions.daily-admin-digest]
+    verify_jwt = false
