@@ -13,8 +13,8 @@ export default function VisitorWelcomePopup() {
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) return;
 
-    // Show after 8 seconds
-    const timer = setTimeout(() => setShow(true), 8000);
+    // Show after 4 seconds for faster engagement
+    const timer = setTimeout(() => setShow(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
