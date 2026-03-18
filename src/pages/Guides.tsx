@@ -1,5 +1,6 @@
 import React from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import { useSeo } from '@/hooks/useSeo';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';

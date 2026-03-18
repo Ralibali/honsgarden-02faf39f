@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
 import { Egg, ArrowRight, BarChart3, Bird, Coins, Shield, Star, Check, Heart, Zap, Bell, TrendingUp, ChevronDown, ChevronRight, HelpCircle, Smartphone, Users, Clock } from 'lucide-react';
