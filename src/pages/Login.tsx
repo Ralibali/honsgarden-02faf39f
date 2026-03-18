@@ -36,6 +36,23 @@ export default function Login() {
   const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+      });
+      if (error) {
+        toast({ title: 'Google-inloggning misslyckades', description: String(error), variant: 'destructive' });
+      }
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message || 'Kunde inte ansluta till Google.', variant: 'destructive' });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
