@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import StickyMobileCTA from '@/components/StickyMobileCTA';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
