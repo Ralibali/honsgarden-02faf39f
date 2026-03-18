@@ -211,6 +211,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <VisitorWelcomePopup />
+      <StickyMobileCTA />
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative min-h-[92vh] flex items-center justify-center">
