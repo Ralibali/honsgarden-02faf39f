@@ -51,7 +51,18 @@ export default function AcceptInvite() {
       const { data, error } = await supabase.functions.invoke('manage-farm', {
         body: { action: 'accept-invite', token },
       });
-      if (error || data?.error) throw new Error(data?.error || error?.message);
+      if (error) {
+        let msg = error.message;
+        try {
+          const ctx = (error as any).context;
+          if (ctx instanceof Response) {
+            const body = await ctx.json();
+            msg = body?.error || msg;
+          }
+        } catch {}
+        throw new Error(data?.error || msg);
+      }
+      if (data?.error) throw new Error(data.error);
       setAccepted(true);
       toast({ title: 'Välkommen! 🎉', description: `Du är nu med i ${inviteInfo?.farm_name}` });
       setTimeout(() => navigate('/app'), 2000);
