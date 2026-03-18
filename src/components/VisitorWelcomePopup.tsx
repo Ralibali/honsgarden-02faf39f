@@ -13,8 +13,8 @@ export default function VisitorWelcomePopup() {
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) return;
 
-    // Show after 8 seconds
-    const timer = setTimeout(() => setShow(true), 8000);
+    // Show after 4 seconds for faster engagement
+    const timer = setTimeout(() => setShow(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -46,15 +46,15 @@ export default function VisitorWelcomePopup() {
               <span className="text-2xl mt-0.5">🐔</span>
               <div className="space-y-1.5">
                 <h3 className="font-serif text-sm text-foreground leading-snug">
-                  Välkommen till Hönsgården!
+                  Hej, hönsägare! 👋
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Logga ägg, håll koll på hälsa och foder – allt samlat i en app. Helt gratis att komma igång!
+                  Logga ägg med ett tryck, håll koll på flocken och se om du går plus. <strong>Helt gratis</strong> – klart på 10 sekunder!
                 </p>
                 <div className="flex items-center gap-2 pt-1.5">
-                  <Link to="/login" onClick={dismiss}>
+                  <Link to="/login?mode=register" onClick={dismiss}>
                     <Button size="sm" className="rounded-xl text-xs gap-1 h-8">
-                      <Egg className="h-3 w-3" /> Skapa konto
+                      <Egg className="h-3 w-3" /> Skapa konto gratis
                     </Button>
                   </Link>
                   <Link to="/blogg" onClick={dismiss} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">

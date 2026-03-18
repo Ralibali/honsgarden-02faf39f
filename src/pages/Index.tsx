@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+import StickyMobileCTA from '@/components/StickyMobileCTA';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
@@ -210,6 +211,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <VisitorWelcomePopup />
+      <StickyMobileCTA />
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative min-h-[92vh] flex items-center justify-center">
