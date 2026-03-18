@@ -23,9 +23,20 @@ export default function AcceptInvite() {
     if (!token) return;
     supabase.functions.invoke('manage-farm', {
       body: { action: 'get-invite', token },
-    }).then(({ data, error }) => {
-      if (error || data?.error) {
-        setError(data?.error || error?.message || 'Kunde inte hämta inbjudan');
+    }).then(async ({ data, error }) => {
+      if (error) {
+        // Extract real error message from FunctionsHttpError context
+        let msg = 'Kunde inte hämta inbjudan';
+        try {
+          const ctx = (error as any).context;
+          if (ctx instanceof Response) {
+            const body = await ctx.json();
+            msg = body?.error || msg;
+          }
+        } catch {}
+        setError(data?.error || msg);
+      } else if (data?.error) {
+        setError(data.error);
       } else {
         setInviteInfo(data);
       }
@@ -40,7 +51,18 @@ export default function AcceptInvite() {
       const { data, error } = await supabase.functions.invoke('manage-farm', {
         body: { action: 'accept-invite', token },
       });
-      if (error || data?.error) throw new Error(data?.error || error?.message);
+      if (error) {
+        let msg = error.message;
+        try {
+          const ctx = (error as any).context;
+          if (ctx instanceof Response) {
+            const body = await ctx.json();
+            msg = body?.error || msg;
+          }
+        } catch {}
+        throw new Error(data?.error || msg);
+      }
+      if (data?.error) throw new Error(data.error);
       setAccepted(true);
       toast({ title: 'Välkommen! 🎉', description: `Du är nu med i ${inviteInfo?.farm_name}` });
       setTimeout(() => navigate('/app'), 2000);
