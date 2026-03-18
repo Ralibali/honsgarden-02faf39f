@@ -572,6 +572,15 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ═══════ NEWSLETTER ═══════ */}
+      <section className="relative z-10 py-16 sm:py-24">
+        <div className="container max-w-3xl mx-auto px-5 sm:px-6">
+          <FadeUp>
+            <NewsletterSignup />
+          </FadeUp>
+        </div>
+      </section>
+
       {/* ═══════ FAQ ═══════ */}
       <section className="relative z-10 bg-card/50 border-y border-border py-16 sm:py-24">
         <div className="container max-w-2xl mx-auto px-5 sm:px-6">

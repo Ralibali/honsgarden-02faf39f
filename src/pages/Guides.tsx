@@ -178,8 +178,13 @@ export default function Guides() {
           </div>
         )}
 
+        {/* Newsletter */}
+        <div className="mt-16">
+          <NewsletterSignup />
+        </div>
+
         {/* CTA */}
-        <div className="mt-16 text-center bg-gradient-to-br from-primary/5 via-card to-accent/5 rounded-2xl p-8 sm:p-12 border border-border/30">
+        <div className="mt-8 text-center bg-gradient-to-br from-primary/5 via-card to-accent/5 rounded-2xl p-8 sm:p-12 border border-border/30">
           <span className="text-3xl mb-3 block">🥚</span>
           <h2 className="font-serif text-xl sm:text-2xl text-foreground mb-2">
             Håll koll på dina höns – helt gratis
