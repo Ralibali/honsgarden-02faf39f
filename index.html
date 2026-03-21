@@ -15,13 +15,18 @@
     <link rel="alternate" hreflang="sv" href="https://honsgarden.se/" />
     <link rel="alternate" hreflang="x-default" href="https://honsgarden.se/" />
 
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/pwa-192.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192.png" />
+
     <!-- Preconnect for speed -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://sikbymtrbhrofysgkqsj.supabase.co" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
 
-    <!-- Preload hero image for LCP -->
+    <!-- Preload critical font & hero image -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Young+Serif&display=swap" />
     <link rel="preload" as="image" href="/hero-home.jpg" fetchpriority="high" />
 
     <!-- Prerendering hints for crawlers -->
@@ -136,7 +141,16 @@
   </head>
 
   <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:outline-none">
+      Hoppa till innehåll
+    </a>
     <div id="root"></div>
+    <noscript>
+      <div style="padding:2rem;text-align:center;font-family:sans-serif;">
+        <h1>Hönsgården</h1>
+        <p>JavaScript behöver vara aktiverat för att använda Hönsgården. Aktivera JavaScript i din webbläsare och ladda om sidan.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

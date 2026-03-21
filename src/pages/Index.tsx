@@ -209,7 +209,7 @@ export default function Index() {
   });
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div id="main-content" className="min-h-screen bg-background overflow-x-hidden">
       <VisitorWelcomePopup />
       <StickyMobileCTA />
 
