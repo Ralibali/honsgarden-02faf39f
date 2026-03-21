@@ -141,7 +141,16 @@
   </head>
 
   <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:outline-none">
+      Hoppa till innehåll
+    </a>
     <div id="root"></div>
+    <noscript>
+      <div style="padding:2rem;text-align:center;font-family:sans-serif;">
+        <h1>Hönsgården</h1>
+        <p>JavaScript behöver vara aktiverat för att använda Hönsgården. Aktivera JavaScript i din webbläsare och ladda om sidan.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
