@@ -12,6 +12,16 @@ export default function Terms() {
     title: 'Användarvillkor & Integritetspolicy | Hönsgården',
     description: 'Läs Hönsgårdens användarvillkor och integritetspolicy. Information om dataskydd, cookies och dina rättigheter.',
     path: '/terms',
+    noindex: true,
+    jsonLd: [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://honsgarden.se' },
+          { '@type': 'ListItem', position: 2, name: 'Användarvillkor', item: 'https://honsgarden.se/terms' },
+        ],
+      },
+    ],
   });
 
   return (
