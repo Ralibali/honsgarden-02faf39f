@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell, Send, Mail, Lightbulb
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell, Send, Mail, Lightbulb, RefreshCw
 } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
 import NotificationSender from '@/components/admin/NotificationSender';
@@ -18,6 +18,7 @@ import UserDetailModal from '@/components/admin/UserDetailModal';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -32,6 +33,7 @@ export default function Admin() {
   const [premiumDurations, setPremiumDurations] = useState<Record<string, string>>({});
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [brevoSyncing, setBrevoSyncing] = useState(false);
   const { data: adminCheck, isLoading: checkLoading, isError: checkError } = useQuery({
     queryKey: ['admin-check'],
     queryFn: () => api.adminCheck(),
@@ -130,10 +132,31 @@ export default function Admin() {
         <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
           <Shield className="h-5 w-5 text-destructive" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-serif text-foreground">Admin</h1>
           <p className="text-xs text-muted-foreground">Hantera användare, prenumerationer och feedback</p>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-xl text-xs gap-1.5"
+          disabled={brevoSyncing}
+          onClick={async () => {
+            setBrevoSyncing(true);
+            try {
+              const { data, error } = await supabase.functions.invoke('sync-brevo');
+              if (error) throw error;
+              toast({ title: '✅ Brevo-synk klar', description: `${data?.synced ?? 0} kontakter synkade` });
+            } catch (err: any) {
+              toast({ title: 'Fel vid Brevo-synk', description: err.message, variant: 'destructive' });
+            } finally {
+              setBrevoSyncing(false);
+            }
+          }}
+        >
+          {brevoSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          Synka Brevo
+        </Button>
       </div>
 
       {/* Stats */}
