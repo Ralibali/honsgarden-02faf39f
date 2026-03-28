@@ -44,7 +44,7 @@ export default function About() {
         url: 'https://honsgarden.se',
         logo: { '@type': 'ImageObject', url: 'https://honsgarden.se/favicon.ico', width: 512, height: 512 },
         description: 'Hönsgården hjälper hobbyuppfödare att hålla koll på ägg, höns, foder och ekonomi – helt digitalt.',
-        email: 'support@honsgarden.se',
+        email: 'info@auroramedia.se',
         foundingDate: '2024',
         address: {
           '@type': 'PostalAddress',
@@ -162,7 +162,7 @@ export default function About() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">E-post</p>
-                  <a href="mailto:support@honsgarden.se" className="text-sm text-primary hover:underline">support@honsgarden.se</a>
+                  <a href="mailto:info@auroramedia.se" className="text-sm text-primary hover:underline">info@auroramedia.se</a>
                 </div>
               </div>
               <div className="flex items-center gap-3">

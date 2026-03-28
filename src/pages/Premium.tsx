@@ -312,7 +312,7 @@ export default function Premium() {
             Uppgradera nu – 149 kr/år
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
-            Frågor? <a href="mailto:support@honsgarden.se" className="text-primary hover:underline">support@honsgarden.se</a>
+            Frågor? <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a>
           </p>
         </div>
       )}
