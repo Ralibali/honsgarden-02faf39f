@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import StickyMobileCTA from '@/components/StickyMobileCTA';
 import NewsletterSignup from '@/components/NewsletterSignup';
