@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import StickyMobileCTA from '@/components/StickyMobileCTA';
 import NewsletterSignup from '@/components/NewsletterSignup';
@@ -59,7 +59,7 @@ const faqs = [
 ];
 
 const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik'];
-const plusFeatures = ['Allt i gratis', 'Obegränsat antal hönor', 'AI-karaktären Agda', 'Avancerad ekonomirapport', 'Export till CSV', 'Prioriterad support'];
+const plusFeatures = ['Allt i gratis', 'Obegränsat antal hönor', 'Avancerad statistik', 'Smarta prognoser', 'Automatiska påminnelser', 'Prioriterad support'];
 
 /* ─── Decorative hen SVG ─── */
 function HenIllustration() {
@@ -76,7 +76,7 @@ function HenIllustration() {
 }
 
 export default function Index() {
-  const [billingYearly, setBillingYearly] = useState(true);
+  
 
   useSeo({
     title: 'Hönsgården – Äggloggare & App för Hobbyuppfödare av Höns',
@@ -210,24 +210,10 @@ export default function Index() {
       <section id="priser" className="relative z-10 py-20 sm:py-28 bg-card/50">
         <div className="container max-w-4xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-10">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Gratis äggloggare – uppgradera när du vill</h2>
-            <p className="text-muted-foreground text-sm sm:text-base">Börja gratis. Uppgradera när du vill.</p>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Uppgradera din hönsgård</h2>
+            <p className="text-muted-foreground text-sm sm:text-base">Få full kontroll med avancerad statistik, smarta prognoser och automatiska påminnelser.</p>
           </motion.div>
 
-          {/* Billing toggle */}
-          <motion.div {...fadeUp(0.1)} className="flex items-center justify-center gap-3 mb-10">
-            <span className={`text-sm ${!billingYearly ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>Månadsvis</span>
-            <button
-              onClick={() => setBillingYearly(!billingYearly)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${billingYearly ? 'bg-primary' : 'bg-muted'}`}
-              aria-label="Växla mellan månads- och årsbetalning"
-            >
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${billingYearly ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-            <span className={`text-sm ${billingYearly ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-              Årsvis <span className="text-xs text-success font-semibold">Spara 35%</span>
-            </span>
-          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Free */}
@@ -235,9 +221,10 @@ export default function Index() {
               {...fadeUp(0.15)}
               className="p-6 sm:p-8 rounded-2xl bg-card border border-border shadow-sm"
             >
-              <h3 className="font-serif text-xl text-foreground mb-1">Gratis</h3>
-              <p className="text-muted-foreground text-sm mb-6">Perfekt för att komma igång</p>
-              <p className="text-4xl font-bold text-foreground mb-6">0 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
+              <h3 className="font-serif text-xl text-foreground mb-1">Månadsplan</h3>
+              <p className="text-muted-foreground text-sm mb-6">Flexibelt, ingen bindningstid</p>
+              <p className="text-4xl font-bold text-foreground mb-1">19 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
+              <p className="text-xs text-muted-foreground mb-6">Sju dagars gratis provperiod</p>
               <ul className="space-y-3 mb-8">
                 {freeFeatures.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
@@ -247,7 +234,7 @@ export default function Index() {
                 ))}
               </ul>
               <Button asChild variant="outline" className="w-full h-11">
-                <a href="/login?mode=register">Kom igång gratis</a>
+                <a href="/login?mode=register">Kom igång – 19 kr/mån</a>
               </Button>
             </motion.div>
 
@@ -258,17 +245,16 @@ export default function Index() {
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
-                  Mest populär
+                  Spara 35%
                 </Badge>
               </div>
-              <h3 className="font-serif text-xl text-foreground mb-1">Plus</h3>
-              <p className="text-muted-foreground text-sm mb-6">För den seriösa hönsägaren</p>
+              <h3 className="font-serif text-xl text-foreground mb-1">Årsplan</h3>
+              <p className="text-muted-foreground text-sm mb-6">Bästa värdet – bara 12 kr/mån</p>
               <p className="text-4xl font-bold text-foreground mb-1">
-                {billingYearly ? '699 kr' : '99 kr'}
-                <span className="text-sm font-normal text-muted-foreground">/{billingYearly ? 'år' : 'mån'}</span>
+                149 kr
+                <span className="text-sm font-normal text-muted-foreground">/år</span>
               </p>
-              {billingYearly && <p className="text-xs text-muted-foreground mb-6">Motsvarar 58 kr/mån</p>}
-              {!billingYearly && <p className="text-xs text-muted-foreground mb-6">&nbsp;</p>}
+              <p className="text-xs text-muted-foreground mb-6">228 kr → du sparar 79 kr per år</p>
               <ul className="space-y-3 mb-8">
                 {plusFeatures.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
@@ -278,7 +264,7 @@ export default function Index() {
                 ))}
               </ul>
               <Button asChild className="w-full h-11 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
-                <a href="/login?mode=register">Prova Plus 14 dagar gratis</a>
+                <a href="/login?mode=register">Kom igång – 149 kr/år</a>
               </Button>
             </motion.div>
           </div>
