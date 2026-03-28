@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -45,7 +45,16 @@ export default function AppLayout() {
           </header>
 
           <main id="main-content" className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-8 relative z-10">
-            <Outlet />
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-2xl">🥚</span>
+                  <span className="text-sm text-muted-foreground">Laddar...</span>
+                </div>
+              </div>
+            }>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
 
