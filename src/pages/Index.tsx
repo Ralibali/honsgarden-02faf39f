@@ -264,7 +264,7 @@ export default function Index() {
               <h3 className="font-serif text-xl text-foreground mb-1">Plus</h3>
               <p className="text-muted-foreground text-sm mb-6">För den seriösa hönsägaren</p>
               <p className="text-4xl font-bold text-foreground mb-1">
-                {billingYearly ? '699 kr' : '89 kr'}
+                {billingYearly ? '699 kr' : '99 kr'}
                 <span className="text-sm font-normal text-muted-foreground">/{billingYearly ? 'år' : 'mån'}</span>
               </p>
               {billingYearly && <p className="text-xs text-muted-foreground mb-6">Motsvarar 58 kr/mån</p>}
