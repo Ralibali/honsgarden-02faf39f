@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, User, Sparkles, Lock, Trash2, AlertTriangle } from 'lucide-react';
+import { Send, User, Sparkles, Lock, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
@@ -58,16 +59,30 @@ async function streamAgda({
   onError: (err: string) => void;
 }) {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      onError('Du måste vara inloggad för att prata med Agda');
+      return;
+    }
+
     const resp = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ message, history: history.slice(-20) }),
     });
 
     if (!resp.ok) {
+      if (resp.status === 429) {
+        onError('Agda har för många samtal just nu. Försök igen om en liten stund! 🐔');
+        return;
+      }
+      if (resp.status === 402) {
+        onError('AI-krediter slut. Kontakta support för att fylla på.');
+        return;
+      }
       let errMsg = 'Kunde inte nå Agda';
       try {
         const errData = await resp.json();
