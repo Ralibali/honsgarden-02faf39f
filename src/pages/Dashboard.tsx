@@ -23,6 +23,7 @@ import ReferralCard from '@/components/ReferralCard';
 import InstallAppCard from '@/components/InstallAppCard';
 import OnboardingGuide from '@/components/OnboardingGuide';
 import AchievementNudge from '@/components/AchievementNudge';
+import TrialExpiryBanner from '@/components/TrialExpiryBanner';
 import { motion } from 'framer-motion';
 
 function getGreeting() {
