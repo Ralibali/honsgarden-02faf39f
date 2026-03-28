@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "logo-honsgarden.png"],
+      includeAssets: ["favicon.ico", "pwa-192.png", "pwa-512x512.png"],
       manifest: {
         name: "Hönsgården – Din digitala äggloggare",
         short_name: "Hönsgården",
@@ -38,12 +38,12 @@ export default defineConfig(({ mode }) => ({
             type: "image/png",
           },
           {
-            src: "/pwa-192.png",
+            src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "/pwa-192.png",
+            src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
