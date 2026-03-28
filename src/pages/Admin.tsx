@@ -7,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
-  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell, Send, Mail
+  Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell, Send, Mail, Lightbulb
 } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
 import NotificationSender from '@/components/admin/NotificationSender';
 import GlossaryManager from '@/components/admin/GlossaryManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import UserInsightsDashboard from '@/components/admin/UserInsightsDashboard';
 import UserDetailModal from '@/components/admin/UserDetailModal';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -160,8 +161,11 @@ export default function Admin() {
         </div>
       )}
 
-      <Tabs defaultValue="analytics" className="space-y-4">
+      <Tabs defaultValue="insights" className="space-y-4">
         <TabsList className="flex w-full overflow-x-auto rounded-xl">
+          <TabsTrigger value="insights" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <Lightbulb className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Insikter</span><span className="sm:hidden">💡</span>
+          </TabsTrigger>
           <TabsTrigger value="analytics" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Eye className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Analys</span><span className="sm:hidden">📊</span>
           </TabsTrigger>
@@ -184,6 +188,11 @@ export default function Admin() {
             <Bell className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Notiser</span><span className="sm:hidden">🔔</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Insights tab */}
+        <TabsContent value="insights" className="space-y-3">
+          <UserInsightsDashboard />
+        </TabsContent>
 
         {/* Analytics tab */}
         <TabsContent value="analytics" className="space-y-3">
