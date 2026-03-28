@@ -40,6 +40,7 @@ const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
 const About = React.lazy(() => import("./pages/About"));
 const EggCalculator = React.lazy(() => import("./pages/EggCalculator"));
 const AcceptInvite = React.lazy(() => import("./pages/AcceptInvite"));
+const Agda = React.lazy(() => import("./pages/Agda"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,6 +123,7 @@ const AppRoutes = () => (
           <Route path="admin" element={<Admin />} />
           <Route path="hens/:henId" element={<HenProfile />} />
           <Route path="weekly-report" element={<WeeklyReport />} />
+          <Route path="agda" element={<Agda />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

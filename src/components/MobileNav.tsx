@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield } from 'lucide-react';
+import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +13,7 @@ const primaryItems = [
 ];
 
 const moreItems = [
+  { title: 'Agda AI', url: '/app/agda', icon: Bot },
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
   { title: 'Foder', url: '/app/feed', icon: Package },
   { title: 'Kläckning', url: '/app/hatching', icon: Baby },
