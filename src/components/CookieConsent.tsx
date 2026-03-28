@@ -40,7 +40,7 @@ export default function CookieConsent() {
             <p className="text-xs sm:text-sm font-medium text-foreground">Vi använder cookies 🍪</p>
             <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug sm:leading-relaxed mt-0.5">
               Bara nödvändiga cookies.{' '}
-              <a href="/terms" className="text-primary hover:underline">Läs mer</a>
+              <a href="/terms" className="text-primary hover:underline">Läs om vår cookiepolicy</a>
             </p>
           </div>
         </div>

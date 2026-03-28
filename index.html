@@ -23,12 +23,22 @@
     <!-- Preconnect for speed -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://sikbymtrbhrofysgkqsj.supabase.co" />
+    <link rel="preconnect" href="https://sikbymtrbhrofysgkqsj.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
 
-    <!-- Preload critical font & hero image -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Young+Serif&display=swap" />
-    <link rel="preload" as="image" href="/hero-home.jpg" fetchpriority="high" />
+    <!-- Preload hero image -->
+    <link rel="preload" as="image" href="/hero-home.webp" type="image/webp" fetchpriority="high" />
+
+    <!-- Non-blocking Google Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Inter:wght@300;400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Inter:wght@300;400;500;600;700&display=swap" />
+    </noscript>
 
     <!-- Prerendering hints for crawlers -->
     <meta name="fragment" content="!" />

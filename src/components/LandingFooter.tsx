@@ -51,7 +51,7 @@ export default function LandingFooter() {
             <p className="text-sm text-white/60 leading-relaxed mb-4">
               Digital äggloggare för moderna hönsägare
             </p>
-            <p className="text-xs text-white/40">© 2025 Hönsgården</p>
+            <p className="text-xs text-white/60">© 2025 Hönsgården</p>
           </div>
 
           {columns.map((col) => (
