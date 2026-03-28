@@ -26,7 +26,7 @@ export default function LandingNavbar() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/85 dark:bg-[hsl(25,14%,13%)]/85 backdrop-blur-md border-b border-stone-100 dark:border-stone-800 shadow-sm'
+          ? 'bg-background/85 backdrop-blur-md border-b border-border/50 shadow-sm'
           : 'bg-transparent'
       }`}
       aria-label="Huvudnavigation"
@@ -75,7 +75,7 @@ export default function LandingNavbar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden overflow-hidden bg-white/95 dark:bg-[hsl(25,14%,13%)]/95 backdrop-blur-md border-b border-stone-100 dark:border-stone-800"
+            className="md:hidden overflow-hidden bg-background/95 backdrop-blur-md border-b border-border/50"
           >
             <div className="px-5 pb-5 pt-2 space-y-3">
               {navLinks.map((link) => (

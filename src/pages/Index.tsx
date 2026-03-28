@@ -250,7 +250,7 @@ export default function Index() {
               {...fadeUp(0.2)}
               whileInView={{ scale: 1 }}
               className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md"
-              style={{ background: '#f0f7ee' }}
+              style={{ background: 'hsl(var(--primary) / 0.05)' }}
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
