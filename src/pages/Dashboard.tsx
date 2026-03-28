@@ -469,6 +469,37 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Feature discovery nudges */}
+      {(feedRecords as any[]).length === 0 && (
+        <Card className="border-warning/20 bg-warning/3 shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3.5">
+            <span className="text-2xl shrink-0">🌾</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Spåra foderkostnader</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Vet du vad varje ägg kostar dig? Börja logga foder idag.</p>
+            </div>
+            <Button size="sm" variant="outline" className="border-warning/40 text-warning hover:bg-warning/10 shrink-0 rounded-xl text-xs" onClick={() => navigate('/app/feed')}>
+              Prova →
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {(transactions as any[]).length === 0 && (
+        <Card className="border-success/20 bg-success/3 shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3.5">
+            <span className="text-2xl shrink-0">💰</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Håll koll på ekonomin</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Logga äggförsäljning och utgifter – se om hönsen går med vinst.</p>
+            </div>
+            <Button size="sm" variant="outline" className="border-success/40 text-success hover:bg-success/10 shrink-0 rounded-xl text-xs" onClick={() => navigate('/app/finance')}>
+              Prova →
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Seasonal tip + AI tip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card className="border-border/50 shadow-sm card-hover">
