@@ -26,13 +26,14 @@ import AchievementNudge from '@/components/AchievementNudge';
 import { motion } from 'framer-motion';
 
 function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 5) return 'God natt';
-  if (hour < 10) return 'God morgon';
-  if (hour < 13) return 'God förmiddag';
-  if (hour < 17) return 'God eftermiddag';
-  if (hour < 21) return 'God kväll';
-  return 'God natt';
+  const now = new Date();
+  const hour = now.getHours();
+  const minutes = now.getMinutes();
+  const timeValue = hour + minutes / 60;
+  if (timeValue < 9) return 'God morgon';
+  if (timeValue < 12) return 'God förmiddag';
+  if (timeValue < 17.5) return 'God eftermiddag';
+  return 'God kväll';
 }
 
 function getFormattedDate() {
