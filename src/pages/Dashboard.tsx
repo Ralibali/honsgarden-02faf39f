@@ -158,6 +158,7 @@ export default function Dashboard() {
   const { data: weatherData, isLoading: weatherLoading } = useQuery({ queryKey: ['weather'], queryFn: fetchWeather, staleTime: 30 * 60 * 1000, retry: 2 });
   const { data: aiTip } = useQuery({ queryKey: ['daily-tip'], queryFn: () => api.getDailyTip(), staleTime: 60 * 60 * 1000, retry: 1 });
   const { data: flocks = [] } = useQuery({ queryKey: ['flocks'], queryFn: () => api.getFlocks(), staleTime: 60_000 });
+  const { data: chores = [] } = useQuery({ queryKey: ['daily-chores'], queryFn: () => api.getDailyChores(), staleTime: 60_000 });
 
   const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
