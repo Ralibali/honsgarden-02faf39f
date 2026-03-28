@@ -96,7 +96,7 @@ export default function Index() {
   });
 
   return (
-    <div id="main-content" className="min-h-screen bg-background overflow-x-hidden">
+    <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">
       <VisitorWelcomePopup />
       <StickyMobileCTA />
       <LandingNavbar />
@@ -106,11 +106,18 @@ export default function Index() {
         style={{ background: 'linear-gradient(135deg, #f5f0e8 0%, #eef5ec 50%, #f5f0e8 100%)' }}
       >
         {/* Subtle hero image texture */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-[0.08] pointer-events-none"
-          style={{ backgroundImage: 'url(/hero-home.jpg)' }}
-          aria-hidden="true"
-        />
+        <picture className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <source srcSet="/hero-home.webp" type="image/webp" />
+          <img
+            src="/hero-home.jpg"
+            alt=""
+            width={1920}
+            height={2880}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover opacity-[0.08]"
+          />
+        </picture>
 
         <div className="container max-w-6xl mx-auto px-5 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -372,6 +379,6 @@ export default function Index() {
       </section>
 
       <LandingFooter />
-    </div>
+    </main>
   );
 }
