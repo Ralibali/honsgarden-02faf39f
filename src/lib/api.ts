@@ -236,6 +236,17 @@ export async function completeChore(choreId: string) {
   const today = format(new Date(), 'yyyy-MM-dd');
   const { error } = await supabase.from('chore_completions').insert({ chore_id: choreId, user_id: userId, completed_date: today });
   if (error) throw new Error(error.message);
+
+  // Auto-advance next_due_at for recurring chores
+  const { data: chore } = await supabase.from('daily_chores').select('recurrence, next_due_at').eq('id', choreId).single();
+  if (chore && chore.recurrence && chore.recurrence !== 'none' && chore.next_due_at) {
+    const current = new Date(chore.next_due_at);
+    const next = new Date(current);
+    if (chore.recurrence === 'daily') next.setDate(next.getDate() + 1);
+    else if (chore.recurrence === 'weekly') next.setDate(next.getDate() + 7);
+    else if (chore.recurrence === 'monthly') next.setMonth(next.getMonth() + 1);
+    await supabase.from('daily_chores').update({ next_due_at: next.toISOString() }).eq('id', choreId);
+  }
 }
 
 export async function uncompleteChore(choreId: string) {
@@ -245,15 +256,29 @@ export async function uncompleteChore(choreId: string) {
   if (error) throw new Error(error.message);
 }
 
-export async function createChore(title: string, description?: string) {
+export async function createChore(title: string, description?: string, options?: { recurrence?: string; next_due_at?: string; reminder_enabled?: boolean; reminder_hours_before?: number }) {
   const userId = await getUserId();
   const { data, error } = await supabase
     .from('daily_chores')
-    .insert({ title, description: description || null, user_id: userId, is_default: false })
+    .insert({
+      title,
+      description: description || null,
+      user_id: userId,
+      is_default: false,
+      recurrence: options?.recurrence || 'none',
+      next_due_at: options?.next_due_at || null,
+      reminder_enabled: options?.reminder_enabled || false,
+      reminder_hours_before: options?.reminder_hours_before || 24,
+    })
     .select()
     .single();
   if (error) throw new Error(error.message);
   return data;
+}
+
+export async function updateChore(choreId: string, updates: { recurrence?: string; next_due_at?: string | null; reminder_enabled?: boolean; reminder_hours_before?: number }) {
+  const { error } = await supabase.from('daily_chores').update(updates).eq('id', choreId);
+  if (error) throw new Error(error.message);
 }
 
 export async function deleteChore(choreId: string) {
@@ -864,7 +889,7 @@ export const api = {
   getTransactions, createTransaction, deleteTransaction,
   getHealthLogs, createHealthLog, getHenHealthLogs,
   submitFeedback, getUserFeedback,
-  getDailyChores, completeChore, uncompleteChore, createChore, deleteChore,
+  getDailyChores, completeChore, uncompleteChore, createChore, deleteChore, updateChore,
   getCoopSettings, updateCoopSettings,
   getFlocks, getOrCreateDefaultFlock, createFlock, updateFlock, deleteFlock,
   getReminderSettings, updateReminderSettings,
