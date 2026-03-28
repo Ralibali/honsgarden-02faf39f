@@ -1,111 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Egg, Bird, BarChart3, Coins, CheckSquare, ArrowRight, Sparkles, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ArrowRight, X, Bird, Egg } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import eggsBasket from '@/assets/eggs-basket.jpg';
-import heroCoop from '@/assets/hero-coop.jpg';
-import henPortrait from '@/assets/hen-portrait.jpg';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const ONBOARDING_KEY = 'honsgarden-onboarding-done';
-
 const getOnboardingKey = (userId: string) => `${ONBOARDING_KEY}-${userId}`;
-
-const steps = [
-  {
-    image: heroCoop,
-    emoji: '👋',
-    title: 'Välkommen till Hönsgården!',
-    subtitle: 'Din smarta kompanjon för hönsägande',
-    description: 'Här får du full koll på ägg, hönor, foder och ekonomi – allt samlat på ett ställe. Låt oss visa dig runt!',
-    color: 'from-primary/20 to-accent/10',
-  },
-  {
-    image: eggsBasket,
-    emoji: '🥚',
-    title: 'Logga ägg enkelt',
-    subtitle: 'Med ett tryck registrerar du dagens skörd',
-    description: 'Tryck snabbt in antal ägg direkt från startsidan. Se statistik dag för dag och spåra vilken höna som värper bäst.',
-    features: [
-      { icon: Egg, text: 'Snabb äggloggning' },
-      { icon: BarChart3, text: 'Statistik & trender' },
-    ],
-    color: 'from-warning/15 to-primary/10',
-  },
-  {
-    image: henPortrait,
-    emoji: '🐔',
-    title: 'Känn dina hönor',
-    subtitle: 'Ge varje höna en profil',
-    description: 'Skapa profiler med namn, ras och födelsedag. Följ hälsa, vaccination och äggproduktion per höna.',
-    features: [
-      { icon: Bird, text: 'Hönsprofiler' },
-      { icon: CheckSquare, text: 'Dagliga uppgifter' },
-    ],
-    color: 'from-primary/15 to-success/10',
-  },
-  {
-    image: null,
-    emoji: '✨',
-    title: 'Allt redo!',
-    subtitle: 'Börja logga dina första ägg',
-    description: 'Du har allt du behöver. Logga ägg, följ flocken och ha full koll. Tips: Lägg appen på hemskärmen för snabb åtkomst!',
-    highlights: [
-      { icon: Egg, text: 'Logga ägg varje dag', desc: 'Bygg en streak!' },
-      { icon: Coins, text: 'Följ ekonomin', desc: 'Se om du går plus' },
-      { icon: Sparkles, text: 'Få smarta tips', desc: 'AI-drivna insikter' },
-      { icon: Bird, text: 'Bjud in en vän', desc: 'Få sju dagars premium' },
-    ],
-    color: 'from-success/15 to-warning/10',
-  },
-];
 
 export default function OnboardingGuide() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const [henName, setHenName] = useState('');
+  const [henBreed, setHenBreed] = useState('');
+  const [henBirthDate, setHenBirthDate] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [createdHenName, setCreatedHenName] = useState('');
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user?.id) return;
 
     const scopedKey = getOnboardingKey(user.id);
 
-    // Legacy fallback for older key format
+    // Legacy fallback
     if (localStorage.getItem(ONBOARDING_KEY)) {
       localStorage.setItem(scopedKey, '1');
       return;
     }
 
-    // Fast path from local cache
     const localDone = localStorage.getItem(scopedKey);
     if (localDone) return;
 
     let isCancelled = false;
     let timer: number | null = null;
 
-    void supabase
-      .from('profiles')
-      .select('preferences')
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (isCancelled || error) return;
+    void (async () => {
+      // Check profile preferences
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('preferences')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-        const prefs = (data?.preferences as Record<string, any>) ?? {};
-        if (prefs.onboarding_done) {
-          localStorage.setItem(scopedKey, '1');
-          return;
+      if (isCancelled) return;
+      const prefs = (profileData?.preferences as Record<string, any>) ?? {};
+      if (prefs.onboarding_done) {
+        localStorage.setItem(scopedKey, '1');
+        return;
+      }
+
+      // Check if user already has hens
+      const { count } = await supabase
+        .from('hens')
+        .select('id', { count: 'exact', head: true });
+
+      if (isCancelled) return;
+      if (count && count > 0) {
+        // Has hens, mark onboarding done
+        localStorage.setItem(scopedKey, '1');
+        await supabase
+          .from('profiles')
+          .update({ preferences: { ...prefs, onboarding_done: true } })
+          .eq('user_id', user.id);
+        return;
+      }
+
+      timer = window.setTimeout(() => {
+        if (!isCancelled) {
+          setStep(0);
+          setOpen(true);
         }
-
-        timer = window.setTimeout(() => {
-          if (!isCancelled) {
-            setStep(0);
-            setOpen(true);
-          }
-        }, 800);
-      });
+      }, 800);
+    })();
 
     return () => {
       isCancelled = true;
@@ -113,40 +85,61 @@ export default function OnboardingGuide() {
     };
   }, [user?.id]);
 
-  const finish = () => {
-    setOpen(false);
-
+  const markDone = async () => {
     if (!user?.id) return;
-
     const scopedKey = getOnboardingKey(user.id);
     localStorage.setItem(scopedKey, '1');
     localStorage.removeItem(ONBOARDING_KEY);
-
-    void supabase
+    const { data } = await supabase
       .from('profiles')
       .select('preferences')
       .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) return;
+      .maybeSingle();
+    const prefs = (data?.preferences as Record<string, any>) ?? {};
+    await supabase
+      .from('profiles')
+      .update({ preferences: { ...prefs, onboarding_done: true } })
+      .eq('user_id', user.id);
+  };
 
-        const prefs = (data?.preferences as Record<string, any>) ?? {};
-        return supabase
-          .from('profiles')
-          .update({ preferences: { ...prefs, onboarding_done: true } })
-          .eq('user_id', user.id);
+  const finish = () => {
+    setOpen(false);
+    markDone();
+  };
+
+  const skipAndClose = () => {
+    setOpen(false);
+    markDone();
+  };
+
+  const addHen = async () => {
+    if (!henName.trim() || !user?.id) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('hens').insert({
+        name: henName.trim(),
+        breed: henBreed.trim() || null,
+        birth_date: henBirthDate || null,
+        user_id: user.id,
+        hen_type: 'hen',
+        is_active: true,
       });
+      if (error) throw error;
+      setCreatedHenName(henName.trim());
+      setStep(2);
+      await markDone();
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const next = () => {
-    if (step < steps.length - 1) setStep(step + 1);
-    else finish();
-  };
-
-  const current = steps[step];
+  // Confetti CSS animation
+  const confettiEmojis = ['🎉', '🥚', '🐔', '✨', '💚', '🌟'];
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) finish(); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) skipAndClose(); }}>
       <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl border-border/60 gap-0 [&>button]:hidden">
         <AnimatePresence mode="wait">
           <motion.div
@@ -156,125 +149,184 @@ export default function OnboardingGuide() {
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Image or gradient header */}
-            {current.image ? (
-              <div className="relative h-44 overflow-hidden">
-                <img
-                  src={current.image}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
-                <div className="absolute bottom-4 left-5">
-                  <span className="text-3xl">{current.emoji}</span>
+            {/* Step 0: Welcome */}
+            {step === 0 && (
+              <>
+                <div className="relative h-36 bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center">
+                  <motion.span
+                    className="text-6xl"
+                    initial={{ scale: 0.5, rotate: -10 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                  >
+                    🐔
+                  </motion.span>
+                  <button
+                    onClick={skipAndClose}
+                    className="absolute top-3 right-3 p-1.5 rounded-full bg-foreground/10 text-foreground/50 hover:bg-foreground/15 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <button
-                  onClick={finish}
-                  className="absolute top-3 right-3 p-1.5 rounded-full bg-foreground/20 backdrop-blur-md text-primary-foreground/80 hover:bg-foreground/30 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ) : (
-              <div className={`relative h-36 bg-gradient-to-br ${current.color} flex items-center justify-center`}>
-                <motion.span
-                  className="text-6xl"
-                  initial={{ scale: 0.5, rotate: -10 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                >
-                  {current.emoji}
-                </motion.span>
-                <button
-                  onClick={finish}
-                  className="absolute top-3 right-3 p-1.5 rounded-full bg-foreground/10 text-foreground/50 hover:bg-foreground/15 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+                <div className="px-6 pt-4 pb-6">
+                  <h2 className="font-serif text-xl text-foreground mb-1">Välkommen till Hönsgården!</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                    Låt oss sätta upp din flock. Det tar bara en minut.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <ProgressDots current={0} total={3} />
+                    <Button size="sm" className="h-9 px-5 text-xs rounded-xl gap-1.5" onClick={() => setStep(1)}>
+                      Kom igång <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors">
+                    Hoppa över
+                  </button>
+                </div>
+              </>
             )}
 
-            {/* Content */}
-            <div className="px-6 pt-4 pb-6">
-              <h2 className="font-serif text-xl text-foreground mb-1">{current.title}</h2>
-              <p className="text-xs text-primary font-medium mb-2">{current.subtitle}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-5">{current.description}</p>
-
-              {/* Features list */}
-              {current.features && (
-                <div className="flex gap-3 mb-5">
-                  {current.features.map((f) => (
-                    <div key={f.text} className="flex items-center gap-2 bg-muted/40 rounded-xl px-3 py-2 flex-1">
-                      <f.icon className="h-4 w-4 text-primary shrink-0" />
-                      <span className="text-xs font-medium text-foreground">{f.text}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Final step highlights */}
-              {current.highlights && (
-                <div className="grid grid-cols-2 gap-2 mb-5">
-                  {current.highlights.map((h) => (
-                    <div key={h.text} className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border/40">
-                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <h.icon className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-medium text-foreground leading-tight">{h.text}</p>
-                        <p className="text-[10px] text-muted-foreground">{h.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Navigation */}
-              <div className="flex items-center justify-between">
-                {/* Dots */}
-                <div className="flex gap-1.5">
-                  {steps.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setStep(i)}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        i === step ? 'w-6 bg-primary' : 'w-1.5 bg-border hover:bg-muted-foreground/30'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {step > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 px-3 text-xs rounded-xl text-muted-foreground"
-                      onClick={() => setStep(step - 1)}
-                    >
-                      Tillbaka
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    className="h-9 px-5 text-xs rounded-xl gap-1.5"
-                    onClick={next}
+            {/* Step 1: Add hen */}
+            {step === 1 && (
+              <>
+                <div className="relative h-28 bg-gradient-to-br from-primary/10 to-success/10 flex items-center justify-center">
+                  <Bird className="h-12 w-12 text-primary/60" />
+                  <button
+                    onClick={skipAndClose}
+                    className="absolute top-3 right-3 p-1.5 rounded-full bg-foreground/10 text-foreground/50 hover:bg-foreground/15 transition-colors"
                   >
-                    {step === steps.length - 1 ? 'Kom igång!' : 'Nästa'}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-              </div>
+                <div className="px-6 pt-4 pb-6">
+                  <h2 className="font-serif text-xl text-foreground mb-1">Lägg till din första höna</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                    Ge henne ett namn så är du igång!
+                  </p>
+                  <div className="space-y-3 mb-5">
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Namn *</label>
+                      <Input
+                        placeholder="T.ex. Greta"
+                        value={henName}
+                        onChange={(e) => setHenName(e.target.value)}
+                        className="rounded-xl"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Ras <span className="text-muted-foreground">(valfritt)</span></label>
+                      <Input
+                        placeholder="T.ex. Barnevelder"
+                        value={henBreed}
+                        onChange={(e) => setHenBreed(e.target.value)}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Kläckdatum <span className="text-muted-foreground">(valfritt)</span></label>
+                      <Input
+                        type="date"
+                        value={henBirthDate}
+                        onChange={(e) => setHenBirthDate(e.target.value)}
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <ProgressDots current={1} total={3} />
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" className="h-9 px-3 text-xs rounded-xl text-muted-foreground" onClick={() => setStep(0)}>
+                        Tillbaka
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-9 px-5 text-xs rounded-xl gap-1.5"
+                        onClick={addHen}
+                        disabled={!henName.trim() || saving}
+                      >
+                        {saving ? 'Sparar...' : 'Lägg till hönan'}
+                      </Button>
+                    </div>
+                  </div>
+                  <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors">
+                    Hoppa över för nu
+                  </button>
+                </div>
+              </>
+            )}
 
-              {step === 0 && (
-                <button onClick={finish} className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors">
-                  Hoppa över
-                </button>
-              )}
-            </div>
+            {/* Step 2: Done */}
+            {step === 2 && (
+              <>
+                <div className="relative h-36 bg-gradient-to-br from-success/15 to-warning/10 flex items-center justify-center overflow-hidden">
+                  {/* Simple confetti */}
+                  {confettiEmojis.map((emoji, i) => (
+                    <motion.span
+                      key={i}
+                      className="absolute text-2xl"
+                      initial={{ opacity: 0, y: 60, x: (i - 2.5) * 40 }}
+                      animate={{
+                        opacity: [0, 1, 1, 0],
+                        y: [60, -20, -40, -60],
+                        rotate: [0, (i % 2 === 0 ? 1 : -1) * 30],
+                      }}
+                      transition={{ duration: 1.5, delay: i * 0.1, ease: 'easeOut' }}
+                    >
+                      {emoji}
+                    </motion.span>
+                  ))}
+                  <motion.span
+                    className="text-6xl relative z-10"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.2 }}
+                  >
+                    ✅
+                  </motion.span>
+                </div>
+                <div className="px-6 pt-4 pb-6">
+                  <h2 className="font-serif text-xl text-foreground mb-1">{createdHenName} är tillagd!</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                    Nu kan du börja logga ägg, spåra hälsa och mycket mer.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <ProgressDots current={2} total={3} />
+                    <Button
+                      size="sm"
+                      className="h-9 px-5 text-xs rounded-xl gap-1.5"
+                      onClick={() => { finish(); navigate('/app/eggs'); }}
+                    >
+                      <Egg className="h-3.5 w-3.5" /> Logga första ägget →
+                    </Button>
+                  </div>
+                  <button
+                    onClick={() => { finish(); navigate('/app'); }}
+                    className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors"
+                  >
+                    Utforska appen
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ProgressDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex gap-1.5">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`h-1.5 rounded-full transition-all duration-300 ${
+            i === current ? 'w-6 bg-primary' : 'w-1.5 bg-border'
+          }`}
+        />
+      ))}
+    </div>
   );
 }
