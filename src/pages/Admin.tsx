@@ -132,10 +132,31 @@ export default function Admin() {
         <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
           <Shield className="h-5 w-5 text-destructive" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-serif text-foreground">Admin</h1>
           <p className="text-xs text-muted-foreground">Hantera användare, prenumerationer och feedback</p>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-xl text-xs gap-1.5"
+          disabled={brevoSyncing}
+          onClick={async () => {
+            setBrevoSyncing(true);
+            try {
+              const { data, error } = await supabase.functions.invoke('sync-brevo');
+              if (error) throw error;
+              toast({ title: '✅ Brevo-synk klar', description: `${data?.synced ?? 0} kontakter synkade` });
+            } catch (err: any) {
+              toast({ title: 'Fel vid Brevo-synk', description: err.message, variant: 'destructive' });
+            } finally {
+              setBrevoSyncing(false);
+            }
+          }}
+        >
+          {brevoSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          Synka Brevo
+        </Button>
       </div>
 
       {/* Stats */}
