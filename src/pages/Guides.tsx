@@ -195,6 +195,11 @@ export default function Guides() {
           </div>
         )}
 
+        {/* Soro blog embed – visas direkt efter egna artiklar */}
+        <section className="mt-12">
+          <SoroBlogEmbed />
+        </section>
+
         {/* Newsletter */}
         <div className="mt-16">
           <NewsletterSignup />
@@ -216,11 +221,6 @@ export default function Guides() {
           </Link>
         </div>
       </main>
-
-      {/* Soro blog embed */}
-      <section className="max-w-5xl mx-auto px-4 mt-16">
-        <SoroBlogEmbed />
-      </section>
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 px-4">
