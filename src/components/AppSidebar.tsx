@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock, Bot } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,6 +24,7 @@ const mainNav = [
   { title: 'Hönor', url: '/app/hens', icon: Bird },
   { title: 'Dagliga uppgifter', url: '/app/tasks', icon: ClipboardCheck },
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
+  { title: 'Agda AI', url: '/app/agda', icon: Bot, premium: true },
 ];
 
 const secondaryNav = [
