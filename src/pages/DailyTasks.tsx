@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, Plus, Trash2, Sparkles, ChevronRight } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Check, Plus, Trash2, Sparkles, ChevronRight, ChevronDown, Clock, AlertTriangle, CalendarDays } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PremiumGate } from '@/components/PremiumGate';
+import { Badge } from '@/components/ui/badge';
 
 const SUGGESTED_CHORES = [
   { title: 'Samla ägg', description: 'Kolla boet och plocka dagens ägg' },
@@ -21,10 +24,38 @@ const SUGGESTED_CHORES = [
   { title: 'Kontrollera stängslet', description: 'Se till att inhägnaden är hel och säker' },
 ];
 
+const RECURRENCE_LABELS: Record<string, string> = {
+  none: 'Engång',
+  daily: 'Dagligen',
+  weekly: 'Veckovis',
+  monthly: 'Månadsvis',
+};
+
+function isDueToday(dateStr: string) {
+  const today = new Date().toISOString().split('T')[0];
+  return dateStr.split('T')[0] === today;
+}
+
+function isPastDue(dateStr: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return new Date(dateStr) < today;
+}
+
+function formatDueDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+}
+
 export default function DailyTasks() {
   const queryClient = useQueryClient();
   const [newTitle, setNewTitle] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [newRecurrence, setNewRecurrence] = useState('none');
+  const [newDueDate, setNewDueDate] = useState('');
+  const [newReminder, setNewReminder] = useState(false);
+  const [newReminderHours, setNewReminderHours] = useState('24');
+  const [editingChore, setEditingChore] = useState<string | null>(null);
 
   const { data: chores = [], isLoading } = useQuery({
     queryKey: ['daily-chores'],
@@ -42,14 +73,28 @@ export default function DailyTasks() {
   });
 
   const createMutation = useMutation({
-    mutationFn: ({ title, description }: { title: string; description?: string }) =>
-      api.createChore(title, description),
+    mutationFn: ({ title, description, options }: { title: string; description?: string; options?: any }) =>
+      api.createChore(title, description, options),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['daily-chores'] });
       toast({ title: '✅ Uppgift tillagd!' });
       setNewTitle('');
+      setNewRecurrence('none');
+      setNewDueDate('');
+      setNewReminder(false);
+      setShowAdvanced(false);
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ choreId, updates }: { choreId: string; updates: any }) =>
+      api.updateChore(choreId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['daily-chores'] });
+      toast({ title: '✅ Uppgift uppdaterad' });
+      setEditingChore(null);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -75,6 +120,19 @@ export default function DailyTasks() {
       return;
     }
     createMutation.mutate({ title: s.title, description: s.description });
+  };
+
+  const handleCreate = () => {
+    if (!newTitle.trim()) return;
+    createMutation.mutate({
+      title: newTitle.trim(),
+      options: {
+        recurrence: newRecurrence,
+        next_due_at: newDueDate ? new Date(newDueDate).toISOString() : undefined,
+        reminder_enabled: newReminder,
+        reminder_hours_before: Number(newReminderHours),
+      },
+    });
   };
 
   const completedCount = chores.filter((c: any) => c.completed).length;
@@ -133,9 +191,7 @@ export default function DailyTasks() {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && newTitle.trim()) {
-                  createMutation.mutate({ title: newTitle.trim() });
-                }
+                if (e.key === 'Enter' && newTitle.trim()) handleCreate();
               }}
               className="flex-1 h-10 rounded-xl border-border/60"
             />
@@ -143,12 +199,73 @@ export default function DailyTasks() {
               size="sm"
               className="h-10 px-4 rounded-xl gap-1.5"
               disabled={!newTitle.trim() || createMutation.isPending}
-              onClick={() => newTitle.trim() && createMutation.mutate({ title: newTitle.trim() })}
+              onClick={handleCreate}
             >
               <Plus className="h-4 w-4" />
               Lägg till
             </Button>
           </div>
+
+          {/* Advanced options toggle */}
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground font-medium hover:text-foreground transition-colors"
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            Schemaläggning
+            <ChevronRight className={`h-3 w-3 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {showAdvanced && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 p-3 bg-muted/20 rounded-xl border border-border/30">
+                  <div>
+                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Återkommande</label>
+                    <Select value={newRecurrence} onValueChange={setNewRecurrence}>
+                      <SelectTrigger className="h-9 text-xs rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Engångssyssla</SelectItem>
+                        <SelectItem value="daily">Dagligen</SelectItem>
+                        <SelectItem value="weekly">Veckovis</SelectItem>
+                        <SelectItem value="monthly">Månadsvis</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Förfallodatum</label>
+                    <Input type="date" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} className="h-9 text-xs rounded-lg" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Påminnelse</label>
+                    <div className="flex items-center gap-2">
+                      <Switch checked={newReminder} onCheckedChange={setNewReminder} />
+                      {newReminder && (
+                        <Select value={newReminderHours} onValueChange={setNewReminderHours}>
+                          <SelectTrigger className="h-9 text-xs rounded-lg flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1 tim</SelectItem>
+                            <SelectItem value="6">6 tim</SelectItem>
+                            <SelectItem value="24">1 dag</SelectItem>
+                            <SelectItem value="48">2 dagar</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Suggestions toggle */}
           <button
@@ -206,6 +323,11 @@ export default function DailyTasks() {
               <AnimatePresence>
                 {chores.map((chore: any) => {
                   const isDone = chore.completed;
+                  const hasDue = !!chore.next_due_at;
+                  const pastDue = hasDue && isPastDue(chore.next_due_at);
+                  const dueToday = hasDue && isDueToday(chore.next_due_at);
+                  const isEditing = editingChore === chore.id;
+
                   return (
                     <motion.div
                       key={chore.id}
@@ -214,45 +336,82 @@ export default function DailyTasks() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20, height: 0 }}
                       transition={{ duration: 0.25 }}
-                      className="flex items-center gap-3 px-4 sm:px-6 py-3.5 hover:bg-secondary/50 transition-colors"
                     >
-                      <button
-                        onClick={() => toggleChore(chore)}
-                        className="flex items-center gap-3 flex-1 text-left"
-                      >
-                        <motion.div
-                          className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-success/20 border-success' : 'border-border hover:border-primary'}`}
-                          whileTap={{ scale: 0.85 }}
+                      <div className="flex items-center gap-3 px-4 sm:px-6 py-3.5 hover:bg-secondary/50 transition-colors">
+                        <button
+                          onClick={() => toggleChore(chore)}
+                          className="flex items-center gap-3 flex-1 text-left"
                         >
-                          <AnimatePresence>
-                            {isDone && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                exit={{ scale: 0 }}
-                              >
-                                <Check className="h-3 w-3 text-success" />
-                              </motion.div>
+                          <motion.div
+                            className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-success/20 border-success' : 'border-border hover:border-primary'}`}
+                            whileTap={{ scale: 0.85 }}
+                          >
+                            <AnimatePresence>
+                              {isDone && (
+                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                                  <Check className="h-3 w-3 text-success" />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`text-xs sm:text-sm transition-all ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                {chore.title}
+                              </span>
+                              {chore.recurrence && chore.recurrence !== 'none' && (
+                                <Badge variant="secondary" className="text-[9px] py-0 px-1.5">
+                                  {RECURRENCE_LABELS[chore.recurrence]}
+                                </Badge>
+                              )}
+                              {hasDue && (
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                  pastDue ? 'bg-destructive/10 text-destructive' :
+                                  dueToday ? 'bg-warning/10 text-warning' :
+                                  'bg-muted text-muted-foreground'
+                                }`}>
+                                  {pastDue ? '⚠️ Försenad' : dueToday ? '📌 Idag' : formatDueDate(chore.next_due_at)}
+                                </span>
+                              )}
+                            </div>
+                            {chore.description && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{chore.description}</p>
                             )}
-                          </AnimatePresence>
-                        </motion.div>
-                        <div className="flex-1 min-w-0">
-                          <span className={`text-xs sm:text-sm transition-all ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                            {chore.title}
-                          </span>
-                          {chore.description && (
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{chore.description}</p>
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {!chore.is_default && (
+                            <>
+                              <button
+                                onClick={() => setEditingChore(isEditing ? null : chore.id)}
+                                className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-colors"
+                              >
+                                <CalendarDays className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => deleteMutation.mutate(chore.id)}
+                                className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
                           )}
                         </div>
-                      </button>
-                      {!chore.is_default && (
-                        <button
-                          onClick={() => deleteMutation.mutate(chore.id)}
-                          className="shrink-0 p-1.5 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+                      </div>
+
+                      {/* Inline edit panel */}
+                      <AnimatePresence>
+                        {isEditing && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden border-t border-border/30"
+                          >
+                            <ChoreEditPanel chore={chore} onSave={(updates) => updateMutation.mutate({ choreId: chore.id, updates })} />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   );
                 })}
@@ -278,5 +437,54 @@ export default function DailyTasks() {
         <div />
       </PremiumGate>
     </motion.div>
+  );
+}
+
+function ChoreEditPanel({ chore, onSave }: { chore: any; onSave: (updates: any) => void }) {
+  const [recurrence, setRecurrence] = useState(chore.recurrence || 'none');
+  const [dueDate, setDueDate] = useState(chore.next_due_at ? chore.next_due_at.split('T')[0] : '');
+  const [reminder, setReminder] = useState(chore.reminder_enabled || false);
+  const [reminderHours, setReminderHours] = useState(String(chore.reminder_hours_before || 24));
+
+  return (
+    <div className="px-4 sm:px-6 py-3 bg-muted/20">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+        <div>
+          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Återkommande</label>
+          <Select value={recurrence} onValueChange={setRecurrence}>
+            <SelectTrigger className="h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Engång</SelectItem>
+              <SelectItem value="daily">Dagligen</SelectItem>
+              <SelectItem value="weekly">Veckovis</SelectItem>
+              <SelectItem value="monthly">Månadsvis</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Förfallodatum</label>
+          <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-8 text-xs rounded-lg" />
+        </div>
+        <div>
+          <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Påminnelse</label>
+          <div className="flex items-center gap-2">
+            <Switch checked={reminder} onCheckedChange={setReminder} />
+            <span className="text-[10px] text-muted-foreground">{reminder ? `${reminderHours}h` : 'Av'}</span>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          className="h-8 text-xs rounded-lg"
+          onClick={() => onSave({
+            recurrence,
+            next_due_at: dueDate ? new Date(dueDate).toISOString() : null,
+            reminder_enabled: reminder,
+            reminder_hours_before: Number(reminderHours),
+          })}
+        >
+          Spara
+        </Button>
+      </div>
+    </div>
   );
 }
