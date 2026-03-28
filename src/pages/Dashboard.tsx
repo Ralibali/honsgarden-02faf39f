@@ -158,6 +158,7 @@ export default function Dashboard() {
   const { data: weatherData, isLoading: weatherLoading } = useQuery({ queryKey: ['weather'], queryFn: fetchWeather, staleTime: 30 * 60 * 1000, retry: 2 });
   const { data: aiTip } = useQuery({ queryKey: ['daily-tip'], queryFn: () => api.getDailyTip(), staleTime: 60 * 60 * 1000, retry: 1 });
   const { data: flocks = [] } = useQuery({ queryKey: ['flocks'], queryFn: () => api.getFlocks(), staleTime: 60_000 });
+  const { data: chores = [] } = useQuery({ queryKey: ['daily-chores'], queryFn: () => api.getDailyChores(), staleTime: 60_000 });
 
   const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
@@ -468,6 +469,45 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Upcoming chores widget */}
+      {(() => {
+        const now24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const upcoming = (chores as any[]).filter((c: any) => {
+          if (!c.next_due_at || c.completed) return false;
+          return new Date(c.next_due_at) <= now24h;
+        });
+        const pastDue = upcoming.filter((c: any) => new Date(c.next_due_at) < new Date());
+        if (upcoming.length === 0) return null;
+        return (
+          <Card className={`border-warning/25 shadow-sm ${pastDue.length > 0 ? 'bg-destructive/3' : 'bg-warning/3'}`}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2.5">
+                <span className="text-lg">📋</span>
+                <p className="text-sm font-semibold text-foreground">
+                  {upcoming.length} uppgift{upcoming.length > 1 ? 'er' : ''} förfaller snart
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                {upcoming.slice(0, 3).map((chore: any) => {
+                  const isPast = new Date(chore.next_due_at) < new Date();
+                  return (
+                    <div key={chore.id} className="flex items-center gap-2">
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isPast ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
+                        {isPast ? '⚠️ Försenad' : '📌 Idag'}
+                      </span>
+                      <span className="text-xs text-foreground">{chore.title}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={() => navigate('/app/tasks')} className="text-xs text-warning hover:underline mt-2.5 font-medium">
+                Se alla uppgifter →
+              </button>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Feature discovery nudges */}
       {(feedRecords as any[]).length === 0 && (
