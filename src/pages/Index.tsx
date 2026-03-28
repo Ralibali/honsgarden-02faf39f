@@ -214,20 +214,6 @@ export default function Index() {
             <p className="text-muted-foreground text-sm sm:text-base">Få full kontroll med avancerad statistik, smarta prognoser och automatiska påminnelser.</p>
           </motion.div>
 
-          {/* Billing toggle */}
-          <motion.div {...fadeUp(0.1)} className="flex items-center justify-center gap-3 mb-10">
-            <span className={`text-sm ${!billingYearly ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>Månadsvis</span>
-            <button
-              onClick={() => setBillingYearly(!billingYearly)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${billingYearly ? 'bg-primary' : 'bg-muted'}`}
-              aria-label="Växla mellan månads- och årsbetalning"
-            >
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${billingYearly ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-            <span className={`text-sm ${billingYearly ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-              Årsvis <span className="text-xs text-success font-semibold">Spara 35% – populärast</span>
-            </span>
-          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Free */}
