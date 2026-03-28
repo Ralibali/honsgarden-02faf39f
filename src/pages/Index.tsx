@@ -234,7 +234,7 @@ export default function Index() {
                 ))}
               </ul>
               <Button asChild variant="outline" className="w-full h-11">
-                <a href="/login?mode=register">Kom igång gratis</a>
+                <a href="/login?mode=register">Kom igång – 19 kr/mån</a>
               </Button>
             </motion.div>
 
@@ -245,7 +245,7 @@ export default function Index() {
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
-                  Mest populär
+                  Spara 35%
                 </Badge>
               </div>
               <h3 className="font-serif text-xl text-foreground mb-1">Årsplan</h3>
@@ -264,7 +264,7 @@ export default function Index() {
                 ))}
               </ul>
               <Button asChild className="w-full h-11 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
-                <a href="/login?mode=register">Prova Plus 14 dagar gratis</a>
+                <a href="/login?mode=register">Kom igång – 149 kr/år</a>
               </Button>
             </motion.div>
           </div>
