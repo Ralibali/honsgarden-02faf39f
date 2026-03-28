@@ -14,8 +14,8 @@ const columns = [
   {
     title: 'Support',
     links: [
-      { label: 'Hjälp', href: 'mailto:support@honsgarden.se' },
-      { label: 'Kontakt', href: 'mailto:support@honsgarden.se' },
+      { label: 'Hjälp', href: 'mailto:info@auroramedia.se' },
+      { label: 'Kontakt', href: 'mailto:info@auroramedia.se' },
       { label: 'Integritetspolicy', href: '/terms' },
       { label: 'Villkor', href: '/terms' },
     ],
