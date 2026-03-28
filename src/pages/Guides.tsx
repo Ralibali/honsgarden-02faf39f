@@ -220,6 +220,7 @@ export default function Guides() {
             </Button>
           </Link>
         </div>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 px-4">
