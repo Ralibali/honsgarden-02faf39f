@@ -181,10 +181,10 @@ export default function Index() {
                 key={f.title}
                 variants={staggerItem}
                 whileHover={{ scale: 1.01, boxShadow: '0 10px 30px -8px rgba(0,0,0,0.1)' }}
-                className="relative p-6 rounded-2xl bg-white dark:bg-card border border-border shadow-sm transition-all duration-200"
+                className="relative p-6 rounded-2xl bg-card border border-border shadow-sm transition-all duration-200"
               >
                 {f.badge && (
-                  <Badge className="absolute top-4 right-4 bg-amber-100 text-amber-800 border-amber-200 text-[10px] font-bold">
+                  <Badge className="absolute top-4 right-4 bg-warning/20 text-warning-foreground border-warning/30 text-[10px] font-bold">
                     {f.badge}
                   </Badge>
                 )}
