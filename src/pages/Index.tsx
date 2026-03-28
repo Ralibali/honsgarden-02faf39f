@@ -79,8 +79,8 @@ export default function Index() {
   const [billingYearly, setBillingYearly] = useState(true);
 
   useSeo({
-    title: 'Hönsgården – Äggloggare & hönsapp för hobbyuppfödare',
-    description: 'Håll koll på ägg, höns, foder och ekonomi – dag för dag. Gratis verktyg för den moderna hönsbonden. Kom igång direkt!',
+    title: 'Hönsgården – Äggloggare & App för Hobbyuppfödare av Höns',
+    description: 'Logga ägg, spåra hälsa och räkna ut din foderkostnad. Gratis app för Sveriges 21 000+ hobbyhönsägare. Fungerar offline. Kom igång på 2 minuter.',
     path: '/',
     ogImage: 'https://honsgarden.se/blog-images/hens-garden.jpg',
     jsonLd: [
@@ -119,7 +119,7 @@ export default function Index() {
                 {...fadeUp(0)}
                 className="font-serif text-4xl sm:text-5xl md:text-7xl text-foreground leading-[1.08] mb-5"
               >
-                Din hönsgård – loggad, dag för dag
+                Äggloggare &amp; höns&shy;app för hobbyhöns&shy;ägare i Sverige
               </motion.h1>
 
               <motion.p
@@ -165,7 +165,7 @@ export default function Index() {
         <div className="container max-w-6xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-12 sm:mb-16">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">
-              Allt du behöver för att sköta din hönsgård smartare
+              Optimera din äggproduktion med smarta verktyg
             </h2>
           </motion.div>
 
@@ -203,7 +203,7 @@ export default function Index() {
       <section id="priser" className="relative z-10 py-20 sm:py-28 bg-card/50">
         <div className="container max-w-4xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-10">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Enkel prissättning</h2>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Gratis äggloggare – uppgradera när du vill</h2>
             <p className="text-muted-foreground text-sm sm:text-base">Börja gratis. Uppgradera när du vill.</p>
           </motion.div>
 
@@ -285,7 +285,7 @@ export default function Index() {
       <section className="relative z-10 py-20 sm:py-28 bg-secondary/50">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-12">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vad svenska hönsägare säger</h2>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vad svenska hobbyhöns&shy;ägare säger</h2>
           </motion.div>
 
           <motion.div

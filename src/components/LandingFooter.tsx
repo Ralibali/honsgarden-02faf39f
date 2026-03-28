@@ -1,14 +1,22 @@
 import React from 'react';
 import { Bird } from 'lucide-react';
 
-const columns = [
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Produkt',
     links: [
       { label: 'Funktioner', href: '#funktioner' },
       { label: 'Priser', href: '#priser' },
+      { label: 'Höns & ägg-guider', href: '/blogg' },
+      { label: 'Hur många ägg lägger en höna?', href: '/blogg/hur-manga-agg-lagger-en-hona' },
+      { label: 'Nybörjarguide – skaffa höns', href: '/blogg/hobbyhons-nyborjarguide' },
       { label: 'Ladda ner app', href: '/login?mode=register' },
-      { label: 'Nyheter', href: '/blogg' },
     ],
   },
   {
@@ -37,7 +45,7 @@ export default function LandingFooter() {
           {/* Brand column */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Bird className="h-5 w-5 text-[#7cb36b]" />
+              <Bird className="h-5 w-5 text-[#7cb36b]" aria-hidden="true" />
               <span className="font-serif text-lg text-white">Hönsgården</span>
             </div>
             <p className="text-sm text-white/60 leading-relaxed mb-4">
