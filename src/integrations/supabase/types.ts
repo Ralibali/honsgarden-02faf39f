@@ -264,6 +264,10 @@ export type Database = {
           description: string | null
           id: string
           is_default: boolean | null
+          next_due_at: string | null
+          recurrence: string | null
+          reminder_enabled: boolean | null
+          reminder_hours_before: number | null
           sort_order: number | null
           title: string
           user_id: string
@@ -273,6 +277,10 @@ export type Database = {
           description?: string | null
           id?: string
           is_default?: boolean | null
+          next_due_at?: string | null
+          recurrence?: string | null
+          reminder_enabled?: boolean | null
+          reminder_hours_before?: number | null
           sort_order?: number | null
           title: string
           user_id: string
@@ -282,6 +290,10 @@ export type Database = {
           description?: string | null
           id?: string
           is_default?: boolean | null
+          next_due_at?: string | null
+          recurrence?: string | null
+          reminder_enabled?: boolean | null
+          reminder_hours_before?: number | null
           sort_order?: number | null
           title?: string
           user_id?: string
