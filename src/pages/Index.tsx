@@ -233,8 +233,7 @@ export default function Index() {
             {/* Free */}
             <motion.div
               {...fadeUp(0.15)}
-              whileInView={{ scale: 1 }}
-              className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-card border border-border shadow-sm"
+              className="p-6 sm:p-8 rounded-2xl bg-card border border-border shadow-sm"
             >
               <h3 className="font-serif text-xl text-foreground mb-1">Gratis</h3>
               <p className="text-muted-foreground text-sm mb-6">Perfekt för att komma igång</p>
@@ -255,9 +254,7 @@ export default function Index() {
             {/* Plus */}
             <motion.div
               {...fadeUp(0.2)}
-              whileInView={{ scale: 1 }}
-              className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md"
-              style={{ background: 'hsl(var(--primary) / 0.05)' }}
+              className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md bg-primary/5"
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
