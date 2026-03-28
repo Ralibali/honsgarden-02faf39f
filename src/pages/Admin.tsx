@@ -33,6 +33,7 @@ export default function Admin() {
   const [premiumDurations, setPremiumDurations] = useState<Record<string, string>>({});
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [brevoSyncing, setBrevoSyncing] = useState(false);
   const { data: adminCheck, isLoading: checkLoading, isError: checkError } = useQuery({
     queryKey: ['admin-check'],
     queryFn: () => api.adminCheck(),
