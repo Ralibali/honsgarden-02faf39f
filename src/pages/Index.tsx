@@ -299,11 +299,11 @@ export default function Index() {
               <motion.div
                 key={t.name}
                 variants={staggerItem}
-                className="p-6 rounded-2xl bg-white dark:bg-card border border-border shadow-sm"
+                className="p-6 rounded-2xl bg-card border border-border shadow-sm"
               >
                 <div className="flex gap-0.5 mb-3">
                   {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <Star key={j} className="h-4 w-4 fill-warning text-warning" />
                   ))}
                 </div>
                 <p className="text-sm text-foreground leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
