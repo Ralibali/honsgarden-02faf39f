@@ -161,7 +161,7 @@ export default function Admin() {
         </div>
       )}
 
-      <Tabs defaultValue="analytics" className="space-y-4">
+      <Tabs defaultValue="insights" className="space-y-4">
         <TabsList className="flex w-full overflow-x-auto rounded-xl">
           <TabsTrigger value="insights" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Lightbulb className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Insikter</span><span className="sm:hidden">💡</span>
