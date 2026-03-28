@@ -1,17 +1,3 @@
-/* Font metric overrides to reduce CLS */
-@font-face {
-  font-family: 'Young Serif';
-  font-display: swap;
-  size-adjust: 103%;
-  ascent-override: 92%;
-}
-
-@font-face {
-  font-family: 'Inter';
-  font-display: swap;
-  size-adjust: 100%;
-  ascent-override: 96%;
-}
 
 @tailwind base;
 @tailwind components;
