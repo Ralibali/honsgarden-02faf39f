@@ -1,5 +1,21 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
+
+function SoroBlogEmbed() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    let url = 'https://app.trysoro.com/api/embed/bfddd713-72b8-48fc-b6ba-70a659602721';
+    const post = params.get('post');
+    if (post) url += '?post=' + encodeURIComponent(post);
+    const script = document.createElement('script');
+    script.src = url;
+    containerRef.current.appendChild(script);
+    return () => { script.remove(); };
+  }, []);
+  return <div id="soro-blog" ref={containerRef} />;
+}
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { useSeo } from '@/hooks/useSeo';
 import { useQuery } from '@tanstack/react-query';
@@ -200,6 +216,11 @@ export default function Guides() {
           </Link>
         </div>
       </main>
+
+      {/* Soro blog embed */}
+      <section className="max-w-5xl mx-auto px-4 mt-16">
+        <SoroBlogEmbed />
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 px-4">
