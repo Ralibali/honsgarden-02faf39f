@@ -76,7 +76,7 @@ function HenIllustration() {
 }
 
 export default function Index() {
-  const [billingYearly, setBillingYearly] = useState(true);
+  
 
   useSeo({
     title: 'Hönsgården – Äggloggare & App för Hobbyuppfödare av Höns',
