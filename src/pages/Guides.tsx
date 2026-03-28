@@ -201,6 +201,11 @@ export default function Guides() {
         </div>
       </main>
 
+      {/* Soro blog embed */}
+      <section className="max-w-5xl mx-auto px-4 mt-16">
+        <SoroBlogEmbed />
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 px-4">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
