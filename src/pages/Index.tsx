@@ -105,65 +105,114 @@ export default function Index() {
       <section className="relative min-h-screen flex items-center pt-16"
         style={{ background: 'linear-gradient(135deg, #f5f0e8 0%, #eef5ec 50%, #f5f0e8 100%)' }}
       >
-        {/* Subtle hero image texture */}
         <picture className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <source srcSet="/hero-home.webp" type="image/webp" />
-          <img
-            src="/hero-home.jpg"
-            alt=""
-            width={1920}
-            height={2880}
-            fetchPriority="high"
-            decoding="async"
-            className="w-full h-full object-cover opacity-[0.08]"
-          />
+          <img src="/hero-home.jpg" alt="" width={1920} height={2880} fetchPriority="high" decoding="async" className="w-full h-full object-cover opacity-[0.08]" />
         </picture>
 
         <div className="container max-w-6xl mx-auto px-5 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
+              <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-4">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1">
+                  ✅ Gratis att börja – ingen bindningstid
+                </Badge>
+              </motion.div>
+
               <motion.h1
-                {...fadeUp(0)}
+                {...fadeUp(0.05)}
                 className="font-serif text-4xl sm:text-5xl md:text-7xl text-foreground leading-[1.08] mb-5"
               >
                 Äggloggare &amp; höns&shy;app för hobbyhöns&shy;ägare i Sverige
               </motion.h1>
 
               <motion.p
-                {...fadeUp(0.2)}
+                {...fadeUp(0.15)}
                 className="text-base sm:text-xl text-muted-foreground max-w-lg leading-relaxed mb-6"
               >
-                Håll koll på ägg, hönor, foder och ekonomi. Gratis för alltid – uppgradera när du vill.
+                Håll koll på ägg, hönor, foder och ekonomi. Logga på 5 sekunder – direkt i hönshuset.
               </motion.p>
 
-              <motion.div {...fadeUp(0.35)} className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-                <span>🐓</span>
-                <span>Används av hönsägare över hela Sverige</span>
+              {/* Social proof row */}
+              <motion.div {...fadeUp(0.25)} className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
+                <span className="flex items-center gap-1.5">
+                  <Bird className="h-4 w-4 text-primary" />
+                  <strong className="text-foreground">1 400+</strong> ägg loggade
+                </span>
+                <span className="hidden sm:inline text-border">|</span>
+                <span className="flex items-center gap-1">
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} className="h-3 w-3 fill-warning text-warning" />
+                  ))}
+                  <span className="ml-1">Älskad av hönsägare</span>
+                </span>
               </motion.div>
 
-              <motion.div {...fadeUp(0.5)} className="flex flex-col sm:flex-row gap-3">
+              <motion.div {...fadeUp(0.35)} className="flex flex-col sm:flex-row gap-3">
                 <Button asChild size="lg" className="h-13 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
                   <a href="/login?mode=register">
-                    Kom igång gratis
+                    Skapa konto gratis
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="h-13 px-8 text-base border-primary/30 text-primary hover:bg-primary/5">
-                  <a href="#funktioner">Se hur det fungerar</a>
+                  <a href="#sa-funkar-det">Se hur det fungerar</a>
                 </Button>
               </motion.div>
+
+              <motion.p {...fadeUp(0.45)} className="text-xs text-muted-foreground mt-3">
+                Inget kreditkort · Konto på 10 sekunder
+              </motion.p>
             </div>
 
-            {/* Decorative hen illustration (desktop only) */}
             <motion.div {...fadeUp(0.4)} className="flex justify-center">
               <HenIllustration />
             </motion.div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
           <ChevronDown className="h-6 w-6 text-muted-foreground/40" />
+        </div>
+      </section>
+
+      {/* ═══════ HOW IT WORKS (3 steps) ═══════ */}
+      <section id="sa-funkar-det" className="relative z-10 py-16 sm:py-20 bg-card/60 border-y border-border">
+        <div className="container max-w-4xl mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-10">
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-2">Så enkelt kommer du igång</h2>
+            <p className="text-sm text-muted-foreground">Tre steg – ingen app-nedladdning behövs</p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-40px' }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-5"
+          >
+            {[
+              { step: '1', emoji: '📝', title: 'Skapa konto', desc: 'E-post och lösenord – klart på 10 sekunder.' },
+              { step: '2', emoji: '🥚', title: 'Logga ditt första ägg', desc: 'Tryck på "+"-knappen och ange antal. Klart!' },
+              { step: '3', emoji: '📊', title: 'Följ trender', desc: 'Se statistik, kostnader och hälsa – allt på ett ställe.' },
+            ].map((s) => (
+              <motion.div key={s.step} variants={staggerItem} className="text-center p-6 rounded-2xl bg-background border border-border shadow-sm">
+                <span className="text-3xl mb-3 block">{s.emoji}</span>
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-bold mb-2">{s.step}</span>
+                <h3 className="font-serif text-base text-foreground mb-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div {...fadeUp(0.3)} className="text-center mt-8">
+            <Button asChild size="lg" className="h-12 px-8 text-base gap-2">
+              <a href="/login?mode=register">
+                Prova nu – det är gratis
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </motion.div>
         </div>
       </section>
 
