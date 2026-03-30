@@ -323,7 +323,7 @@ export default function Import() {
           <ChevronLeft className="h-4 w-4" />
           Tillbaka
         </button>
-        <h1 className="text-2xl font-bold">Importera & exportera data</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Importera & exportera data</h1>
         <p className="text-muted-foreground">Importera befintlig statistik eller exportera din data</p>
       </div>
 
