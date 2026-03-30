@@ -41,6 +41,7 @@ const About = React.lazy(() => import("./pages/About"));
 const EggCalculator = React.lazy(() => import("./pages/EggCalculator"));
 const AcceptInvite = React.lazy(() => import("./pages/AcceptInvite"));
 const Agda = React.lazy(() => import("./pages/Agda"));
+const Overview = React.lazy(() => import("./pages/Overview"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -117,6 +118,7 @@ const AppRoutes = () => (
           <Route path="tasks" element={<DailyTasks />} />
           <Route path="finance" element={<Finance />} />
           <Route path="statistics" element={<Statistics />} />
+          <Route path="overview" element={<Overview />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="premium" element={<Premium />} />
           <Route path="community" element={<Community />} />
