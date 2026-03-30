@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Egg, Plus, Minus, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EggSuccessAnimation } from './EggSuccessAnimation';
+import { FeatureSuggestionToast } from './FeatureSuggestionToast';
 
 export function QuickEggFAB() {
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(1);
   const [selectedHenId, setSelectedHenId] = useState<string>('all');
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animCount, setAnimCount] = useState(0);
+  const [showSuggestion, setShowSuggestion] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: hens = [] } = useQuery({
@@ -36,7 +41,8 @@ export function QuickEggFAB() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
-      toast({ title: `🥚 ${count} ägg registrerade!` });
+      setAnimCount(count);
+      setShowAnimation(true);
       setOpen(false);
       setCount(1);
       setSelectedHenId('all');
