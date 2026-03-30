@@ -200,9 +200,30 @@ export default function OnboardingGuide() {
                 </div>
                 <div className="px-6 pt-4 pb-6">
                   <h2 className="font-serif text-xl text-foreground mb-1">Lägg till din första höna</h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                     Ge henne ett namn så är du igång!
                   </p>
+
+                  {/* Breed presets */}
+                  <div className="mb-3">
+                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Populära raser</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['Barnevelder', 'Sussex', 'Maran', 'Orpington', 'Silkeshöna', 'Araucana', 'Wyandotte'].map(breed => (
+                        <button
+                          key={breed}
+                          onClick={() => setHenBreed(breed)}
+                          className={`text-[11px] px-2.5 py-1 rounded-full border transition-all ${
+                            henBreed === breed
+                              ? 'bg-primary/10 border-primary/30 text-primary font-semibold'
+                              : 'bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/60'
+                          }`}
+                        >
+                          {breed}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="space-y-3 mb-5">
                     <div>
                       <label className="text-xs font-medium text-foreground mb-1 block">Namn *</label>
@@ -220,15 +241,6 @@ export default function OnboardingGuide() {
                         placeholder="T.ex. Barnevelder"
                         value={henBreed}
                         onChange={(e) => setHenBreed(e.target.value)}
-                        className="rounded-xl"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-foreground mb-1 block">Kläckdatum <span className="text-muted-foreground">(valfritt)</span></label>
-                      <Input
-                        type="date"
-                        value={henBirthDate}
-                        onChange={(e) => setHenBirthDate(e.target.value)}
                         className="rounded-xl"
                       />
                     </div>
