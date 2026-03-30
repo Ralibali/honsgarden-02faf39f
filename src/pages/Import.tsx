@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
-import { downloadCSV, downloadExcel } from "@/lib/exportUtils";
+import { downloadCSV, downloadExcel, downloadMultiSheetExcel } from "@/lib/exportUtils";
 
 type AnalysisResult = {
   detected_type: "hens" | "egg_logs" | "flocks" | "mixed" | "unknown";
@@ -523,6 +523,12 @@ export default function Import() {
                 </div>
               </Card>
             ))}
+          </div>
+          <div className="mt-4 pt-4 border-t">
+            <Button variant="default" disabled={exporting} onClick={handleExportAll} className="w-full">
+              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
+              Exportera allt i en Excel-fil
+            </Button>
           </div>
         </CardContent>
       </Card>
