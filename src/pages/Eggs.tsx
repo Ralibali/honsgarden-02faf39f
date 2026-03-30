@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,11 +12,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EggForm } from '@/components/eggs/EggForm';
 import { EggGroupedView } from '@/components/eggs/EggGroupedView';
 import { EggListView } from '@/components/eggs/EggListView';
+import { EggSuccessAnimation } from '@/components/EggSuccessAnimation';
+import { FeatureSuggestionToast } from '@/components/FeatureSuggestionToast';
 
 export default function Eggs() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState<'grouped' | 'list'>('grouped');
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animCount, setAnimCount] = useState(0);
+  const [showSuggestion, setShowSuggestion] = useState(false);
 
   const { data: eggs = [], isLoading } = useQuery({
     queryKey: ['eggs'],
@@ -37,11 +42,30 @@ export default function Eggs() {
 
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
+  // Track unused features for contextual suggestions
+  const { data: feedRecords = [] } = useQuery({ queryKey: ['feed-records'], queryFn: () => api.getFeedRecords(), staleTime: 60_000 });
+  const { data: transactions = [] } = useQuery({ queryKey: ['transactions'], queryFn: () => api.getTransactions(), staleTime: 60_000 });
+  const { data: chores = [] } = useQuery({ queryKey: ['daily-chores'], queryFn: () => api.getDailyChores(), staleTime: 60_000 });
+
+  const unusedFeatures: ('feed' | 'finance' | 'chores')[] = [];
+  if ((feedRecords as any[]).length === 0) unusedFeatures.push('feed');
+  if ((transactions as any[]).length === 0) unusedFeatures.push('finance');
+  if ((chores as any[]).length === 0) unusedFeatures.push('chores');
+
+  const handleAnimationDone = useCallback(() => {
+    setShowAnimation(false);
+    toast({ title: `🥚 ${animCount} ägg registrerade!` });
+    if (unusedFeatures.length > 0) {
+      setShowSuggestion(true);
+    }
+  }, [animCount, unusedFeatures.length]);
+
   const createMutation = useMutation({
     mutationFn: (data: { date: string; count: number; hen_id?: string; flock_id?: string }) => api.createEggRecord(data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
-      toast({ title: '🥚 Ägg registrerade!' });
+      setAnimCount(variables.count);
+      setShowAnimation(true);
       setShowForm(false);
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
@@ -197,6 +221,16 @@ export default function Eggs() {
           )}
         </CardContent>
       </Card>
+
+      {/* Success animation */}
+      <EggSuccessAnimation show={showAnimation} count={animCount} onDone={handleAnimationDone} />
+
+      {/* Contextual feature suggestion */}
+      <FeatureSuggestionToast
+        show={showSuggestion}
+        unusedFeatures={unusedFeatures}
+        onDismiss={() => setShowSuggestion(false)}
+      />
     </div>
   );
 }
