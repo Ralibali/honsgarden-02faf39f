@@ -68,7 +68,6 @@ export default function Import() {
   const [analyzing, setAnalyzing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [targetType, setTargetType] = useState<string>("hens");
-  const [targetType, setTargetType] = useState<string>("hens");
   const [sheetsUrl, setSheetsUrl] = useState("");
   const [loadingSheets, setLoadingSheets] = useState(false);
   const [exporting, setExporting] = useState(false);
