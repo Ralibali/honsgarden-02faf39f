@@ -11,6 +11,20 @@ export function downloadExcel(rows: Record<string, any>[], filename: string, she
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
+export function downloadMultiSheetExcel(sheets: { name: string; rows: Record<string, any>[] }[], filename: string) {
+  const wb = XLSX.utils.book_new();
+  for (const sheet of sheets) {
+    if (sheet.rows.length === 0) {
+      const ws = XLSX.utils.aoa_to_sheet([["Ingen data"]]);
+      XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+    } else {
+      const ws = XLSX.utils.json_to_sheet(sheet.rows);
+      XLSX.utils.book_append_sheet(wb, ws, sheet.name);
+    }
+  }
+  XLSX.writeFile(wb, `${filename}.xlsx`);
+}
+
 export function downloadCSV(rows: Record<string, any>[], filename: string) {
   if (rows.length === 0) return;
   const headers = Object.keys(rows[0]);
