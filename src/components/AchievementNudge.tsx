@@ -7,10 +7,13 @@ interface AchievementNudgeProps {
   eggs: any[];
   hens: any[];
   streak: number;
+  feedRecords?: any[];
+  transactions?: any[];
+  chores?: any[];
 }
 
-export default function AchievementNudge({ eggs, hens, streak }: AchievementNudgeProps) {
-  const achievements = buildAchievements(eggs, hens, streak);
+export default function AchievementNudge({ eggs, hens, streak, feedRecords = [], transactions = [], chores = [] }: AchievementNudgeProps) {
+  const achievements = buildAchievements(eggs, hens, streak, feedRecords, transactions, chores);
   
   // Find the closest locked achievement (highest progress, not yet unlocked)
   const closest = achievements.find(a => !a.unlocked && a.progress > 0);

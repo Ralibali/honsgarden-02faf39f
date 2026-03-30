@@ -378,7 +378,7 @@ export default function Dashboard() {
       </div>
 
       {/* Achievement nudge */}
-      <AchievementNudge eggs={eggs} hens={hens as any[]} streak={streak} />
+      <AchievementNudge eggs={eggs} hens={hens as any[]} streak={streak} feedRecords={feedRecords as any[]} transactions={transactions as any[]} chores={chores as any[]} />
 
       {/* Premium nudge */}
       <PremiumNudge />
@@ -688,7 +688,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Achievements */}
-      <Achievements eggs={eggs} hens={hens as any[]} streak={streak} />
+      <Achievements eggs={eggs} hens={hens as any[]} streak={streak} feedRecords={feedRecords as any[]} transactions={transactions as any[]} chores={chores as any[]} />
 
       {/* Share card */}
       <ShareCard
