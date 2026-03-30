@@ -3,12 +3,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 
@@ -65,6 +67,8 @@ export default function Import() {
   const [analyzing, setAnalyzing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [targetType, setTargetType] = useState<string>("hens");
+  const [sheetsUrl, setSheetsUrl] = useState("");
+  const [loadingSheets, setLoadingSheets] = useState(false);
 
   const parseFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -128,6 +132,38 @@ export default function Import() {
     const file = e.target.files?.[0];
     if (file) parseFile(file);
   }, [parseFile]);
+
+  const handleGoogleSheets = async () => {
+    const match = sheetsUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (!match) {
+      toast({ title: "Ogiltig länk", description: "Klistra in en giltig Google Sheets-delningslänk.", variant: "destructive" });
+      return;
+    }
+    const sheetId = match[1];
+    setLoadingSheets(true);
+    try {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+      const res = await fetch(csvUrl);
+      if (!res.ok) throw new Error("Kunde inte hämta kalkylarket. Kontrollera att det är delat publikt.");
+      const csvText = await res.text();
+      const workbook = XLSX.read(csvText, { type: "string" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
+      if (json.length === 0) {
+        toast({ title: "Tom data", description: "Kalkylarket verkar inte innehålla någon data.", variant: "destructive" });
+        return;
+      }
+      const hdrs = Object.keys(json[0]);
+      setHeaders(hdrs);
+      setRawRows(json);
+      setStep(2);
+      analyzeData(hdrs, json.slice(0, 20));
+    } catch (err: any) {
+      toast({ title: "Kunde inte hämta data", description: err.message || "Kontrollera att länken är publik.", variant: "destructive" });
+    } finally {
+      setLoadingSheets(false);
+    }
+  };
 
   const handleImport = async () => {
     if (!user?.id) return;
@@ -222,7 +258,7 @@ export default function Import() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Importera data</h1>
-        <p className="text-muted-foreground">Ladda upp din befintliga statistik från Excel eller CSV</p>
+        <p className="text-muted-foreground">Ladda upp din befintliga statistik från Excel, CSV eller Google Sheets</p>
       </div>
 
       {/* Progress */}
@@ -242,33 +278,56 @@ export default function Import() {
       {step === 1 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Upload className="h-5 w-5" /> Ladda upp fil</CardTitle>
-            <CardDescription>Välj en Excel- eller CSV-fil med din hönsgårdsdata</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Upload className="h-5 w-5" /> Välj datakälla</CardTitle>
+            <CardDescription>Ladda upp en fil eller klistra in en Google Sheets-länk</CardDescription>
           </CardHeader>
           <CardContent>
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-              className="border-2 border-dashed rounded-lg p-12 text-center hover:border-primary/50 transition-colors cursor-pointer"
-              onClick={() => document.getElementById("file-input")?.click()}
-            >
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex gap-2">
-                  <FileSpreadsheet className="h-10 w-10 text-green-600" />
-                  <FileText className="h-10 w-10 text-blue-600" />
+            <Tabs defaultValue="file">
+              <TabsList className="w-full">
+                <TabsTrigger value="file" className="flex-1"><FileSpreadsheet className="h-4 w-4 mr-1" /> Excel / CSV</TabsTrigger>
+                <TabsTrigger value="sheets" className="flex-1"><Link className="h-4 w-4 mr-1" /> Google Sheets</TabsTrigger>
+              </TabsList>
+              <TabsContent value="file">
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDrop}
+                  className="border-2 border-dashed rounded-lg p-12 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                  onClick={() => document.getElementById("file-input")?.click()}
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <FileSpreadsheet className="h-10 w-10 text-primary" />
+                    <p className="font-medium">Dra och släpp din fil här</p>
+                    <p className="text-sm text-muted-foreground">eller klicka för att välja fil</p>
+                    <p className="text-xs text-muted-foreground">Stödjer .xlsx, .xls och .csv</p>
+                  </div>
                 </div>
-                <p className="font-medium">Dra och släpp din fil här</p>
-                <p className="text-sm text-muted-foreground">eller klicka för att välja fil</p>
-                <p className="text-xs text-muted-foreground">Stödjer .xlsx, .xls och .csv</p>
-              </div>
-            </div>
-            <input
-              id="file-input"
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+              </TabsContent>
+              <TabsContent value="sheets">
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Klistra in delningslänken till ditt Google Sheets-dokument. Det måste vara delat som <strong>"Alla med länken kan visa"</strong>.
+                    </p>
+                    <Input
+                      placeholder="https://docs.google.com/spreadsheets/d/..."
+                      value={sheetsUrl}
+                      onChange={(e) => setSheetsUrl(e.target.value)}
+                    />
+                  </div>
+                  <Button onClick={handleGoogleSheets} disabled={!sheetsUrl.trim() || loadingSheets} className="w-full">
+                    {loadingSheets ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Link className="h-4 w-4 mr-1" />}
+                    Hämta data från Google Sheets
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       )}
