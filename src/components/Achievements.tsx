@@ -267,6 +267,69 @@ export function buildAchievements(eggs: any[], hens: any[], streak: number, feed
       target: 15,
       tier: 'gold',
     },
+    // Feed achievements
+    {
+      id: 'first-feed',
+      title: 'Första fodret',
+      description: 'Logga ditt första foderinköp',
+      emoji: '🌾',
+      icon: Package,
+      unlocked: feedRecords.length >= 1,
+      progress: Math.min(100, (feedRecords.length / 1) * 100),
+      current: Math.min(feedRecords.length, 1),
+      target: 1,
+      tier: 'bronze',
+    },
+    {
+      id: 'feed-tracker',
+      title: 'Foderexperten',
+      description: 'Logga 10 foderinköp',
+      emoji: '📊',
+      icon: Package,
+      unlocked: feedRecords.length >= 10,
+      progress: Math.min(100, (feedRecords.length / 10) * 100),
+      current: Math.min(feedRecords.length, 10),
+      target: 10,
+      tier: 'silver',
+    },
+    // Finance achievements
+    {
+      id: 'first-transaction',
+      title: 'Första transaktionen',
+      description: 'Logga din första inkomst eller utgift',
+      emoji: '💰',
+      icon: Coins,
+      unlocked: transactions.length >= 1,
+      progress: Math.min(100, (transactions.length / 1) * 100),
+      current: Math.min(transactions.length, 1),
+      target: 1,
+      tier: 'bronze',
+    },
+    {
+      id: 'finance-pro',
+      title: 'Ekonomiproffs',
+      description: 'Logga 20 transaktioner',
+      emoji: '📈',
+      icon: Coins,
+      unlocked: transactions.length >= 20,
+      progress: Math.min(100, (transactions.length / 20) * 100),
+      current: Math.min(transactions.length, 20),
+      target: 20,
+      tier: 'silver',
+    },
+    // Chores achievements
+    {
+      id: 'first-chore',
+      title: 'Första uppgiften',
+      description: 'Skapa din första dagliga uppgift',
+      emoji: '✅',
+      icon: ClipboardCheck,
+      unlocked: chores.length >= 1,
+      progress: Math.min(100, (chores.length / 1) * 100),
+      current: Math.min(chores.length, 1),
+      target: 1,
+      tier: 'bronze',
+    },
   ];
 
   return list.sort((a, b) => {
@@ -276,10 +339,10 @@ export function buildAchievements(eggs: any[], hens: any[], streak: number, feed
   });
 }
 
-export default function Achievements({ eggs, hens, streak }: AchievementsProps) {
+export default function Achievements({ eggs, hens, streak, feedRecords = [], transactions = [], chores = [] }: AchievementsProps) {
   const { user } = useAuth();
   const rewardedRef = useRef<Set<string>>(new Set());
-  const achievements = useMemo(() => buildAchievements(eggs, hens, streak), [eggs, hens, streak]);
+  const achievements = useMemo(() => buildAchievements(eggs, hens, streak, feedRecords, transactions, chores), [eggs, hens, streak, feedRecords, transactions, chores]);
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
 
