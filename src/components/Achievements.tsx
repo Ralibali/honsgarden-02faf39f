@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Egg, Flame, Star, Trophy, Target, Zap, Heart, Crown, Gift, Users, Calendar } from 'lucide-react';
+import { Egg, Flame, Star, Trophy, Target, Zap, Heart, Crown, Gift, Users, Calendar, Package, Coins, ClipboardCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -38,6 +38,9 @@ interface AchievementsProps {
   eggs: any[];
   hens: any[];
   streak: number;
+  feedRecords?: any[];
+  transactions?: any[];
+  chores?: any[];
 }
 
 function getTierColors(tier: string, unlocked: boolean) {
@@ -51,7 +54,7 @@ function getTierColors(tier: string, unlocked: boolean) {
   }
 }
 
-export function buildAchievements(eggs: any[], hens: any[], streak: number): Achievement[] {
+export function buildAchievements(eggs: any[], hens: any[], streak: number, feedRecords: any[] = [], transactions: any[] = [], chores: any[] = []): Achievement[] {
   const totalEggs = eggs.reduce((sum: number, e: any) => sum + (e.count || 0), 0);
   const activeHens = hens.filter((h: any) => h.is_active).length;
   const totalHens = hens.length;
