@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart } from 'lucide-react';
+import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart, Upload } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,6 +20,7 @@ const moreItems = [
   { title: 'Ekonomi', url: '/app/finance', icon: Coins },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
   { title: 'Översikt', url: '/app/overview', icon: PieChart },
+  { title: 'Importera', url: '/app/import', icon: Upload },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
 ];
