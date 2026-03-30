@@ -380,6 +380,22 @@ export default function Dashboard() {
       {/* Achievement nudge */}
       <AchievementNudge eggs={eggs} hens={hens as any[]} streak={streak} feedRecords={feedRecords as any[]} transactions={transactions as any[]} chores={chores as any[]} />
 
+      {/* Import data shortcut */}
+      <Card className="border-border/50 shadow-sm card-hover cursor-pointer" onClick={() => navigate('/app/import')}>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <Plus className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Importera data</p>
+              <p className="text-[11px] text-muted-foreground">Läs in hönor & ägg från fil eller Google Sheets</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+        </CardContent>
+      </Card>
+
       {/* Premium nudge */}
       <PremiumNudge />
 
