@@ -20,6 +20,7 @@ const moreItems = [
   { title: 'Ekonomi', url: '/app/finance', icon: Coins },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
   { title: 'Översikt', url: '/app/overview', icon: PieChart },
+  { title: 'Importera', url: '/app/import', icon: Upload },
   { title: 'Premium', url: '/app/premium', icon: Crown },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
 ];
