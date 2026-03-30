@@ -57,16 +57,14 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
 
   let subStatus = profile?.subscription_status ?? 'free';
 
-  // Heal status drift: future expiry should always be premium
+  // Heal status drift locally (server-side sync handled by check-subscription edge function)
   if (hasValidExpiry && subStatus !== 'premium') {
     subStatus = 'premium';
-    void supabase.from('profiles').update({ subscription_status: 'premium' }).eq('user_id', supaUser.id);
   }
 
-  // Auto-downgrade only when expired
+  // Auto-downgrade only when expired (local state only)
   if (subStatus === 'premium' && expiryDate && expiryDate < now) {
     subStatus = 'free';
-    void supabase.from('profiles').update({ subscription_status: 'free', premium_expires_at: null }).eq('user_id', supaUser.id);
   }
 
   return {
