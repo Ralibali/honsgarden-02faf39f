@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link, Download } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link, Download, ChevronLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 import { downloadCSV, downloadExcel, downloadMultiSheetExcel } from "@/lib/exportUtils";
@@ -60,6 +61,7 @@ const TARGET_FIELDS: Record<string, { label: string; fields: { value: string; la
 
 export default function Import() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [rawRows, setRawRows] = useState<Record<string, unknown>[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -314,6 +316,13 @@ export default function Import() {
   return (
     <div className="space-y-6">
       <div>
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Tillbaka
+        </button>
         <h1 className="text-2xl font-bold">Importera & exportera data</h1>
         <p className="text-muted-foreground">Importera befintlig statistik eller exportera din data</p>
       </div>
