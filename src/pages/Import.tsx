@@ -252,6 +252,34 @@ export default function Import() {
     }
   };
 
+  const handleExport = async (table: string, format: "csv" | "xlsx") => {
+    if (!user?.id) return;
+    setExporting(true);
+    try {
+      const { data, error } = await supabase
+        .from(table as "hens" | "egg_logs" | "flocks")
+        .select("*");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        toast({ title: "Ingen data", description: "Det finns ingen data att exportera.", variant: "destructive" });
+        return;
+      }
+      const cleaned = data.map(({ user_id, id, created_at, updated_at, ...rest }: any) => rest);
+      const name = table === "hens" ? "honor" : table === "egg_logs" ? "agglogg" : "flockar";
+      const filename = `${name}_${new Date().toISOString().slice(0, 10)}`;
+      if (format === "csv") {
+        downloadCSV(cleaned, filename);
+      } else {
+        downloadExcel(cleaned, filename, name);
+      }
+      toast({ title: "Export klar!", description: `${data.length} rader exporterade.` });
+    } catch (err: any) {
+      toast({ title: "Exportfel", description: err.message || "Något gick fel.", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const confidenceColor = (c: number) => (c > 80 ? "bg-green-100 text-green-800" : c > 50 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800");
 
   const currentFields = TARGET_FIELDS[targetType]?.fields || TARGET_FIELDS.hens.fields;
