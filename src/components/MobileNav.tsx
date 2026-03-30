@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart } from 'lucide-react';
+import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart, Upload } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
