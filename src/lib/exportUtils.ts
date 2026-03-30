@@ -1,6 +1,15 @@
 /**
- * Export utilities for CSV and PDF generation
+ * Export utilities for CSV, Excel and PDF generation
  */
+import * as XLSX from "xlsx";
+
+export function downloadExcel(rows: Record<string, any>[], filename: string, sheetName = "Data") {
+  if (rows.length === 0) return;
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, `${filename}.xlsx`);
+}
 
 export function downloadCSV(rows: Record<string, any>[], filename: string) {
   if (rows.length === 0) return;

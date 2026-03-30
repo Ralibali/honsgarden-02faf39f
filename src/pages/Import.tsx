@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
+import { downloadCSV, downloadExcel } from "@/lib/exportUtils";
 
 type AnalysisResult = {
   detected_type: "hens" | "egg_logs" | "flocks" | "mixed" | "unknown";
@@ -69,6 +70,7 @@ export default function Import() {
   const [targetType, setTargetType] = useState<string>("hens");
   const [sheetsUrl, setSheetsUrl] = useState("");
   const [loadingSheets, setLoadingSheets] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const parseFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -250,6 +252,34 @@ export default function Import() {
     }
   };
 
+  const handleExport = async (table: string, format: "csv" | "xlsx") => {
+    if (!user?.id) return;
+    setExporting(true);
+    try {
+      const { data, error } = await supabase
+        .from(table as "hens" | "egg_logs" | "flocks")
+        .select("*");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        toast({ title: "Ingen data", description: "Det finns ingen data att exportera.", variant: "destructive" });
+        return;
+      }
+      const cleaned = data.map(({ user_id, id, created_at, updated_at, ...rest }: any) => rest);
+      const name = table === "hens" ? "honor" : table === "egg_logs" ? "agglogg" : "flockar";
+      const filename = `${name}_${new Date().toISOString().slice(0, 10)}`;
+      if (format === "csv") {
+        downloadCSV(cleaned, filename);
+      } else {
+        downloadExcel(cleaned, filename, name);
+      }
+      toast({ title: "Export klar!", description: `${data.length} rader exporterade.` });
+    } catch (err: any) {
+      toast({ title: "Exportfel", description: err.message || "Något gick fel.", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const confidenceColor = (c: number) => (c > 80 ? "bg-green-100 text-green-800" : c > 50 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800");
 
   const currentFields = TARGET_FIELDS[targetType]?.fields || TARGET_FIELDS.hens.fields;
@@ -257,8 +287,8 @@ export default function Import() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Importera data</h1>
-        <p className="text-muted-foreground">Ladda upp din befintliga statistik från Excel, CSV eller Google Sheets</p>
+        <h1 className="text-2xl font-bold">Importera & exportera data</h1>
+        <p className="text-muted-foreground">Importera befintlig statistik eller exportera din data</p>
       </div>
 
       {/* Progress */}
@@ -467,6 +497,35 @@ export default function Import() {
           </div>
         </div>
       )}
+
+      {/* Export section - always visible */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Download className="h-5 w-5" /> Exportera data</CardTitle>
+          <CardDescription>Ladda ner din hönsgårdsdata som Excel eller CSV</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { key: "hens", label: "Hönor", emoji: "🐔" },
+              { key: "egg_logs", label: "Äggloggningar", emoji: "🥚" },
+              { key: "flocks", label: "Flockar", emoji: "🐣" },
+            ].map(({ key, label, emoji }) => (
+              <Card key={key} className="p-4 space-y-3">
+                <p className="font-medium text-sm">{emoji} {label}</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" disabled={exporting} onClick={() => handleExport(key, "csv")}>
+                    CSV
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={exporting} onClick={() => handleExport(key, "xlsx")}>
+                    Excel
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
