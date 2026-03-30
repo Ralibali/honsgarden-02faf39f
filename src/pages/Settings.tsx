@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
   User, Bell, Shield, LogOut, Loader2, MessageSquare, Mail,
-  FileText, HelpCircle, Crown, Download, Palette, Moon, Sun,
-  Heart, ExternalLink, Info, Trash2, CheckCircle2, Clock, Send, RotateCcw,
+  FileText, HelpCircle, Crown, Download, Upload, Palette, Moon, Sun,
+  Heart, ExternalLink, Info, Trash2, CheckCircle2, Clock, Send, RotateCcw, ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { FamilyMembers } from '@/components/FamilyMembers';
@@ -451,6 +451,22 @@ export default function SettingsPage() {
             {exportLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             Exportera som CSV
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Import data */}
+      <Card className="border-border/50 shadow-sm card-hover cursor-pointer" onClick={() => navigate('/app/import')}>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+              <Upload className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Importera data</p>
+              <p className="text-xs text-muted-foreground">Läs in hönor & ägg från CSV, Excel eller Google Sheets</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground" />
         </CardContent>
       </Card>
 
