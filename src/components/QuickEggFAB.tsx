@@ -29,6 +29,24 @@ export function QuickEggFAB() {
     staleTime: 60_000,
   });
 
+  // Track unused features for contextual suggestions
+  const { data: feedRecords = [] } = useQuery({ queryKey: ['feed-records'], queryFn: () => api.getFeedRecords(), staleTime: 60_000 });
+  const { data: transactions = [] } = useQuery({ queryKey: ['transactions'], queryFn: () => api.getTransactions(), staleTime: 60_000 });
+  const { data: chores = [] } = useQuery({ queryKey: ['daily-chores'], queryFn: () => api.getDailyChores(), staleTime: 60_000 });
+
+  const unusedFeatures: ('feed' | 'finance' | 'chores')[] = [];
+  if ((feedRecords as any[]).length === 0) unusedFeatures.push('feed');
+  if ((transactions as any[]).length === 0) unusedFeatures.push('finance');
+  if ((chores as any[]).length === 0) unusedFeatures.push('chores');
+
+  const handleAnimationDone = useCallback(() => {
+    setShowAnimation(false);
+    toast({ title: `🥚 ${animCount} ägg registrerade!` });
+    if (unusedFeatures.length > 0) {
+      setShowSuggestion(true);
+    }
+  }, [animCount, unusedFeatures.length]);
+
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const mutation = useMutation({
@@ -178,6 +196,16 @@ export function QuickEggFAB() {
           </div>
         </button>
       )}
+
+      {/* Success animation */}
+      <EggSuccessAnimation show={showAnimation} count={animCount} onDone={handleAnimationDone} />
+
+      {/* Contextual feature suggestion */}
+      <FeatureSuggestionToast
+        show={showSuggestion}
+        unusedFeatures={unusedFeatures}
+        onDismiss={() => setShowSuggestion(false)}
+      />
     </>
   );
 }
