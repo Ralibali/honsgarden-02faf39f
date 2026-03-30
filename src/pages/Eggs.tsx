@@ -221,6 +221,16 @@ export default function Eggs() {
           )}
         </CardContent>
       </Card>
+
+      {/* Success animation */}
+      <EggSuccessAnimation show={showAnimation} count={animCount} onDone={handleAnimationDone} />
+
+      {/* Contextual feature suggestion */}
+      <FeatureSuggestionToast
+        show={showSuggestion}
+        unusedFeatures={unusedFeatures}
+        onDismiss={() => setShowSuggestion(false)}
+      />
     </div>
   );
 }
