@@ -280,6 +280,33 @@ export default function Import() {
     }
   };
 
+  const handleExportAll = async () => {
+    if (!user?.id) return;
+    setExporting(true);
+    try {
+      const [hensRes, eggsRes, flocksRes] = await Promise.all([
+        supabase.from("hens").select("*"),
+        supabase.from("egg_logs").select("*"),
+        supabase.from("flocks").select("*"),
+      ]);
+      const clean = (data: any[]) => data.map(({ user_id, id, created_at, updated_at, ...rest }: any) => rest);
+      downloadMultiSheetExcel(
+        [
+          { name: "Hönor", rows: clean(hensRes.data || []) },
+          { name: "Äggloggningar", rows: clean(eggsRes.data || []) },
+          { name: "Flockar", rows: clean(flocksRes.data || []) },
+        ],
+        `honsgarden_${new Date().toISOString().slice(0, 10)}`
+      );
+      const total = (hensRes.data?.length || 0) + (eggsRes.data?.length || 0) + (flocksRes.data?.length || 0);
+      toast({ title: "Export klar!", description: `${total} rader exporterade i 3 flikar.` });
+    } catch (err: any) {
+      toast({ title: "Exportfel", description: err.message || "Något gick fel.", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const confidenceColor = (c: number) => (c > 80 ? "bg-green-100 text-green-800" : c > 50 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800");
 
   const currentFields = TARGET_FIELDS[targetType]?.fields || TARGET_FIELDS.hens.fields;
