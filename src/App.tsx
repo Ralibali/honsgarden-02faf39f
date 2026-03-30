@@ -42,6 +42,7 @@ const EggCalculator = React.lazy(() => import("./pages/EggCalculator"));
 const AcceptInvite = React.lazy(() => import("./pages/AcceptInvite"));
 const Agda = React.lazy(() => import("./pages/Agda"));
 const Overview = React.lazy(() => import("./pages/Overview"));
+const Import = React.lazy(() => import("./pages/Import"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -126,6 +127,7 @@ const AppRoutes = () => (
           <Route path="hens/:henId" element={<HenProfile />} />
           <Route path="weekly-report" element={<WeeklyReport />} />
           <Route path="agda" element={<Agda />} />
+          <Route path="import" element={<Import />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -1,0 +1,91 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const { rows, headers } = await req.json();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const systemPrompt = `Du är en dataimport-assistent för en svensk hönsgårdsapp kallad Hönsgården. Appen har dessa tabeller:
+
+hens: name (text, obligatorisk), breed (text), color (text), birth_date (date YYYY-MM-DD), is_active (boolean), notes (text), hen_type (text: "hen"/"rooster")
+
+egg_logs: date (date YYYY-MM-DD, obligatorisk), count (integer, obligatorisk), notes (text)
+
+flocks: name (text, obligatorisk), description (text)
+
+Analysera kolumnrubrikerna och exempeldata. Returnera ENBART ett JSON-objekt (ingen markdown, inga kodblock) med denna struktur:
+
+{
+  "detected_type": "hens" | "egg_logs" | "flocks" | "mixed" | "unknown",
+  "confidence": 0-100,
+  "suggested_mapping": { "source_column": "target_field" },
+  "unmapped_columns": ["col1"],
+  "sample_preview": [ { ...3 första raderna mappade till target-fält... } ],
+  "warnings": ["eventuella problem, på svenska"],
+  "summary": "kort sammanfattning på svenska"
+}
+
+Var smart med kolumnnamn — "Namn" → name, "Ras" → breed, "Antal" → count, "Datum" → date, etc. Hantera svenska och engelska kolumnnamn. Om data ser ut som äggstatistik med datum och antal, sätt detected_type till "egg_logs". Om det är hönslistor med namn/ras, sätt "hens".`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Kolumnrubriker: ${JSON.stringify(headers)}\n\nFörsta ${rows.length} raderna:\n${JSON.stringify(rows)}` },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Förfrågan begränsad, försök igen om en stund." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "AI-krediter slut, vänligen fyll på." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const t = await response.text();
+      console.error("AI gateway error:", response.status, t);
+      throw new Error("AI gateway error");
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+
+    // Try to parse JSON from the response (strip potential markdown fences)
+    let parsed;
+    try {
+      const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      parsed = JSON.parse(jsonStr);
+    } catch {
+      console.error("Failed to parse AI response:", content);
+      throw new Error("Kunde inte tolka AI-svaret");
+    }
+
+    return new Response(JSON.stringify(parsed), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("analyze-import error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Okänt fel" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
