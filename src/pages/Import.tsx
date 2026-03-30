@@ -3,12 +3,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText, AlertTriangle, CheckCircle, Loader2, ArrowLeft, ArrowRight, Link } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 
@@ -65,6 +67,8 @@ export default function Import() {
   const [analyzing, setAnalyzing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [targetType, setTargetType] = useState<string>("hens");
+  const [sheetsUrl, setSheetsUrl] = useState("");
+  const [loadingSheets, setLoadingSheets] = useState(false);
 
   const parseFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -128,6 +132,38 @@ export default function Import() {
     const file = e.target.files?.[0];
     if (file) parseFile(file);
   }, [parseFile]);
+
+  const handleGoogleSheets = async () => {
+    const match = sheetsUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (!match) {
+      toast({ title: "Ogiltig länk", description: "Klistra in en giltig Google Sheets-delningslänk.", variant: "destructive" });
+      return;
+    }
+    const sheetId = match[1];
+    setLoadingSheets(true);
+    try {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+      const res = await fetch(csvUrl);
+      if (!res.ok) throw new Error("Kunde inte hämta kalkylarket. Kontrollera att det är delat publikt.");
+      const csvText = await res.text();
+      const workbook = XLSX.read(csvText, { type: "string" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
+      if (json.length === 0) {
+        toast({ title: "Tom data", description: "Kalkylarket verkar inte innehålla någon data.", variant: "destructive" });
+        return;
+      }
+      const hdrs = Object.keys(json[0]);
+      setHeaders(hdrs);
+      setRawRows(json);
+      setStep(2);
+      analyzeData(hdrs, json.slice(0, 20));
+    } catch (err: any) {
+      toast({ title: "Kunde inte hämta data", description: err.message || "Kontrollera att länken är publik.", variant: "destructive" });
+    } finally {
+      setLoadingSheets(false);
+    }
+  };
 
   const handleImport = async () => {
     if (!user?.id) return;
