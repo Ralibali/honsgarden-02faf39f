@@ -54,32 +54,44 @@ export default function Premium() {
   const isPremium = user?.subscription_status === 'premium';
 
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      // After Stripe redirect, sync subscription status
-      const syncSubscription = async () => {
+    if (searchParams.get('success') !== 'true') return;
+
+    let cancelled = false;
+
+    const pollSubscription = async () => {
+      const MAX_ATTEMPTS = 10;
+      const DELAY_MS = 2000;
+
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        if (cancelled) return;
+
         try {
           const { data, error } = await supabase.functions.invoke('check-subscription');
           if (!error && data?.subscribed) {
             toast({ title: '🎉 Välkommen till Premium!', description: 'Din uppgradering är klar. Njut av alla funktioner!' });
-            // Reload to pick up new profile status
             window.location.replace('/app/premium');
-          } else {
-            // Stripe may take a moment – retry once after 3s
-            setTimeout(async () => {
-              const { data: retryData } = await supabase.functions.invoke('check-subscription');
-              if (retryData?.subscribed) {
-                window.location.replace('/app/premium');
-              } else {
-                toast({ title: 'Betalningen behandlas', description: 'Det kan ta någon minut innan din premium aktiveras. Ladda om sidan snart.' });
-              }
-            }, 3000);
+            return;
           }
         } catch {
-          toast({ title: 'Betalningen behandlas', description: 'Ladda om sidan om en stund för att se din premium-status.' });
+          // Retry on failure
         }
-      };
-      syncSubscription();
-    }
+
+        if (attempt < MAX_ATTEMPTS) {
+          await new Promise((r) => setTimeout(r, DELAY_MS));
+        }
+      }
+
+      // All attempts exhausted
+      if (!cancelled) {
+        toast({
+          title: 'Betalningen behandlas',
+          description: 'Det kan ta en liten stund. Sidan synkar automatiskt – du behöver inte göra något.',
+        });
+      }
+    };
+
+    pollSubscription();
+    return () => { cancelled = true; };
   }, [searchParams]);
 
   const handleManageSubscription = async () => {
