@@ -264,14 +264,14 @@ export default function Dashboard() {
   const firstEggDate = eggs.length > 0 ? new Date(Math.min(...eggs.map((e: any) => new Date(e.date).getTime()))) : null;
   const daysSinceFirstEgg = firstEggDate ? Math.floor((Date.now() - firstEggDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
   const hasImported = localStorage.getItem('honsgarden-imported') === '1';
-  const showImportCard = !hasImported && daysSinceSignup < 7;
+  const showImportCard = !hasImported && daysSinceFirstEgg < 7;
   const hasFeedRecords = (feedRecords as any[]).length > 0;
   const hasTransactions = (transactions as any[]).length > 0;
   const feedDismissed = localStorage.getItem('dashboard-feed-nudge-dismissed') === '1';
   const financeDismissed = localStorage.getItem('dashboard-finance-nudge-dismissed') === '1';
   const showFeedNudge = !hasFeedRecords && !feedDismissed;
   const showFinanceNudge = !hasTransactions && !financeDismissed;
-  const showDiary = daysSinceSignup >= 7 || (healthLogs as any[]).some((l: any) => l.type === 'diary');
+  const showDiary = daysSinceFirstEgg >= 7 || (healthLogs as any[]).some((l: any) => l.type === 'diary');
   const showCalendar = eggs.length > 0;
 
   // Unified tip card
