@@ -88,7 +88,7 @@ export default function Terms() {
             </p>
             <p className="text-sm text-foreground leading-relaxed">
               Hönsgården / honsgarden.se<br />
-              E-post: <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a><br />
+              E-post: <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a><br />
               Webbplats: <a href="https://www.honsgarden.se" className="text-primary hover:underline">www.honsgarden.se</a>
             </p>
 
@@ -208,7 +208,7 @@ export default function Terms() {
               <li><strong>Rätt att återkalla samtycke</strong> – Du kan när som helst återkalla samtycke för nyhetsbrev via avprenumerationslänken eller via inställningar i appen.</li>
             </ul>
             <p className="text-sm text-foreground leading-relaxed mt-2">
-              Radering och export kan du göra direkt i appen. För övriga förfrågningar, kontakta oss på <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a>. Vi besvarar din begäran inom 30 dagar.
+              Radering och export kan du göra direkt i appen. För övriga förfrågningar, kontakta oss på <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a>. Vi besvarar din begäran inom 30 dagar.
             </p>
 
             <h2 className="font-serif text-lg text-foreground mt-6 mb-2">9. Automatiserat beslutsfattande</h2>
@@ -276,7 +276,7 @@ export default function Terms() {
             </p>
             <p className="text-sm text-foreground leading-relaxed">
               Hönsgården / honsgarden.se<br />
-              E-post: <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a><br />
+              E-post: <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a><br />
               Webbplats: <a href="https://www.honsgarden.se" className="text-primary hover:underline">www.honsgarden.se</a>
             </p>
           </div>

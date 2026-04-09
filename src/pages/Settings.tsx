@@ -500,7 +500,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-3">
           <p className="text-xs text-muted-foreground">
             Har du frågor, problem eller behöver hjälp? Skriv till oss nedan eller mejla direkt till{' '}
-            <a href="mailto:info@honsgarden.se" className="text-primary hover:underline">info@honsgarden.se</a>.
+            <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a>.
           </p>
           <Textarea
             placeholder="Beskriv ditt ärende..."
