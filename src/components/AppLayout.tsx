@@ -32,7 +32,17 @@ export default function AppLayout() {
             <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
-            <NotificationBell />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+                className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors"
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span>Sök...</span>
+                <kbd className="ml-2 bg-background border border-border rounded px-1.5 py-0.5 text-[10px] font-mono">⌘K</kbd>
+              </button>
+              <NotificationBell />
+            </div>
           </header>
 
           {/* Mobile header */}
@@ -61,6 +71,7 @@ export default function AppLayout() {
 
         <MobileNav />
         <QuickEggFAB />
+        <CommandPalette />
       </div>
     </SidebarProvider>
   );
