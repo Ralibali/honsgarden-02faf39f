@@ -52,7 +52,16 @@ export default function AppLayout() {
               <Feather className="h-4 w-4 text-primary" />
               <span className="font-serif text-lg text-foreground">Hönsgården</span>
             </div>
-            <NotificationBell />
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                aria-label="Sök"
+              >
+                <Search className="h-4.5 w-4.5" />
+              </button>
+              <NotificationBell />
+            </div>
           </header>
 
           <main id="main-content" className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-8 relative z-10">
