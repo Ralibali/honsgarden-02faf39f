@@ -29,6 +29,8 @@ const premiumFeatures = [
 ];
 
 const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Fungerar offline'];
+
+const highlights = [
   { icon: Users, title: 'Obegränsade flockar', desc: 'Gratis = 1 flock. Premium = hur många du vill.' },
   { icon: Calculator, title: 'Kostnad per ägg', desc: 'Se exakt vad varje ägg kostar att producera.' },
   { icon: TrendingUp, title: 'Smarta prognoser', desc: 'Förväntat antal ägg baserat på dina data.' },
