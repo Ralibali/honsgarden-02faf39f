@@ -196,7 +196,7 @@ export default function Premium() {
               <span className="text-4xl font-bold text-foreground">19</span>
               <span className="text-lg text-muted-foreground ml-1">kr/mån</span>
             </div>
-            <p className="text-xs text-primary font-medium mb-4">🎁 Sju dagars gratis provperiod</p>
+            <p className="text-xs text-primary font-medium mb-4">🎁 Sju dagars gratis provperiod – starta idag</p>
             <ul className="space-y-2.5 mb-6">
               {premiumFeatures.slice(0, 6).map((f) => (
                 <li key={f.text} className="flex items-center gap-2 text-sm text-foreground">
