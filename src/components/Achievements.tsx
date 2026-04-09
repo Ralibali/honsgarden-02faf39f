@@ -339,10 +339,18 @@ export function buildAchievements(eggs: any[], hens: any[], streak: number, feed
   });
 }
 
-export default function Achievements({ eggs, hens, streak, feedRecords = [], transactions = [], chores = [] }: AchievementsProps) {
+interface AchievementsComponentProps extends Partial<AchievementsProps> {
+  achievements?: Achievement[];
+  eggs: any[];
+  hens: any[];
+  streak: number;
+}
+
+export default function Achievements({ achievements: passedAchievements, eggs, hens, streak, feedRecords = [], transactions = [], chores = [] }: AchievementsComponentProps) {
   const { user } = useAuth();
   const rewardedRef = useRef<Set<string>>(new Set());
-  const achievements = useMemo(() => buildAchievements(eggs, hens, streak, feedRecords, transactions, chores), [eggs, hens, streak, feedRecords, transactions, chores]);
+  const computedAchievements = useMemo(() => passedAchievements ?? buildAchievements(eggs, hens, streak, feedRecords, transactions, chores), [passedAchievements, eggs, hens, streak, feedRecords, transactions, chores]);
+  const achievements = computedAchievements;
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
 
