@@ -100,10 +100,10 @@ Deno.serve(async (req) => {
         .eq("user_id", user.id)
         .single();
 
-      const farmName = coop?.coop_name || "Hönsgården";
-      const inviterName =
-        inviterProfile?.display_name || user.email || "Någon";
-      const inviteUrl = `https://honsgarden.lovable.app/inbjudan/${invitation.token}`;
+      const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const farmName = escapeHtml(coop?.coop_name || "Hönsgården");
+      const inviterName = escapeHtml(inviterProfile?.display_name || user.email || "Någon");
+      const inviteUrl = `https://honsgarden.lovable.app/inbjudan/${encodeURIComponent(invitation.token)}`;
 
       // Send invitation email via queue
       await supabaseAdmin.rpc("enqueue_email", {

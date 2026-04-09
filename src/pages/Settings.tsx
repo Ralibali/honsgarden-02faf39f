@@ -78,12 +78,15 @@ export default function SettingsPage() {
   // Load weekly report preference from profile
   useEffect(() => {
     if (!user?.id) return;
+    let cancelled = false;
     supabase.from('profiles').select('preferences').eq('user_id', user.id).maybeSingle().then(({ data }) => {
+      if (cancelled) return;
       if (data?.preferences && typeof data.preferences === 'object') {
         const prefs = data.preferences as Record<string, unknown>;
         setWeeklyReportEmail(prefs.weekly_report_email !== false);
       }
-    });
+    }).catch(() => {});
+    return () => { cancelled = true; };
   }, [user?.id]);
 
   useEffect(() => {
