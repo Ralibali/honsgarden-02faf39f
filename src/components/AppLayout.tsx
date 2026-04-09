@@ -4,7 +4,8 @@ import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { MobileNav } from './MobileNav';
 import { QuickEggFAB } from './QuickEggFAB';
-import { Menu, Feather } from 'lucide-react';
+import CommandPalette from './CommandPalette';
+import { Menu, Feather, Search } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 
 export default function AppLayout() {
