@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Egg, Bird, Sun, Loader2, Crown, Sparkles, X } from 'lucide-react';
+import { Egg, Bird, Sun, Loader2, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 
