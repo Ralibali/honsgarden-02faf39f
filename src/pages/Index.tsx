@@ -362,8 +362,8 @@ export default function Index() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="w-full h-11 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
-                <a href="/login?mode=register">Gå med Karin, Lars och fler hönsägare</a>
+              <Button asChild className="w-full h-11 text-sm shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+                <a href="/login?mode=register">Välj årsplan – 149 kr</a>
               </Button>
             </motion.div>
           </div>
