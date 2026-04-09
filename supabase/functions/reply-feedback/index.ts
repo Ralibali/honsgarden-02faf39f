@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       sender_domain: "notify.honsgarden.se",
       subject: "Svar på din feedback – Hönsgården 💬",
       html,
-      text: `Hej ${displayName}! Tack för din feedback. Svar: ${message}`,
+      text: `Hej ${displayName}! Tack för din feedback. Svar: ${safeMessage}`,
       purpose: "transactional",
       label: "feedback-reply",
       message_id: messageId,

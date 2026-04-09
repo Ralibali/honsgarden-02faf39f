@@ -85,7 +85,7 @@ export default function SettingsPage() {
         const prefs = data.preferences as Record<string, unknown>;
         setWeeklyReportEmail(prefs.weekly_report_email !== false);
       }
-    }).catch(() => {});
+    }, () => {});
     return () => { cancelled = true; };
   }, [user?.id]);
 
