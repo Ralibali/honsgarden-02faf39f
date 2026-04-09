@@ -1,19 +1,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Target } from 'lucide-react';
-import { buildAchievements, TIER_PREMIUM_DAYS } from '@/components/Achievements';
+import { TIER_PREMIUM_DAYS, type Achievement } from '@/components/Achievements';
 
 interface AchievementNudgeProps {
-  eggs: any[];
-  hens: any[];
-  streak: number;
-  feedRecords?: any[];
-  transactions?: any[];
-  chores?: any[];
+  achievements: Achievement[];
 }
 
-export default function AchievementNudge({ eggs, hens, streak, feedRecords = [], transactions = [], chores = [] }: AchievementNudgeProps) {
-  const achievements = buildAchievements(eggs, hens, streak, feedRecords, transactions, chores);
+export default function AchievementNudge({ achievements }: AchievementNudgeProps) {
   
   // Find the closest locked achievement (highest progress, not yet unlocked)
   const closest = achievements.find(a => !a.unlocked && a.progress > 0);

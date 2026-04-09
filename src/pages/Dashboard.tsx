@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Egg, Bird, CalendarDays, Coins, Thermometer, Lightbulb,
   ArrowRight, BookOpen, Loader2, Plus, TrendingUp, Sparkles, Feather,
-  Flame, Award, Heart, Sun, CloudRain, Snowflake, Wind,
+  Flame, Award, Heart, Sun, CloudRain, Snowflake, Wind, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -15,16 +13,16 @@ import { DailySummaryModal } from '@/components/DailySummaryModal';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { PremiumNudge } from '@/components/PremiumGate';
 import { useAuth } from '@/hooks/useAuth';
 import Achievements from '@/components/Achievements';
 import ShareCard from '@/components/ShareCard';
 import ReferralCard from '@/components/ReferralCard';
 import InstallAppCard from '@/components/InstallAppCard';
-import OnboardingGuide from '@/components/OnboardingGuide';
+import OnboardingGuide, { useOnboardingVisible } from '@/components/OnboardingGuide';
 import AchievementNudge from '@/components/AchievementNudge';
 import TrialExpiryBanner from '@/components/TrialExpiryBanner';
 import { motion } from 'framer-motion';
+import { buildAchievements } from '@/components/Achievements';
 
 function getGreeting() {
   const now = new Date();
@@ -116,7 +114,7 @@ function calculateStreak(eggs: any[]): number {
     const dateStr = d.toISOString().split('T')[0];
     const hasEggs = eggs.some((e: any) => e.date === dateStr && e.count > 0);
     if (hasEggs) streak++;
-    else if (i > 0) break; // Allow today to not have eggs yet
+    else if (i > 0) break;
     else continue;
   }
   return streak;
@@ -139,16 +137,45 @@ function getDayName(dateStr: string): string {
   return days[new Date(dateStr).getDay()];
 }
 
+/** Prioritized daily tip: weather warning > AI tip > seasonal */
+function getDailyTipCard(currentTemp: number | null, weatherCode: number, aiTip: any, seasonal: { text: string; emoji: string }) {
+  // Weather warning takes priority for extreme conditions
+  if (currentTemp != null && (currentTemp < 0 || currentTemp > 25 || (weatherCode >= 60 && weatherCode <= 77))) {
+    return {
+      emoji: currentTemp < 0 ? '🥶' : currentTemp > 25 ? '🥵' : '🌧️',
+      label: 'Vädervarning',
+      text: getWeatherTip(currentTemp, weatherCode),
+      color: 'warning',
+    };
+  }
+  // AI tip next
+  if (aiTip?.tip_text) {
+    return {
+      emoji: '✨',
+      label: 'Dagens tips',
+      text: aiTip.tip_text,
+      color: 'warning',
+    };
+  }
+  // Seasonal fallback
+  return {
+    emoji: seasonal.emoji,
+    label: 'Säsongens tips',
+    text: seasonal.text,
+    color: 'accent',
+  };
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryText, setDiaryText] = useState('');
-  const [customEggCount, setCustomEggCount] = useState('');
-  const [selectedHenId, setSelectedHenId] = useState<string>('all');
   const [weatherExpanded, setWeatherExpanded] = useState(false);
+  const [showMoreSection, setShowMoreSection] = useState(false);
   const now = new Date();
+  const onboardingVisible = useOnboardingVisible();
 
   const { data: eggs = [] } = useQuery({ queryKey: ['eggs'], queryFn: () => api.getEggs(), staleTime: 60_000 });
   const { data: hens = [] } = useQuery({ queryKey: ['hens'], queryFn: () => api.getHens(), staleTime: 60_000 });
@@ -157,23 +184,7 @@ export default function Dashboard() {
   const { data: feedRecords = [] } = useQuery({ queryKey: ['feed-records'], queryFn: () => api.getFeedRecords(), staleTime: 60_000 });
   const { data: weatherData, isLoading: weatherLoading } = useQuery({ queryKey: ['weather'], queryFn: fetchWeather, staleTime: 30 * 60 * 1000, retry: 2 });
   const { data: aiTip } = useQuery({ queryKey: ['daily-tip'], queryFn: () => api.getDailyTip(), staleTime: 60 * 60 * 1000, retry: 1 });
-  const { data: flocks = [] } = useQuery({ queryKey: ['flocks'], queryFn: () => api.getFlocks(), staleTime: 60_000 });
   const { data: chores = [] } = useQuery({ queryKey: ['daily-chores'], queryFn: () => api.getDailyChores(), staleTime: 60_000 });
-
-  const activeHensList = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
-
-  const eggMutation = useMutation({
-    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) =>
-      api.createEggRecord({ date: now.toISOString().split('T')[0], count, hen_id: hen_id || undefined, flock_id: flock_id || undefined }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['eggs'] }); toast({ title: '🥚 Ägg registrerade!' }); },
-    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
-  });
-
-  const diaryMutation = useMutation({
-    mutationFn: (text: string) => api.createHealthLog({ date: now.toISOString().split('T')[0], type: 'diary', description: text }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['health-logs'] }); toast({ title: '📝 Dagboksinlägg sparat!' }); setDiaryOpen(false); setDiaryText(''); },
-    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
-  });
 
   const currentTemp = weatherData?.current?.temperature_2m;
   const weatherCode = weatherData?.current?.weathercode ?? 0;
@@ -200,6 +211,12 @@ export default function Dashboard() {
   const topHen = getTopHen(eggs, hens as any[]);
   const seasonal = getSeasonalTip();
 
+  // Shared achievements calculation (used by both AchievementNudge and Achievements)
+  const achievements = useMemo(
+    () => buildAchievements(eggs, hens as any[], streak, feedRecords as any[], transactions as any[], chores as any[]),
+    [eggs, hens, streak, feedRecords, transactions, chores]
+  );
+
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
@@ -220,6 +237,12 @@ export default function Dashboard() {
     return 'bg-primary/30 text-primary font-bold';
   };
 
+  const diaryMutation = useMutation({
+    mutationFn: (text: string) => api.createHealthLog({ date: now.toISOString().split('T')[0], type: 'diary', description: text }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['health-logs'] }); toast({ title: '📝 Dagboksinlägg sparat!' }); setDiaryOpen(false); setDiaryText(''); },
+    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+  });
+
   const diaryEntries = (healthLogs as any[])
     .filter((l: any) => l.type === 'diary' && l.description)
     .slice(0, 4)
@@ -228,22 +251,44 @@ export default function Dashboard() {
       text: l.description,
     }));
 
-  const addEggs = (count: number) => {
-    const isFlockSelection = selectedHenId.startsWith('flock:');
-    const hen_id = !isFlockSelection && selectedHenId !== 'all' ? selectedHenId : undefined;
-    const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
-    eggMutation.mutate({ count, hen_id, flock_id });
-  };
-
   const stats = [
+    { icon: Egg, value: todayEggs, label: 'idag', color: 'text-primary', bg: 'bg-primary/8' },
     { icon: Egg, value: yesterdayEggs, label: 'igår', color: 'text-accent', bg: 'bg-accent/8' },
-    { icon: Bird, value: activeHens, label: 'hönor', color: 'text-primary', bg: 'bg-primary/8' },
     { icon: TrendingUp, value: weekEggs, label: 'veckan', color: 'text-muted-foreground', bg: 'bg-muted/60' },
-    { icon: Coins, value: `${monthProfit >= 0 ? '+' : ''}${Math.round(monthProfit)}`, label: 'kr/mån', color: monthProfit >= 0 ? 'text-success' : 'text-destructive', bg: monthProfit >= 0 ? 'bg-success/8' : 'bg-destructive/8' },
+    { icon: Bird, value: activeHens, label: 'hönor', color: 'text-primary', bg: 'bg-primary/8' },
   ];
 
-  // Weather forecast data
   const forecast = weatherData?.daily;
+
+  // Adaptive visibility - use egg data to determine user maturity instead of created_at
+  const firstEggDate = eggs.length > 0 ? new Date(Math.min(...eggs.map((e: any) => new Date(e.date).getTime()))) : null;
+  const daysSinceFirstEgg = firstEggDate ? Math.floor((Date.now() - firstEggDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const hasImported = localStorage.getItem('honsgarden-imported') === '1';
+  const showImportCard = !hasImported && daysSinceFirstEgg < 7;
+  const hasFeedRecords = (feedRecords as any[]).length > 0;
+  const hasTransactions = (transactions as any[]).length > 0;
+  const feedDismissed = localStorage.getItem('dashboard-feed-nudge-dismissed') === '1';
+  const financeDismissed = localStorage.getItem('dashboard-finance-nudge-dismissed') === '1';
+  const showFeedNudge = !hasFeedRecords && !feedDismissed;
+  const showFinanceNudge = !hasTransactions && !financeDismissed;
+  const showDiary = daysSinceFirstEgg >= 7 || (healthLogs as any[]).some((l: any) => l.type === 'diary');
+  const showCalendar = eggs.length > 0;
+
+  // Unified tip card
+  const tipCard = getDailyTipCard(currentTemp ?? null, weatherCode, aiTip, seasonal);
+
+  // Premium upsell: only show TrialExpiryBanner (not PremiumNudge duplicated)
+  // TrialExpiryBanner handles its own visibility logic
+
+  // Chores widget
+  const upcomingChores = useMemo(() => {
+    const now24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    return (chores as any[]).filter((c: any) => {
+      if (!c.next_due_at || c.completed) return false;
+      return new Date(c.next_due_at) <= now24h;
+    });
+  }, [chores]);
+  const pastDueChores = upcomingChores.filter((c: any) => new Date(c.next_due_at) < new Date());
 
   return (
     <motion.div
@@ -252,16 +297,16 @@ export default function Dashboard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
     >
+      {/* Priority 0: Trial banner (max 1 premium upsell) */}
       <TrialExpiryBanner />
+
+      {/* Onboarding (new users only) */}
       <OnboardingGuide />
-      <DailySummaryModal />
 
-      {/* Install app card (mobile) */}
-      <div className="block md:hidden">
-        <InstallAppCard />
-      </div>
+      {/* DailySummaryModal: only if not day-1 and onboarding not visible */}
+      {!onboardingVisible && eggs.length > 0 && <DailySummaryModal />}
 
-      {/* Hero header */}
+      {/* ─── 1. Greeting + Weather pill ─── */}
       <div className="flex items-end justify-between gap-4 pt-1">
         <div>
           <p className="data-label mb-1.5">{getFormattedDate()}</p>
@@ -271,7 +316,7 @@ export default function Dashboard() {
         </div>
         <button
           onClick={() => setWeatherExpanded(!weatherExpanded)}
-          className="flex items-center gap-2 bg-card border border-border/60 rounded-2xl px-3.5 py-2 shadow-sm shrink-0 hover:shadow-md transition-shadow cursor-pointer"
+          className="flex items-center gap-2 bg-card border border-border/60 rounded-2xl px-3.5 py-2 shadow-sm shrink-0 hover:shadow-md transition-shadow cursor-pointer active:scale-[0.97] transition-transform"
         >
           {weatherLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
@@ -288,6 +333,14 @@ export default function Dashboard() {
           )}
         </button>
       </div>
+
+      {/* Weather tip shown directly (not hidden behind click) */}
+      {currentTemp != null && (
+        <p className="text-xs text-muted-foreground -mt-2 flex items-center gap-1.5">
+          <Thermometer className="h-3 w-3 text-destructive/60" />
+          {getWeatherTip(currentTemp, weatherCode)}
+        </p>
+      )}
 
       {/* Expandable weather forecast */}
       {weatherExpanded && forecast && (
@@ -313,17 +366,14 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-3 italic">
-              {currentTemp != null ? getWeatherTip(currentTemp, weatherCode) : ''}
-            </p>
           </CardContent>
         </Card>
       )}
 
-      {/* Quick stats */}
+      {/* ─── 2. Quick stats (4 cards) ─── */}
       <div className="grid grid-cols-4 gap-2.5 stagger-children">
         {stats.map(({ icon: Icon, value, label, color, bg }, i) => (
-          <Card key={i} className="border-border/50 shadow-sm card-hover overflow-hidden">
+          <Card key={i} className="border-border/50 shadow-sm card-hover overflow-hidden active:scale-[0.97] transition-transform">
             <CardContent className="p-3.5 text-center relative">
               <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
                 <Icon className={`h-4 w-4 ${color}`} />
@@ -335,10 +385,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Streak + Best hen row */}
+      {/* ─── 3. Streak + Top hen ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Streak */}
-        <Card className="border-border/50 shadow-sm card-hover">
+        <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
           <CardContent className="p-4 flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
               <Flame className={`h-5 w-5 ${streak >= 7 ? 'text-warning' : 'text-muted-foreground'}`} />
@@ -354,8 +403,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Top hen */}
-        <Card className="border-border/50 shadow-sm card-hover">
+        <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
           <CardContent className="p-4 flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
               <Award className="h-5 w-5 text-primary" />
@@ -377,346 +425,263 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Achievement nudge */}
-      <AchievementNudge eggs={eggs} hens={hens as any[]} streak={streak} feedRecords={feedRecords as any[]} transactions={transactions as any[]} chores={chores as any[]} />
+      {/* ─── 4. Upcoming chores (if any) ─── */}
+      {upcomingChores.length > 0 && (
+        <Card className={`border-warning/25 shadow-sm active:scale-[0.98] transition-transform ${pastDueChores.length > 0 ? 'bg-destructive/3' : 'bg-warning/3'}`}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="text-lg">📋</span>
+              <p className="text-sm font-semibold text-foreground">
+                {upcomingChores.length} uppgift{upcomingChores.length > 1 ? 'er' : ''} förfaller snart
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              {upcomingChores.slice(0, 3).map((chore: any) => {
+                const isPast = new Date(chore.next_due_at) < new Date();
+                return (
+                  <div key={chore.id} className="flex items-center gap-2">
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isPast ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
+                      {isPast ? '⚠️ Försenad' : '📌 Idag'}
+                    </span>
+                    <span className="text-xs text-foreground">{chore.title}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <button onClick={() => navigate('/app/tasks')} className="text-xs text-warning hover:underline mt-2.5 font-medium">
+              Se alla uppgifter →
+            </button>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Import data shortcut */}
-      <Card className="border-border/50 shadow-sm card-hover cursor-pointer" onClick={() => navigate('/app/import')}>
-        <CardContent className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-              <Plus className="h-5 w-5 text-accent" />
+      {/* ─── 5. Unified daily tip ─── */}
+      <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className={`w-7 h-7 rounded-lg bg-${tipCard.color}/10 flex items-center justify-center`}>
+              <span className="text-sm">{tipCard.emoji}</span>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Importera data</p>
-              <p className="text-[11px] text-muted-foreground">Läs in hönor & ägg från fil eller Google Sheets</p>
-            </div>
+            <span className="data-label">{tipCard.label}</span>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm text-foreground leading-relaxed">{tipCard.text}</p>
         </CardContent>
       </Card>
 
-      {/* Premium nudge */}
-      <PremiumNudge />
-
-      {/* Egg quick-add */}
-      <Card className="border-primary/15 overflow-hidden shadow-sm">
-        <div className="h-1 bg-gradient-to-r from-primary/40 via-primary/20 to-accent/30" />
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Egg className="h-4 w-4 text-primary" />
+      {/* ─── 6. Egg calendar ─── */}
+      {showCalendar && (
+        <Card className="border-border/50 shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/8 flex items-center justify-center">
+                  <CalendarDays className="h-4 w-4 text-primary" />
+                </div>
+                <h2 className="font-serif text-sm text-foreground">{getMonthName(now.getMonth())}</h2>
               </div>
-              <span className="font-serif text-sm text-foreground">Registrera ägg</span>
+              <span className="text-xs text-muted-foreground font-medium">
+                {Object.values(eggCalendarData).reduce((a, b) => a + b, 0)} ägg totalt
+              </span>
             </div>
-            <span className="text-xs bg-primary/8 text-primary px-3 py-1 rounded-full font-medium tabular-nums border border-primary/10">
-              {todayEggs} idag
-            </span>
-          </div>
-
-          {/* Flock selector */}
-          {(activeHensList.length > 0 || (flocks as any[]).length > 0) && (
-            <div className="mb-3">
-              <Select value={selectedHenId} onValueChange={setSelectedHenId}>
-                <SelectTrigger className="h-8 text-[11px] rounded-lg border-border/50">
-                  <SelectValue placeholder="Alla (generellt)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">🥚 Alla (generellt)</SelectItem>
-                  {(flocks as any[]).map((flock: any) => {
-                    const flockHens = activeHensList.filter((h: any) => h.flock_id === flock.id);
-                    return (
-                      <SelectItem key={`flock:${flock.id}`} value={`flock:${flock.id}`}>
-                        <span className="font-semibold">👥 {flock.name}</span>
-                        <span className="text-muted-foreground ml-1 text-[10px]">({flockHens.length})</span>
-                      </SelectItem>
-                    );
-                  })}
-                  {activeHensList.filter((h: any) => !h.flock_id).length > 0 && (
-                    <>
-                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border/30 mt-1 pt-2">Utan flock</div>
-                      {activeHensList.filter((h: any) => !h.flock_id).map((hen: any) => (
-                        <SelectItem key={hen.id} value={hen.id}>🐔 {hen.name}</SelectItem>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-7 gap-1.5 mb-2">
+              {['M', 'T', 'O', 'T', 'F', 'L', 'S'].map((d, i) => (
+                <div key={`${d}-${i}`} className={`text-[10px] text-center font-medium ${i >= 5 ? 'text-accent/60' : 'text-muted-foreground'}`}>{d}</div>
+              ))}
             </div>
-          )}
+            <div className="grid grid-cols-7 gap-1.5">
+              {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const eggCount = eggCalendarData[day] || 0;
+                const isToday = day === now.getDate();
+                const isFuture = day > now.getDate();
+                return (
+                  <div
+                    key={day}
+                    className={`rounded-lg text-center py-1.5 text-[11px] transition-all
+                      ${isFuture ? 'bg-muted/20 text-muted-foreground/25' : getEggColor(eggCount)}
+                      ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-background shadow-sm' : ''}
+                    `}
+                  >
+                    <span className="leading-none">{day}</span>
+                    {!isFuture && eggCount > 0 && (
+                      <span className="block text-[8px] leading-none opacity-70 mt-0.5">{eggCount}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-          <div className="flex items-center gap-2 justify-center">
-            {[1, 2, 3, 4, 5].map((n) => (
+      {/* ─── 7. Diary (shown after first week) ─── */}
+      {showDiary && (
+        <Card className="border-border/50 shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-accent/8 flex items-center justify-center">
+                  <BookOpen className="h-4 w-4 text-accent" />
+                </div>
+                <h2 className="font-serif text-sm text-foreground">Dagbok</h2>
+              </div>
               <Button
-                key={n}
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="w-12 h-10 text-sm font-bold bg-card border-primary/15 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 rounded-xl"
-                onClick={() => addEggs(n)}
-                disabled={eggMutation.isPending}
+                className="h-8 px-3 text-xs text-primary hover:text-primary hover:bg-primary/8 rounded-xl gap-1.5"
+                onClick={() => setDiaryOpen(true)}
               >
-                +{n}
+                <Plus className="h-3.5 w-3.5" />
+                Skriv
               </Button>
-            ))}
-          </div>
-
-          {/* Custom count inline input */}
-          <div className="flex items-center gap-2 mt-3">
-            <Input
-              type="number"
-              min="1"
-              placeholder="Valfritt antal"
-              value={customEggCount}
-              onChange={(e) => setCustomEggCount(e.target.value)}
-              className="h-9 text-sm rounded-xl flex-1"
-            />
-            <Button
-              size="sm"
-              className="h-9 px-4 rounded-xl text-sm"
-              disabled={!customEggCount || Number(customEggCount) <= 0 || eggMutation.isPending}
-              onClick={() => {
-                const n = Number(customEggCount);
-                if (n > 0) { addEggs(n); setCustomEggCount(''); }
-              }}
-            >
-              Lägg till
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Upcoming chores widget */}
-      {(() => {
-        const now24h = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        const upcoming = (chores as any[]).filter((c: any) => {
-          if (!c.next_due_at || c.completed) return false;
-          return new Date(c.next_due_at) <= now24h;
-        });
-        const pastDue = upcoming.filter((c: any) => new Date(c.next_due_at) < new Date());
-        if (upcoming.length === 0) return null;
-        return (
-          <Card className={`border-warning/25 shadow-sm ${pastDue.length > 0 ? 'bg-destructive/3' : 'bg-warning/3'}`}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2.5">
-                <span className="text-lg">📋</span>
-                <p className="text-sm font-semibold text-foreground">
-                  {upcoming.length} uppgift{upcoming.length > 1 ? 'er' : ''} förfaller snart
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                {upcoming.slice(0, 3).map((chore: any) => {
-                  const isPast = new Date(chore.next_due_at) < new Date();
-                  return (
-                    <div key={chore.id} className="flex items-center gap-2">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isPast ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
-                        {isPast ? '⚠️ Försenad' : '📌 Idag'}
-                      </span>
-                      <span className="text-xs text-foreground">{chore.title}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <button onClick={() => navigate('/app/tasks')} className="text-xs text-warning hover:underline mt-2.5 font-medium">
-                Se alla uppgifter →
-              </button>
-            </CardContent>
-          </Card>
-        );
-      })()}
-
-      {/* Feature discovery nudges */}
-      {(feedRecords as any[]).length === 0 && (
-        <Card className="border-warning/20 bg-warning/3 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3.5">
-            <span className="text-2xl shrink-0">🌾</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Spåra foderkostnader</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Vet du vad varje ägg kostar dig? Börja logga foder idag.</p>
             </div>
-            <Button size="sm" variant="outline" className="border-warning/40 text-warning hover:bg-warning/10 shrink-0 rounded-xl text-xs" onClick={() => navigate('/app/feed')}>
-              Prova →
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {(transactions as any[]).length === 0 && (
-        <Card className="border-success/20 bg-success/3 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3.5">
-            <span className="text-2xl shrink-0">💰</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Håll koll på ekonomin</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Logga äggförsäljning och utgifter – se om hönsen går med vinst.</p>
-            </div>
-            <Button size="sm" variant="outline" className="border-success/40 text-success hover:bg-success/10 shrink-0 rounded-xl text-xs" onClick={() => navigate('/app/finance')}>
-              Prova →
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Seasonal tip + AI tip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Card className="border-border/50 shadow-sm card-hover">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-                <span className="text-sm">{seasonal.emoji}</span>
+            {diaryEntries.length > 0 ? (
+              <div className="space-y-2">
+                {diaryEntries.map((entry, i) => (
+                  <div key={i} className="flex gap-3 items-start p-3 rounded-xl bg-muted/30 border border-border/30">
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5 font-medium bg-muted/60 px-2 py-0.5 rounded-md">{entry.date}</span>
+                    <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
+                  </div>
+                ))}
               </div>
-              <span className="data-label">Säsongens tips</span>
-            </div>
-            <p className="text-sm text-foreground leading-relaxed">{seasonal.text}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-warning/15 shadow-sm card-hover">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-warning" />
-              </div>
-              <span className="data-label">Dagens tips</span>
-            </div>
-            {aiTip?.tip_text ? (
-              <p className="text-sm text-foreground leading-relaxed">{aiTip.tip_text}</p>
             ) : (
-              <p className="text-sm text-muted-foreground italic">Laddar dagens tips...</p>
+              <div className="text-center py-8 card-inset rounded-xl">
+                <Feather className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2.5" />
+                <p className="text-sm text-muted-foreground font-medium">Inga inlägg ännu</p>
+                <p className="text-xs text-muted-foreground/60 mt-0.5">Skriv om vad som händer med dina höns</p>
+              </div>
             )}
           </CardContent>
         </Card>
-      </div>
+      )}
 
-      {/* Egg calendar */}
-      <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-primary/8 flex items-center justify-center">
-                <CalendarDays className="h-4 w-4 text-primary" />
-              </div>
-              <h2 className="font-serif text-sm text-foreground">{getMonthName(now.getMonth())}</h2>
-            </div>
-            <span className="text-xs text-muted-foreground font-medium">
-              {Object.values(eggCalendarData).reduce((a, b) => a + b, 0)} ägg totalt
-            </span>
+      {/* ─── 8. "Mer" collapsible section ─── */}
+      <button
+        onClick={() => setShowMoreSection(!showMoreSection)}
+        className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors active:scale-[0.98]"
+      >
+        {showMoreSection ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        {showMoreSection ? 'Visa mindre' : 'Visa mer'}
+      </button>
+
+      {showMoreSection && (
+        <div className="space-y-5 animate-fade-in">
+          {/* Install app card (mobile) */}
+          <div className="block md:hidden">
+            <InstallAppCard />
           </div>
-          <div className="grid grid-cols-7 gap-1.5 mb-2">
-            {['M', 'T', 'O', 'T', 'F', 'L', 'S'].map((d, i) => (
-              <div key={`${d}-${i}`} className={`text-[10px] text-center font-medium ${i >= 5 ? 'text-accent/60' : 'text-muted-foreground'}`}>{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1.5">
-            {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const eggCount = eggCalendarData[day] || 0;
-              const isToday = day === now.getDate();
-              const isFuture = day > now.getDate();
-              return (
-                <div
-                  key={day}
-                  className={`rounded-lg text-center py-1.5 text-[11px] transition-all
-                    ${isFuture ? 'bg-muted/20 text-muted-foreground/25' : getEggColor(eggCount)}
-                    ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-background shadow-sm' : ''}
-                  `}
-                >
-                  <span className="leading-none">{day}</span>
-                  {!isFuture && eggCount > 0 && (
-                    <span className="block text-[8px] leading-none opacity-70 mt-0.5">{eggCount}</span>
-                  )}
+
+          {/* Achievement nudge */}
+          <AchievementNudge achievements={achievements} />
+
+          {/* Import data shortcut (adaptive) */}
+          {showImportCard && (
+            <Card className="border-border/50 shadow-sm card-hover cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate('/app/import')}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                    <Plus className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Importera data</p>
+                    <p className="text-[11px] text-muted-foreground">Läs in hönor & ägg från fil eller Google Sheets</p>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick links */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card
-          className="border-primary/10 cursor-pointer hover:bg-primary/4 transition-all duration-200 shadow-sm card-hover group"
-          onClick={() => navigate('/app/eggs')}
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors shrink-0">
-              <Egg className="h-4.5 w-4.5 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">Ägghistorik</p>
-              <p className="text-[10px] text-muted-foreground">{todayEggs} idag</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className="border-accent/10 cursor-pointer hover:bg-accent/4 transition-all duration-200 shadow-sm card-hover group"
-          onClick={() => navigate('/app/hens')}
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-accent/8 flex items-center justify-center group-hover:bg-accent/12 transition-colors shrink-0">
-              <Bird className="h-4.5 w-4.5 text-accent" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">Mina hönor</p>
-              <p className="text-[10px] text-muted-foreground">{activeHens} aktiva</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Diary */}
-      <Card className="border-border/50 shadow-sm">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-accent/8 flex items-center justify-center">
-                <BookOpen className="h-4 w-4 text-accent" />
-              </div>
-              <h2 className="font-serif text-sm text-foreground">Dagbok</h2>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-3 text-xs text-primary hover:text-primary hover:bg-primary/8 rounded-xl gap-1.5"
-              onClick={() => setDiaryOpen(true)}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Skriv
-            </Button>
-          </div>
-          {diaryEntries.length > 0 ? (
-            <div className="space-y-2">
-              {diaryEntries.map((entry, i) => (
-                <div key={i} className="flex gap-3 items-start p-3 rounded-xl bg-muted/30 border border-border/30">
-                  <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5 font-medium bg-muted/60 px-2 py-0.5 rounded-md">{entry.date}</span>
-                  <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 card-inset rounded-xl">
-              <Feather className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2.5" />
-              <p className="text-sm text-muted-foreground font-medium">Inga inlägg ännu</p>
-              <p className="text-xs text-muted-foreground/60 mt-0.5">Skriv om vad som händer med dina höns</p>
-            </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Achievements */}
-      <Achievements eggs={eggs} hens={hens as any[]} streak={streak} feedRecords={feedRecords as any[]} transactions={transactions as any[]} chores={chores as any[]} />
+          {/* Feature discovery nudges (dismissible, adaptive) */}
+          {showFeedNudge && (
+            <Card className="border-warning/20 bg-warning/3 shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3.5">
+                <span className="text-2xl shrink-0">🌾</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Spåra foderkostnader</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Vet du vad varje ägg kostar dig? Börja logga foder idag.</p>
+                </div>
+                <div className="flex flex-col gap-1 shrink-0">
+                  <Button size="sm" variant="outline" className="border-warning/40 text-warning hover:bg-warning/10 rounded-xl text-xs" onClick={() => navigate('/app/feed')}>
+                    Prova →
+                  </Button>
+                  <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-feed-nudge-dismissed', '1')}>
+                    Göm
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Share card */}
-      <ShareCard
-        weekEggs={weekEggs}
-        totalEggs={eggs.reduce((s: number, e: any) => s + (e.count || 0), 0)}
-        henCount={activeHens}
-        streak={streak}
-        userName={user?.name?.split(' ')[0]}
-      />
+          {showFinanceNudge && (
+            <Card className="border-success/20 bg-success/3 shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3.5">
+                <span className="text-2xl shrink-0">💰</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Håll koll på ekonomin</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Logga äggförsäljning och utgifter – se om hönsen går med vinst.</p>
+                </div>
+                <div className="flex flex-col gap-1 shrink-0">
+                  <Button size="sm" variant="outline" className="border-success/40 text-success hover:bg-success/10 rounded-xl text-xs" onClick={() => navigate('/app/finance')}>
+                    Prova →
+                  </Button>
+                  <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-finance-nudge-dismissed', '1')}>
+                    Göm
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Referral */}
-      <ReferralCard />
+          {/* Quick links */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card
+              className="border-primary/10 cursor-pointer hover:bg-primary/4 transition-all duration-200 shadow-sm card-hover group active:scale-[0.97] transition-transform"
+              onClick={() => navigate('/app/eggs')}
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors shrink-0">
+                  <Egg className="h-4.5 w-4.5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">Ägghistorik</p>
+                  <p className="text-[10px] text-muted-foreground">{todayEggs} idag</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card
+              className="border-accent/10 cursor-pointer hover:bg-accent/4 transition-all duration-200 shadow-sm card-hover group active:scale-[0.97] transition-transform"
+              onClick={() => navigate('/app/hens')}
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-accent/8 flex items-center justify-center group-hover:bg-accent/12 transition-colors shrink-0">
+                  <Bird className="h-4.5 w-4.5 text-accent" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">Mina hönor</p>
+                  <p className="text-[10px] text-muted-foreground">{activeHens} aktiva</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Achievements */}
+          <Achievements achievements={achievements} eggs={eggs} hens={hens as any[]} streak={streak} />
+
+          {/* Share card */}
+          <ShareCard
+            weekEggs={weekEggs}
+            totalEggs={eggs.reduce((s: number, e: any) => s + (e.count || 0), 0)}
+            henCount={activeHens}
+            streak={streak}
+            userName={user?.name?.split(' ')[0]}
+          />
+
+          {/* Referral */}
+          <ReferralCard />
+        </div>
+      )}
 
       {/* Diary dialog */}
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>

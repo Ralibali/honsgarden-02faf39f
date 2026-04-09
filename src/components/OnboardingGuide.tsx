@@ -12,8 +12,27 @@ import { toast } from '@/hooks/use-toast';
 const ONBOARDING_KEY = 'honsgarden-onboarding-done';
 const getOnboardingKey = (userId: string) => `${ONBOARDING_KEY}-${userId}`;
 
+// Hook to let parent know if onboarding is visible
+const onboardingVisibleRef = { current: false };
+export function useOnboardingVisible() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const check = () => setVisible(onboardingVisibleRef.current);
+    check();
+    const id = setInterval(check, 500);
+    return () => clearInterval(id);
+  }, []);
+  return visible;
+}
+
 export default function OnboardingGuide() {
   const [open, setOpen] = useState(false);
+
+  // Sync visibility to ref for useOnboardingVisible
+  useEffect(() => {
+    onboardingVisibleRef.current = open;
+    return () => { onboardingVisibleRef.current = false; };
+  }, [open]);
   const [step, setStep] = useState(0);
   const [henName, setHenName] = useState('');
   const [henBreed, setHenBreed] = useState('');
