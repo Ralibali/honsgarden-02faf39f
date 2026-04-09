@@ -162,17 +162,50 @@ export default function Premium() {
       </div>
 
       {/* Pricing cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* Free */}
+        <Card className="bg-card border-border shadow-sm">
+          <CardContent className="p-6">
+            <h3 className="font-serif text-lg text-foreground mb-1">Gratis</h3>
+            <p className="text-muted-foreground text-sm mb-5">Perfekt för att komma igång</p>
+            <div className="mb-2">
+              <span className="text-4xl font-bold text-foreground">0</span>
+              <span className="text-lg text-muted-foreground ml-1">kr</span>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Ingen tidsgräns</p>
+            <ul className="space-y-2.5 mb-6">
+              {freeFeatures.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm text-foreground">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Button variant="outline" className="w-full h-11" disabled>
+              Din nuvarande plan
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Monthly */}
         <Card className="bg-card border-border shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
-            <h3 className="font-serif text-lg text-foreground mb-1">Månadsplan</h3>
+            <h3 className="font-serif text-lg text-foreground mb-1">Plus – Månad</h3>
             <p className="text-muted-foreground text-sm mb-5">Flexibelt, ingen bindningstid</p>
             <div className="mb-2">
               <span className="text-4xl font-bold text-foreground">19</span>
               <span className="text-lg text-muted-foreground ml-1">kr/mån</span>
             </div>
-            <p className="text-xs text-muted-foreground mb-4">Sju dagar gratis provperiod</p>
+            <p className="text-xs text-primary font-medium mb-4">🎁 Sju dagars gratis provperiod</p>
+            <ul className="space-y-2.5 mb-6">
+              {premiumFeatures.slice(0, 6).map((f) => (
+                <li key={f.text} className="flex items-center gap-2 text-sm text-foreground">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  {f.text}
+                </li>
+              ))}
+              <li className="text-xs text-muted-foreground pl-6">+ allt i Gratis</li>
+            </ul>
             <Button 
               variant="outline"
               className="w-full h-11 gap-2 active:scale-95 transition-transform"
@@ -180,7 +213,7 @@ export default function Premium() {
               disabled={!!loadingPlan || isPremium}
             >
               {loadingPlan === 'monthly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              {isPremium ? 'Du har redan Premium' : 'Välj månadsplan'}
+              {isPremium ? 'Du har redan Plus' : 'Prova 7 dagar gratis'}
             </Button>
           </CardContent>
         </Card>
@@ -191,22 +224,31 @@ export default function Premium() {
              Spara 35% – populärast
            </div>
            <CardContent className="p-6 pt-10">
-             <h3 className="font-serif text-lg text-foreground mb-1">Årsplan</h3>
+             <h3 className="font-serif text-lg text-foreground mb-1">Plus – År</h3>
              <p className="text-muted-foreground text-sm mb-5">Bästa värdet – bara 12 kr/mån</p>
              <div className="mb-2">
                <span className="text-4xl font-bold text-foreground">149</span>
                <span className="text-lg text-muted-foreground ml-1">kr/år</span>
              </div>
-             <p className="text-xs text-muted-foreground mb-5">
+             <p className="text-xs text-muted-foreground mb-4">
                <span className="line-through">228 kr</span> → du sparar 79 kr per år
              </p>
+             <ul className="space-y-2.5 mb-6">
+              {premiumFeatures.slice(0, 6).map((f) => (
+                <li key={f.text} className="flex items-center gap-2 text-sm text-foreground">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  {f.text}
+                </li>
+              ))}
+              <li className="text-xs text-muted-foreground pl-6">+ allt i Gratis</li>
+            </ul>
             <Button 
               className="w-full h-12 gap-2 active:scale-95 transition-transform text-base font-semibold shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"
               onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
               disabled={!!loadingPlan || isPremium}
             >
               {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-              {isPremium ? 'Du har redan Premium' : 'Välj årsplan – 149 kr'}
+              {isPremium ? 'Du har redan Plus' : 'Välj årsplan – 149 kr'}
             </Button>
           </CardContent>
         </Card>
