@@ -167,7 +167,7 @@ export default function Premium() {
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6">
             <h3 className="font-serif text-lg text-foreground mb-1">Gratis</h3>
-            <p className="text-muted-foreground text-sm mb-5">Perfekt för att komma igång</p>
+            <p className="text-muted-foreground text-sm mb-5">Allt du behöver för att börja</p>
             <div className="mb-2">
               <span className="text-4xl font-bold text-foreground">0</span>
               <span className="text-lg text-muted-foreground ml-1">kr</span>
@@ -181,8 +181,8 @@ export default function Premium() {
                 </li>
               ))}
             </ul>
-            <Button variant="outline" className="w-full h-11" disabled>
-              Din nuvarande plan
+            <Button variant="outline" className="w-full h-11" disabled={!isPremium}>
+              {isPremium ? 'Byt till gratis' : 'Din nuvarande plan'}
             </Button>
           </CardContent>
         </Card>
@@ -196,7 +196,7 @@ export default function Premium() {
               <span className="text-4xl font-bold text-foreground">19</span>
               <span className="text-lg text-muted-foreground ml-1">kr/mån</span>
             </div>
-            <p className="text-xs text-primary font-medium mb-4">🎁 Sju dagars gratis provperiod</p>
+            <p className="text-xs text-primary font-medium mb-4">🎁 Sju dagars gratis provperiod – starta idag</p>
             <ul className="space-y-2.5 mb-6">
               {premiumFeatures.slice(0, 6).map((f) => (
                 <li key={f.text} className="flex items-center gap-2 text-sm text-foreground">
