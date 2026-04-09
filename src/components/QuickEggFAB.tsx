@@ -1,20 +1,21 @@
 import React, { useState, useCallback } from 'react';
-import { Egg, Plus, Minus, Check, X } from 'lucide-react';
+import { Egg, Plus, Minus, Check, X, CalendarMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EggSuccessAnimation } from './EggSuccessAnimation';
-import { FeatureSuggestionToast } from './FeatureSuggestionToast';
+
+const LAST_HEN_KEY = 'honsgarden-last-hen';
 
 export function QuickEggFAB() {
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(1);
-  const [selectedHenId, setSelectedHenId] = useState<string>('all');
+  const [selectedHenId, setSelectedHenId] = useState<string>(() => localStorage.getItem(LAST_HEN_KEY) || 'all');
   const [showAnimation, setShowAnimation] = useState(false);
   const [animCount, setAnimCount] = useState(0);
-  const [showSuggestion, setShowSuggestion] = useState(false);
+  const [useYesterday, setUseYesterday] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: hens = [] } = useQuery({
@@ -29,44 +30,52 @@ export function QuickEggFAB() {
     staleTime: 60_000,
   });
 
-  // Track unused features for contextual suggestions
-  const { data: feedRecords = [] } = useQuery({ queryKey: ['feed-records'], queryFn: () => api.getFeedRecords(), staleTime: 60_000 });
-  const { data: transactions = [] } = useQuery({ queryKey: ['transactions'], queryFn: () => api.getTransactions(), staleTime: 60_000 });
-  const { data: chores = [] } = useQuery({ queryKey: ['daily-chores'], queryFn: () => api.getDailyChores(), staleTime: 60_000 });
-
-  const unusedFeatures: ('feed' | 'finance' | 'chores')[] = [];
-  if ((feedRecords as any[]).length === 0) unusedFeatures.push('feed');
-  if ((transactions as any[]).length === 0) unusedFeatures.push('finance');
-  if ((chores as any[]).length === 0) unusedFeatures.push('chores');
-
   const handleAnimationDone = useCallback(() => {
     setShowAnimation(false);
-    toast({ title: `🥚 ${animCount} ägg registrerade!` });
-    if (unusedFeatures.length > 0) {
-      setShowSuggestion(true);
-    }
-  }, [animCount, unusedFeatures.length]);
+    toast({ title: `🥚 ${animCount} ägg registrerade!${useYesterday ? ' (igår)' : ''}` });
+  }, [animCount, useYesterday]);
 
   const activeHens = (hens as any[]).filter((h: any) => h.is_active && h.hen_type !== 'rooster');
 
   const mutation = useMutation({
-    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) =>
-      api.createEggRecord({
-        date: new Date().toISOString().split('T')[0],
+    mutationFn: ({ count, hen_id, flock_id }: { count: number; hen_id?: string; flock_id?: string }) => {
+      const date = useYesterday
+        ? new Date(Date.now() - 86400000).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+      return api.createEggRecord({
+        date,
         count,
         hen_id: hen_id || undefined,
         flock_id: flock_id || undefined,
-      }),
+      });
+    },
+    onMutate: async ({ count }) => {
+      // Optimistic update for today's count
+      await queryClient.cancelQueries({ queryKey: ['eggs'] });
+      const prev = queryClient.getQueryData(['eggs']);
+      queryClient.setQueryData(['eggs'], (old: any[]) => {
+        if (!old) return old;
+        const date = useYesterday
+          ? new Date(Date.now() - 86400000).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0];
+        return [...old, { date, count, id: `temp-${Date.now()}`, hen_id: null, flock_id: null }];
+      });
+      return { prev };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
       setAnimCount(count);
       setShowAnimation(true);
       setOpen(false);
       setCount(1);
-      setSelectedHenId('all');
+      setUseYesterday(false);
+      // Remember last selection
+      localStorage.setItem(LAST_HEN_KEY, selectedHenId);
     },
-    onError: (err: any) =>
-      toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+    onError: (err: any, _, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['eggs'], ctx.prev);
+      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+    },
   });
 
   const handleSave = () => {
@@ -75,6 +84,18 @@ export function QuickEggFAB() {
     const flock_id = isFlockSelection ? selectedHenId.replace('flock:', '') : undefined;
     mutation.mutate({ count, hen_id, flock_id });
   };
+
+  // Keyboard shortcut: E to open
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'e' && !e.metaKey && !e.ctrlKey && !e.altKey && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        setOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   return (
     <>
@@ -128,7 +149,7 @@ export function QuickEggFAB() {
                 <button
                   key={n}
                   onClick={() => setCount(n)}
-                  className={`w-9 h-9 rounded-full text-xs font-semibold transition-all active:scale-90 ${
+                  className={`min-w-[44px] min-h-[44px] rounded-full text-xs font-semibold transition-all active:scale-90 ${
                     count === n
                       ? 'bg-primary text-primary-foreground shadow-md'
                       : 'bg-muted/60 text-muted-foreground hover:bg-muted'
@@ -138,6 +159,19 @@ export function QuickEggFAB() {
                 </button>
               ))}
             </div>
+
+            {/* Yesterday toggle */}
+            <button
+              onClick={() => setUseYesterday(!useYesterday)}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                useYesterday
+                  ? 'bg-accent/10 border border-accent/30 text-accent'
+                  : 'bg-muted/40 border border-border/30 text-muted-foreground hover:bg-muted/60'
+              }`}
+            >
+              <CalendarMinus className="h-3.5 w-3.5" />
+              {useYesterday ? 'Loggar för igår ✓' : 'Logga igår istället'}
+            </button>
 
             {/* Flock / Hen selector */}
             {(activeHens.length > 0 || (flocks as any[]).length > 0) && (
@@ -177,7 +211,7 @@ export function QuickEggFAB() {
               disabled={mutation.isPending}
             >
               <Check className="h-4 w-4" />
-              Registrera {count} ägg
+              Registrera {count} ägg{useYesterday ? ' (igår)' : ''}
             </Button>
           </div>
         </div>
@@ -188,7 +222,7 @@ export function QuickEggFAB() {
         <button
           onClick={() => setOpen(true)}
           className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[35] w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 animate-fade-in"
-          aria-label="Registrera ägg"
+          aria-label="Registrera ägg (E)"
         >
           <div className="relative">
             <Egg className="h-6 w-6" />
@@ -199,13 +233,6 @@ export function QuickEggFAB() {
 
       {/* Success animation */}
       <EggSuccessAnimation show={showAnimation} count={animCount} onDone={handleAnimationDone} />
-
-      {/* Contextual feature suggestion */}
-      <FeatureSuggestionToast
-        show={showSuggestion}
-        unusedFeatures={unusedFeatures}
-        onDismiss={() => setShowSuggestion(false)}
-      />
     </>
   );
 }
