@@ -109,7 +109,7 @@ export default function About() {
                 Det hela började med en enkel frustration: att logga ägg i ett kalkylark var opraktiskt, och att komma ihåg vilken höna som behövde extra koll var nästan omöjligt.
               </p>
               <p>
-                Så vi byggde Hönsgården – en digital äggloggare och gårdsverktyg som gör det enkelt att ha full kontroll. Idag använder tusentals svenska hönsägare appen varje dag.
+                Så vi byggde Hönsgården – en digital äggloggare och gårdsverktyg som gör det enkelt att ha full kontroll. Appen är ny, och vi växer snabbt bland svenska hönsägare.
               </p>
               <p>
                 Vår blogg delar expertkunskap om hönsraser, foder, hälsa och hönshusbygge – allt baserat på erfarenhet och research. Vi strävar efter att vara den mest trovärdiga källan för hönskunskap i Sverige.

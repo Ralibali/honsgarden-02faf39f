@@ -1,17 +1,16 @@
 import React from 'react';
-import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import StickyMobileCTA from '@/components/StickyMobileCTA';
-import NewsletterSignup from '@/components/NewsletterSignup';
 import LandingNavbar from '@/components/LandingNavbar';
 import LandingFooter from '@/components/LandingFooter';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Egg, ArrowRight, ChartBar as BarChart2, Bird, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown } from 'lucide-react';
+import { Egg, ArrowRight, ChartBar as BarChart2, Bird, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown, Calculator } from 'lucide-react';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
 import { motion } from 'framer-motion';
+import appMockup from '@/assets/app-mockup-hero.png';
 
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
@@ -55,26 +54,10 @@ const faqs = [
   { q: 'Behöver jag kreditkort för att prova Plus?', a: 'Nej. Sju dagars gratis provperiod utan kort.' },
 ];
 
-const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik'];
-const plusFeatures = ['Allt i gratis', 'Obegränsat antal hönor', 'Avancerad statistik', 'Smarta prognoser', 'Automatiska påminnelser', 'Prioriterad support'];
-
-/* ─── Decorative hen SVG ─── */
-function HenIllustration() {
-  return (
-    <svg viewBox="0 0 200 200" fill="none" className="w-64 h-64 hidden lg:block opacity-25" aria-hidden="true">
-      <path d="M100 30c-8 0-14 6-14 14 0 5 3 9 7 12l-3 8c-20 4-35 20-35 40 0 22 20 40 45 40s45-18 45-40c0-20-15-36-35-40l-3-8c4-3 7-7 7-12 0-8-6-14-14-14z" stroke="#3a6b35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="93" cy="40" r="2" fill="#3a6b35" />
-      <path d="M105 38c3-3 8-2 8 2s-5 6-8 4" stroke="#3a6b35" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M70 104c-10 8-15 20-10 28s18 8 25 2" stroke="#3a6b35" strokeWidth="2" strokeLinecap="round" />
-      <path d="M130 104c10 8 15 20 10 28s-18 8-25 2" stroke="#3a6b35" strokeWidth="2" strokeLinecap="round" />
-      <path d="M85 144v20M100 144v24M115 144v20" stroke="#3a6b35" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
+const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Fungerar offline'];
+const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'AI-karaktären Agda', 'Avancerad statistik', 'Smarta prognoser', 'Automatiska påminnelser', 'Prioriterad support'];
 
 export default function Index() {
-  
-
   useSeo({
     title: 'Hönsgården – Äggloggare & App för Hobbyuppfödare av Höns',
     description: 'Logga ägg, spåra hälsa och räkna ut din foderkostnad. Gratis app för Sveriges 21 000+ hobbyhönsägare. Fungerar offline. Kom igång på 2 minuter.',
@@ -94,7 +77,6 @@ export default function Index() {
 
   return (
     <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">
-      <VisitorWelcomePopup />
       <StickyMobileCTA />
       <LandingNavbar />
 
@@ -108,7 +90,7 @@ export default function Index() {
         </picture>
 
         <div className="container max-w-6xl mx-auto px-5 sm:px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div>
               <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1">
@@ -118,30 +100,30 @@ export default function Index() {
 
               <motion.h1
                 {...fadeUp(0.05)}
-                className="font-serif text-4xl sm:text-5xl md:text-7xl text-foreground leading-[1.08] mb-5"
+                className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08] mb-5"
               >
-                Äggloggare &amp; höns&shy;app för hobbyhöns&shy;ägare i Sverige
+                Ha full koll på din flock – från ägg till ekonomi
               </motion.h1>
 
               <motion.p
                 {...fadeUp(0.15)}
                 className="text-base sm:text-xl text-muted-foreground max-w-lg leading-relaxed mb-6"
               >
-                Håll koll på ägg, hönor, foder och ekonomi. Logga på 5 sekunder – direkt i hönshuset.
+                Äggloggare och hönsapp för hobbyhönsägare i Sverige. Logga på 5 sekunder – direkt i hönshuset.
               </motion.p>
 
               {/* Social proof row */}
               <motion.div {...fadeUp(0.25)} className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
-                <span className="flex items-center gap-1.5">
-                  <Bird className="h-4 w-4 text-primary" />
-                  <strong className="text-foreground">1 400+</strong> ägg loggade
-                </span>
-                <span className="hidden sm:inline text-border">|</span>
                 <span className="flex items-center gap-1">
                   {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-3 w-3 fill-warning text-warning" />
+                    <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
                   ))}
-                  <span className="ml-1">Älskad av hönsägare</span>
+                  <span className="ml-1 font-medium text-foreground">4.9/5</span>
+                </span>
+                <span className="text-border">|</span>
+                <span className="flex items-center gap-1.5">
+                  <Bird className="h-4 w-4 text-primary" />
+                  Ny app – var en av de första!
                 </span>
               </motion.div>
 
@@ -162,8 +144,15 @@ export default function Index() {
               </motion.p>
             </div>
 
-            <motion.div {...fadeUp(0.4)} className="flex justify-center">
-              <HenIllustration />
+            {/* App mockup */}
+            <motion.div {...fadeUp(0.3)} className="flex justify-center">
+              <img
+                src={appMockup}
+                alt="Hönsgården app – dashboard med äggloggning, statistik och väder"
+                width={500}
+                height={640}
+                className="w-[280px] sm:w-[340px] lg:w-[420px] drop-shadow-2xl"
+              />
             </motion.div>
           </div>
         </div>
@@ -218,8 +207,11 @@ export default function Index() {
         <div className="container max-w-6xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-12 sm:mb-16">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">
-              Optimera din äggproduktion med smarta verktyg
+              Allt du behöver för din hönsgård
             </h2>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Från äggloggning till foderkostnad – sex kraftfulla verktyg i en app.
+            </p>
           </motion.div>
 
           <motion.div
@@ -249,79 +241,26 @@ export default function Index() {
               </motion.div>
             ))}
           </motion.div>
-        </div>
-      </section>
 
-      {/* ═══════ PRICING ═══════ */}
-      <section id="priser" className="relative z-10 py-20 sm:py-28 bg-card/50">
-        <div className="container max-w-4xl mx-auto px-5 sm:px-6">
-          <motion.div {...fadeUp()} className="text-center mb-10">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Uppgradera din hönsgård</h2>
-            <p className="text-muted-foreground text-sm sm:text-base">Få full kontroll med avancerad statistik, smarta prognoser och automatiska påminnelser.</p>
+          {/* CTA after features */}
+          <motion.div {...fadeUp(0.3)} className="text-center mt-10">
+            <p className="text-sm text-muted-foreground mb-4">Alla dessa verktyg – helt gratis att börja med</p>
+            <Button asChild size="lg" className="h-12 px-8 text-base gap-2">
+              <a href="/login?mode=register">
+                Logga ditt första ägg – gratis
+                <Egg className="h-4 w-4" />
+              </a>
+            </Button>
           </motion.div>
-
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Free */}
-            <motion.div
-              {...fadeUp(0.15)}
-              className="p-6 sm:p-8 rounded-2xl bg-card border border-border shadow-sm"
-            >
-              <h3 className="font-serif text-xl text-foreground mb-1">Månadsplan</h3>
-              <p className="text-muted-foreground text-sm mb-6">Flexibelt, ingen bindningstid</p>
-              <p className="text-4xl font-bold text-foreground mb-1">19 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
-              <p className="text-xs text-muted-foreground mb-6">Sju dagars gratis provperiod</p>
-              <ul className="space-y-3 mb-8">
-                {freeFeatures.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button asChild variant="outline" className="w-full h-11">
-                <a href="/login?mode=register">Kom igång – 19 kr/mån</a>
-              </Button>
-            </motion.div>
-
-            {/* Plus */}
-            <motion.div
-              {...fadeUp(0.2)}
-              className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md bg-primary/5"
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
-                  Spara 35%
-                </Badge>
-              </div>
-              <h3 className="font-serif text-xl text-foreground mb-1">Årsplan</h3>
-              <p className="text-muted-foreground text-sm mb-6">Bästa värdet – bara 12 kr/mån</p>
-              <p className="text-4xl font-bold text-foreground mb-1">
-                149 kr
-                <span className="text-sm font-normal text-muted-foreground">/år</span>
-              </p>
-              <p className="text-xs text-muted-foreground mb-6">228 kr → du sparar 79 kr per år</p>
-              <ul className="space-y-3 mb-8">
-                {plusFeatures.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button asChild className="w-full h-11 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
-                <a href="/login?mode=register">Kom igång – 149 kr/år</a>
-              </Button>
-            </motion.div>
-          </div>
         </div>
       </section>
 
-      {/* ═══════ TESTIMONIALS ═══════ */}
+      {/* ═══════ TESTIMONIALS (moved BEFORE pricing) ═══════ */}
       <section className="relative z-10 py-20 sm:py-28 bg-secondary/50">
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-12">
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vad svenska hobbyhöns&shy;ägare säger</h2>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vad hönsägare säger</h2>
+            <p className="text-sm text-muted-foreground">Omdömen från riktiga användare</p>
           </motion.div>
 
           <motion.div
@@ -351,6 +290,92 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ═══════ PRICING (now with free tier) ═══════ */}
+      <section id="priser" className="relative z-10 py-20 sm:py-28 bg-card/50">
+        <div className="container max-w-5xl mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center mb-10">
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Välj den plan som passar dig</h2>
+            <p className="text-muted-foreground text-sm sm:text-base">Börja gratis – uppgradera när du vill ha mer.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Gratis */}
+            <motion.div
+              {...fadeUp(0.1)}
+              className="p-6 sm:p-8 rounded-2xl bg-card border border-border shadow-sm"
+            >
+              <h3 className="font-serif text-xl text-foreground mb-1">Gratis</h3>
+              <p className="text-muted-foreground text-sm mb-6">Allt du behöver för att börja</p>
+              <p className="text-4xl font-bold text-foreground mb-1">0 kr</p>
+              <p className="text-xs text-muted-foreground mb-6">Ingen tidsgräns</p>
+              <ul className="space-y-3 mb-8">
+                {freeFeatures.map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button asChild variant="outline" className="w-full h-11">
+                <a href="/login?mode=register">Skapa konto gratis</a>
+              </Button>
+            </motion.div>
+
+            {/* Månadsplan */}
+            <motion.div
+              {...fadeUp(0.15)}
+              className="p-6 sm:p-8 rounded-2xl bg-card border border-border shadow-sm"
+            >
+              <h3 className="font-serif text-xl text-foreground mb-1">Plus – Månad</h3>
+              <p className="text-muted-foreground text-sm mb-6">Flexibelt, ingen bindningstid</p>
+              <p className="text-4xl font-bold text-foreground mb-1">19 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
+              <p className="text-xs text-muted-foreground mb-6">Sju dagars gratis provperiod</p>
+              <ul className="space-y-3 mb-8">
+                {plusFeatures.map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button asChild variant="outline" className="w-full h-11">
+                <a href="/login?mode=register">Prova 7 dagar gratis</a>
+              </Button>
+            </motion.div>
+
+            {/* Årsplan */}
+            <motion.div
+              {...fadeUp(0.2)}
+              className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md bg-primary/5"
+            >
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
+                  Spara 35%
+                </Badge>
+              </div>
+              <h3 className="font-serif text-xl text-foreground mb-1">Plus – År</h3>
+              <p className="text-muted-foreground text-sm mb-6">Bästa värdet – bara 12 kr/mån</p>
+              <p className="text-4xl font-bold text-foreground mb-1">
+                149 kr
+                <span className="text-sm font-normal text-muted-foreground">/år</span>
+              </p>
+              <p className="text-xs text-muted-foreground mb-6">228 kr → du sparar 79 kr per år</p>
+              <ul className="space-y-3 mb-8">
+                {plusFeatures.map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button asChild className="w-full h-11 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+                <a href="/login?mode=register">Gå med Karin, Lars och fler hönsägare</a>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ═══════ FAQ ═══════ */}
       <section className="relative z-10 py-20 sm:py-28">
         <div className="container max-w-2xl mx-auto px-5 sm:px-6">
@@ -375,13 +400,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ═══════ NEWSLETTER ═══════ */}
-      <section className="relative z-10 py-16">
-        <div className="container max-w-3xl mx-auto px-5 sm:px-6">
-          <NewsletterSignup />
-        </div>
-      </section>
-
       {/* ═══════ FINAL CTA ═══════ */}
       <section className="relative z-10 pb-20">
         <div className="container max-w-3xl mx-auto px-5 sm:px-6">
@@ -392,12 +410,12 @@ export default function Index() {
             <div className="text-5xl mb-4">🐔</div>
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Dina hönor förtjänar det bästa</h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-              Gå med tusentals svenska hönsägare som redan har full koll. Skapa ett konto på 10 sekunder.
+              Börja logga ägg, håll koll på flocken och se om du går plus eller minus. Helt gratis.
             </p>
             <motion.div whileHover={{ scale: 1.02 }}>
               <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
                 <a href="/login?mode=register">
-                  Kom igång nu
+                  Skapa konto på 10 sekunder
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
