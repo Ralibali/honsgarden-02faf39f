@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Egg, Bird, Sun, Loader2, X } from 'lucide-react';
 import { api } from '@/lib/api';
-// useNavigate removed – no longer needed after removing premium upsell button
+
 
 const STORAGE_KEY = 'daily-summary-date';
 
@@ -11,7 +11,7 @@ export function DailySummaryModal() {
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  
   const hasChecked = useRef(false);
 
   useEffect(() => {
