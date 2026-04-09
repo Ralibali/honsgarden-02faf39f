@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/accordion';
 import { motion } from 'framer-motion';
 import appMockup from '@/assets/app-mockup-hero.png';
+import ActivityPulse from '@/components/ActivityPulse';
 
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
