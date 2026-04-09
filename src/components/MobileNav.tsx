@@ -46,20 +46,20 @@ export function MobileNav() {
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setShowMore(false)}>
           <div className="absolute inset-0 bg-foreground/15 backdrop-blur-sm" />
           <div
-            className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-2 shadow-xl animate-fade-in-scale"
+            className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-2 shadow-xl animate-fade-in-scale max-h-[60vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-3 gap-1">
               {allMoreItems.map((item) => (
                 <NavLink
                   key={item.url}
                   to={item.url}
-                  className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-[0.95]"
                   activeClassName="text-primary bg-primary/8"
                   onClick={() => setShowMore(false)}
                 >
                   <item.icon className="h-5 w-5" />
-                  <span className="text-[9px] font-medium truncate">{item.title}</span>
+                  <span className="text-[10px] font-medium text-center leading-tight">{item.title}</span>
                 </NavLink>
               ))}
             </div>

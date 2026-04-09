@@ -109,21 +109,6 @@ export function DailySummaryModal() {
                 </div>
               )}
 
-              {/* Premium upsell */}
-              <button
-                onClick={() => { handleClose(); navigate('/app/premium'); }}
-                className="w-full flex items-center gap-2.5 p-2.5 rounded-lg bg-gradient-to-r from-primary/8 via-accent/8 to-warning/10 border border-primary/15 hover:border-primary/30 transition-all group"
-              >
-                <div className="w-7 h-7 rounded-md bg-warning/15 flex items-center justify-center shrink-0">
-                  <Crown className="h-3.5 w-3.5 text-warning" />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="text-[10px] font-semibold text-foreground">Smartare insikter med Premium</p>
-                  <p className="text-[9px] text-muted-foreground">Sju dagar gratis – sedan 19 kr/mån</p>
-                </div>
-                <Sparkles className="h-3 w-3 text-warning shrink-0" />
-              </button>
-
               {/* Action */}
               <Button className="w-full h-9 text-sm font-medium" onClick={handleClose}>
                 Starta dagen 🐔
