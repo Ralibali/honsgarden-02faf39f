@@ -9,7 +9,6 @@ interface UserProfile {
   is_premium?: boolean;
   subscription_status?: string;
   subscription_end?: string | null;
-  [key: string]: any;
 }
 
 interface AuthContextType {
@@ -24,7 +23,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const SYNC_INTERVAL_MS = 60_000; // Re-check subscription every 60 seconds
+const SYNC_INTERVAL_MS = 60_000;
 
 function toBasicProfile(supaUser: SupabaseUser): UserProfile {
   return {
@@ -51,7 +50,6 @@ async function syncSubscriptionStatus(): Promise<{ subscriptionEnd: string | nul
 }
 
 async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
-  // Sync Stripe status → profiles table
   const { subscriptionEnd, synced } = await syncSubscriptionStatus();
 
   const { data: profile } = await supabase
@@ -66,13 +64,10 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
 
   let subStatus = profile?.subscription_status ?? 'free';
 
-  // Heal status drift locally
   if (hasValidExpiry && subStatus !== 'premium') {
     subStatus = 'premium';
   }
 
-  // Auto-downgrade ONLY if sync succeeded and expiry is past
-  // If sync failed, keep current status to avoid false downgrades
   if (synced && subStatus === 'premium' && expiryDate && expiryDate < now) {
     subStatus = 'free';
   }
@@ -92,17 +87,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentUserRef = useRef<SupabaseUser | null>(null);
+  const profileReadyRef = useRef(false);
 
-  // Periodic subscription sync
   const startPeriodicSync = useCallback((supaUser: SupabaseUser) => {
-    // Clear any existing interval
     if (syncIntervalRef.current) {
       clearInterval(syncIntervalRef.current);
     }
     currentUserRef.current = supaUser;
 
     syncIntervalRef.current = setInterval(async () => {
-      if (!currentUserRef.current) return;
+      // Gate: don't sync until the initial profile has been fully loaded
+      if (!currentUserRef.current || !profileReadyRef.current) return;
       try {
         const profile = await buildProfile(currentUserRef.current);
         setUser(profile);
@@ -118,9 +113,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       syncIntervalRef.current = null;
     }
     currentUserRef.current = null;
+    profileReadyRef.current = false;
   }, []);
 
-  // Exposed method to force-refresh subscription (used after checkout)
   const refreshSubscription = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -146,20 +141,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (hydrateProfile) {
+        // Mark profile as not ready until buildProfile completes
+        profileReadyRef.current = false;
+
         void buildProfile(supaUser)
           .then((profile) => {
             if (isMounted) {
               setUser(profile);
+              profileReadyRef.current = true;
               startPeriodicSync(supaUser);
             }
           })
           .catch(() => {
-            // Keep basic profile if profile query fails
-            if (isMounted) startPeriodicSync(supaUser);
+            if (isMounted) {
+              // Even on failure, allow periodic sync to retry
+              profileReadyRef.current = true;
+              startPeriodicSync(supaUser);
+            }
           });
       }
     };
 
+    // Wait for getSession to restore from storage before processing auth state
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
@@ -201,10 +204,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (data.user) {
       setUser(toBasicProfile(data.user));
+      profileReadyRef.current = false;
       void buildProfile(data.user).then((p) => {
         setUser(p);
+        profileReadyRef.current = true;
         startPeriodicSync(data.user);
-      }).catch(() => undefined);
+      }).catch(() => {
+        profileReadyRef.current = true;
+      });
     }
   };
 
