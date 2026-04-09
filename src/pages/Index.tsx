@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/accordion';
 import { motion } from 'framer-motion';
 import appMockup from '@/assets/app-mockup-hero.png';
+import ActivityPulse from '@/components/ActivityPulse';
 
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
@@ -120,11 +121,10 @@ export default function Index() {
                   ))}
                   <span className="ml-1 font-medium text-foreground">4.9/5</span>
                 </span>
-                <span className="text-border">|</span>
-                <span className="flex items-center gap-1.5">
-                  <Bird className="h-4 w-4 text-primary" />
-                  Ny app – var en av de första!
-                </span>
+              </motion.div>
+
+              <motion.div {...fadeUp(0.3)}>
+                <ActivityPulse />
               </motion.div>
 
               <motion.div {...fadeUp(0.35)} className="flex flex-col sm:flex-row gap-3">
@@ -329,7 +329,7 @@ export default function Index() {
               <h3 className="font-serif text-xl text-foreground mb-1">Plus – Månad</h3>
               <p className="text-muted-foreground text-sm mb-6">Flexibelt, ingen bindningstid</p>
               <p className="text-4xl font-bold text-foreground mb-1">19 kr<span className="text-sm font-normal text-muted-foreground">/mån</span></p>
-              <p className="text-xs text-muted-foreground mb-6">Sju dagars gratis provperiod</p>
+              <p className="text-xs text-primary font-medium mb-6">🎁 Sju dagars gratis provperiod – starta idag</p>
               <ul className="space-y-3 mb-8">
                 {plusFeatures.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-foreground">
