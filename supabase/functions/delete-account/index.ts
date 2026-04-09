@@ -36,11 +36,27 @@ Deno.serve(async (req) => {
 
     const userId = user.id;
 
-    // Use service role to delete all user data
+    // Use service role for privileged operations
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
     );
+
+    // Rate limit: max 1 delete-account per 10 minutes per user
+    const { data: allowed } = await supabaseAdmin.rpc('check_rate_limit', {
+      _user_id: userId,
+      _function_name: 'delete-account',
+      _max_requests: 1,
+      _window_minutes: 10,
+    });
+
+    if (allowed === false) {
+      return new Response(JSON.stringify({ error: "Du har redan begärt kontoborttagning nyligen. Vänta några minuter." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "600" },
+      });
+    }
 
     // Delete all user data from all tables (order matters for FK constraints)
     const tables = [

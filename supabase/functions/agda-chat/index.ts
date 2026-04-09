@@ -89,7 +89,6 @@ function buildProactiveInsights(hens: any[], eggs: any[], health: any[]): string
   const insights: string[] = [];
   const today = new Date();
 
-  // Check for hens that haven't laid eggs recently
   if (hens.length > 0 && eggs.length > 0) {
     const henEggDates: Record<string, string> = {};
     eggs.forEach((e: any) => {
@@ -111,7 +110,6 @@ function buildProactiveInsights(hens: any[], eggs: any[], health: any[]): string
     });
   }
 
-  // Check for declining egg production
   if (eggs.length >= 14) {
     const lastWeek = eggs.filter((e: any) => {
       const d = new Date(e.date);
@@ -130,7 +128,6 @@ function buildProactiveInsights(hens: any[], eggs: any[], health: any[]): string
     }
   }
 
-  // Recent health concerns
   if (health.length > 0) {
     const recentHealth = health.filter((h: any) => {
       const diff = (today.getTime() - new Date(h.date).getTime()) / 86400000;
@@ -141,7 +138,6 @@ function buildProactiveInsights(hens: any[], eggs: any[], health: any[]): string
     }
   }
 
-  // Seasonal tips
   const month = today.getMonth();
   if (month >= 8 && month <= 10) {
     insights.push("🍂 Det är ruggsäsong – minskad äggproduktion är helt normalt. Ge extra protein!");
@@ -171,6 +167,27 @@ serve(async (req) => {
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) throw new Error("Ej autentiserad");
+
+    // Rate limit: max 20 messages per minute per user
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    const { data: allowed } = await adminClient.rpc('check_rate_limit', {
+      _user_id: user.id,
+      _function_name: 'agda-chat',
+      _max_requests: 20,
+      _window_minutes: 1,
+    });
+
+    if (allowed === false) {
+      return new Response(JSON.stringify({ error: "Du skickar meddelanden för snabbt. Vänta en stund och försök igen! 🐔" }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+      });
+    }
 
     const { message, history = [] } = await req.json();
     if (!message) throw new Error("Meddelande saknas");
