@@ -260,9 +260,9 @@ export default function Dashboard() {
 
   const forecast = weatherData?.daily;
 
-  // Adaptive visibility
-  const userCreatedAt = user?.created_at ? new Date(user.created_at) : null;
-  const daysSinceSignup = userCreatedAt ? Math.floor((Date.now() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  // Adaptive visibility - use egg data to determine user maturity instead of created_at
+  const firstEggDate = eggs.length > 0 ? new Date(Math.min(...eggs.map((e: any) => new Date(e.date).getTime()))) : null;
+  const daysSinceFirstEgg = firstEggDate ? Math.floor((Date.now() - firstEggDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
   const hasImported = localStorage.getItem('honsgarden-imported') === '1';
   const showImportCard = !hasImported && daysSinceSignup < 7;
   const hasFeedRecords = (feedRecords as any[]).length > 0;
