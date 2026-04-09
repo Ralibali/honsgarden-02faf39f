@@ -263,17 +263,11 @@ export default function Index() {
             <p className="text-sm text-muted-foreground">Omdömen från riktiga användare</p>
           </motion.div>
 
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5"
-          >
-            {testimonials.map((t) => (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+            {testimonials.map((t, i) => (
               <motion.div
                 key={t.name}
-                variants={staggerItem}
+                {...fadeUp(i * 0.1)}
                 className="p-6 rounded-2xl bg-card border border-border shadow-sm"
               >
                 <div className="flex gap-0.5 mb-3">
@@ -286,7 +280,7 @@ export default function Index() {
                 <p className="text-xs text-muted-foreground">{t.meta}</p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
