@@ -7,10 +7,7 @@ import LandingFooter from '@/components/LandingFooter';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Egg, ArrowRight, BarChart2, Bird, Heart, Star, Check, Bot,
-  Smartphone, Wheat, ChevronDown,
-} from 'lucide-react';
+import { Egg, ArrowRight, ChartBar as BarChart2, Bird, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown } from 'lucide-react';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
@@ -55,7 +52,7 @@ const faqs = [
   { q: 'Hur många hönor kan jag ha i gratisversionen?', a: 'Upp till 10 hönor. Plus ger obegränsat antal.' },
   { q: 'Vad är AI-karaktären Agda?', a: 'Agda är din digitala hönskonsult som svarar på frågor baserade på din logghistorik – tillgänglig för Plus-medlemmar.' },
   { q: 'Fungerar appen offline?', a: 'Ja. Installera som PWA och logga direkt i hönshuset utan internet.' },
-  { q: 'Behöver jag kreditkort för att prova Plus?', a: 'Nej. 14 dagars gratis provperiod utan kort.' },
+  { q: 'Behöver jag kreditkort för att prova Plus?', a: 'Nej. Sju dagars gratis provperiod utan kort.' },
 ];
 
 const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik'];
