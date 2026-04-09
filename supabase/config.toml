@@ -17,3 +17,5 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = false
   [functions.daily-admin-digest]
     verify_jwt = false
+  [functions.premium-expiry-cron]
+    verify_jwt = false
