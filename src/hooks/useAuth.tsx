@@ -222,7 +222,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     stopPeriodicSync();
     await supabase.auth.signOut();
     setUser(null);
-    localStorage.clear();
+    try {
+      const keysToRemove = Object.keys(localStorage).filter(k =>
+        k.startsWith('sb-') || k.startsWith('supabase') || k.startsWith('honsgarden-') || k === 'theme' || k === '_track_sid'
+      );
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch { /* private browsing */ }
   };
 
   return (

@@ -50,7 +50,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: corsHeaders });
   }
 
-  const displayName = display_name || to.split("@")[0];
+  const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  const displayName = escapeHtml(display_name || to.split("@")[0]);
+  const safeMessage = escapeHtml(message);
   const messageId = `feedback-reply-${feedback_id}-${Date.now()}`;
 
   // 1. Save reply to feedback table
@@ -87,7 +89,7 @@ Deno.serve(async (req) => {
   </p>
 
   <div style="background: hsl(142,32%,96%); border-left: 4px solid hsl(142,32%,34%); border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 0 0 24px;">
-    <p style="font-size: 14px; color: hsl(22,12%,25%); line-height: 1.7; margin: 0; white-space: pre-wrap;">${message}</p>
+    <p style="font-size: 14px; color: hsl(22,12%,25%); line-height: 1.7; margin: 0; white-space: pre-wrap;">${safeMessage}</p>
   </div>
 
   <a href="https://honsgarden.lovable.app/app/settings" style="background-color: hsl(142,32%,34%); color: hsl(35,32%,97%); font-size: 15px; font-weight: 600; border-radius: 14px; padding: 14px 28px; text-decoration: none; display: inline-block;">
@@ -108,7 +110,7 @@ Deno.serve(async (req) => {
       sender_domain: "notify.honsgarden.se",
       subject: "Svar på din feedback – Hönsgården 💬",
       html,
-      text: `Hej ${displayName}! Tack för din feedback. Svar: ${message}`,
+      text: `Hej ${displayName}! Tack för din feedback. Svar: ${safeMessage}`,
       purpose: "transactional",
       label: "feedback-reply",
       message_id: messageId,

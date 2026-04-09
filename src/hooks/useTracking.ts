@@ -35,7 +35,7 @@ export function usePageTracking() {
       user_agent: navigator.userAgent,
       session_id: sessionId,
       device_type: getDeviceType(),
-    } as any).then(() => {});
+    } as any).then(() => {}, () => {});
   }, [location.pathname]);
 }
 
@@ -52,7 +52,7 @@ export function trackClick(eventName: string, opts?: {
     path: window.location.pathname,
     session_id: sessionId,
     metadata: opts?.metadata || {},
-  } as any).then(() => {});
+  } as any).then(() => {}, () => {});
 }
 
 // CTA keywords to auto-detect

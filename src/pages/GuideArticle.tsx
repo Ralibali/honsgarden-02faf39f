@@ -135,8 +135,10 @@ function renderContent(
   }
 
   return DOMPurify.sanitize(raw, {
-    ADD_TAGS: ['iframe', 'video', 'source', 'picture', 'details', 'summary'],
-    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'target', 'rel', 'style', 'title'],
+    ADD_TAGS: ['video', 'source', 'picture', 'details', 'summary'],
+    ADD_ATTR: ['loading', 'target', 'rel', 'title'],
+    FORBID_TAGS: ['iframe', 'object', 'embed', 'form', 'input'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
   });
 }
 

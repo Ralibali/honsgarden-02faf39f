@@ -28,6 +28,31 @@ Deno.serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
+    // SSRF protection: block internal/private IPs and non-HTTP schemes
+    try {
+      const parsed = new URL(formattedUrl);
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        return new Response(JSON.stringify({ success: false, error: 'Only HTTP(S) URLs allowed' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const hostname = parsed.hostname.toLowerCase();
+      const blockedPatterns = [
+        /^localhost$/i, /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
+        /^0\./, /^\[::1?\]$/, /^169\.254\./, /\.internal$/, /\.local$/,
+        /metadata\.google/, /\.amazonaws\.com$/,
+      ];
+      if (blockedPatterns.some(p => p.test(hostname))) {
+        return new Response(JSON.stringify({ success: false, error: 'URL not allowed' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    } catch {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid URL' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     console.log('Scraping product URL:', formattedUrl);
 
     const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
