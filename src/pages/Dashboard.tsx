@@ -464,7 +464,7 @@ export default function Dashboard() {
             </div>
             <span className="data-label">{tipCard.label}</span>
           </div>
-          <p className="text-sm text-foreground leading-relaxed">{tipCard.text}</p>
+          <p className="text-sm text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: tipCard.text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
         </CardContent>
       </Card>
 
