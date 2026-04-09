@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bird } from 'lucide-react';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 interface FooterLink {
   label: string;
@@ -13,10 +14,10 @@ const columns: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Funktioner', href: '#funktioner' },
       { label: 'Priser', href: '#priser' },
+      { label: 'Äggkalkylator', href: '/kalkylator' },
       { label: 'Höns & ägg-guider', href: '/blogg' },
       { label: 'Hur många ägg lägger en höna?', href: '/blogg/hur-manga-agg-lagger-en-hona' },
       { label: 'Nybörjarguide – skaffa höns', href: '/blogg/hobbyhons-nyborjarguide' },
-      { label: 'Ladda ner app', href: '/login?mode=register' },
     ],
   },
   {
@@ -71,6 +72,13 @@ export default function LandingFooter() {
               </nav>
             </div>
           ))}
+        </div>
+
+        {/* Newsletter moved to footer */}
+        <div className="mt-10 pt-8 border-t border-white/10">
+          <div className="max-w-md">
+            <NewsletterSignup variant="inline" />
+          </div>
         </div>
       </div>
     </footer>

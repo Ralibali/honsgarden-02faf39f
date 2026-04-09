@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { X, Egg, ChevronRight } from 'lucide-react';
+import { X, Egg } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const STORAGE_KEY = 'visitor-welcome-dismissed';
+const COOKIE_CONSENT_KEY = 'cookie-consent';
 
 export default function VisitorWelcomePopup() {
   const [show, setShow] = useState(false);
@@ -13,9 +14,25 @@ export default function VisitorWelcomePopup() {
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) return;
 
-    // Show after 4 seconds for faster engagement
-    const timer = setTimeout(() => setShow(true), 4000);
-    return () => clearTimeout(timer);
+    // Wait for cookie consent to be handled first
+    const checkReady = () => {
+      const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+      if (!consent) return false; // Cookie consent not yet handled
+      return true;
+    };
+
+    // Trigger on 50% scroll depth (not timer)
+    const onScroll = () => {
+      if (!checkReady()) return;
+      const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      if (scrollPercent >= 0.5) {
+        setShow(true);
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const dismiss = () => {
@@ -56,9 +73,6 @@ export default function VisitorWelcomePopup() {
                     <Button size="sm" className="rounded-xl text-xs gap-1 h-8">
                       <Egg className="h-3 w-3" /> Skapa konto gratis
                     </Button>
-                  </Link>
-                  <Link to="/blogg" onClick={dismiss} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
-                    Läs bloggen <ChevronRight className="h-3 w-3" />
                   </Link>
                 </div>
               </div>
