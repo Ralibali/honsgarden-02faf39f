@@ -155,6 +155,49 @@ export default function OnboardingGuide() {
     }
   };
 
+  const loadDemoData = async () => {
+    if (!user?.id) return;
+    setLoadingDemo(true);
+    try {
+      const demoHens = [
+        { name: 'Greta', breed: 'Barnevelder', color: 'Brun', user_id: user.id, hen_type: 'hen', is_active: true },
+        { name: 'Astrid', breed: 'Sussex', color: 'Vit', user_id: user.id, hen_type: 'hen', is_active: true },
+        { name: 'Signe', breed: 'Maran', color: 'Koppar', user_id: user.id, hen_type: 'hen', is_active: true },
+      ];
+      const { data: insertedHens, error: henErr } = await supabase.from('hens').insert(demoHens).select();
+      if (henErr) throw henErr;
+
+      // Generate 14 days of egg data
+      const eggLogs: any[] = [];
+      const today = new Date();
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const hen = insertedHens![Math.floor(Math.random() * insertedHens!.length)];
+        eggLogs.push({
+          date: dateStr,
+          count: Math.floor(Math.random() * 3) + 1,
+          hen_id: hen.id,
+          user_id: user.id,
+        });
+      }
+      const { error: eggErr } = await supabase.from('egg_logs').insert(eggLogs);
+      if (eggErr) throw eggErr;
+
+      // Mark as demo data for potential cleanup
+      localStorage.setItem('honsgarden-demo-data', '1');
+      setCreatedHenName('Greta, Astrid & Signe');
+      setStep(2);
+      await markDone();
+      toast({ title: '🎉 Exempeldata laddat!', description: '3 hönor och 14 dagars äggdata har skapats.' });
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoadingDemo(false);
+    }
+  };
+
   // Confetti CSS animation
   const confettiEmojis = ['🎉', '🥚', '🐔', '✨', '💚', '🌟'];
 
