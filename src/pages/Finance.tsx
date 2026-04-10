@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, TrendingUp, TrendingDown, Coins, ShoppingCart, Minus, Users, Loader2, Trash2, Download } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Coins, ShoppingCart, Minus, Users, Loader2, Trash2, Download, BarChart3 } from 'lucide-react';
 import { downloadCSV, downloadPDF } from '@/lib/exportUtils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
