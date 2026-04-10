@@ -251,7 +251,9 @@ export default function Index() {
       </section>
 
       {/* ═══════ TESTIMONIALS (moved BEFORE pricing) ═══════ */}
-      <section className="relative z-10 py-20 sm:py-28 bg-secondary/50">
+      <section className="relative z-10 py-20 sm:py-28"
+        style={{ background: 'linear-gradient(180deg, hsl(var(--secondary)/0.3) 0%, hsl(var(--secondary)/0.5) 40%, hsl(var(--secondary)/0.3) 100%)' }}
+      >
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-12">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vad hönsägare säger</h2>
