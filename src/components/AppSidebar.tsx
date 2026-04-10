@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock, Bot, PieChart, Upload } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Lock, Bot, PieChart, Upload, CalendarDays } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +34,7 @@ const secondaryNav = [
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
   { title: 'Översikt', url: '/app/overview', icon: PieChart, premium: true },
   { title: 'Premium', url: '/app/premium', icon: Crown },
+  { title: 'Säsongskalender', url: '/app/calendar', icon: CalendarDays },
   { title: 'Importera data', url: '/app/import', icon: Upload },
   { title: 'Inställningar', url: '/app/settings', icon: Settings },
   { title: 'Admin', url: '/app/admin', icon: Shield, adminOnly: true },
