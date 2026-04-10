@@ -38,6 +38,7 @@ export default function OnboardingGuide() {
   const [henBreed, setHenBreed] = useState('');
   const [henBirthDate, setHenBirthDate] = useState('');
   const [saving, setSaving] = useState(false);
+  const [loadingDemo, setLoadingDemo] = useState(false);
   const [createdHenName, setCreatedHenName] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
