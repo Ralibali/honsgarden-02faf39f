@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, TrendingUp, TrendingDown, Coins, ShoppingCart, Minus, Users, Loader2, Trash2, Download } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Coins, ShoppingCart, Minus, Users, Loader2, Trash2, Download, BarChart3 } from 'lucide-react';
 import { downloadCSV, downloadPDF } from '@/lib/exportUtils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,6 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { PremiumGate } from '@/components/PremiumGate';
+import FinancialInsights from '@/components/FinancialInsights';
+import { useQuery as useRQQuery } from '@tanstack/react-query';
 
 const INCOME_CATEGORIES = [
   { value: 'egg_sales', label: 'Äggförsäljning' },
@@ -47,6 +49,11 @@ export default function Finance() {
     queryFn: () => api.getTransactions(),
   });
 
+  const { data: eggs = [] } = useRQQuery({
+    queryKey: ['eggs'],
+    queryFn: () => api.getEggs(),
+    staleTime: 60_000,
+  });
   const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const selectedCategory = categories.find(c => c.value === form.category);
   const isOther = form.category === 'other';
@@ -235,11 +242,16 @@ export default function Finance() {
         <Tabs value={view} onValueChange={setView}>
           <TabsList>
             <TabsTrigger value="overview">Översikt</TabsTrigger>
+            <TabsTrigger value="insights" className="gap-1.5">
+              <BarChart3 className="h-3.5 w-3.5" /> Analys
+            </TabsTrigger>
             <TabsTrigger value="customers">Kategorier</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        {view === 'overview' ? (
+        {view === 'insights' ? (
+          <FinancialInsights transactions={transactions as any} eggs={eggs as any} />
+        ) : view === 'overview' ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <Card className="bg-card border-border border-l-4 border-l-success shadow-sm">
