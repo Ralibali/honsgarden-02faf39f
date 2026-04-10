@@ -82,69 +82,62 @@ export default function Index() {
       <LandingNavbar />
 
       {/* ═══════ HERO ═══════ */}
-      <section className="relative min-h-screen flex items-center pt-16"
+      <section className="relative flex flex-col justify-center pt-24 pb-10 sm:min-h-screen sm:pt-16 sm:pb-8"
         style={{ background: 'linear-gradient(135deg, #f5f0e8 0%, #eef5ec 50%, #f5f0e8 100%)' }}
       >
-        <picture className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <source srcSet="/hero-home.webp" type="image/webp" />
-          <img src="/hero-home.jpg" alt="" width={1920} height={2880} fetchPriority="high" decoding="async" className="w-full h-full object-cover opacity-[0.08]" />
-        </picture>
 
         <div className="container max-w-6xl mx-auto px-5 sm:px-6 relative z-10">
-          <div className="max-w-3xl">
-              <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-4">
+          <div className="max-w-2xl mx-auto text-center lg:text-left lg:mx-0 lg:max-w-3xl">
+              <motion.div {...fadeUp(0)} className="flex items-center justify-center lg:justify-start gap-2 mb-3">
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1">
-                  ✅ Gratis att börja – ingen bindningstid
+                  ✅ Gratis – ingen bindningstid
                 </Badge>
               </motion.div>
 
               <motion.h1
                 {...fadeUp(0.05)}
-                className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground leading-[1.08] mb-5"
+                className="font-serif text-[2rem] sm:text-5xl md:text-6xl text-foreground leading-[1.08] mb-3 sm:mb-5"
               >
-                Ha full koll på din flock – från ägg till ekonomi
+                Ha koll på din flock – <span className="text-primary">från ägg till ekonomi</span>
               </motion.h1>
 
               <motion.p
-                {...fadeUp(0.15)}
-                className="text-base sm:text-xl text-muted-foreground max-w-lg leading-relaxed mb-6"
+                {...fadeUp(0.08)}
+                className="text-sm sm:text-xl text-muted-foreground max-w-lg mx-auto lg:mx-0 leading-relaxed mb-4 sm:mb-6"
               >
-                Äggloggare och hönsapp för hobbyhönsägare i Sverige. Logga på 5 sekunder – direkt i hönshuset.
+                Logga ägg, spåra hälsa och räkna foderkostnad. På 5 sekunder – direkt i hönshuset.
               </motion.p>
 
-              {/* Social proof row */}
-              <motion.div {...fadeUp(0.25)} className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
-                <span className="flex items-center gap-1">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
-                  ))}
-                  <span className="ml-1 font-medium text-foreground">4.9/5</span>
-                </span>
-              </motion.div>
-
-              <motion.div {...fadeUp(0.3)}>
-                <ActivityPulse />
-              </motion.div>
-
-              <motion.div {...fadeUp(0.35)} className="flex flex-col sm:flex-row gap-3">
-                <Button asChild size="lg" className="h-13 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+              <motion.div {...fadeUp(0.12)} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-4">
+                <Button asChild size="lg" className="h-12 sm:h-13 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
                   <a href="/login?mode=register">
                     Skapa konto gratis
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-13 px-8 text-base border-primary/30 text-primary hover:bg-primary/5">
+                <Button asChild variant="outline" size="lg" className="h-12 sm:h-13 px-8 text-base border-primary/30 text-primary hover:bg-primary/5">
                   <a href="#sa-funkar-det">Se hur det fungerar</a>
                 </Button>
               </motion.div>
 
-              <motion.p {...fadeUp(0.45)} className="text-xs text-muted-foreground mt-3">
-                Inget kreditkort · Konto på 10 sekunder
-              </motion.p>
+              <motion.div {...fadeUp(0.15)} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} className="h-3 w-3 fill-warning text-warning" />
+                  ))}
+                  <span className="ml-1 font-medium text-foreground">4.9/5</span>
+                </span>
+                <span className="hidden sm:inline">·</span>
+                <span>Inget kreditkort · Konto på 10 sekunder</span>
+              </motion.div>
+
+              <motion.div {...fadeUp(0.18)} className="mt-3 flex justify-center lg:justify-start">
+                <ActivityPulse />
+              </motion.div>
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 animate-bounce hidden sm:block">
           <ChevronDown className="h-6 w-6 text-muted-foreground/40" />
         </div>
       </section>
