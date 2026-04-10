@@ -9,12 +9,14 @@ import {
   Users, Crown, MessageSquare, BarChart3, Loader2, Trash2,
   Shield, TrendingUp, Egg, CheckCircle2, XCircle, Clock, FileCheck, Search, CalendarDays, BookOpen, Link2, Eye, Bell, Send, Mail, Lightbulb, RefreshCw
 } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import BlogEditor from '@/components/admin/BlogEditor';
 import NotificationSender from '@/components/admin/NotificationSender';
 import GlossaryManager from '@/components/admin/GlossaryManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserInsightsDashboard from '@/components/admin/UserInsightsDashboard';
 import UserDetailModal from '@/components/admin/UserDetailModal';
+import RevenueDashboard from '@/components/admin/RevenueDashboard';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -189,6 +191,9 @@ export default function Admin() {
           <TabsTrigger value="insights" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Lightbulb className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Insikter</span><span className="sm:hidden">💡</span>
           </TabsTrigger>
+          <TabsTrigger value="revenue" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <DollarSign className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Intäkter</span><span className="sm:hidden">💰</span>
+          </TabsTrigger>
           <TabsTrigger value="analytics" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Eye className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Analys</span><span className="sm:hidden">📊</span>
           </TabsTrigger>
@@ -215,6 +220,10 @@ export default function Admin() {
         {/* Insights tab */}
         <TabsContent value="insights" className="space-y-3">
           <UserInsightsDashboard />
+        </TabsContent>
+
+        <TabsContent value="revenue" className="space-y-3">
+          <RevenueDashboard />
         </TabsContent>
 
         {/* Analytics tab */}
