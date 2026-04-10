@@ -424,6 +424,6 @@ export default function Index() {
 
       <Suspense fallback={null}><LandingFooter /></Suspense>
     </main>
-    </LazyMotion>
+    </>
   );
 }
