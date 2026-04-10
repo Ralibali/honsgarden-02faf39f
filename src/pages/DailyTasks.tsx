@@ -301,6 +301,7 @@ export default function DailyTasks() {
                         }`}
                       >
                         <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                          <span className="text-sm">{s.emoji}</span>
                           {exists && <Check className="h-3 w-3 text-success" />}
                           {s.title}
                         </p>
