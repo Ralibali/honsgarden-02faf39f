@@ -134,7 +134,7 @@ export default function Index() {
               </motion.div>
 
               <motion.div {...fadeUp(0.18)} className="mt-3 flex justify-center lg:justify-start">
-                <ActivityPulse />
+                <Suspense fallback={null}><ActivityPulse /></Suspense>
               </motion.div>
           </div>
         </div>
@@ -423,7 +423,8 @@ export default function Index() {
         </div>
       </section>
 
-      <LandingFooter />
+      <Suspense fallback={null}><LandingFooter /></Suspense>
     </main>
+    </LazyMotion>
   );
 }
