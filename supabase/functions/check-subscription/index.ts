@@ -7,6 +7,51 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ELIGIBLE_STATUSES = new Set(["active", "trialing", "past_due", "unpaid"]);
+const STATUS_PRIORITY: Record<string, number> = {
+  active: 4,
+  trialing: 3,
+  past_due: 2,
+  unpaid: 1,
+};
+
+function getStripeEnd(subscription: Stripe.Subscription): string | null {
+  const endTimestamp = subscription.current_period_end;
+  return typeof endTimestamp === "number"
+    ? new Date(endTimestamp * 1000).toISOString()
+    : null;
+}
+
+function getStripeProductId(subscription: Stripe.Subscription): string | null {
+  const product = subscription.items.data[0]?.price?.product;
+  return typeof product === "string" ? product : product?.id ?? null;
+}
+
+function isEligibleStripeSubscription(subscription: Stripe.Subscription, now: Date): boolean {
+  if (!ELIGIBLE_STATUSES.has(subscription.status)) return false;
+
+  if (subscription.status === "active" || subscription.status === "trialing") {
+    return true;
+  }
+
+  const stripeEnd = getStripeEnd(subscription);
+  return !!stripeEnd && new Date(stripeEnd) > now;
+}
+
+async function safeEnqueueEmail(
+  supabaseClient: ReturnType<typeof createClient>,
+  payload: Record<string, unknown>,
+) {
+  const { error } = await supabaseClient.rpc("enqueue_email", {
+    queue_name: "transactional_emails",
+    payload,
+  });
+
+  if (error) {
+    console.error("[check-subscription] enqueue_email failed", error.message);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,7 +60,7 @@ serve(async (req) => {
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    { auth: { persistSession: false } },
   );
 
   try {
@@ -28,39 +73,48 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Auth error: ${userError.message}`);
+
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('subscription_status, premium_expires_at')
-      .eq('user_id', user.id)
+      .from("profiles")
+      .select("subscription_status, premium_expires_at")
+      .eq("user_id", user.id)
       .maybeSingle();
 
     const now = new Date();
     const premiumExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-    const hasLifetimePremium = profile?.subscription_status === 'premium' && !profile.premium_expires_at;
+    const hasLifetimePremium = profile?.subscription_status === "premium" && !profile.premium_expires_at;
     const hasDatePremium = !!premiumExpiry && premiumExpiry > now;
     const hasUnexpiredPremium = hasLifetimePremium || hasDatePremium;
 
-    // Heal status drift: if expiry is in the future, user should be premium
-    if (hasDatePremium && profile?.subscription_status !== 'premium') {
-      await supabaseClient
-        .from('profiles')
-        .update({ subscription_status: 'premium' })
-        .eq('user_id', user.id);
+    if (hasDatePremium && profile?.subscription_status !== "premium") {
+      const { error } = await supabaseClient
+        .from("profiles")
+        .update({ subscription_status: "premium" })
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("[check-subscription] failed to heal premium drift", error.message);
+      }
     }
 
-    if (customers.data.length === 0) {
-      // Keep manual/trial/admin premium intact; only auto-downgrade if premium has expired.
-      if (profile?.subscription_status === 'premium' && profile.premium_expires_at && new Date(profile.premium_expires_at) <= now) {
-        await supabaseClient
-          .from('profiles')
-          .update({ subscription_status: 'free', premium_expires_at: null })
-          .eq('user_id', user.id);
+    const customers = await stripe.customers.list({ email: user.email, limit: 100 });
+    const customerIds = [...new Set(customers.data.map((customer) => customer.id))];
+
+    if (customerIds.length === 0) {
+      if (profile?.subscription_status === "premium" && profile.premium_expires_at && new Date(profile.premium_expires_at) <= now) {
+        const { error } = await supabaseClient
+          .from("profiles")
+          .update({ subscription_status: "free", premium_expires_at: null })
+          .eq("user_id", user.id);
+
+        if (error) {
+          console.error("[check-subscription] failed to downgrade expired premium without Stripe customer", error.message);
+        }
       }
 
       return new Response(JSON.stringify({
@@ -71,74 +125,58 @@ serve(async (req) => {
       });
     }
 
-    const customerId = customers.data[0].id;
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
+    const subscriptionResponses = await Promise.all(
+      customerIds.map((customerId) => stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 100,
+      })),
+    );
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    const eligibleSubscriptions = subscriptionResponses
+      .flatMap((response) => response.data)
+      .filter((subscription) => isEligibleStripeSubscription(subscription, now))
+      .sort((a, b) => {
+        const statusDiff = (STATUS_PRIORITY[b.status] ?? 0) - (STATUS_PRIORITY[a.status] ?? 0);
+        if (statusDiff !== 0) return statusDiff;
+        return (b.current_period_end ?? 0) - (a.current_period_end ?? 0);
+      });
+
+    const stripeSubscription = eligibleSubscriptions[0] ?? null;
+    const hasStripeSubscription = !!stripeSubscription;
+
     let subscriptionEnd = profile?.premium_expires_at ?? null;
-    let productId = null;
+    let productId: string | null = null;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
-      let stripeEnd: string | null = null;
-      try {
-        const endTimestamp = subscription.current_period_end;
-        if (endTimestamp && typeof endTimestamp === 'number') {
-          stripeEnd = new Date(endTimestamp * 1000).toISOString();
-        }
-      } catch {
-        // Skip if date parsing fails
-      }
-      productId = subscription.items.data[0].price.product;
-
-      const wasNotPremium = profile?.subscription_status !== 'premium';
-
-      // Keep the LATER of Stripe period end vs existing premium expiry
-      // (so trial/admin/achievement days are not overwritten)
+    if (stripeSubscription) {
+      const stripeEnd = getStripeEnd(stripeSubscription);
       const existingExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
       const stripeExpiry = stripeEnd ? new Date(stripeEnd) : null;
-      
+
       if (existingExpiry && stripeExpiry && existingExpiry > stripeExpiry) {
-        subscriptionEnd = profile!.premium_expires_at;
+        subscriptionEnd = profile.premium_expires_at;
       } else if (stripeEnd) {
         subscriptionEnd = stripeEnd;
       }
 
-      await supabaseClient
-        .from('profiles')
-        .update({ subscription_status: 'premium', premium_expires_at: subscriptionEnd })
-        .eq('user_id', user.id);
+      productId = getStripeProductId(stripeSubscription);
+      const wasNotPremium = profile?.subscription_status !== "premium";
 
-      // Send admin notification on new premium upgrade
+      const { error: updateError } = await supabaseClient
+        .from("profiles")
+        .update({ subscription_status: "premium", premium_expires_at: subscriptionEnd })
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        throw new Error(`Profile update error: ${updateError.message}`);
+      }
+
       if (wasNotPremium) {
         const ts = Date.now();
-
-        // 1. Admin notification
-        await supabaseClient.rpc('enqueue_email', {
-          queue_name: 'transactional_emails',
-          payload: {
-            to: 'info@auroramedia.se',
-            from: 'Hönsgården <noreply@notify.honsgarden.se>',
-            sender_domain: 'notify.honsgarden.se',
-            subject: 'Ny premiumbetalning på Hönsgården!',
-            html: `<h2>Ny premiummedlem! 🎉</h2><p><strong>E-post:</strong> ${user.email}</p><p><strong>Prenumeration:</strong> aktiv</p><p><strong>Slutdatum:</strong> ${subscriptionEnd || 'okänt'}</p>`,
-            text: `Ny premiumbetalning: ${user.email} (slutdatum: ${subscriptionEnd || 'okänt'})`,
-            purpose: 'transactional',
-            label: 'admin-premium-upgrade',
-            message_id: `premium-admin-${user.id}-${ts}`,
-            queued_at: new Date().toISOString(),
-          },
-        });
-
-        // 2. User welcome-to-premium email 🎉
         const endFormatted = subscriptionEnd
-          ? new Date(subscriptionEnd).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })
-          : '';
-        const logoUrl = 'https://sikbymtrbhrofysgkqsj.supabase.co/storage/v1/object/public/email-assets/logo-honsgarden.png';
+          ? new Date(subscriptionEnd).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" })
+          : "";
+        const logoUrl = "https://sikbymtrbhrofysgkqsj.supabase.co/storage/v1/object/public/email-assets/logo-honsgarden.png";
         const premiumHtml = `
 <div style="font-family: 'Inter', Arial, sans-serif; max-width: 520px; padding: 36px 28px; background: #ffffff;">
   <img src="${logoUrl}" width="140" alt="Hönsgården" style="margin: 0 0 28px;" />
@@ -163,7 +201,7 @@ serve(async (req) => {
     </table>
   </div>
 
-  ${endFormatted ? `<p style="font-size: 13px; color: hsl(22,12%,55%); margin: 0 0 20px;">Din Premium gäller till <strong>${endFormatted}</strong>.</p>` : ''}
+  ${endFormatted ? `<p style="font-size: 13px; color: hsl(22,12%,55%); margin: 0 0 20px;">Din Premium gäller till <strong>${endFormatted}</strong>.</p>` : ""}
 
   <a href="https://honsgarden.lovable.app/app" style="background-color: hsl(142,32%,34%); color: hsl(35,32%,97%); font-size: 15px; font-weight: 600; border-radius: 14px; padding: 14px 28px; text-decoration: none; display: inline-block;">
     Utforska Premium →
@@ -174,44 +212,58 @@ serve(async (req) => {
   </p>
 </div>`;
 
-        await supabaseClient.rpc('enqueue_email', {
-          queue_name: 'transactional_emails',
-          payload: {
+        await Promise.allSettled([
+          safeEnqueueEmail(supabaseClient, {
+            to: "info@auroramedia.se",
+            from: "Hönsgården <noreply@notify.honsgarden.se>",
+            sender_domain: "notify.honsgarden.se",
+            subject: "Ny premiumbetalning på Hönsgården!",
+            html: `<h2>Ny premiummedlem! 🎉</h2><p><strong>E-post:</strong> ${user.email}</p><p><strong>Prenumeration:</strong> ${stripeSubscription.status}</p><p><strong>Slutdatum:</strong> ${subscriptionEnd || "okänt"}</p>`,
+            text: `Ny premiumbetalning: ${user.email} (${stripeSubscription.status}, slutdatum: ${subscriptionEnd || "okänt"})`,
+            purpose: "transactional",
+            label: "admin-premium-upgrade",
+            message_id: `premium-admin-${user.id}-${ts}`,
+            queued_at: new Date().toISOString(),
+          }),
+          safeEnqueueEmail(supabaseClient, {
             to: user.email,
-            from: 'Hönsgården <noreply@notify.honsgarden.se>',
-            sender_domain: 'notify.honsgarden.se',
-            subject: 'Tack för att du blev Premium! 🌟',
+            from: "Hönsgården <noreply@notify.honsgarden.se>",
+            sender_domain: "notify.honsgarden.se",
+            subject: "Tack för att du blev Premium! 🌟",
             html: premiumHtml,
-            text: `Tack för att du uppgraderade till Premium! Dina nya fördelar: avancerad statistik, obegränsade höns, veckorapporter, achievements och AI-tips.${endFormatted ? ` Gäller till ${endFormatted}.` : ''} Utforska: https://honsgarden.lovable.app/app`,
-            purpose: 'transactional',
-            label: 'user-premium-welcome',
+            text: `Tack för att du uppgraderade till Premium! Dina nya fördelar: avancerad statistik, obegränsade höns, veckorapporter, achievements och AI-tips.${endFormatted ? ` Gäller till ${endFormatted}.` : ""} Utforska: https://honsgarden.lovable.app/app`,
+            purpose: "transactional",
+            label: "user-premium-welcome",
             message_id: `premium-user-${user.id}-${ts}`,
             queued_at: new Date().toISOString(),
-          },
-        });
+          }),
+        ]);
       }
-    } else {
-      // If Stripe has no active subscription, preserve manual/trial premium while valid.
-      if (profile?.subscription_status === 'premium' && profile.premium_expires_at && new Date(profile.premium_expires_at) <= now) {
-        await supabaseClient
-          .from('profiles')
-          .update({ subscription_status: 'free', premium_expires_at: null })
-          .eq('user_id', user.id);
-        subscriptionEnd = null;
+    } else if (profile?.subscription_status === "premium" && profile.premium_expires_at && new Date(profile.premium_expires_at) <= now) {
+      const { error } = await supabaseClient
+        .from("profiles")
+        .update({ subscription_status: "free", premium_expires_at: null })
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("[check-subscription] failed to downgrade expired premium without eligible Stripe subscription", error.message);
       }
+
+      subscriptionEnd = null;
     }
 
-    const subscribed = hasActiveSub || hasUnexpiredPremium;
-
     return new Response(JSON.stringify({
-      subscribed,
+      subscribed: hasStripeSubscription || hasUnexpiredPremium,
       product_id: productId,
       subscription_end: subscriptionEnd,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[check-subscription] fatal error", message);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
