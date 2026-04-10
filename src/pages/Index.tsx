@@ -282,7 +282,9 @@ export default function Index() {
       </section>
 
       {/* ═══════ PRICING (now with free tier) ═══════ */}
-      <section id="priser" className="relative z-10 py-20 sm:py-28 bg-card/50">
+      <section id="priser" className="relative z-10 py-20 sm:py-28"
+        style={{ background: 'linear-gradient(180deg, hsl(var(--secondary)/0.3) 0%, hsl(var(--card)/0.5) 30%, hsl(var(--card)/0.5) 70%, hsl(var(--background)) 100%)' }}
+      >
         <div className="container max-w-5xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-10">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Välj den plan som passar dig</h2>
