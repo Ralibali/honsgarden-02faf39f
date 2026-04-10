@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowRight, X, Bird, Egg } from 'lucide-react';
+import { ArrowRight, X, Bird, Egg, Sparkles, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +38,7 @@ export default function OnboardingGuide() {
   const [henBreed, setHenBreed] = useState('');
   const [henBirthDate, setHenBirthDate] = useState('');
   const [saving, setSaving] = useState(false);
+  const [loadingDemo, setLoadingDemo] = useState(false);
   const [createdHenName, setCreatedHenName] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -154,6 +155,49 @@ export default function OnboardingGuide() {
     }
   };
 
+  const loadDemoData = async () => {
+    if (!user?.id) return;
+    setLoadingDemo(true);
+    try {
+      const demoHens = [
+        { name: 'Greta', breed: 'Barnevelder', color: 'Brun', user_id: user.id, hen_type: 'hen', is_active: true },
+        { name: 'Astrid', breed: 'Sussex', color: 'Vit', user_id: user.id, hen_type: 'hen', is_active: true },
+        { name: 'Signe', breed: 'Maran', color: 'Koppar', user_id: user.id, hen_type: 'hen', is_active: true },
+      ];
+      const { data: insertedHens, error: henErr } = await supabase.from('hens').insert(demoHens).select();
+      if (henErr) throw henErr;
+
+      // Generate 14 days of egg data
+      const eggLogs: any[] = [];
+      const today = new Date();
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const hen = insertedHens![Math.floor(Math.random() * insertedHens!.length)];
+        eggLogs.push({
+          date: dateStr,
+          count: Math.floor(Math.random() * 3) + 1,
+          hen_id: hen.id,
+          user_id: user.id,
+        });
+      }
+      const { error: eggErr } = await supabase.from('egg_logs').insert(eggLogs);
+      if (eggErr) throw eggErr;
+
+      // Mark as demo data for potential cleanup
+      localStorage.setItem('honsgarden-demo-data', '1');
+      setCreatedHenName('Greta, Astrid & Signe');
+      setStep(2);
+      await markDone();
+      toast({ title: '🎉 Exempeldata laddat!', description: '3 hönor och 14 dagars äggdata har skapats.' });
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoadingDemo(false);
+    }
+  };
+
   // Confetti CSS animation
   const confettiEmojis = ['🎉', '🥚', '🐔', '✨', '💚', '🌟'];
 
@@ -198,7 +242,17 @@ export default function OnboardingGuide() {
                       Kom igång <ArrowRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors">
+                  <div className="mt-4 pt-3 border-t border-border/40">
+                    <button
+                      onClick={loadDemoData}
+                      disabled={loadingDemo}
+                      className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors py-2 rounded-xl hover:bg-primary/5"
+                    >
+                      {loadingDemo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                      {loadingDemo ? 'Skapar exempeldata...' : 'Fyll med exempeldata istället'}
+                    </button>
+                  </div>
+                  <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-2 hover:text-muted-foreground transition-colors">
                     Hoppa över
                   </button>
                 </div>
