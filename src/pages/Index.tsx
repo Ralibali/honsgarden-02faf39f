@@ -16,20 +16,20 @@ const ActivityPulse = lazy(() => import('@/components/ActivityPulse'));
 import appMockup from '@/assets/app-mockup-hero.png';
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 } as const,
+  initial: { opacity: 0, y: 14 } as const,
   whileInView: { opacity: 1, y: 0 } as const,
-  viewport: { once: true, margin: '-60px' },
-  transition: { duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+  viewport: { once: true, margin: '-80px' },
+  transition: { duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
 });
 
 const staggerContainer = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.06 } },
 };
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
 };
 
 /* ─── Data ─── */
