@@ -91,8 +91,7 @@ export default function Index() {
         </picture>
 
         <div className="container max-w-6xl mx-auto px-5 sm:px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div>
+          <div className="max-w-3xl">
               <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1">
                   ✅ Gratis att börja – ingen bindningstid
@@ -142,18 +141,6 @@ export default function Index() {
               <motion.p {...fadeUp(0.45)} className="text-xs text-muted-foreground mt-3">
                 Inget kreditkort · Konto på 10 sekunder
               </motion.p>
-            </div>
-
-            {/* App mockup */}
-            <motion.div {...fadeUp(0.3)} className="flex justify-center">
-              <img
-                src={appMockup}
-                alt="Hönsgården app – dashboard med äggloggning, statistik och väder"
-                width={500}
-                height={640}
-                className="w-[280px] sm:w-[340px] lg:w-[420px]"
-              />
-            </motion.div>
           </div>
         </div>
 
@@ -168,6 +155,17 @@ export default function Index() {
           <motion.div {...fadeUp()} className="text-center mb-10">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-2">Så enkelt kommer du igång</h2>
             <p className="text-sm text-muted-foreground">Tre steg – ingen app-nedladdning behövs</p>
+          </motion.div>
+
+          <motion.div {...fadeUp(0.1)} className="mb-10 sm:mb-12 flex justify-center">
+            <img
+              src={appMockup}
+              alt="Hönsgården app – dashboard med äggloggning, statistik och väder"
+              width={500}
+              height={640}
+              className="w-full max-w-[320px] sm:max-w-[380px]"
+              loading="lazy"
+            />
           </motion.div>
 
           <motion.div
