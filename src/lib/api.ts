@@ -939,6 +939,47 @@ export async function adminAcceptTerms() {
   return {};
 }
 
+// ==================== EGG GOALS ====================
+
+async function getEggGoals() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  const { data, error } = await supabase
+    .from('egg_goals' as any)
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data as any[];
+}
+
+async function upsertEggGoal(goal: { period: string; target_count: number; is_active?: boolean; id?: string }) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  if (goal.id) {
+    const { data, error } = await supabase
+      .from('egg_goals' as any)
+      .update({ target_count: goal.target_count, period: goal.period, is_active: goal.is_active ?? true } as any)
+      .eq('id', goal.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
+  const { data, error } = await supabase
+    .from('egg_goals' as any)
+    .insert({ user_id: user.id, period: goal.period, target_count: goal.target_count } as any)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function deleteEggGoal(id: string) {
+  const { error } = await supabase.from('egg_goals' as any).delete().eq('id', id);
+  if (error) throw error;
+}
+
 // Legacy compatibility: export as api object for existing imports
 export const api = {
   getHens, createHen, updateHen, deleteHen, getHenProfile, markHenSeen,
@@ -964,6 +1005,7 @@ export const api = {
   getStreak, touchStreak,
   getRankingSummary, getFlockStatistics, getFlockHealth,
   getInsights, getAgdaInboxToday,
+  getEggGoals, upsertEggGoal, deleteEggGoal,
   adminCheck, adminStats, adminUsers, adminSubscriptions,
   adminFeedback, adminUpdateFeedbackStatus, adminReplyFeedback, adminDeleteUser, adminUpdateSubscription,
   adminAcceptTerms,
