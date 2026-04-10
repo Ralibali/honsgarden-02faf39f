@@ -20,6 +20,74 @@ import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 
+function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
+  const [count, setCount] = useState('1');
+  const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleQuickLog = async () => {
+    if (!count || Number(count) <= 0) return;
+    setSaving(true);
+    try {
+      await api.createEggRecord({
+        date: new Date().toISOString().split('T')[0],
+        count: Number(count),
+        hen_id: henId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['eggs'] });
+      queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
+      toast({ title: `🥚 ${count} ägg loggat för ${henName}!` });
+      setCount('1');
+    } catch (err: any) {
+      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card className="border-primary/15 shadow-sm bg-primary/[0.02]">
+      <CardContent className="p-4">
+        <p className="text-xs font-medium text-foreground mb-2.5 flex items-center gap-1.5">
+          <Plus className="h-3.5 w-3.5 text-primary" /> Snabblogga ägg för {henName}
+        </p>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0 rounded-xl"
+              onClick={() => setCount(String(Math.max(1, Number(count) - 1)))}
+            >−</Button>
+            <Input
+              type="number"
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+              className="w-16 h-9 text-center rounded-xl font-semibold"
+              min={1}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0 rounded-xl"
+              onClick={() => setCount(String(Number(count) + 1))}
+            >+</Button>
+          </div>
+          <Button
+            size="sm"
+            className="h-9 rounded-xl gap-1.5 flex-1"
+            onClick={handleQuickLog}
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Egg className="h-3.5 w-3.5" />}
+            Logga idag
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function HenProfile() {
   const { henId } = useParams<{ henId: string }>();
   const navigate = useNavigate();
