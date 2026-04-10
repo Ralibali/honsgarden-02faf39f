@@ -400,7 +400,7 @@ export default function Index() {
       </section>
 
       {/* ═══════ FINAL CTA ═══════ */}
-      <section className="relative z-10 pb-20">
+      <section className="relative z-10 pb-10 sm:pb-16">
         <div className="container max-w-3xl mx-auto px-5 sm:px-6">
           <motion.div
             {...fadeUp()}
