@@ -242,6 +242,9 @@ export default function Finance() {
         <Tabs value={view} onValueChange={setView}>
           <TabsList>
             <TabsTrigger value="overview">Översikt</TabsTrigger>
+            <TabsTrigger value="insights" className="gap-1.5">
+              <BarChart3 className="h-3.5 w-3.5" /> Analys
+            </TabsTrigger>
             <TabsTrigger value="customers">Kategorier</TabsTrigger>
           </TabsList>
         </Tabs>
