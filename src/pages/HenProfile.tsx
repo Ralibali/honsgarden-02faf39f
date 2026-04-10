@@ -13,11 +13,12 @@ import {
 } from '@/components/ui/dialog';
 import {
   ArrowLeft, Egg, Heart, Calendar, TrendingUp, Share2, Edit2, Loader2, Save, X,
-  Link2, Facebook, Instagram, Mail, MessageSquare,
+  Link2, Facebook, Instagram, Mail, MessageSquare, Plus, BarChart3,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 export default function HenProfile() {
   const { henId } = useParams<{ henId: string }>();
