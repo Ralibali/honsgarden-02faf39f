@@ -155,12 +155,13 @@ export default function Index() {
 
           <motion.div {...fadeUp(0.1)} className="mb-10 sm:mb-12 flex justify-center">
             <img
-              src={appMockup}
+              src="/app-mockup-hero.png"
               alt="Hönsgården app – dashboard med äggloggning, statistik och väder"
               width={500}
               height={640}
               className="w-full max-w-[320px] sm:max-w-[380px]"
               loading="lazy"
+              decoding="async"
             />
           </motion.div>
 
