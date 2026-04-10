@@ -78,8 +78,9 @@ export default function Index() {
   });
 
   return (
+    <LazyMotion features={domAnimation}>
     <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">
-      <StickyMobileCTA />
+      <Suspense fallback={null}><StickyMobileCTA /></Suspense>
       <LandingNavbar />
 
       {/* ═══════ HERO ═══════ */}
@@ -155,7 +156,7 @@ export default function Index() {
 
           <motion.div {...fadeUp(0.1)} className="mb-10 sm:mb-12 flex justify-center">
             <img
-              src="/app-mockup-hero.png"
+              src={appMockup}
               alt="Hönsgården app – dashboard med äggloggning, statistik och väder"
               width={500}
               height={640}
