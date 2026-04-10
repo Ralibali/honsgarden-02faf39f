@@ -300,6 +300,36 @@ export type Database = {
         }
         Relationships: []
       }
+      egg_goals: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          period: string
+          target_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          period?: string
+          target_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          period?: string
+          target_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       egg_logs: {
         Row: {
           count: number
