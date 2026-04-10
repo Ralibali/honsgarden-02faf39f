@@ -82,7 +82,7 @@ export default function Index() {
       <LandingNavbar />
 
       {/* ═══════ HERO ═══════ */}
-      <section className="relative min-h-[85svh] sm:min-h-screen flex items-center pt-20 pb-6 sm:pt-16 sm:pb-8"
+      <section className="relative flex flex-col justify-center pt-24 pb-10 sm:min-h-screen sm:pt-16 sm:pb-8"
         style={{ background: 'linear-gradient(135deg, #f5f0e8 0%, #eef5ec 50%, #f5f0e8 100%)' }}
       >
 
