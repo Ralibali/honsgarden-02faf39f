@@ -55,6 +55,23 @@ export default function Finance() {
     queryFn: () => api.getEggs(),
     staleTime: 60_000,
   });
+
+  const { data: coopSettings } = useRQQuery({
+    queryKey: ['coop-settings'],
+    queryFn: () => api.getCoopSettings(),
+  });
+
+  const budgetTarget = (coopSettings as any)?.settings?.budget_target ?? null;
+  const incomeTarget = (coopSettings as any)?.settings?.income_target ?? null;
+
+  const handleBudgetSave = async (costTarget: number | null, incTarget: number | null) => {
+    const currentSettings = (coopSettings as any)?.settings || {};
+    await api.updateCoopSettings({
+      settings: { ...currentSettings, budget_target: costTarget, income_target: incTarget },
+    });
+    queryClient.invalidateQueries({ queryKey: ['coop-settings'] });
+    toast({ title: 'Månadsmål sparade!' });
+  };
   const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const selectedCategory = categories.find(c => c.value === form.category);
   const isOther = form.category === 'other';
