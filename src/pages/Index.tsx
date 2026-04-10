@@ -344,7 +344,7 @@ export default function Index() {
               className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md bg-primary/5"
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
+                <Badge className="bg-primary text-primary-foreground text-xs px-3 py-1">
                   Spara 35%
                 </Badge>
               </div>
