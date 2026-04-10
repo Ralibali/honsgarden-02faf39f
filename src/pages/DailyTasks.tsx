@@ -14,14 +14,14 @@ import { PremiumGate } from '@/components/PremiumGate';
 import { Badge } from '@/components/ui/badge';
 
 const SUGGESTED_CHORES = [
-  { title: 'Samla ägg', description: 'Kolla boet och plocka dagens ägg' },
-  { title: 'Fyll på vatten', description: 'Se till att vattenskålarna är fulla och rena' },
-  { title: 'Fyll på foder', description: 'Kontrollera foderbehållarna' },
-  { title: 'Stäng luckan', description: 'Stäng hönsluckan på kvällen för säkerheten' },
-  { title: 'Öppna luckan', description: 'Öppna luckan på morgonen så hönsen kommer ut' },
-  { title: 'Kontrollera hälsa', description: 'Snabb koll att alla hönor mår bra' },
-  { title: 'Rengör hönshuset', description: 'Byt strö och rengör ströbädden' },
-  { title: 'Kontrollera stängslet', description: 'Se till att inhägnaden är hel och säker' },
+  { title: 'Samla ägg', description: 'Kolla boet och plocka dagens ägg', emoji: '🥚' },
+  { title: 'Fyll på vatten', description: 'Se till att vattenskålarna är fulla och rena', emoji: '💧' },
+  { title: 'Fyll på foder', description: 'Kontrollera foderbehållarna', emoji: '🌾' },
+  { title: 'Stäng luckan', description: 'Stäng hönsluckan på kvällen för säkerheten', emoji: '🌙' },
+  { title: 'Öppna luckan', description: 'Öppna luckan på morgonen så hönsen kommer ut', emoji: '☀️' },
+  { title: 'Kontrollera hälsa', description: 'Snabb koll att alla hönor mår bra', emoji: '❤️' },
+  { title: 'Rengör hönshuset', description: 'Byt strö och rengör ströbädden', emoji: '🧹' },
+  { title: 'Kontrollera stängslet', description: 'Se till att inhägnaden är hel och säker', emoji: '🔒' },
 ];
 
 const RECURRENCE_LABELS: Record<string, string> = {
