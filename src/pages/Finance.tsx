@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { PremiumGate } from '@/components/PremiumGate';
 import FinancialInsights from '@/components/FinancialInsights';
+import BudgetGoalsWidget from '@/components/BudgetGoalsWidget';
 import { useQuery as useRQQuery } from '@tanstack/react-query';
 
 const INCOME_CATEGORIES = [
