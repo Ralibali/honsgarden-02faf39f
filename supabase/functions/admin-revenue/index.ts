@@ -7,6 +7,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Only Hönsgården products
+const HONSGARDEN_PRODUCT_IDS = new Set([
+  "prod_U1nXjyO3PyPsWS", // Hönsgården årsprenumeration
+  "prod_U1nW7q52KG8tm4", // Hönsgården årsbetalning
+  "prod_U1nP6PS9ifMlFy", // Hönsgården månadsvis
+]);
+
+function isHonsgardenSub(sub: Stripe.Subscription): boolean {
+  return sub.items.data.some((item) => {
+    const productId = typeof item.price.product === "string"
+      ? item.price.product
+      : (item.price.product as Stripe.Product)?.id;
+    return HONSGARDEN_PRODUCT_IDS.has(productId);
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -19,7 +35,6 @@ Deno.serve(async (req) => {
   );
 
   try {
-    // Auth check — admin only
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
     const token = authHeader.replace("Bearer ", "");
@@ -35,7 +50,16 @@ Deno.serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not set");
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // 1. Fetch ALL subscriptions (active + trialing + past_due + canceled)
+    // Fetch Hönsgården prices for filtering charges
+    const honsgardenPriceIds = new Set<string>();
+    for (const prodId of HONSGARDEN_PRODUCT_IDS) {
+      const prices = await stripe.prices.list({ product: prodId, limit: 100 });
+      for (const p of prices.data) {
+        honsgardenPriceIds.add(p.id);
+      }
+    }
+
+    // 1. Fetch subscriptions (only Hönsgården)
     const allSubs: Stripe.Subscription[] = [];
     for (const status of ["active", "trialing", "past_due", "canceled"] as const) {
       let hasMore = true;
@@ -46,7 +70,9 @@ Deno.serve(async (req) => {
           limit: 100,
           ...(startingAfter ? { starting_after: startingAfter } : {}),
         });
-        allSubs.push(...batch.data);
+        for (const sub of batch.data) {
+          if (isHonsgardenSub(sub)) allSubs.push(sub);
+        }
         hasMore = batch.has_more;
         if (batch.data.length > 0) {
           startingAfter = batch.data[batch.data.length - 1].id;
@@ -62,14 +88,6 @@ Deno.serve(async (req) => {
     let mrr = 0;
     let monthlyCount = 0;
     let yearlyCount = 0;
-    const recentPayments: Array<{
-      email: string;
-      amount: number;
-      currency: string;
-      date: string;
-      plan: string;
-      status: string;
-    }> = [];
 
     for (const sub of activeSubs) {
       const item = sub.items.data[0];
@@ -87,38 +105,60 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3. Recent charges (last 30 days)
+    // 3. Recent invoices for Hönsgården subscriptions (last 30 days)
     const thirtyDaysAgo = Math.floor((now.getTime() - 30 * 86400000) / 1000);
-    const charges = await stripe.charges.list({
-      limit: 50,
+    const recentPayments: Array<{
+      email: string;
+      amount: number;
+      currency: string;
+      date: string;
+      plan: string;
+      status: string;
+    }> = [];
+
+    // Use invoices filtered by subscription to only get Hönsgården payments
+    const invoices = await stripe.invoices.list({
+      limit: 100,
       created: { gte: thirtyDaysAgo },
+      status: "paid",
     });
 
-    for (const charge of charges.data) {
-      if (charge.status !== "succeeded") continue;
+    for (const inv of invoices.data) {
+      // Check if any line item belongs to a Hönsgården price
+      const isHG = inv.lines?.data?.some((line) => {
+        const priceId = typeof line.price === "string" ? line.price : line.price?.id;
+        return priceId && honsgardenPriceIds.has(priceId);
+      });
+      if (!isHG) continue;
+
       recentPayments.push({
-        email: charge.billing_details?.email ?? charge.receipt_email ?? "okänd",
-        amount: charge.amount / 100,
-        currency: charge.currency.toUpperCase(),
-        date: new Date(charge.created * 1000).toISOString(),
-        plan: charge.description ?? "Premium",
-        status: charge.status,
+        email: inv.customer_email ?? "okänd",
+        amount: (inv.amount_paid ?? 0) / 100,
+        currency: (inv.currency ?? "sek").toUpperCase(),
+        date: new Date((inv.created ?? 0) * 1000).toISOString(),
+        plan: inv.lines?.data?.[0]?.description ?? "Premium",
+        status: "succeeded",
       });
     }
 
-    // 4. Monthly revenue trend (last 6 months from charges)
+    // 4. Monthly revenue trend (last 6 months)
     const sixMonthsAgo = Math.floor((now.getTime() - 180 * 86400000) / 1000);
-    const allCharges = await stripe.charges.list({
+    const allInvoices = await stripe.invoices.list({
       limit: 100,
       created: { gte: sixMonthsAgo },
+      status: "paid",
     });
 
     const monthlyRevenue: Record<string, number> = {};
-    for (const ch of allCharges.data) {
-      if (ch.status !== "succeeded") continue;
-      const d = new Date(ch.created * 1000);
+    for (const inv of allInvoices.data) {
+      const isHG = inv.lines?.data?.some((line) => {
+        const priceId = typeof line.price === "string" ? line.price : line.price?.id;
+        return priceId && honsgardenPriceIds.has(priceId);
+      });
+      if (!isHG) continue;
+      const d = new Date((inv.created ?? 0) * 1000);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      monthlyRevenue[key] = (monthlyRevenue[key] ?? 0) + ch.amount / 100;
+      monthlyRevenue[key] = (monthlyRevenue[key] ?? 0) + (inv.amount_paid ?? 0) / 100;
     }
 
     const revenueTrend = Object.entries(monthlyRevenue)
@@ -134,7 +174,7 @@ Deno.serve(async (req) => {
     const totalRevenue30d = recentPayments.reduce((sum, p) => sum + p.amount, 0);
 
     const result = {
-      mrr: Math.round(mrr / 100), // Convert from öre to kr
+      mrr: Math.round(mrr / 100),
       arr: Math.round((mrr / 100) * 12),
       active_subscribers: activeSubs.length,
       monthly_subscribers: monthlyCount,
