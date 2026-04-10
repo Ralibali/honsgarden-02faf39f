@@ -7,7 +7,7 @@ import { Egg, ArrowRight, ChartBar as BarChart2, Heart, Star, Check, Bot, Smartp
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
-import { motion, LazyMotion, domAnimation } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 /* Lazy-loaded below-fold components */
 const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
@@ -78,7 +78,7 @@ export default function Index() {
   });
 
   return (
-    <LazyMotion features={domAnimation}>
+    <>
     <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">
       <Suspense fallback={null}><StickyMobileCTA /></Suspense>
       <LandingNavbar />
@@ -424,6 +424,6 @@ export default function Index() {
 
       <Suspense fallback={null}><LandingFooter /></Suspense>
     </main>
-    </LazyMotion>
+    </>
   );
 }
