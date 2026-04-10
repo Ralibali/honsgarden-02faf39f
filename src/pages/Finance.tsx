@@ -49,6 +49,11 @@ export default function Finance() {
     queryFn: () => api.getTransactions(),
   });
 
+  const { data: eggs = [] } = useRQQuery({
+    queryKey: ['eggs'],
+    queryFn: () => api.getEggs(),
+    staleTime: 60_000,
+  });
   const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const selectedCategory = categories.find(c => c.value === form.category);
   const isOther = form.category === 'other';
