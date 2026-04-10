@@ -249,7 +249,9 @@ export default function Finance() {
           </TabsList>
         </Tabs>
 
-        {view === 'overview' ? (
+        {view === 'insights' ? (
+          <FinancialInsights transactions={transactions as any} eggs={eggs as any} />
+        ) : view === 'overview' ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <Card className="bg-card border-border border-l-4 border-l-success shadow-sm">
