@@ -78,7 +78,7 @@ export default function Index() {
   });
 
   return (
-    <LazyMotion features={domAnimation}>
+    <LazyMotion features={domMax}>
     <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">
       <Suspense fallback={null}><StickyMobileCTA /></Suspense>
       <LandingNavbar />
