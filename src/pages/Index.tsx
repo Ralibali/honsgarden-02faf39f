@@ -12,8 +12,8 @@ import { motion, LazyMotion, domAnimation } from 'framer-motion';
 /* Lazy-loaded below-fold components */
 const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
+const ActivityPulse = lazy(() => import('@/components/ActivityPulse'));
 import appMockup from '@/assets/app-mockup-hero.png';
-
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 } as const,
