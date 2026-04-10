@@ -370,7 +370,9 @@ export default function Index() {
       </section>
 
       {/* ═══════ FAQ ═══════ */}
-      <section className="relative z-10 py-20 sm:py-28">
+      <section className="relative z-10 py-20 sm:py-28"
+        style={{ background: 'linear-gradient(180deg, hsl(var(--background)) 0%, #f5f0e8 50%, hsl(var(--background)) 100%)' }}
+      >
         <div className="container max-w-2xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-10">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-2">Vanliga frågor</h2>
