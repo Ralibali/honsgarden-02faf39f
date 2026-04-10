@@ -242,7 +242,17 @@ export default function OnboardingGuide() {
                       Kom igång <ArrowRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors">
+                  <div className="mt-4 pt-3 border-t border-border/40">
+                    <button
+                      onClick={loadDemoData}
+                      disabled={loadingDemo}
+                      className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors py-2 rounded-xl hover:bg-primary/5"
+                    >
+                      {loadingDemo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                      {loadingDemo ? 'Skapar exempeldata...' : 'Fyll med exempeldata istället'}
+                    </button>
+                  </div>
+                  <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-2 hover:text-muted-foreground transition-colors">
                     Hoppa över
                   </button>
                 </div>
