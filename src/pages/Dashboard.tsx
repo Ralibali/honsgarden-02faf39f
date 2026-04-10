@@ -23,6 +23,7 @@ import AchievementNudge from '@/components/AchievementNudge';
 import TrialExpiryBanner from '@/components/TrialExpiryBanner';
 import { motion } from 'framer-motion';
 import { buildAchievements } from '@/components/Achievements';
+import EggGoalsWidget from '@/components/EggGoalsWidget';
 
 function getGreeting() {
   const now = new Date();
@@ -384,6 +385,9 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {/* ─── Egg Goals ─── */}
+      <EggGoalsWidget eggs={eggs} />
 
       {/* ─── 3. Streak + Top hen ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
