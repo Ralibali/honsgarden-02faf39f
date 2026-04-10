@@ -143,7 +143,9 @@ export default function Index() {
       </section>
 
       {/* ═══════ HOW IT WORKS (3 steps) ═══════ */}
-      <section id="sa-funkar-det" className="relative z-10 py-16 sm:py-20 bg-card/60 border-y border-border">
+      <section id="sa-funkar-det" className="relative z-10 py-16 sm:py-20"
+        style={{ background: 'linear-gradient(180deg, #f5f0e8 0%, #eef5ec 40%, hsl(var(--background)) 100%)' }}
+      >
         <div className="container max-w-4xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center mb-10">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground mb-2">Så enkelt kommer du igång</h2>
