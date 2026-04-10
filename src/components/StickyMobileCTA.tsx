@@ -9,9 +9,8 @@ export default function StickyMobileCTA() {
 
   useEffect(() => {
     const onScroll = () => {
-      // Only show after scrolling past 60vh AND welcome popup dismissed
-      const welcomeDismissed = localStorage.getItem(WELCOME_DISMISSED_KEY);
-      setVisible(window.scrollY > window.innerHeight * 0.6 && !!welcomeDismissed);
+      // Show after scrolling past 40vh
+      setVisible(window.scrollY > window.innerHeight * 0.4);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
