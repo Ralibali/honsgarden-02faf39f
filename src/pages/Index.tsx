@@ -151,7 +151,7 @@ export default function Index() {
                 alt="Hönsgården app – dashboard med äggloggning, statistik och väder"
                 width={500}
                 height={640}
-                className="w-[280px] sm:w-[340px] lg:w-[420px] drop-shadow-2xl"
+                className="w-[280px] sm:w-[340px] lg:w-[420px]"
               />
             </motion.div>
           </div>
