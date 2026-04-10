@@ -1,34 +1,35 @@
-import React from 'react';
-import StickyMobileCTA from '@/components/StickyMobileCTA';
+import React, { lazy, Suspense } from 'react';
 import LandingNavbar from '@/components/LandingNavbar';
-import LandingFooter from '@/components/LandingFooter';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Egg, ArrowRight, ChartBar as BarChart2, Bird, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown, Calculator } from 'lucide-react';
+import { Egg, ArrowRight, ChartBar as BarChart2, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown } from 'lucide-react';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
-import { motion } from 'framer-motion';
-import appMockup from '@/assets/app-mockup-hero.png';
-import ActivityPulse from '@/components/ActivityPulse';
+import { motion, LazyMotion, domAnimation } from 'framer-motion';
 
+/* Lazy-loaded below-fold components */
+const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
+const LandingFooter = lazy(() => import('@/components/LandingFooter'));
+const ActivityPulse = lazy(() => import('@/components/ActivityPulse'));
+import appMockup from '@/assets/app-mockup-hero.png';
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 } as const,
+  initial: { opacity: 0, y: 14 } as const,
   whileInView: { opacity: 1, y: 0 } as const,
-  viewport: { once: true, margin: '-60px' },
-  transition: { duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+  viewport: { once: true, margin: '-80px' },
+  transition: { duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
 });
 
 const staggerContainer = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.06 } },
 };
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
 };
 
 /* ─── Data ─── */
@@ -77,8 +78,9 @@ export default function Index() {
   });
 
   return (
+    <LazyMotion features={domAnimation}>
     <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">
-      <StickyMobileCTA />
+      <Suspense fallback={null}><StickyMobileCTA /></Suspense>
       <LandingNavbar />
 
       {/* ═══════ HERO ═══════ */}
@@ -132,13 +134,13 @@ export default function Index() {
               </motion.div>
 
               <motion.div {...fadeUp(0.18)} className="mt-3 flex justify-center lg:justify-start">
-                <ActivityPulse />
+                <Suspense fallback={null}><ActivityPulse /></Suspense>
               </motion.div>
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 animate-bounce hidden sm:block">
-          <ChevronDown className="h-6 w-6 text-muted-foreground/40" />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden sm:block opacity-40">
+          <ChevronDown className="h-6 w-6 text-muted-foreground" />
         </div>
       </section>
 
@@ -160,6 +162,7 @@ export default function Index() {
               height={640}
               className="w-full max-w-[320px] sm:max-w-[380px]"
               loading="lazy"
+              decoding="async"
             />
           </motion.div>
 
@@ -220,8 +223,7 @@ export default function Index() {
               <motion.div
                 key={f.title}
                 variants={staggerItem}
-                whileHover={{ scale: 1.01, boxShadow: '0 10px 30px -8px rgba(0,0,0,0.1)' }}
-                className="relative p-6 rounded-2xl bg-card border border-border shadow-sm transition-all duration-200"
+                className="relative p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow duration-200"
               >
                 {f.badge && (
                   <Badge className="absolute top-4 right-4 bg-warning/20 text-warning-foreground border-warning/30 text-[10px] font-bold">
@@ -342,7 +344,7 @@ export default function Index() {
               className="relative p-6 sm:p-8 rounded-2xl border-2 border-primary shadow-md bg-primary/5"
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground animate-pulse text-xs px-3 py-1">
+                <Badge className="bg-primary text-primary-foreground text-xs px-3 py-1">
                   Spara 35%
                 </Badge>
               </div>
@@ -407,20 +409,21 @@ export default function Index() {
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
               Börja logga ägg, håll koll på flocken och se om du går plus eller minus. Helt gratis.
             </p>
-            <motion.div whileHover={{ scale: 1.02 }}>
-              <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)]">
+            <div>
+              <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:scale-[1.02] transition-transform">
                 <a href="/login?mode=register">
                   Skapa konto på 10 sekunder
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
-            </motion.div>
+            </div>
             <p className="text-xs text-muted-foreground mt-4">Helt kostnadsfritt · Avsluta när du vill</p>
           </motion.div>
         </div>
       </section>
 
-      <LandingFooter />
+      <Suspense fallback={null}><LandingFooter /></Suspense>
     </main>
+    </LazyMotion>
   );
 }
