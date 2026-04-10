@@ -278,6 +278,50 @@ export default function HenProfile() {
         </div>
       )}
 
+      {/* Quick egg log */}
+      {!isRooster && !editing && <QuickEggLog henId={henId!} henName={hen.name} />}
+
+      {/* Production trend (last 14 days) */}
+      {!isRooster && !editing && henEggs.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="h-4 w-4 text-primary/60" />
+              <span className="font-serif text-sm text-foreground">Senaste 14 dagarna</span>
+            </div>
+            <div className="flex items-end gap-1 h-16">
+              {Array.from({ length: 14 }).map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (13 - i));
+                const dateStr = d.toISOString().split('T')[0];
+                const count = dailyCounts[dateStr] || 0;
+                const maxCount = Math.max(...Object.values(dailyCounts), 1);
+                const h = count > 0 ? Math.max(15, (count / maxCount) * 100) : 5;
+                return (
+                  <motion.div
+                    key={i}
+                    className="flex-1 flex flex-col items-center gap-0.5"
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                  >
+                    <motion.div
+                      className={`w-full rounded-t-md ${count > 0 ? 'bg-primary/30' : 'bg-muted/40'}`}
+                      initial={{ height: 0 }}
+                      animate={{ height: `${h}%` }}
+                      transition={{ duration: 0.4, delay: i * 0.03 }}
+                      style={{ minHeight: count > 0 ? 8 : 3 }}
+                    />
+                    {i % 2 === 0 && (
+                      <span className="text-[8px] text-muted-foreground">{d.getDate()}</span>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Best day */}
       {bestDay && !editing && (
         <Card className="border-warning/15 shadow-sm">
