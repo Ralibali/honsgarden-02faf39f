@@ -290,7 +290,7 @@ export default function Finance() {
                   <p className="stat-number text-xl sm:text-2xl text-foreground">{monthExpense} kr</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card border-border border-l-4 border-l-primary shadow-sm">
+            <Card className="bg-card border-border border-l-4 border-l-primary shadow-sm">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <Coins className="h-4 w-4 text-primary" />
@@ -300,6 +300,14 @@ export default function Finance() {
                 </CardContent>
               </Card>
             </div>
+
+            <BudgetGoalsWidget
+              monthExpense={monthExpense}
+              monthIncome={monthIncome}
+              budgetTarget={budgetTarget}
+              incomeTarget={incomeTarget}
+              onSave={handleBudgetSave}
+            />
 
             <Card className="bg-card border-border shadow-sm">
               <CardHeader className="px-4 sm:px-6">
