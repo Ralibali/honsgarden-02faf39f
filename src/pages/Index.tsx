@@ -1,17 +1,18 @@
-import React from 'react';
-import StickyMobileCTA from '@/components/StickyMobileCTA';
+import React, { lazy, Suspense } from 'react';
 import LandingNavbar from '@/components/LandingNavbar';
-import LandingFooter from '@/components/LandingFooter';
 import { useSeo } from '@/hooks/useSeo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Egg, ArrowRight, ChartBar as BarChart2, Bird, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown, Calculator } from 'lucide-react';
+import { Egg, ArrowRight, ChartBar as BarChart2, Heart, Star, Check, Bot, Smartphone, Wheat, ChevronDown } from 'lucide-react';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
-import { motion } from 'framer-motion';
-import appMockup from '@/assets/app-mockup-hero.png';
-import ActivityPulse from '@/components/ActivityPulse';
+import { motion, LazyMotion, domAnimation } from 'framer-motion';
+
+/* Lazy-loaded below-fold components */
+const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
+const LandingFooter = lazy(() => import('@/components/LandingFooter'));
+const ActivityPulse = lazy(() => import('@/components/ActivityPulse'));
 
 /* ─── Animation helpers ─── */
 const fadeUp = (delay = 0) => ({
