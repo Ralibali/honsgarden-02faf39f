@@ -7,7 +7,7 @@ import { Egg, ArrowRight, ChartBar as BarChart2, Heart, Star, Check, Bot, Smartp
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
-import { motion, LazyMotion, domMax } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 /* Lazy-loaded below-fold components */
 const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
