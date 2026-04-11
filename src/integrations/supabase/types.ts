@@ -1124,6 +1124,13 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_farm_member_display_names: {
+        Args: { _uid: string }
+        Returns: {
+          display_name: string
+          user_id: string
+        }[]
+      }
       get_farm_user_ids: { Args: { _uid: string }; Returns: string[] }
       get_user_farm_ids: { Args: { _uid: string }; Returns: string[] }
       grant_premium_days: {
