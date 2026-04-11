@@ -47,7 +47,7 @@ export function FamilyMembers() {
       ];
       
       const profileMap: Record<string, any> = {};
-      (profiles || []).forEach(p => { profileMap[p.user_id] = p; });
+      (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
       
       return (data as any[]).map((m: any) => ({
         ...m,
