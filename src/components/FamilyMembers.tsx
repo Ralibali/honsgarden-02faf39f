@@ -31,12 +31,20 @@ export function FamilyMembers() {
         .order('joined_at');
       if (error) throw error;
       
-      // Enrich with profile info
-      const userIds = (data as any[]).map((m: any) => m.user_id);
-      const { data: profiles } = await supabase
+      // Enrich with profile info - own profile directly, co-members via safe function
+      const { data: ownProfile } = await supabase
         .from('profiles')
         .select('user_id, display_name, email')
-        .in('user_id', userIds);
+        .eq('user_id', user!.id)
+        .single();
+      
+      const { data: coMemberProfiles } = await supabase
+        .rpc('get_farm_member_display_names', { _uid: user!.id });
+      
+      const profiles = [
+        ...(ownProfile ? [ownProfile] : []),
+        ...(coMemberProfiles || []).map((p: any) => ({ ...p, email: null })),
+      ];
       
       const profileMap: Record<string, any> = {};
       (profiles || []).forEach(p => { profileMap[p.user_id] = p; });
