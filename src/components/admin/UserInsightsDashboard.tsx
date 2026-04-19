@@ -37,7 +37,7 @@ export default function UserInsightsDashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from('profiles')
-        .select('user_id, display_name, email, created_at, subscription_status, premium_expires_at');
+        .select('user_id, display_name, email, created_at, subscription_status, premium_expires_at, is_lifetime_premium');
       return (data || []) as any[];
     },
   });
