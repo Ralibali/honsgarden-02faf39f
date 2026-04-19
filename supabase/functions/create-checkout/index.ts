@@ -32,9 +32,43 @@ serve(async (req) => {
     });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
+    let customerId: string | undefined;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+
+      // Guard: prevent duplicate subscriptions. If the customer already has an
+      // active or trialing subscription, send them to the customer portal instead.
+      const existingSubs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 10,
+      });
+
+      const blockingSub = existingSubs.data.find(
+        (s) => s.status === "active" || s.status === "trialing" || s.status === "past_due"
+      );
+
+      if (blockingSub) {
+        const origin = req.headers.get("origin") || "";
+        const portalSession = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: `${origin}/app/premium`,
+        });
+
+        return new Response(
+          JSON.stringify({
+            error: "already_subscribed",
+            message:
+              "Du har redan en aktiv prenumeration. Vi öppnar kundportalen där du kan hantera den.",
+            portal_url: portalSession.url,
+            subscription_status: blockingSub.status,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 409,
+          }
+        );
+      }
     }
 
     const session = await stripe.checkout.sessions.create({
