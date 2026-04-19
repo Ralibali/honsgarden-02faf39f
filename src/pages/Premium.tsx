@@ -122,8 +122,19 @@ export default function Premium() {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId },
       });
+
+      // Handle "already subscribed" → redirect to customer portal
+      if (data?.error === 'already_subscribed' && data?.portal_url) {
+        toast({
+          title: 'Du har redan en aktiv prenumeration',
+          description: 'Vi öppnar kundportalen där du kan hantera den.',
+        });
+        window.location.href = data.portal_url;
+        return;
+      }
+
       if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.message || data.error);
       if (data?.url) {
         window.location.href = data.url;
       } else {
