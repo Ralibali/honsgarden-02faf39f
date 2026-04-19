@@ -81,13 +81,14 @@ serve(async (req) => {
 
     const { data: profile } = await supabaseClient
       .from("profiles")
-      .select("subscription_status, premium_expires_at")
+      .select("subscription_status, premium_expires_at, is_lifetime_premium")
       .eq("user_id", user.id)
       .maybeSingle();
 
     const now = new Date();
     const premiumExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-    const hasLifetimePremium = profile?.subscription_status === "premium" && !profile.premium_expires_at;
+    // Livstid kräver explicit flagga – aldrig härled från NULL expires_at
+    const hasLifetimePremium = profile?.is_lifetime_premium === true;
     const hasDatePremium = !!premiumExpiry && premiumExpiry > now;
     const hasUnexpiredPremium = hasLifetimePremium || hasDatePremium;
 
