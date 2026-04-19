@@ -901,6 +901,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          is_lifetime_premium: boolean
           preferences: Json
           premium_expires_at: string | null
           referral_code: string | null
@@ -915,6 +916,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_lifetime_premium?: boolean
           preferences?: Json
           premium_expires_at?: string | null
           referral_code?: string | null
@@ -929,6 +931,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_lifetime_premium?: boolean
           preferences?: Json
           premium_expires_at?: string | null
           referral_code?: string | null
@@ -1164,6 +1167,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      set_lifetime_premium: {
+        Args: { _is_lifetime: boolean; _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
