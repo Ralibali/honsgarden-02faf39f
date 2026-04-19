@@ -95,6 +95,8 @@ export default function Admin() {
       api.adminUpdateSubscription(userId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['insights-profiles'] });
       toast({ title: 'Prenumeration uppdaterad' });
     },
     onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
@@ -319,13 +321,13 @@ export default function Admin() {
                           <XCircle className="h-2.5 w-2.5 mr-0.5" /> Ej godkänt
                         </Badge>
                       )}
-                      {user.subscription_status === 'premium' && user.premium_expires_at && (
+                      {user.subscription_status === 'premium' && user.premium_expires_at && !user.is_lifetime_premium && (
                         <span className="text-[9px] text-muted-foreground flex items-center gap-1">
                           <CalendarDays className="h-2.5 w-2.5" />
                           Går ut {new Date(user.premium_expires_at).toLocaleDateString('sv-SE')}
                         </span>
                       )}
-                      {user.subscription_status === 'premium' && !user.premium_expires_at && (
+                      {user.subscription_status === 'premium' && user.is_lifetime_premium && (
                         <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
                       )}
                       <span className="text-[10px] text-muted-foreground ml-auto">
@@ -427,13 +429,15 @@ export default function Admin() {
                         </Button>
                         {user.subscription_status === 'premium' && (
                           <div className="flex flex-col items-end gap-1">
-                            {user.premium_expires_at ? (
+                            {user.is_lifetime_premium ? (
+                              <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
+                            ) : user.premium_expires_at ? (
                               <span className="text-[9px] text-muted-foreground flex items-center gap-1">
                                 <CalendarDays className="h-2.5 w-2.5" />
                                 Går ut {new Date(user.premium_expires_at).toLocaleDateString('sv-SE')}
                               </span>
                             ) : (
-                              <span className="text-[9px] text-success font-medium">♾️ Livstid</span>
+                              <span className="text-[9px] text-warning font-medium">⚠️ Saknar slutdatum</span>
                             )}
                             <Button
                               variant="outline"

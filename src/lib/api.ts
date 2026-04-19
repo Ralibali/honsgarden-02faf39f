@@ -906,6 +906,8 @@ export async function adminDeleteUser(userId: string) {
 
 export async function adminUpdateSubscription(userId: string, data: { is_premium: boolean; days?: string }) {
   if (!data.is_premium) {
+    // Ta bort både premium och livstidsflagga
+    await supabase.rpc('set_lifetime_premium', { _user_id: userId, _is_lifetime: false });
     const { error } = await supabase.from('profiles').update({
       subscription_status: 'free',
       premium_expires_at: null,
@@ -917,14 +919,13 @@ export async function adminUpdateSubscription(userId: string, data: { is_premium
   const selectedDays = data.days ?? '7';
 
   if (selectedDays === 'lifetime') {
-    const { error } = await supabase.from('profiles').update({
-      subscription_status: 'premium',
-      premium_expires_at: null,
-    }).eq('user_id', userId);
+    const { error } = await supabase.rpc('set_lifetime_premium', { _user_id: userId, _is_lifetime: true });
     if (error) throw new Error(error.message);
     return {};
   }
 
+  // Tidsbegränsad premium – ta bort ev. livstidsflagga först, lägg sedan till dagar
+  await supabase.rpc('set_lifetime_premium', { _user_id: userId, _is_lifetime: false });
   const days = Number(selectedDays);
   const safeDays = Number.isFinite(days) && days > 0 ? days : 7;
   const { error } = await supabase.rpc('grant_premium_days', { _user_id: userId, _days: safeDays });
