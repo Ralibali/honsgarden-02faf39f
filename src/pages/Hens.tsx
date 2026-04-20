@@ -481,10 +481,14 @@ export default function Hens() {
             <Card key={hen.id} className={`border-border/50 shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer ${!hen.is_active ? 'opacity-50' : ''}`} onClick={() => navigate(`/app/hens/${hen.id}`)}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
-                    hen.hen_type === 'rooster' ? 'bg-warning/10' : 'bg-accent/10'
-                  }`}>
-                    {getEmoji(hen.hen_type)}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <HenAvatar
+                      henId={hen.id}
+                      henType={hen.hen_type}
+                      imageUrl={hen.image_url}
+                      size="md"
+                      editable
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
