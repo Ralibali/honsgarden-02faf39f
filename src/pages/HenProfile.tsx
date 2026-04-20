@@ -305,6 +305,7 @@ export default function HenProfile() {
                   imageUrl={hen.image_url}
                   size="lg"
                   editable
+                  showProfileActions
                 />
               </div>
               <h1 className="text-2xl font-serif text-foreground mb-1">{hen.name}</h1>
