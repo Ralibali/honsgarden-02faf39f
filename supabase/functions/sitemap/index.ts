@@ -149,6 +149,30 @@ Deno.serve(async (req) => {
     }
   }
 
+  if (settings?.public_routes_enabled) {
+    for (const source of SEO_SOURCES) {
+      const { data: rows } = await supabase
+        .from(source.table)
+        .select("slug, updated_at, last_generated_at")
+        .eq("published", true)
+        .order("updated_at", { ascending: false });
+
+      for (const row of rows ?? []) {
+        const lastmod = (row.updated_at || row.last_generated_at || now).split("T")[0];
+        const loc = `${source.base}/${row.slug}`;
+        xml += `  <url>
+    <loc>${BASE_URL}${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>${source.priority}</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}${loc}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}${loc}" />
+  </url>
+`;
+      }
+    }
+  }
+
   xml += `</urlset>`;
 
   return new Response(xml, {
