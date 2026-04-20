@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -82,6 +82,11 @@ export default function HenAvatar({
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
+
+  useEffect(() => {
+    setDisplayUrl(imageUrl || '');
+  }, [imageUrl]);
 
   const emoji = henType === 'rooster' ? '🐓' : '🐔';
   const sizeClass = SIZES[size];
@@ -101,6 +106,8 @@ export default function HenAvatar({
     }
 
     setUploading(true);
+    const previewUrl = URL.createObjectURL(file);
+    setDisplayUrl(previewUrl);
     try {
       const blob = await compressImage(file);
       const path = `${user.id}/${henId}.webp`;
@@ -124,12 +131,19 @@ export default function HenAvatar({
       const publicUrl = `${signedData.signedUrl}&v=${Date.now()}`;
 
       await api.updateHen(henId, { image_url: publicUrl } as any);
-      queryClient.invalidateQueries({ queryKey: ['hens'] });
-      queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
+      setDisplayUrl(publicUrl);
+      queryClient.setQueryData(['hen-profile', henId], (old: any) => old ? { ...old, image_url: publicUrl } : old);
+      queryClient.setQueryData(['hens'], (old: any) => Array.isArray(old) ? old.map((hen) => hen.id === henId ? { ...hen, image_url: publicUrl } : hen) : old);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['hens'] }),
+        queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] }),
+      ]);
       toast({ title: 'Bild uppladdad! 📷' });
     } catch (err: any) {
+      setDisplayUrl(imageUrl || '');
       toast({ title: 'Uppladdning misslyckades', description: err.message, variant: 'destructive' });
     } finally {
+      URL.revokeObjectURL(previewUrl);
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
     }
@@ -143,6 +157,7 @@ export default function HenAvatar({
       const path = `${user.id}/${henId}.webp`;
       await supabase.storage.from('hen-images').remove([path]);
       await api.updateHen(henId, { image_url: null } as any);
+      setDisplayUrl('');
       queryClient.invalidateQueries({ queryKey: ['hens'] });
       queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
       toast({ title: 'Bild borttagen' });
@@ -165,14 +180,18 @@ export default function HenAvatar({
         } : undefined}
         role={editable && showProfileActions ? 'button' : undefined}
         tabIndex={editable && showProfileActions ? 0 : undefined}
-        aria-label={editable && showProfileActions ? (imageUrl ? 'Byt bild' : 'Ladda upp bild') : undefined}
+        aria-label={editable && showProfileActions ? (displayUrl ? 'Byt bild' : 'Ladda upp bild') : undefined}
       >
-        {imageUrl ? (
+        {displayUrl ? (
           <img
-            src={imageUrl}
+            key={displayUrl}
+            src={displayUrl}
             alt="Höna"
             className="w-full h-full object-cover"
             loading="lazy"
+            onLoad={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'block';
+            }}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
@@ -199,7 +218,7 @@ export default function HenAvatar({
               className={`absolute -bottom-1 -right-1 ${
                 size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'
               } rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`}
-              aria-label={imageUrl ? 'Byt bild' : 'Ladda upp bild'}
+                aria-label={displayUrl ? 'Byt bild' : 'Ladda upp bild'}
             >
               {uploading ? (
                 <Loader2 className={`${iconClass} animate-spin`} />
@@ -208,7 +227,7 @@ export default function HenAvatar({
               )}
             </button>
           )}
-          {imageUrl && !uploading && !showProfileActions && (
+          {displayUrl && !uploading && !showProfileActions && (
             <button
               type="button"
               onClick={handleRemove}
@@ -229,9 +248,9 @@ export default function HenAvatar({
                 className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
               >
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                {imageUrl ? 'Byt bild' : 'Lägg till bild'}
+                {displayUrl ? 'Byt bild' : 'Lägg till bild'}
               </button>
-              {imageUrl && (
+              {displayUrl && (
                 <button
                   type="button"
                   onClick={handleRemove}
