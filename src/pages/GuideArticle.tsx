@@ -716,6 +716,22 @@ export default function GuideArticle() {
         })()}
       </article>
 
+      {toc.length > 0 && (
+        <aside className="hidden lg:block">
+          <nav className="sticky top-24 rounded-2xl border border-border/50 bg-card/70 p-4" aria-label="Innehållsförteckning">
+            <p className="mb-3 text-xs font-medium uppercase text-muted-foreground">Innehåll</p>
+            <ol className="space-y-2 text-sm">
+              {toc.map(item => (
+                <li key={item.id} className={item.level === 3 ? 'pl-3' : ''}>
+                  <a href={`#${item.id}`} className="text-muted-foreground transition-colors hover:text-primary">{item.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </aside>
+      )}
+      </main>
+
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 px-4">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
