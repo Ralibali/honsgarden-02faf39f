@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Edit, Eye, Loader2, Play, Search, Shield, Sparkles } from 'lucide-react';
+import { AlertTriangle, Edit, Eye, Loader2, Play, Plus, Search, Shield, Sparkles } from 'lucide-react';
 import { api } from '@/lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -51,10 +51,22 @@ type SeoConfig = {
   table: 'seo_breeds' | 'seo_problems' | 'seo_care_topics' | 'seo_months';
   categoryField: string;
   categoryLabel: string;
+  categoryRequired?: boolean;
   previewBase: string;
   jsonFields: { key: string; label: string; fields: string[] }[];
   textFields: string[];
 };
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/å/g, 'a')
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
 
 const configs: SeoConfig[] = [
   {
@@ -77,6 +89,7 @@ const configs: SeoConfig[] = [
     table: 'seo_problems',
     categoryField: 'category',
     categoryLabel: 'Kategori',
+    categoryRequired: true,
     previewBase: '/problem',
     textFields: ['summary', 'treatment_overview', 'when_to_call_vet', 'content', 'medical_disclaimer', 'meta_title', 'meta_description', 'og_image_url'],
     jsonFields: [
@@ -95,6 +108,7 @@ const configs: SeoConfig[] = [
     table: 'seo_care_topics',
     categoryField: 'category',
     categoryLabel: 'Kategori',
+    categoryRequired: true,
     previewBase: '/skotsel',
     textFields: ['summary', 'content', 'meta_title', 'meta_description', 'og_image_url'],
     jsonFields: [
@@ -248,6 +262,7 @@ export default function SeoAdmin() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [editing, setEditing] = useState<{ config: SeoConfig; row: SeoRow } | null>(null);
+  const [creating, setCreating] = useState<{ name: string; slug: string; category: string }>({ name: '', slug: '', category: '' });
   const [publishTarget, setPublishTarget] = useState<{ config: SeoConfig; row: SeoRow; next: boolean } | null>(null);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
@@ -297,6 +312,19 @@ export default function SeoAdmin() {
     onError: (error: any) => toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' }),
   });
 
+  const createRowMutation = useMutation({
+    mutationFn: async ({ config, payload }: { config: SeoConfig; payload: Record<string, any> }) => {
+      const { error } = await supabase.from(config.table as any).insert(payload);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seo-admin-rows'] });
+      setCreating({ name: '', slug: '', category: '' });
+      toast({ title: 'SEO-post skapad' });
+    },
+    onError: (error: any) => toast({ title: 'Kunde inte skapa', description: error.message, variant: 'destructive' }),
+  });
+
   const activeConfig = configs.find(config => config.type === activeTab)!;
   const filteredRows = useMemo(() => {
     const rows = rowGroups[activeTab] ?? [];
@@ -315,6 +343,24 @@ export default function SeoAdmin() {
     [...config.textFields, ...config.jsonFields.map(field => field.key)].forEach(key => { patch[key] = row[key] || null; });
     updateRowMutation.mutate({ config, id: row.id, patch });
     setEditing(null);
+  };
+
+  const handleCreate = () => {
+    const name = creating.name.trim();
+    const slug = slugify(creating.slug || creating.name);
+    if (!name || !slug) {
+      toast({ title: 'Namn och slug krävs', variant: 'destructive' });
+      return;
+    }
+    if (activeConfig.categoryRequired && !creating.category.trim()) {
+      toast({ title: `${activeConfig.categoryLabel} krävs`, variant: 'destructive' });
+      return;
+    }
+
+    const payload: Record<string, any> = { name, slug, published: false, generation_status: 'pending' };
+    if (activeConfig.type === 'months') payload.month_number = Number(creating.category) || 1;
+    else if (creating.category.trim()) payload[activeConfig.categoryField] = creating.category.trim();
+    createRowMutation.mutate({ config: activeConfig, payload });
   };
 
   const runGenerate = async (config: SeoConfig, row: SeoRow) => {
@@ -384,13 +430,47 @@ export default function SeoAdmin() {
         </CardContent>
       </Card>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as SeoType)} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value as SeoType);
+        setCreating({ name: '', slug: '', category: '' });
+      }} className="space-y-4">
         <TabsList className="flex w-full overflow-x-auto rounded-xl">
           {configs.map(config => <TabsTrigger key={config.type} value={config.type} className="rounded-lg">{config.label}</TabsTrigger>)}
         </TabsList>
 
         {configs.map(config => (
           <TabsContent key={config.type} value={config.type} className="space-y-4">
+            <Card className="border-border/60">
+              <CardContent className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(160px,220px)_minmax(160px,220px)_auto] sm:items-end">
+                <div className="space-y-1.5">
+                  <Label>Namn</Label>
+                  <Input
+                    value={creating.name}
+                    onChange={(event) => setCreating(prev => ({ ...prev, name: event.target.value, slug: prev.slug || slugify(event.target.value) }))}
+                    placeholder={`Ny ${config.label.toLowerCase().replace(/er$/, '')}...`}
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Slug</Label>
+                  <Input value={creating.slug} onChange={(event) => setCreating(prev => ({ ...prev, slug: slugify(event.target.value) }))} placeholder="url-slug" className="rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{config.categoryLabel}</Label>
+                  <Input
+                    value={creating.category}
+                    onChange={(event) => setCreating(prev => ({ ...prev, category: event.target.value }))}
+                    placeholder={config.type === 'months' ? '1–12' : config.categoryRequired ? 'Obligatorisk' : 'Valfri'}
+                    className="rounded-xl"
+                  />
+                </div>
+                <Button type="button" className="rounded-xl gap-2" onClick={handleCreate} disabled={createRowMutation.isPending}>
+                  {createRowMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  Skapa
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
