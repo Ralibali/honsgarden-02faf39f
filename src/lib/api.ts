@@ -103,9 +103,14 @@ export async function createHen(henData: HenInsert): Promise<Hen> {
 }
 
 export async function updateHen(id: string, henData: HenUpdate): Promise<Hen> {
-  const { data, error } = await supabase.from('hens').update(henData).eq('id', id).select().single();
+  const { data, error } = await supabase.from('hens').update(henData).eq('id', id).select().maybeSingle();
   if (error) throw new Error(error.message);
-  return data;
+  if (data) return data;
+
+  const { data: currentHen, error: fetchError } = await supabase.from('hens').select('*').eq('id', id).maybeSingle();
+  if (fetchError) throw new Error(fetchError.message);
+  if (!currentHen) throw new Error('Hönan kunde inte uppdateras.');
+  return currentHen;
 }
 
 export async function deleteHen(id: string): Promise<void> {
