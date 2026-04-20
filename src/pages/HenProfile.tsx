@@ -19,6 +19,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import HenAvatar from '@/components/HenAvatar';
 
 function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
   const [count, setCount] = useState('1');
