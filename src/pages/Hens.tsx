@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import HenAvatar from '@/components/HenAvatar';
 
 export default function Hens() {
   const navigate = useNavigate();
