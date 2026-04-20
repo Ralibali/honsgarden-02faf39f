@@ -25,8 +25,8 @@ const columns: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Hjälp', href: 'mailto:info@auroramedia.se' },
       { label: 'Kontakt', href: 'mailto:info@auroramedia.se' },
-      { label: 'Integritetspolicy', href: '/terms' },
-      { label: 'Villkor', href: '/terms' },
+      { label: 'Integritetspolicy & GDPR', href: '/terms' },
+      { label: 'Villkor & ansvarsfriskrivning', href: '/terms' },
     ],
   },
   {
@@ -40,30 +40,30 @@ const columns: { title: string; links: FooterLink[] }[] = [
 
 export default function LandingFooter() {
   return (
-    <footer className="relative z-10 bg-[#1c2e1a] text-white/80">
+    <footer className="relative z-10 bg-primary text-primary-foreground/80">
       <div className="container max-w-6xl mx-auto px-5 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           {/* Brand column */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Bird className="h-5 w-5 text-[#7cb36b]" aria-hidden="true" />
-              <span className="font-serif text-lg text-white">Hönsgården</span>
+              <Bird className="h-5 w-5 text-primary-foreground/70" aria-hidden="true" />
+              <span className="font-serif text-lg text-primary-foreground">Hönsgården</span>
             </div>
-            <p className="text-sm text-white/60 leading-relaxed mb-4">
+              <p className="text-sm text-primary-foreground/60 leading-relaxed mb-4">
               Digital äggloggare för moderna hönsägare
             </p>
-            <p className="text-xs text-white/60">© {new Date().getFullYear()} Hönsgården</p>
+            <p className="text-xs text-primary-foreground/60">© {new Date().getFullYear()} Hönsgården</p>
           </div>
 
           {columns.map((col) => (
             <div key={col.title}>
-              <h3 className="font-serif text-sm text-white mb-3">{col.title}</h3>
+              <h3 className="font-serif text-sm text-primary-foreground mb-3">{col.title}</h3>
               <nav className="space-y-2">
                 {col.links.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
-                    className="block text-sm text-white/60 hover:text-white transition-colors"
+                    className="block text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors"
                     {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
                     {link.label}
@@ -75,7 +75,7 @@ export default function LandingFooter() {
         </div>
 
         {/* Newsletter moved to footer */}
-        <div className="mt-10 pt-8 border-t border-white/10">
+        <div className="mt-10 pt-8 border-t border-primary-foreground/10">
           <div className="max-w-md">
             <NewsletterSignup variant="inline" />
           </div>

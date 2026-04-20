@@ -18,11 +18,17 @@ function getDeviceType(): string {
   return 'desktop';
 }
 
+function hasAnalyticsConsent(): boolean {
+  return localStorage.getItem('cookie-consent') === 'accepted';
+}
+
 export function usePageTracking() {
   const location = useLocation();
   const lastPath = useRef('');
 
   useEffect(() => {
+    if (!hasAnalyticsConsent()) return;
+
     const path = location.pathname;
     if (path === lastPath.current) return;
     lastPath.current = path;
@@ -44,6 +50,8 @@ export function trackClick(eventName: string, opts?: {
   elementText?: string;
   metadata?: Record<string, any>;
 }) {
+  if (!hasAnalyticsConsent()) return;
+
   const sessionId = getSessionId();
   supabase.from('click_events').insert({
     event_name: eventName,
