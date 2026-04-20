@@ -35,6 +35,155 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_advertisers: {
+        Row: {
+          adtraction_advertiser_id: string | null
+          base_url: string | null
+          commission_rate: number | null
+          cookie_days: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          pin_domain: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          adtraction_advertiser_id?: string | null
+          base_url?: string | null
+          commission_rate?: number | null
+          cookie_days?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          pin_domain?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          adtraction_advertiser_id?: string | null
+          base_url?: string | null
+          commission_rate?: number | null
+          cookie_days?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          pin_domain?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      affiliate_link_tests: {
+        Row: {
+          adtraction_registered_at: string | null
+          affiliate_url: string
+          id: string
+          notes: string | null
+          product_id: string | null
+          registered_correctly: boolean | null
+          tested_at: string
+          tested_by: string | null
+        }
+        Insert: {
+          adtraction_registered_at?: string | null
+          affiliate_url: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          registered_correctly?: boolean | null
+          tested_at?: string
+          tested_by?: string | null
+        }
+        Update: {
+          adtraction_registered_at?: string | null
+          affiliate_url?: string
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          registered_correctly?: boolean | null
+          tested_at?: string
+          tested_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_link_tests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_products: {
+        Row: {
+          advertiser_id: string | null
+          affiliate_url: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price: string | null
+          product_url: string | null
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id?: string | null
+          affiliate_url?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price?: string | null
+          product_url?: string | null
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string | null
+          affiliate_url?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price?: string | null
+          product_url?: string | null
+          slug?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_products_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertiser_config"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_products_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_comments: {
         Row: {
           content: string
@@ -1072,6 +1221,27 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -1125,9 +1295,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      advertiser_config: {
+        Row: {
+          adtraction_advertiser_id: string | null
+          base_tracking_url: string | null
+          base_url: string | null
+          commission_rate: number | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+          partner_id: string | null
+          pin_domain: string | null
+          slug: string | null
+        }
+        Insert: {
+          adtraction_advertiser_id?: string | null
+          base_tracking_url?: never
+          base_url?: string | null
+          commission_rate?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          partner_id?: never
+          pin_domain?: string | null
+          slug?: string | null
+        }
+        Update: {
+          adtraction_advertiser_id?: string | null
+          base_tracking_url?: never
+          base_url?: string | null
+          commission_rate?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          partner_id?: never
+          pin_domain?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      build_affiliate_url: {
+        Args: { p_advertiser_id: string; p_product_url: string }
+        Returns: string
+      }
       check_rate_limit: {
         Args: {
           _function_name: string
