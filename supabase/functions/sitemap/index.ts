@@ -8,16 +8,16 @@ const responseHeaders = {
 
 const BASE_URL = "https://honsgarden.se";
 
-const CATEGORY_FALLBACKS = [
+const CATEGORIES = [
   "guide", "recension", "tips", "halsa",
   "nyborjare", "raser", "tradgard", "hem", "friluftsliv",
 ];
 
-const SEO_TABLES = [
-  { table: "seo_breeds", path: "/raser", priority: "0.8", changefreq: "monthly" },
-  { table: "seo_problems", path: "/problem", priority: "0.8", changefreq: "monthly" },
-  { table: "seo_care_topics", path: "/skotsel", priority: "0.8", changefreq: "monthly" },
-  { table: "seo_months", path: "/manad", priority: "0.7", changefreq: "monthly" },
+const SEO_SOURCES = [
+  { table: "seo_breeds", base: "/raser", priority: "0.8" },
+  { table: "seo_problems", base: "/problem", priority: "0.8" },
+  { table: "seo_care_topics", base: "/skotsel", priority: "0.7" },
+  { table: "seo_months", base: "/manad", priority: "0.7" },
 ];
 
 function escapeXml(str: string): string {
@@ -45,15 +45,21 @@ Deno.serve(async (req) => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
-  // Collect unique tags and categories from published canonical blog content
+  const { data: settings } = await supabase
+    .from("seo_settings")
+    .select("public_routes_enabled")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  // Collect unique tags
   const allTags = new Set<string>();
-  const allCategories = new Set<string>();
   if (posts) {
     for (const post of posts) {
-      if (post.category) allCategories.add(post.category);
       if (post.tags) {
         for (const tag of post.tags) allTags.add(tag);
       }
+      if (post.category) allTags.add(post.category);
     }
   }
 
@@ -85,8 +91,8 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Category pages. Keep fallbacks so established category URLs remain discoverable.
-  for (const cat of new Set([...CATEGORY_FALLBACKS, ...allCategories])) {
+  // Category pages
+  for (const cat of CATEGORIES) {
     xml += `  <url>
     <loc>${BASE_URL}/blogg/kategori/${cat}</loc>
     <lastmod>${now}</lastmod>
@@ -112,7 +118,7 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Blog posts, canonical only. Legacy /guider URLs redirect to /blogg and must not be in sitemap.
+  // Blog posts (both /blogg/ canonical and /guider/ alternate)
   if (posts) {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
@@ -143,32 +149,24 @@ Deno.serve(async (req) => {
     }
   }
 
-  // SEO content engine pages: only include when public routes are enabled and rows are published.
-  const { data: seoSettings } = await supabase
-    .from("seo_settings")
-    .select("public_routes_enabled")
-    .limit(1)
-    .maybeSingle();
-
-  if (seoSettings?.public_routes_enabled) {
-    for (const entry of SEO_TABLES) {
+  if (settings?.public_routes_enabled) {
+    for (const source of SEO_SOURCES) {
       const { data: rows } = await supabase
-        .from(entry.table)
+        .from(source.table)
         .select("slug, updated_at, last_generated_at")
         .eq("published", true)
         .order("updated_at", { ascending: false });
 
-      if (!rows) continue;
-
-      for (const row of rows) {
+      for (const row of rows ?? []) {
         const lastmod = (row.updated_at || row.last_generated_at || now).split("T")[0];
+        const loc = `${source.base}/${row.slug}`;
         xml += `  <url>
-    <loc>${BASE_URL}${entry.path}/${row.slug}</loc>
+    <loc>${BASE_URL}${loc}</loc>
     <lastmod>${lastmod}</lastmod>
-    <changefreq>${entry.changefreq}</changefreq>
-    <priority>${entry.priority}</priority>
-    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}${entry.path}/${row.slug}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}${entry.path}/${row.slug}" />
+    <changefreq>monthly</changefreq>
+    <priority>${source.priority}</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}${loc}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}${loc}" />
   </url>
 `;
       }

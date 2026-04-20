@@ -67,20 +67,12 @@ export default function Terms() {
             Tjänsten tillhandahålls "i befintligt skick" utan garantier av något slag. Vi garanterar inte oavbruten eller felfri drift och ansvarar inte för indirekt skada, utebliven vinst eller dataförlust utöver vad som följer av tvingande svensk lag.
           </p>
 
-          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">6. Medicinsk, juridisk och ekonomisk friskrivning</h2>
-          <p className="text-sm text-foreground leading-relaxed">
-            All information i Hönsgården, inklusive guider, AI-svar, påminnelser, statistik och rekommendationer, är generell information och ska inte betraktas som veterinärmedicinsk, juridisk, ekonomisk eller annan professionell rådgivning. Du ansvarar själv för beslut som rör dina djur, din verksamhet och din användning av tjänsten.
-          </p>
-          <p className="text-sm text-foreground leading-relaxed">
-            Vid sjukdom, misstänkt smitta, skada, djurskyddsfrågor eller osäkerhet ska du alltid kontakta veterinär, Jordbruksverket, SVA eller annan behörig myndighet. Vi ansvarar inte för skador, förluster, felaktiga beslut, uteblivna åtgärder eller följder av att information i tjänsten används utan professionell bedömning.
-          </p>
-
-          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">7. Ändringar av villkoren</h2>
+          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">6. Ändringar av villkoren</h2>
           <p className="text-sm text-foreground leading-relaxed">
             Vi förbehåller oss rätten att ändra dessa villkor. Vid väsentliga förändringar meddelas du via e-post eller i tjänsten minst 30 dagar före ändringen träder i kraft. Fortsatt användning efter ändring innebär godkännande av de nya villkoren.
           </p>
 
-          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">8. Tillämplig lag & Tvistelösning</h2>
+          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">7. Tillämplig lag & Tvistelösning</h2>
           <p className="text-sm text-foreground leading-relaxed">
             Dessa villkor regleras av svensk lag. Tvister ska i första hand lösas genom dialog. Om vi inte kan enas kan tvisten prövas av Allmänna reklamationsnämnden (ARN) för konsumenter, eller av allmän domstol i Sverige.
           </p>
@@ -194,15 +186,7 @@ export default function Terms() {
               Du kan ändra dina cookieinställningar när som helst via cookie-bannern eller i din webbläsare. Att blockera nödvändiga cookies kan påverka tjänstens funktion.
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">7. Informationsansvar och rådgivning</h2>
-            <p className="text-sm text-foreground leading-relaxed">
-              Hönsgården innehåller information, guider, beräkningar och AI-genererade svar som är avsedda som allmän vägledning. Informationen kan vara ofullständig, inaktuell eller felaktig och ersätter aldrig veterinär, myndighetsbesked, juridisk rådgivning eller annan professionell bedömning.
-            </p>
-            <p className="text-sm text-foreground leading-relaxed">
-              Du är själv ansvarig för att kontrollera uppgifter mot relevanta källor och för att följa gällande lagar, föreskrifter och djurskyddsregler. Vid frågor om djurhälsa, smitta, behandling eller avlivning ska du kontakta veterinär eller behörig myndighet.
-            </p>
-
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">8. Lagringstid</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">7. Lagringstid</h2>
             <p className="text-sm text-foreground leading-relaxed">Vi lagrar dina personuppgifter enligt följande principer:</p>
             <ul className="text-sm text-foreground space-y-1 list-disc pl-5">
               <li><strong>Kontodata och användarinnehåll:</strong> Så länge ditt konto är aktivt</li>
@@ -212,7 +196,7 @@ export default function Terms() {
               <li><strong>Anonymiserad statistik:</strong> Sparas utan tidsgräns (är inte personuppgifter)</li>
             </ul>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">9. Dina rättigheter</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">8. Dina rättigheter</h2>
             <p className="text-sm text-foreground leading-relaxed">Enligt GDPR har du följande rättigheter:</p>
             <ul className="text-sm text-foreground space-y-2 list-disc pl-5">
               <li><strong>Rätt till tillgång (art. 15)</strong> – Du kan begära information om vilka personuppgifter vi behandlar om dig.</li>
@@ -227,12 +211,12 @@ export default function Terms() {
               Radering och export kan du göra direkt i appen. För övriga förfrågningar, kontakta oss på <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a>. Vi besvarar din begäran inom 30 dagar.
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">10. Automatiserat beslutsfattande</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">9. Automatiserat beslutsfattande</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Vi använder inte automatiserat beslutsfattande eller profilering som har rättslig verkan eller på liknande sätt väsentligt påverkar dig (artikel 22 GDPR). AI-funktioner i appen (t.ex. dagliga tips) ger generella rekommendationer och fattar inga beslut som rör dig personligen.
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">11. Säkerhetsåtgärder</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">10. Säkerhetsåtgärder</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Vi vidtar lämpliga tekniska och organisatoriska åtgärder för att skydda dina personuppgifter enligt artikel 32 GDPR, bland annat:
             </p>
@@ -244,12 +228,12 @@ export default function Terms() {
               <li>Regelbunden säkerhetsgranskning av koden</li>
             </ul>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">12. Personuppgiftsincidenter</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">11. Personuppgiftsincidenter</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Om en personuppgiftsincident inträffar som kan innebära risk för dina rättigheter och friheter, anmäler vi detta till Integritetsskyddsmyndigheten (IMY) inom 72 timmar i enlighet med artikel 33 GDPR. Om incidenten sannolikt medför hög risk för dig informeras du utan onödigt dröjsmål (artikel 34 GDPR).
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">13. E-postkommunikation</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">12. E-postkommunikation</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Vi skiljer på tjänstemeddelanden och marknadsföring:
             </p>
@@ -269,12 +253,12 @@ export default function Terms() {
               Du kan avprenumerera från marknadsföring via länken i varje utskick eller via inställningar i appen. Samtycke till marknadsföring påverkar inte tjänstemeddelanden.
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">14. Barns personuppgifter</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">13. Barns personuppgifter</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Tjänsten riktar sig inte till barn under 16 år. Vi samlar inte medvetet in personuppgifter från barn under 16 år. Om vi upptäcker att en person under 16 år har registrerat sig utan vårdnadshavares samtycke raderar vi uppgifterna.
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">15. Tillsynsmyndighet</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">14. Tillsynsmyndighet</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Om du anser att vår behandling av dina personuppgifter bryter mot GDPR har du rätt att lämna klagomål till:
             </p>
@@ -286,7 +270,7 @@ export default function Terms() {
               Telefon: 08-657 61 00
             </p>
 
-            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">16. Kontakt</h2>
+            <h2 className="font-serif text-lg text-foreground mt-6 mb-2">15. Kontakt</h2>
             <p className="text-sm text-foreground leading-relaxed">
               Frågor om denna policy eller dina personuppgifter? Kontakta oss:
             </p>

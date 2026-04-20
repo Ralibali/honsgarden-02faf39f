@@ -84,8 +84,6 @@ export default function HenAvatar({
   const pendingImageUrlRef = useRef<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
-  const [imageLoading, setImageLoading] = useState(!!imageUrl);
-  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!pendingImageUrlRef.current) {
@@ -98,11 +96,6 @@ export default function HenAvatar({
     setDisplayUrl(imageUrl);
     pendingImageUrlRef.current = null;
   }, [imageUrl]);
-
-  useEffect(() => {
-    setImageLoading(!!displayUrl);
-    setImageError(false);
-  }, [displayUrl]);
 
   const emoji = henType === 'rooster' ? '🐓' : '🐔';
   const sizeClass = SIZES[size];
@@ -186,13 +179,11 @@ export default function HenAvatar({
   };
 
   const bgClass = henType === 'rooster' ? 'bg-warning/10' : 'bg-accent/10';
-  const isSyncing = uploading || !!pendingImageUrlRef.current;
-  const showFallback = !displayUrl || imageError;
 
   return (
     <div className={`relative shrink-0 ${className}`}>
       <div
-        className={`${sizeClass} relative rounded-xl overflow-hidden flex items-center justify-center ${bgClass} ${editable && showProfileActions ? 'cursor-pointer' : ''}`}
+        className={`${sizeClass} rounded-xl overflow-hidden flex items-center justify-center ${bgClass} ${editable && showProfileActions ? 'cursor-pointer' : ''}`}
         onClick={editable && showProfileActions ? () => openFilePicker() : undefined}
         onKeyDown={editable && showProfileActions ? (e) => {
           if (e.key === 'Enter' || e.key === ' ') openFilePicker(e);
@@ -201,7 +192,7 @@ export default function HenAvatar({
         tabIndex={editable && showProfileActions ? 0 : undefined}
         aria-label={editable && showProfileActions ? (displayUrl ? 'Byt bild' : 'Ladda upp bild') : undefined}
       >
-        {!showFallback ? (
+        {displayUrl ? (
           <img
             key={displayUrl}
             src={displayUrl}
@@ -210,34 +201,15 @@ export default function HenAvatar({
             loading="lazy"
             onLoad={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = 'block';
-              setImageLoading(false);
-              setImageError(false);
             }}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
-              setImageLoading(false);
-              setImageError(true);
             }}
           />
         ) : (
           <span>{emoji}</span>
         )}
-        {displayUrl && imageLoading && !imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm" aria-label="Bilden laddas">
-            <Loader2 className={`${iconClass} animate-spin text-primary`} />
-          </div>
-        )}
-        {isSyncing && (
-          <div className="absolute inset-x-1 bottom-1 rounded-md bg-primary/90 px-1 py-0.5 text-center text-[9px] font-medium leading-none text-primary-foreground shadow-sm">
-            Synkas
-          </div>
-        )}
       </div>
-      {imageError && displayUrl && (
-        <p className="mt-1 max-w-24 text-center text-[10px] leading-tight text-muted-foreground">
-          Bilden kunde inte visas
-        </p>
-      )}
 
       {editable && (
         <>

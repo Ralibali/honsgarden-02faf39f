@@ -37,10 +37,10 @@ export default function CookieConsent() {
             <Cookie className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
-            <p className="text-xs sm:text-sm font-medium text-foreground">Cookies & integritet 🍪</p>
+            <p className="text-xs sm:text-sm font-medium text-foreground">Vi använder cookies 🍪</p>
             <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug sm:leading-relaxed mt-0.5">
-              Vi använder nödvändiga cookies och, om du accepterar, enkel analys.{' '}
-              <a href="/terms" className="text-primary hover:underline">Läs villkor, GDPR och ansvar</a>
+              Bara nödvändiga cookies.{' '}
+              <a href="/terms" className="text-primary hover:underline">Läs om vår cookiepolicy</a>
             </p>
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function CookieConsent() {
             Acceptera
           </Button>
           <Button onClick={decline} variant="outline" size="sm" className="flex-1 h-7 sm:h-9 text-xs sm:text-sm">
-            Bara nödvändiga
+            Nödvändiga
           </Button>
         </div>
       </div>
