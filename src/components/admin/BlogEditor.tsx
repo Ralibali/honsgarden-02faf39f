@@ -95,10 +95,14 @@ type BlogPost = {
   excerpt: string | null;
   content: string;
   cover_image_url: string | null;
+  feature_image_url?: string | null;
   category: string | null;
   tags: string[] | null;
   meta_title: string | null;
   meta_description: string | null;
+  meta_keywords?: string | null;
+  reading_time_minutes?: number | null;
+  word_count?: number | null;
   is_published: boolean;
   published_at: string | null;
   author_id: string;
@@ -112,6 +116,10 @@ function slugify(text: string) {
     .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+function getPlainWordCount(value: string) {
+  return value.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
 }
 
 type ProductItem = {
