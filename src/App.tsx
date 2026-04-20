@@ -29,6 +29,7 @@ const Premium = React.lazy(() => import("./pages/Premium"));
 const Community = React.lazy(() => import("./pages/Community"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const Admin = React.lazy(() => import("./pages/Admin"));
+const SeoAdmin = React.lazy(() => import("./pages/SeoAdmin"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const HenProfile = React.lazy(() => import("./pages/HenProfile"));
 const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
@@ -110,6 +111,7 @@ const AppRoutes = () => (
         <Route path="/blogg/kategori/:category" element={<BlogCategory />} />
         <Route path="/blogg/tagg/:tag" element={<BlogTag />} />
         <Route path="/blogg/:slug" element={<GuideArticle />} />
+        <Route path="/admin/seo" element={<ProtectedRoute><SeoAdmin /></ProtectedRoute>} />
         <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="eggs" element={<Eggs />} />
