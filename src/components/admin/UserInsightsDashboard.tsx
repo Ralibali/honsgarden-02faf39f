@@ -559,6 +559,78 @@ export default function UserInsightsDashboard() {
         </Card>
       )}
 
+      {/* Subscription Health Check */}
+      <Card className="border-border/50">
+        <CardHeader className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="font-serif text-sm flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Prenumerationshälsokontroll
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8 rounded-lg gap-1.5"
+              onClick={() => healthCheckMutation.mutate()}
+              disabled={healthCheckMutation.isPending}
+            >
+              {healthCheckMutation.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              Kör hälsokontroll nu
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          {healthCheckMutation.isPending ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Skannar prenumerationer och synkar mot Stripe...
+            </div>
+          ) : healthCheckResult ? (
+            <div className="space-y-3">
+              {healthCheckResult.totalIssues === 0 ? (
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <ShieldCheck className="h-4 w-4" />
+                  Alla prenumerationer är korrekta! Inga problem hittades.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-yellow-600">
+                    <AlertTriangle className="h-4 w-4" />
+                    <strong>{healthCheckResult.totalIssues} problem hittades</strong>
+                  </div>
+                  {healthCheckResult.issues.duplicates.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      • {healthCheckResult.issues.duplicates.length} dubbla aktiva prenumerationer
+                    </div>
+                  )}
+                  {healthCheckResult.issues.orphan_premium.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      • {healthCheckResult.issues.orphan_premium.length} premium utan giltigt slutdatum
+                    </div>
+                  )}
+                  {healthCheckResult.issues.out_of_sync.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      • {healthCheckResult.issues.out_of_sync.length} profiler osynkade mot Stripe
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Ett detaljerat mejl har skickats till info@auroramedia.se
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground py-2">
+              Kör manuell hälsokontroll för att skanna efter dubbla prenumerationer, orphan-premium och synkproblem. Körs automatiskt varje dag kl 06:00.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* AI Tips Section */}
       <Card className="border-border/50 border-primary/20">
         <CardHeader className="px-4 py-3">
