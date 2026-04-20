@@ -1265,6 +1265,483 @@ export type Database = {
           },
         ]
       }
+      seo_breeds: {
+        Row: {
+          adult_weight_hen_kg: number | null
+          adult_weight_rooster_kg: number | null
+          ai_model_used: string | null
+          authoritative_sources: Json | null
+          avg_eggs_per_year: number | null
+          beginner_friendly: boolean | null
+          breed_group: string | null
+          broody_tendency: string | null
+          cold_hardy: boolean | null
+          conservation_status: string | null
+          content: string | null
+          created_at: string
+          egg_color: string | null
+          egg_size: string | null
+          faq: Json | null
+          generation_status: string
+          id: string
+          is_swedish_landrace: boolean | null
+          key_facts: Json | null
+          last_generated_at: string | null
+          medical_disclaimer: string | null
+          medically_reviewed_by: string | null
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          name_alt: string[] | null
+          name_latin: string | null
+          noise_level: string | null
+          og_image_url: string | null
+          origin_country: string | null
+          published: boolean
+          reviewed_at: string | null
+          slug: string
+          space_requirement_m2_per_hen: number | null
+          summary: string | null
+          temperament: string | null
+          updated_at: string
+        }
+        Insert: {
+          adult_weight_hen_kg?: number | null
+          adult_weight_rooster_kg?: number | null
+          ai_model_used?: string | null
+          authoritative_sources?: Json | null
+          avg_eggs_per_year?: number | null
+          beginner_friendly?: boolean | null
+          breed_group?: string | null
+          broody_tendency?: string | null
+          cold_hardy?: boolean | null
+          conservation_status?: string | null
+          content?: string | null
+          created_at?: string
+          egg_color?: string | null
+          egg_size?: string | null
+          faq?: Json | null
+          generation_status?: string
+          id?: string
+          is_swedish_landrace?: boolean | null
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          medical_disclaimer?: string | null
+          medically_reviewed_by?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          name_alt?: string[] | null
+          name_latin?: string | null
+          noise_level?: string | null
+          og_image_url?: string | null
+          origin_country?: string | null
+          published?: boolean
+          reviewed_at?: string | null
+          slug: string
+          space_requirement_m2_per_hen?: number | null
+          summary?: string | null
+          temperament?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adult_weight_hen_kg?: number | null
+          adult_weight_rooster_kg?: number | null
+          ai_model_used?: string | null
+          authoritative_sources?: Json | null
+          avg_eggs_per_year?: number | null
+          beginner_friendly?: boolean | null
+          breed_group?: string | null
+          broody_tendency?: string | null
+          cold_hardy?: boolean | null
+          conservation_status?: string | null
+          content?: string | null
+          created_at?: string
+          egg_color?: string | null
+          egg_size?: string | null
+          faq?: Json | null
+          generation_status?: string
+          id?: string
+          is_swedish_landrace?: boolean | null
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          medical_disclaimer?: string | null
+          medically_reviewed_by?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          name_alt?: string[] | null
+          name_latin?: string | null
+          noise_level?: string | null
+          og_image_url?: string | null
+          origin_country?: string | null
+          published?: boolean
+          reviewed_at?: string | null
+          slug?: string
+          space_requirement_m2_per_hen?: number | null
+          summary?: string | null
+          temperament?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_care_topics: {
+        Row: {
+          ai_model_used: string | null
+          authoritative_sources: Json | null
+          category: string
+          content: string | null
+          cost_estimate_sek: string | null
+          created_at: string
+          difficulty_level: string | null
+          faq: Json | null
+          generation_status: string
+          howto_steps: Json | null
+          id: string
+          intent: string | null
+          key_facts: Json | null
+          last_generated_at: string | null
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          og_image_url: string | null
+          published: boolean
+          required_materials: Json | null
+          slug: string
+          summary: string | null
+          time_required: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          authoritative_sources?: Json | null
+          category: string
+          content?: string | null
+          cost_estimate_sek?: string | null
+          created_at?: string
+          difficulty_level?: string | null
+          faq?: Json | null
+          generation_status?: string
+          howto_steps?: Json | null
+          id?: string
+          intent?: string | null
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          og_image_url?: string | null
+          published?: boolean
+          required_materials?: Json | null
+          slug: string
+          summary?: string | null
+          time_required?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          authoritative_sources?: Json | null
+          category?: string
+          content?: string | null
+          cost_estimate_sek?: string | null
+          created_at?: string
+          difficulty_level?: string | null
+          faq?: Json | null
+          generation_status?: string
+          howto_steps?: Json | null
+          id?: string
+          intent?: string | null
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          og_image_url?: string | null
+          published?: boolean
+          required_materials?: Json | null
+          slug?: string
+          summary?: string | null
+          time_required?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_indexing_queue: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          processed_at: string | null
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          processed_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          processed_at?: string | null
+        }
+        Relationships: []
+      }
+      seo_months: {
+        Row: {
+          ai_model_used: string | null
+          common_problems_this_month: Json | null
+          content: string | null
+          created_at: string
+          daylight_considerations: string | null
+          egg_production_expectation: string | null
+          faq: Json | null
+          generation_status: string
+          id: string
+          key_facts: Json | null
+          last_generated_at: string | null
+          meta_description: string | null
+          meta_title: string | null
+          month_number: number
+          name: string
+          og_image_url: string | null
+          published: boolean
+          slug: string
+          summary: string | null
+          temperature_considerations: string | null
+          typical_tasks: Json | null
+          updated_at: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          common_problems_this_month?: Json | null
+          content?: string | null
+          created_at?: string
+          daylight_considerations?: string | null
+          egg_production_expectation?: string | null
+          faq?: Json | null
+          generation_status?: string
+          id?: string
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          month_number: number
+          name: string
+          og_image_url?: string | null
+          published?: boolean
+          slug: string
+          summary?: string | null
+          temperature_considerations?: string | null
+          typical_tasks?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          common_problems_this_month?: Json | null
+          content?: string | null
+          created_at?: string
+          daylight_considerations?: string | null
+          egg_production_expectation?: string | null
+          faq?: Json | null
+          generation_status?: string
+          id?: string
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          month_number?: number
+          name?: string
+          og_image_url?: string | null
+          published?: boolean
+          slug?: string
+          summary?: string | null
+          temperature_considerations?: string | null
+          typical_tasks?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_problem_breeds: {
+        Row: {
+          breed_id: string
+          id: string
+          note: string | null
+          problem_id: string
+        }
+        Insert: {
+          breed_id: string
+          id?: string
+          note?: string | null
+          problem_id: string
+        }
+        Update: {
+          breed_id?: string
+          id?: string
+          note?: string | null
+          problem_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_problem_breeds_breed_id_fkey"
+            columns: ["breed_id"]
+            isOneToOne: false
+            referencedRelation: "seo_breeds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_problem_breeds_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "seo_problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_problems: {
+        Row: {
+          ai_model_used: string | null
+          authoritative_sources: Json | null
+          category: string
+          causes: Json | null
+          content: string | null
+          created_at: string
+          diagnosis_steps: Json | null
+          faq: Json | null
+          generation_status: string
+          id: string
+          is_notifiable: boolean | null
+          is_zoonotic: boolean | null
+          key_facts: Json | null
+          last_generated_at: string | null
+          medical_disclaimer: string | null
+          medically_reviewed_by: string | null
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          name_alt: string[] | null
+          og_image_url: string | null
+          prevention_steps: Json | null
+          published: boolean
+          reviewed_at: string | null
+          severity: string | null
+          slug: string
+          summary: string | null
+          symptoms: Json | null
+          treatment_overview: string | null
+          updated_at: string
+          when_to_call_vet: string | null
+        }
+        Insert: {
+          ai_model_used?: string | null
+          authoritative_sources?: Json | null
+          category: string
+          causes?: Json | null
+          content?: string | null
+          created_at?: string
+          diagnosis_steps?: Json | null
+          faq?: Json | null
+          generation_status?: string
+          id?: string
+          is_notifiable?: boolean | null
+          is_zoonotic?: boolean | null
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          medical_disclaimer?: string | null
+          medically_reviewed_by?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          name_alt?: string[] | null
+          og_image_url?: string | null
+          prevention_steps?: Json | null
+          published?: boolean
+          reviewed_at?: string | null
+          severity?: string | null
+          slug: string
+          summary?: string | null
+          symptoms?: Json | null
+          treatment_overview?: string | null
+          updated_at?: string
+          when_to_call_vet?: string | null
+        }
+        Update: {
+          ai_model_used?: string | null
+          authoritative_sources?: Json | null
+          category?: string
+          causes?: Json | null
+          content?: string | null
+          created_at?: string
+          diagnosis_steps?: Json | null
+          faq?: Json | null
+          generation_status?: string
+          id?: string
+          is_notifiable?: boolean | null
+          is_zoonotic?: boolean | null
+          key_facts?: Json | null
+          last_generated_at?: string | null
+          medical_disclaimer?: string | null
+          medically_reviewed_by?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          name_alt?: string[] | null
+          og_image_url?: string | null
+          prevention_steps?: Json | null
+          published?: boolean
+          reviewed_at?: string | null
+          severity?: string | null
+          slug?: string
+          summary?: string | null
+          symptoms?: Json | null
+          treatment_overview?: string | null
+          updated_at?: string
+          when_to_call_vet?: string | null
+        }
+        Relationships: []
+      }
+      seo_settings: {
+        Row: {
+          created_at: string
+          default_ai_model: string
+          default_medical_disclaimer: string | null
+          editorial_org_name: string
+          id: string
+          last_sitemap_ping_at: string | null
+          llms_txt_enabled: boolean
+          public_routes_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_ai_model?: string
+          default_medical_disclaimer?: string | null
+          editorial_org_name?: string
+          id?: string
+          last_sitemap_ping_at?: string | null
+          llms_txt_enabled?: boolean
+          public_routes_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_ai_model?: string
+          default_medical_disclaimer?: string | null
+          editorial_org_name?: string
+          id?: string
+          last_sitemap_ping_at?: string | null
+          llms_txt_enabled?: boolean
+          public_routes_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -1466,6 +1943,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      seo_public_routes_enabled: { Args: never; Returns: boolean }
       set_lifetime_premium: {
         Args: { _is_lifetime: boolean; _user_id: string }
         Returns: undefined
