@@ -19,3 +19,5 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = false
   [functions.premium-expiry-cron]
     verify_jwt = false
+  [functions.sync-soro-blog]
+    verify_jwt = false

@@ -1,21 +1,4 @@
-import React, { useEffect, useRef } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
-
-function SoroBlogEmbed() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const params = new URLSearchParams(window.location.search);
-    let url = 'https://app.trysoro.com/api/embed/bfddd713-72b8-48fc-b6ba-70a659602721';
-    const post = params.get('post');
-    if (post) url += '?post=' + encodeURIComponent(post);
-    const script = document.createElement('script');
-    script.src = url;
-    containerRef.current.appendChild(script);
-    return () => { script.remove(); };
-  }, []);
-  return <div id="soro-blog" ref={containerRef} />;
-}
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { useSeo } from '@/hooks/useSeo';
 import { useQuery } from '@tanstack/react-query';
@@ -196,11 +179,6 @@ export default function Guides() {
             ))}
           </div>
         )}
-
-        {/* Soro blog embed – visas direkt efter egna artiklar */}
-        <section className="mt-12">
-          <SoroBlogEmbed />
-        </section>
 
         {/* Newsletter */}
         <div className="mt-16">
