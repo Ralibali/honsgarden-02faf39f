@@ -272,10 +272,11 @@ export default function GuideArticle() {
     if (!post) return;
     const BASE = 'https://honsgarden.se';
     const fullUrl = `${BASE}/blogg/${post.slug}`;
-    const pageTitle = post.meta_title || post.title + ' | Hönsgården';
+    const pageTitle = `${post.title} | Hönsgården`;
     const pageDesc = post.meta_description || post.excerpt || '';
-    const imageUrl = post.cover_image_url
-      ? (post.cover_image_url.startsWith('http') ? post.cover_image_url : `${BASE}${post.cover_image_url}`)
+    const featureImage = post.feature_image_url || post.cover_image_url;
+    const imageUrl = featureImage
+      ? (featureImage.startsWith('http') ? featureImage : `${BASE}${featureImage}`)
       : `${BASE}/blog-images/hens-garden.jpg`;
 
     const createdElements: HTMLElement[] = [];
@@ -375,15 +376,16 @@ export default function GuideArticle() {
         mainEntityOfPage: { '@type': 'WebPage', '@id': fullUrl },
         isPartOf: { '@id': `${BASE}/#website` },
         inLanguage: 'sv-SE',
-        ...(post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
-        wordCount: post.content.replace(/<[^>]+>/g, '').split(/\s+/).length,
+        ...(post.meta_keywords ? { keywords: post.meta_keywords } : post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
+        wordCount: post.word_count || post.content.replace(/<[^>]+>/g, '').split(/\s+/).length,
       },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Hem', item: BASE },
           { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE}/blogg` },
-          { '@type': 'ListItem', position: 3, name: post.title, item: fullUrl },
+          ...(post.category ? [{ '@type': 'ListItem', position: 3, name: categoryLabels[post.category] || post.category, item: `${BASE}/blogg/kategori/${post.category}` }] : []),
+          { '@type': 'ListItem', position: post.category ? 4 : 3, name: post.title, item: fullUrl },
         ],
       },
       {
