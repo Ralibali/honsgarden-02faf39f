@@ -55,9 +55,9 @@ function isHtmlContent(content: string): boolean {
 function renderMarkdown(md: string): string {
   let html = md
     // Headers
-    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-serif text-foreground mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-serif text-foreground mt-8 mb-3">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-serif text-foreground mt-8 mb-3">$1</h1>')
+    .replace(/^### (.+)$/gm, (_, text) => `<h3 id="${slugifyHeading(text)}" class="text-lg font-serif text-foreground mt-6 mb-2 scroll-mt-24">${text}</h3>`)
+    .replace(/^## (.+)$/gm, (_, text) => `<h2 id="${slugifyHeading(text)}" class="text-xl font-serif text-foreground mt-8 mb-3 scroll-mt-24">${text}</h2>`)
+    .replace(/^# (.+)$/gm, (_, text) => `<h1 id="${slugifyHeading(text)}" class="text-2xl font-serif text-foreground mt-8 mb-3 scroll-mt-24">${text}</h1>`)
     // Bold & italic
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -94,6 +94,11 @@ function renderContent(
   glossary?: { keyword: string; url: string; rel: string }[]
 ): string {
   let raw = isHtmlContent(content) ? content : renderMarkdown(content);
+  raw = raw.replace(/<h([23])([^>]*)>([\s\S]*?)<\/h[23]>/gi, (full, level, attrs, inner) => {
+    if (/\sid=/.test(attrs)) return full;
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    return `<h${level}${attrs} id="${slugifyHeading(text)}">${inner}</h${level}>`;
+  });
 
   // Apply glossary links first (affiliate keywords → links)
   if (glossary && glossary.length > 0) {
@@ -160,7 +165,7 @@ function renderContent(
 
   return DOMPurify.sanitize(raw, {
     ADD_TAGS: ['video', 'source', 'picture', 'details', 'summary'],
-    ADD_ATTR: ['loading', 'target', 'rel', 'title'],
+    ADD_ATTR: ['loading', 'target', 'rel', 'title', 'id'],
     FORBID_TAGS: ['iframe', 'object', 'embed', 'form', 'input'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
   });
