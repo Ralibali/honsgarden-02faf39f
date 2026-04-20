@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useMemo, useState, useEffect } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Egg, Loader2, BookOpen, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Egg, Loader2, BookOpen, CalendarDays, Clock } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
 const BlogComments = lazy(() => import('@/components/BlogComments'));
 
@@ -16,10 +16,34 @@ const categoryLabels: Record<string, string> = {
   tips: 'Tips & tricks',
   halsa: 'Hälsa',
   nyborjare: 'Nybörjare',
+  raser: 'Raser',
   tradgard: 'Trädgård & odling',
   hem: 'Hem & hållbarhet',
   friluftsliv: 'Friluftsliv & natur',
 };
+
+const slugifyHeading = (text: string) => text
+  .toLowerCase()
+  .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/(^-|-$)/g, '');
+
+function extractToc(content: string) {
+  const source = content.replace(/<[^>]+>/g, (tag) => tag.startsWith('<h') || tag.startsWith('</h') ? tag : '');
+  const headings: { id: string; text: string; level: number }[] = [];
+  const markdownRegex = /^(##|###)\s+(.+)$/gm;
+  let match;
+  while ((match = markdownRegex.exec(content)) !== null) {
+    const text = match[2].replace(/[#*_`]/g, '').trim();
+    if (text) headings.push({ id: slugifyHeading(text), text, level: match[1].length });
+  }
+  const htmlRegex = /<h([23])[^>]*>([\s\S]*?)<\/h[23]>/gi;
+  while ((match = htmlRegex.exec(source)) !== null) {
+    const text = match[2].replace(/<[^>]+>/g, '').trim();
+    if (text && !headings.some(h => h.id === slugifyHeading(text))) headings.push({ id: slugifyHeading(text), text, level: Number(match[1]) });
+  }
+  return headings.slice(0, 12);
+}
 
 /** Detect if content is raw HTML (starts with a tag) or Markdown */
 function isHtmlContent(content: string): boolean {
