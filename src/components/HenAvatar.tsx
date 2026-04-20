@@ -81,11 +81,20 @@ export default function HenAvatar({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingImageUrlRef = useRef<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
 
   useEffect(() => {
-    setDisplayUrl(imageUrl || '');
+    if (!pendingImageUrlRef.current) {
+      setDisplayUrl(imageUrl || '');
+      return;
+    }
+
+    if (!imageUrl) return;
+
+    setDisplayUrl(imageUrl);
+    pendingImageUrlRef.current = null;
   }, [imageUrl]);
 
   const emoji = henType === 'rooster' ? '🐓' : '🐔';
@@ -130,16 +139,16 @@ export default function HenAvatar({
       // Cache-buster så uppdaterad bild visas direkt
       const publicUrl = `${signedData.signedUrl}&v=${Date.now()}`;
 
-      await api.updateHen(henId, { image_url: publicUrl } as any);
-      setDisplayUrl(publicUrl);
-      queryClient.setQueryData(['hen-profile', henId], (old: any) => old ? { ...old, image_url: publicUrl } : old);
-      queryClient.setQueryData(['hens'], (old: any) => Array.isArray(old) ? old.map((hen) => hen.id === henId ? { ...hen, image_url: publicUrl } : hen) : old);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['hens'] }),
-        queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] }),
-      ]);
+      pendingImageUrlRef.current = publicUrl;
+      const updatedHen = await api.updateHen(henId, { image_url: publicUrl } as any);
+      const nextImageUrl = updatedHen.image_url || publicUrl;
+
+      setDisplayUrl(nextImageUrl);
+      queryClient.setQueryData(['hen-profile', henId], (old: any) => old ? { ...old, ...updatedHen, image_url: nextImageUrl } : updatedHen);
+      queryClient.setQueryData(['hens'], (old: any) => Array.isArray(old) ? old.map((hen) => hen.id === henId ? { ...hen, ...updatedHen, image_url: nextImageUrl } : hen) : old);
       toast({ title: 'Bild uppladdad! 📷' });
     } catch (err: any) {
+      pendingImageUrlRef.current = null;
       setDisplayUrl(imageUrl || '');
       toast({ title: 'Uppladdning misslyckades', description: err.message, variant: 'destructive' });
     } finally {
@@ -157,6 +166,7 @@ export default function HenAvatar({
       const path = `${user.id}/${henId}.webp`;
       await supabase.storage.from('hen-images').remove([path]);
       await api.updateHen(henId, { image_url: null } as any);
+      pendingImageUrlRef.current = null;
       setDisplayUrl('');
       queryClient.invalidateQueries({ queryKey: ['hens'] });
       queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
