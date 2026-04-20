@@ -637,7 +637,8 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                     <SelectItem value="recension">Recension</SelectItem>
                     <SelectItem value="tips">Tips & tricks</SelectItem>
                     <SelectItem value="halsa">Hälsa</SelectItem>
-                    <SelectItem value="nybörjare">Nybörjare</SelectItem>
+                    <SelectItem value="nyborjare">Nybörjare</SelectItem>
+                    <SelectItem value="raser">Raser</SelectItem>
                     <SelectItem value="tradgard">Trädgård & odling</SelectItem>
                     <SelectItem value="hem">Hem & hållbarhet</SelectItem>
                     <SelectItem value="friluftsliv">Friluftsliv & natur</SelectItem>
@@ -729,6 +730,11 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                 <Textarea value={metaDescription} onChange={e => setMetaDescription(e.target.value)} placeholder={excerpt || 'Beskrivning för sökmotorer'} rows={2} className="rounded-xl text-xs" maxLength={160} />
                 <span className="text-[9px] text-muted-foreground">{(metaDescription || excerpt || '').length}/160</span>
               </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground">Meta-keywords</label>
+                <Input value={metaKeywords} onChange={e => setMetaKeywords(e.target.value)} placeholder="hönsras, värphöns, lanthöns" className="rounded-xl text-xs" />
+              </div>
+              <p className="text-[10px] text-muted-foreground">{getPlainWordCount(content)} ord · ca {Math.max(1, Math.ceil(getPlainWordCount(content) / 220))} min läsning</p>
             </CardContent>
           </Card>
         </div>
