@@ -487,7 +487,6 @@ export default function Hens() {
                       henType={hen.hen_type}
                       imageUrl={hen.image_url}
                       size="md"
-                      editable
                     />
                   </div>
                   <div className="min-w-0 flex-1">
