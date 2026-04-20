@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Edit, Eye, Loader2, Play, Search, Shield, Sparkles } from 'lucide-react';
+import { AlertTriangle, Edit, Eye, Loader2, Play, Plus, Search, Shield, Sparkles } from 'lucide-react';
 import { api } from '@/lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -51,10 +51,22 @@ type SeoConfig = {
   table: 'seo_breeds' | 'seo_problems' | 'seo_care_topics' | 'seo_months';
   categoryField: string;
   categoryLabel: string;
+  categoryRequired?: boolean;
   previewBase: string;
   jsonFields: { key: string; label: string; fields: string[] }[];
   textFields: string[];
 };
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/å/g, 'a')
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
 
 const configs: SeoConfig[] = [
   {
@@ -77,6 +89,7 @@ const configs: SeoConfig[] = [
     table: 'seo_problems',
     categoryField: 'category',
     categoryLabel: 'Kategori',
+    categoryRequired: true,
     previewBase: '/problem',
     textFields: ['summary', 'treatment_overview', 'when_to_call_vet', 'content', 'medical_disclaimer', 'meta_title', 'meta_description', 'og_image_url'],
     jsonFields: [
@@ -95,6 +108,7 @@ const configs: SeoConfig[] = [
     table: 'seo_care_topics',
     categoryField: 'category',
     categoryLabel: 'Kategori',
+    categoryRequired: true,
     previewBase: '/skotsel',
     textFields: ['summary', 'content', 'meta_title', 'meta_description', 'og_image_url'],
     jsonFields: [
