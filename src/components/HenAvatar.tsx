@@ -109,9 +109,13 @@ export default function HenAvatar({
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from('hen-images').getPublicUrl(path);
-      // Add cache-buster so updates show immediately
-      const publicUrl = `${urlData.publicUrl}?v=${Date.now()}`;
+      // Skapa en signerad URL som gäller 1 år (privat bucket)
+      const { data: signedData, error: signedErr } = await supabase.storage
+        .from('hen-images')
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (signedErr) throw signedErr;
+      // Cache-buster så uppdaterad bild visas direkt
+      const publicUrl = `${signedData.signedUrl}&v=${Date.now()}`;
 
       await api.updateHen(henId, { image_url: publicUrl } as any);
       queryClient.invalidateQueries({ queryKey: ['hens'] });
