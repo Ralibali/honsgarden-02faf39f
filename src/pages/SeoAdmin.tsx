@@ -437,6 +437,37 @@ export default function SeoAdmin() {
 
         {configs.map(config => (
           <TabsContent key={config.type} value={config.type} className="space-y-4">
+            <Card className="border-border/60">
+              <CardContent className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(160px,220px)_minmax(160px,220px)_auto] sm:items-end">
+                <div className="space-y-1.5">
+                  <Label>Namn</Label>
+                  <Input
+                    value={creating.name}
+                    onChange={(event) => setCreating(prev => ({ ...prev, name: event.target.value, slug: prev.slug || slugify(event.target.value) }))}
+                    placeholder={`Ny ${config.label.toLowerCase().replace(/er$/, '')}...`}
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Slug</Label>
+                  <Input value={creating.slug} onChange={(event) => setCreating(prev => ({ ...prev, slug: slugify(event.target.value) }))} placeholder="url-slug" className="rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{config.categoryLabel}</Label>
+                  <Input
+                    value={creating.category}
+                    onChange={(event) => setCreating(prev => ({ ...prev, category: event.target.value }))}
+                    placeholder={config.type === 'months' ? '1–12' : config.categoryRequired ? 'Obligatorisk' : 'Valfri'}
+                    className="rounded-xl"
+                  />
+                </div>
+                <Button type="button" className="rounded-xl gap-2" onClick={handleCreate} disabled={createRowMutation.isPending}>
+                  {createRowMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  Skapa
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
