@@ -11,7 +11,7 @@ import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 
 const categoryLabels: Record<string, string> = {
   guide: 'Guide', recension: 'Recension', tips: 'Tips & tricks', halsa: 'Hälsa',
-  nyborjare: 'Nybörjare', tradgard: 'Trädgård & odling', hem: 'Hem & hållbarhet', friluftsliv: 'Friluftsliv & natur',
+  nyborjare: 'Nybörjare', raser: 'Raser', tradgard: 'Trädgård & odling', hem: 'Hem & hållbarhet', friluftsliv: 'Friluftsliv & natur',
 };
 
 export default function BlogTag() {
@@ -51,7 +51,7 @@ export default function BlogTag() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
+        .select('id, title, slug, excerpt, cover_image_url, feature_image_url, category, tags, published_at, reading_time_minutes')
         .eq('is_published', true)
         .contains('tags', [decodedTag])
         .order('published_at', { ascending: false });
@@ -158,9 +158,9 @@ export default function BlogTag() {
             {posts.map(post => (
               <Link key={post.id} to={`/blogg/${post.slug}`} className="group">
                 <Card className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full">
-                  {post.cover_image_url ? (
+                  {(post.feature_image_url || post.cover_image_url) ? (
                     <div className="aspect-video overflow-hidden">
-                      <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <img src={post.feature_image_url || post.cover_image_url || ''} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     </div>
                   ) : (
                     <div className="aspect-video bg-gradient-to-br from-primary/8 to-accent/8 flex items-center justify-center">
@@ -177,6 +177,7 @@ export default function BlogTag() {
                           {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
                       )}
+                      {post.reading_time_minutes && <span className="text-[10px] text-muted-foreground">{post.reading_time_minutes} min</span>}
                     </div>
                     <h2 className="font-serif text-lg text-foreground leading-snug group-hover:text-primary transition-colors">{post.title}</h2>
                     {post.excerpt && <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>}
