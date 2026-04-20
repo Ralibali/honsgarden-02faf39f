@@ -180,7 +180,7 @@ export default function HenAvatar({
         } : undefined}
         role={editable && showProfileActions ? 'button' : undefined}
         tabIndex={editable && showProfileActions ? 0 : undefined}
-        aria-label={editable && showProfileActions ? (imageUrl ? 'Byt bild' : 'Ladda upp bild') : undefined}
+        aria-label={editable && showProfileActions ? (displayUrl ? 'Byt bild' : 'Ladda upp bild') : undefined}
       >
         {displayUrl ? (
           <img
@@ -227,7 +227,7 @@ export default function HenAvatar({
               )}
             </button>
           )}
-          {imageUrl && !uploading && !showProfileActions && (
+          {displayUrl && !uploading && !showProfileActions && (
             <button
               type="button"
               onClick={handleRemove}
