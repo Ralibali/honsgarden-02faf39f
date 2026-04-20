@@ -463,17 +463,21 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
     if (!file) return;
     setUploading(true);
     try {
-      const optimizedFile = await compressImageToWebP(file);
-      const ext = optimizedFile.type === 'image/webp' ? 'webp' : optimizedFile.name.split('.').pop() || 'jpg';
-      const path = `${Date.now()}.${ext}`;
+      if (file.type === 'image/svg+xml') {
+        throw new Error('SVG stöds inte för feature-bilder. Ladda upp JPG, PNG eller WebP.');
+      }
+
+      const optimizedFile = await compressImageToWebP(file, 1800, 0.8);
+      const baseName = slugify(optimizedFile.name.replace(/\.[^.]+$/, '') || title || 'feature-bild');
+      const path = `feature-images/${baseName}-${Date.now()}.webp`;
       const { error } = await supabase.storage.from('blog-images').upload(path, optimizedFile, {
-        contentType: optimizedFile.type || 'image/webp',
+        contentType: 'image/webp',
         cacheControl: '31536000',
       });
       if (error) throw error;
       const { data } = supabase.storage.from('blog-images').getPublicUrl(path);
       setCoverUrl(data.publicUrl);
-      toast({ title: optimizedFile.type === 'image/webp' ? 'Bild komprimerad till WebP och uppladdad' : 'Bild uppladdad' });
+      toast({ title: 'Feature-bild komprimerad till WebP och uppladdad' });
     } catch (err: any) {
       toast({ title: 'Uppladdning misslyckades', description: err.message, variant: 'destructive' });
     } finally {
@@ -620,13 +624,13 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
             </CardContent>
           </Card>
 
-          {/* Cover image */}
+          {/* Feature image */}
           <Card className="border-border/50">
             <CardContent className="p-4 space-y-3">
-              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1"><ImagePlus className="h-3 w-3" /> Omslagsbild</p>
+              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1"><ImagePlus className="h-3 w-3" /> Feature-bild</p>
               {coverUrl ? (
                 <div className="relative">
-                  <img src={coverUrl} alt="Omslag" className="rounded-lg w-full aspect-video object-cover" />
+                  <img src={coverUrl} alt="Feature-bild" className="rounded-lg w-full aspect-video object-cover" />
                   <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full" onClick={() => setCoverUrl('')}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -634,8 +638,8 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
               ) : (
                 <label className="flex flex-col items-center gap-2 py-6 border-2 border-dashed border-border/60 rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <ImagePlus className="h-5 w-5 text-muted-foreground" />}
-                  <span className="text-[10px] text-muted-foreground">{uploading ? 'Komprimerar och laddar upp...' : 'Klicka för att ladda upp WebP-optimerad bild'}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                  <span className="text-[10px] text-muted-foreground">{uploading ? 'Komprimerar till WebP och laddar upp...' : 'Ladda upp JPG/PNG/WebP – sparas som WebP'}</span>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                 </label>
               )}
               <Input value={coverUrl} onChange={e => setCoverUrl(e.target.value)} placeholder="Eller klistra in bild-URL" className="rounded-xl text-xs" />
