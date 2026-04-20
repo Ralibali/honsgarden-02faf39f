@@ -714,6 +714,7 @@ export type Database = {
           flock_id: string | null
           hen_type: string
           id: string
+          image_url: string | null
           is_active: boolean
           name: string
           notes: string | null
@@ -728,6 +729,7 @@ export type Database = {
           flock_id?: string | null
           hen_type?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           name: string
           notes?: string | null
@@ -742,6 +744,7 @@ export type Database = {
           flock_id?: string | null
           hen_type?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           name?: string
           notes?: string | null
