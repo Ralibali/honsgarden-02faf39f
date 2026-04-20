@@ -543,6 +543,9 @@ export default function GuideArticle() {
   return (
     <div className="min-h-screen bg-background">
       <VisitorWelcomePopup />
+      <div className="fixed inset-x-0 top-0 z-50 h-1 bg-border/40" aria-hidden="true">
+        <div className="h-full bg-primary transition-[width] duration-150" style={{ width: `${readingProgress}%` }} />
+      </div>
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -557,7 +560,8 @@ export default function GuideArticle() {
         </div>
       </header>
 
-      <article className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-8 sm:py-12 lg:grid-cols-[minmax(0,720px)_240px]">
+      <article className="w-full max-w-[720px]">
         {/* Meta */}
         <div className="flex items-center gap-2 flex-wrap mb-4">
           {post.category && (
@@ -571,6 +575,9 @@ export default function GuideArticle() {
               {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           )}
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="h-3 w-3" /> {readingMinutes} min läsning
+          </span>
           {post.author_name && (
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px]">✍️</span>
@@ -599,22 +606,25 @@ export default function GuideArticle() {
             src={post.cover_image_url}
             alt={post.title}
             className="w-full rounded-2xl aspect-video object-cover mb-8"
+            loading="lazy"
           />
         )}
 
         {/* Content with auto internal links */}
         <div
           className="prose-custom"
-          dangerouslySetInnerHTML={{
-            __html: renderContent(
-              post.content,
-              allPosts
-                .filter(p => p.slug !== slug)
-                .map(p => ({ title: p.title, slug: p.slug })),
-              glossary
-            ),
-          }}
+          dangerouslySetInnerHTML={{ __html: articleIntroHtml }}
         />
+
+        <div className="my-10 rounded-2xl border border-border/30 bg-gradient-to-br from-primary/5 via-card to-accent/5 p-6 text-center sm:p-8">
+          <h2 className="font-serif text-xl text-foreground mb-2">Börja gratis i Hönsgården</h2>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-4">Logga ägg, följ dina hönor och få påminnelser utan krångel.</p>
+          <Link to="/login"><Button className="rounded-xl gap-2"><Egg className="h-4 w-4" /> Kom igång gratis</Button></Link>
+        </div>
+
+        {articleRestHtml && (
+          <div className="prose-custom" dangerouslySetInnerHTML={{ __html: articleRestHtml }} />
+        )}
 
         {/* Tags + Share */}
         {post.tags && post.tags.length > 0 && (
