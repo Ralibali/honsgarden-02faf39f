@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Link2, MessageCircle } from 'lucide-react';
+import { Facebook, Link2, Pin } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Props {
@@ -10,7 +10,6 @@ interface Props {
 export default function ShareButtons({ url, title, description }: Props) {
   const encoded = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
-  const encodedDesc = encodeURIComponent(description || '');
 
   const links = [
     {
@@ -20,16 +19,10 @@ export default function ShareButtons({ url, title, description }: Props) {
       color: 'hover:text-[#1877F2]',
     },
     {
-      icon: Twitter,
-      label: 'X',
-      href: `https://twitter.com/intent/tweet?url=${encoded}&text=${encodedTitle}`,
-      color: 'hover:text-foreground',
-    },
-    {
-      icon: MessageCircle,
-      label: 'WhatsApp',
-      href: `https://wa.me/?text=${encodedTitle}%20${encoded}`,
-      color: 'hover:text-[#25D366]',
+      icon: Pin,
+      label: 'Pinterest',
+      href: `https://pinterest.com/pin/create/button/?url=${encoded}&description=${encodedTitle}`,
+      color: 'hover:text-destructive',
     },
   ];
 

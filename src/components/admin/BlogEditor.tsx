@@ -95,10 +95,14 @@ type BlogPost = {
   excerpt: string | null;
   content: string;
   cover_image_url: string | null;
+  feature_image_url?: string | null;
   category: string | null;
   tags: string[] | null;
   meta_title: string | null;
   meta_description: string | null;
+  meta_keywords?: string | null;
+  reading_time_minutes?: number | null;
+  word_count?: number | null;
   is_published: boolean;
   published_at: string | null;
   author_id: string;
@@ -112,6 +116,10 @@ function slugify(text: string) {
     .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+function getPlainWordCount(value: string) {
+  return value.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
 }
 
 type ProductItem = {
@@ -342,7 +350,8 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [tagsInput, setTagsInput] = useState((post?.tags || []).join(', '));
   const [metaTitle, setMetaTitle] = useState(post?.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(post?.meta_description || '');
-  const [coverUrl, setCoverUrl] = useState(post?.cover_image_url || '');
+  const [metaKeywords, setMetaKeywords] = useState(post?.meta_keywords || '');
+  const [coverUrl, setCoverUrl] = useState(post?.feature_image_url || post?.cover_image_url || '');
   const [uploading, setUploading] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('edit');
   const [autoSlug, setAutoSlug] = useState(!post);
@@ -371,6 +380,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
       if (!user) throw new Error('Ej inloggad');
 
       const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
+      const words = getPlainWordCount(content);
       const postData: any = {
         title,
         slug,
@@ -380,7 +390,11 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
         tags,
         meta_title: metaTitle || null,
         meta_description: metaDescription || null,
+        meta_keywords: metaKeywords || null,
         cover_image_url: coverUrl || null,
+        feature_image_url: coverUrl || null,
+        reading_time_minutes: Math.max(1, Math.ceil(words / 220)),
+        word_count: words,
         author_id: user.id,
         glossary_ids: selectedGlossaryIds,
       };
@@ -623,7 +637,8 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                     <SelectItem value="recension">Recension</SelectItem>
                     <SelectItem value="tips">Tips & tricks</SelectItem>
                     <SelectItem value="halsa">Hälsa</SelectItem>
-                    <SelectItem value="nybörjare">Nybörjare</SelectItem>
+                    <SelectItem value="nyborjare">Nybörjare</SelectItem>
+                    <SelectItem value="raser">Raser</SelectItem>
                     <SelectItem value="tradgard">Trädgård & odling</SelectItem>
                     <SelectItem value="hem">Hem & hållbarhet</SelectItem>
                     <SelectItem value="friluftsliv">Friluftsliv & natur</SelectItem>
@@ -715,6 +730,11 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
                 <Textarea value={metaDescription} onChange={e => setMetaDescription(e.target.value)} placeholder={excerpt || 'Beskrivning för sökmotorer'} rows={2} className="rounded-xl text-xs" maxLength={160} />
                 <span className="text-[9px] text-muted-foreground">{(metaDescription || excerpt || '').length}/160</span>
               </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground">Meta-keywords</label>
+                <Input value={metaKeywords} onChange={e => setMetaKeywords(e.target.value)} placeholder="hönsras, värphöns, lanthöns" className="rounded-xl text-xs" />
+              </div>
+              <p className="text-[10px] text-muted-foreground">{getPlainWordCount(content)} ord · ca {Math.max(1, Math.ceil(getPlainWordCount(content) / 220))} min läsning</p>
             </CardContent>
           </Card>
         </div>

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useMemo, useState, useEffect } from 'react';
 import VisitorWelcomePopup from '@/components/VisitorWelcomePopup';
 import { useParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Egg, Loader2, BookOpen, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Egg, Loader2, BookOpen, CalendarDays, Clock } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
 const BlogComments = lazy(() => import('@/components/BlogComments'));
 
@@ -16,10 +16,34 @@ const categoryLabels: Record<string, string> = {
   tips: 'Tips & tricks',
   halsa: 'Hälsa',
   nyborjare: 'Nybörjare',
+  raser: 'Raser',
   tradgard: 'Trädgård & odling',
   hem: 'Hem & hållbarhet',
   friluftsliv: 'Friluftsliv & natur',
 };
+
+const slugifyHeading = (text: string) => text
+  .toLowerCase()
+  .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/(^-|-$)/g, '');
+
+function extractToc(content: string) {
+  const source = content.replace(/<[^>]+>/g, (tag) => tag.startsWith('<h') || tag.startsWith('</h') ? tag : '');
+  const headings: { id: string; text: string; level: number }[] = [];
+  const markdownRegex = /^(##|###)\s+(.+)$/gm;
+  let match;
+  while ((match = markdownRegex.exec(content)) !== null) {
+    const text = match[2].replace(/[#*_`]/g, '').trim();
+    if (text) headings.push({ id: slugifyHeading(text), text, level: match[1].length });
+  }
+  const htmlRegex = /<h([23])[^>]*>([\s\S]*?)<\/h[23]>/gi;
+  while ((match = htmlRegex.exec(source)) !== null) {
+    const text = match[2].replace(/<[^>]+>/g, '').trim();
+    if (text && !headings.some(h => h.id === slugifyHeading(text))) headings.push({ id: slugifyHeading(text), text, level: Number(match[1]) });
+  }
+  return headings.slice(0, 12);
+}
 
 /** Detect if content is raw HTML (starts with a tag) or Markdown */
 function isHtmlContent(content: string): boolean {
@@ -31,9 +55,9 @@ function isHtmlContent(content: string): boolean {
 function renderMarkdown(md: string): string {
   let html = md
     // Headers
-    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-serif text-foreground mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-serif text-foreground mt-8 mb-3">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-serif text-foreground mt-8 mb-3">$1</h1>')
+    .replace(/^### (.+)$/gm, (_, text) => `<h3 id="${slugifyHeading(text)}" class="text-lg font-serif text-foreground mt-6 mb-2 scroll-mt-24">${text}</h3>`)
+    .replace(/^## (.+)$/gm, (_, text) => `<h2 id="${slugifyHeading(text)}" class="text-xl font-serif text-foreground mt-8 mb-3 scroll-mt-24">${text}</h2>`)
+    .replace(/^# (.+)$/gm, (_, text) => `<h1 id="${slugifyHeading(text)}" class="text-2xl font-serif text-foreground mt-8 mb-3 scroll-mt-24">${text}</h1>`)
     // Bold & italic
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -70,6 +94,11 @@ function renderContent(
   glossary?: { keyword: string; url: string; rel: string }[]
 ): string {
   let raw = isHtmlContent(content) ? content : renderMarkdown(content);
+  raw = raw.replace(/<h([23])([^>]*)>([\s\S]*?)<\/h[23]>/gi, (full, level, attrs, inner) => {
+    if (/\sid=/.test(attrs)) return full;
+    const text = inner.replace(/<[^>]+>/g, '').trim();
+    return `<h${level}${attrs} id="${slugifyHeading(text)}">${inner}</h${level}>`;
+  });
 
   // Apply glossary links first (affiliate keywords → links)
   if (glossary && glossary.length > 0) {
@@ -136,7 +165,7 @@ function renderContent(
 
   return DOMPurify.sanitize(raw, {
     ADD_TAGS: ['video', 'source', 'picture', 'details', 'summary'],
-    ADD_ATTR: ['loading', 'target', 'rel', 'title'],
+    ADD_ATTR: ['loading', 'target', 'rel', 'title', 'id'],
     FORBID_TAGS: ['iframe', 'object', 'embed', 'form', 'input'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
   });
@@ -144,6 +173,7 @@ function renderContent(
 
 export default function GuideArticle() {
   const { slug } = useParams<{ slug: string }>();
+  const [readingProgress, setReadingProgress] = useState(0);
 
   // Fetch current post
   const { data: post, isLoading, isError } = useQuery({
@@ -173,7 +203,7 @@ export default function GuideArticle() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
+        .select('id, title, slug, excerpt, cover_image_url, feature_image_url, category, tags, published_at')
         .eq('is_published', true)
         .order('published_at', { ascending: false });
       if (error) throw error;
@@ -198,15 +228,55 @@ export default function GuideArticle() {
     enabled: !!post,
   });
 
+  const toc = useMemo(() => post ? extractToc(post.content) : [], [post]);
+  const readingMinutes = post?.reading_time_minutes || Math.max(1, Math.ceil((post?.word_count || post?.content?.replace(/<[^>]+>/g, '').split(/\s+/).length || 0) / 220));
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const article = document.querySelector('article');
+      if (!article) return;
+      const rect = article.getBoundingClientRect();
+      const total = Math.max(1, article.scrollHeight - window.innerHeight * 0.6);
+      const read = Math.min(total, Math.max(0, -rect.top));
+      setReadingProgress(Math.round((read / total) * 100));
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    return () => {
+      window.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('resize', updateProgress);
+    };
+  }, [post?.id]);
+
+  const renderedArticleHtml = useMemo(() => {
+    if (!post) return '';
+    return renderContent(
+      post.content,
+      allPosts.filter(p => p.slug !== slug).map(p => ({ title: p.title, slug: p.slug })),
+      glossary
+    );
+  }, [post, allPosts, glossary, slug]);
+
+  const [articleIntroHtml, articleRestHtml] = useMemo(() => {
+    if (!renderedArticleHtml) return ['', ''];
+    const matches = [...renderedArticleHtml.matchAll(/<h2\b/gi)];
+    const splitAt = matches[1]?.index ?? matches[0]?.index ?? -1;
+    return splitAt > 0
+      ? [renderedArticleHtml.slice(0, splitAt), renderedArticleHtml.slice(splitAt)]
+      : [renderedArticleHtml, ''];
+  }, [renderedArticleHtml]);
+
   // SEO - full OG, Twitter, hreflang, JSON-LD with Article + FAQ + Product + BreadcrumbList
   React.useEffect(() => {
     if (!post) return;
     const BASE = 'https://honsgarden.se';
     const fullUrl = `${BASE}/blogg/${post.slug}`;
-    const pageTitle = post.meta_title || post.title + ' | Hönsgården';
+    const pageTitle = `${post.title} | Hönsgården`;
     const pageDesc = post.meta_description || post.excerpt || '';
-    const imageUrl = post.cover_image_url
-      ? (post.cover_image_url.startsWith('http') ? post.cover_image_url : `${BASE}${post.cover_image_url}`)
+    const featureImage = post.feature_image_url || post.cover_image_url;
+    const imageUrl = featureImage
+      ? (featureImage.startsWith('http') ? featureImage : `${BASE}${featureImage}`)
       : `${BASE}/blog-images/hens-garden.jpg`;
 
     const createdElements: HTMLElement[] = [];
@@ -306,15 +376,16 @@ export default function GuideArticle() {
         mainEntityOfPage: { '@type': 'WebPage', '@id': fullUrl },
         isPartOf: { '@id': `${BASE}/#website` },
         inLanguage: 'sv-SE',
-        ...(post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
-        wordCount: post.content.replace(/<[^>]+>/g, '').split(/\s+/).length,
+        ...(post.meta_keywords ? { keywords: post.meta_keywords } : post.tags && post.tags.length > 0 ? { keywords: post.tags.join(', ') } : {}),
+        wordCount: post.word_count || post.content.replace(/<[^>]+>/g, '').split(/\s+/).length,
       },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Hem', item: BASE },
           { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE}/blogg` },
-          { '@type': 'ListItem', position: 3, name: post.title, item: fullUrl },
+          ...(post.category ? [{ '@type': 'ListItem', position: 3, name: categoryLabels[post.category] || post.category, item: `${BASE}/blogg/kategori/${post.category}` }] : []),
+          { '@type': 'ListItem', position: post.category ? 4 : 3, name: post.title, item: fullUrl },
         ],
       },
       {
@@ -474,6 +545,9 @@ export default function GuideArticle() {
   return (
     <div className="min-h-screen bg-background">
       <VisitorWelcomePopup />
+      <div className="fixed inset-x-0 top-0 z-50 h-1 bg-border/40" aria-hidden="true">
+        <div className="h-full bg-primary transition-[width] duration-150" style={{ width: `${readingProgress}%` }} />
+      </div>
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -488,7 +562,8 @@ export default function GuideArticle() {
         </div>
       </header>
 
-      <article className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-8 sm:py-12 lg:grid-cols-[minmax(0,720px)_240px]">
+      <article className="w-full max-w-[720px]">
         {/* Meta */}
         <div className="flex items-center gap-2 flex-wrap mb-4">
           {post.category && (
@@ -502,6 +577,9 @@ export default function GuideArticle() {
               {new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           )}
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="h-3 w-3" /> {readingMinutes} min läsning
+          </span>
           {post.author_name && (
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px]">✍️</span>
@@ -525,27 +603,30 @@ export default function GuideArticle() {
         )}
 
         {/* Cover */}
-        {post.cover_image_url && (
+        {(post.feature_image_url || post.cover_image_url) && (
           <img
-            src={post.cover_image_url}
+            src={post.feature_image_url || post.cover_image_url || ''}
             alt={post.title}
             className="w-full rounded-2xl aspect-video object-cover mb-8"
+            loading="lazy"
           />
         )}
 
         {/* Content with auto internal links */}
         <div
           className="prose-custom"
-          dangerouslySetInnerHTML={{
-            __html: renderContent(
-              post.content,
-              allPosts
-                .filter(p => p.slug !== slug)
-                .map(p => ({ title: p.title, slug: p.slug })),
-              glossary
-            ),
-          }}
+          dangerouslySetInnerHTML={{ __html: articleIntroHtml }}
         />
+
+        <div className="my-10 rounded-2xl border border-border/30 bg-gradient-to-br from-primary/5 via-card to-accent/5 p-6 text-center sm:p-8">
+          <h2 className="font-serif text-xl text-foreground mb-2">Börja gratis i Hönsgården</h2>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-4">Logga ägg, följ dina hönor och få påminnelser utan krångel.</p>
+          <Link to="/login"><Button className="rounded-xl gap-2"><Egg className="h-4 w-4" /> Kom igång gratis</Button></Link>
+        </div>
+
+        {articleRestHtml && (
+          <div className="prose-custom" dangerouslySetInnerHTML={{ __html: articleRestHtml }} />
+        )}
 
         {/* Tags + Share */}
         {post.tags && post.tags.length > 0 && (
@@ -611,9 +692,9 @@ export default function GuideArticle() {
                 {related.map(r => (
                   <Link key={r.id} to={`/blogg/${r.slug}`} className="group">
                     <div className="rounded-xl border border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full bg-card">
-                      {r.cover_image_url ? (
+                      {(r.feature_image_url || r.cover_image_url) ? (
                         <div className="aspect-video overflow-hidden">
-                          <img src={r.cover_image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <img src={r.feature_image_url || r.cover_image_url || ''} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         </div>
                       ) : (
                         <div className="aspect-video bg-gradient-to-br from-primary/8 to-accent/8 flex items-center justify-center">
@@ -636,6 +717,22 @@ export default function GuideArticle() {
           );
         })()}
       </article>
+
+      {toc.length > 0 && (
+        <aside className="hidden lg:block">
+          <nav className="sticky top-24 rounded-2xl border border-border/50 bg-card/70 p-4" aria-label="Innehållsförteckning">
+            <p className="mb-3 text-xs font-medium uppercase text-muted-foreground">Innehåll</p>
+            <ol className="space-y-2 text-sm">
+              {toc.map(item => (
+                <li key={item.id} className={item.level === 3 ? 'pl-3' : ''}>
+                  <a href={`#${item.id}`} className="text-muted-foreground transition-colors hover:text-primary">{item.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </aside>
+      )}
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 px-4">
