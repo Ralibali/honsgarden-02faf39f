@@ -173,6 +173,7 @@ function renderContent(
 
 export default function GuideArticle() {
   const { slug } = useParams<{ slug: string }>();
+  const [readingProgress, setReadingProgress] = useState(0);
 
   // Fetch current post
   const { data: post, isLoading, isError } = useQuery({
@@ -226,6 +227,27 @@ export default function GuideArticle() {
     },
     enabled: !!post,
   });
+
+  const toc = useMemo(() => post ? extractToc(post.content) : [], [post]);
+  const readingMinutes = post?.reading_time_minutes || Math.max(1, Math.ceil((post?.word_count || post?.content?.replace(/<[^>]+>/g, '').split(/\s+/).length || 0) / 220));
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const article = document.querySelector('article');
+      if (!article) return;
+      const rect = article.getBoundingClientRect();
+      const total = Math.max(1, article.scrollHeight - window.innerHeight * 0.6);
+      const read = Math.min(total, Math.max(0, -rect.top));
+      setReadingProgress(Math.round((read / total) * 100));
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    return () => {
+      window.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('resize', updateProgress);
+    };
+  }, [post?.id]);
 
   // SEO - full OG, Twitter, hreflang, JSON-LD with Article + FAQ + Product + BreadcrumbList
   React.useEffect(() => {
