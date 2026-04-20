@@ -67,12 +67,20 @@ export default function Terms() {
             Tjänsten tillhandahålls "i befintligt skick" utan garantier av något slag. Vi garanterar inte oavbruten eller felfri drift och ansvarar inte för indirekt skada, utebliven vinst eller dataförlust utöver vad som följer av tvingande svensk lag.
           </p>
 
-          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">6. Ändringar av villkoren</h2>
+          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">6. Medicinsk, juridisk och ekonomisk friskrivning</h2>
+          <p className="text-sm text-foreground leading-relaxed">
+            All information i Hönsgården, inklusive guider, AI-svar, påminnelser, statistik och rekommendationer, är generell information och ska inte betraktas som veterinärmedicinsk, juridisk, ekonomisk eller annan professionell rådgivning. Du ansvarar själv för beslut som rör dina djur, din verksamhet och din användning av tjänsten.
+          </p>
+          <p className="text-sm text-foreground leading-relaxed">
+            Vid sjukdom, misstänkt smitta, skada, djurskyddsfrågor eller osäkerhet ska du alltid kontakta veterinär, Jordbruksverket, SVA eller annan behörig myndighet. Vi ansvarar inte för skador, förluster, felaktiga beslut, uteblivna åtgärder eller följder av att information i tjänsten används utan professionell bedömning.
+          </p>
+
+          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">7. Ändringar av villkoren</h2>
           <p className="text-sm text-foreground leading-relaxed">
             Vi förbehåller oss rätten att ändra dessa villkor. Vid väsentliga förändringar meddelas du via e-post eller i tjänsten minst 30 dagar före ändringen träder i kraft. Fortsatt användning efter ändring innebär godkännande av de nya villkoren.
           </p>
 
-          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">7. Tillämplig lag & Tvistelösning</h2>
+          <h2 className="font-serif text-lg text-foreground mt-6 mb-2">8. Tillämplig lag & Tvistelösning</h2>
           <p className="text-sm text-foreground leading-relaxed">
             Dessa villkor regleras av svensk lag. Tvister ska i första hand lösas genom dialog. Om vi inte kan enas kan tvisten prövas av Allmänna reklamationsnämnden (ARN) för konsumenter, eller av allmän domstol i Sverige.
           </p>
