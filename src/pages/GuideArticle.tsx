@@ -249,6 +249,24 @@ export default function GuideArticle() {
     };
   }, [post?.id]);
 
+  const renderedArticleHtml = useMemo(() => {
+    if (!post) return '';
+    return renderContent(
+      post.content,
+      allPosts.filter(p => p.slug !== slug).map(p => ({ title: p.title, slug: p.slug })),
+      glossary
+    );
+  }, [post, allPosts, glossary, slug]);
+
+  const [articleIntroHtml, articleRestHtml] = useMemo(() => {
+    if (!renderedArticleHtml) return ['', ''];
+    const matches = [...renderedArticleHtml.matchAll(/<h2\b/gi)];
+    const splitAt = matches[1]?.index ?? matches[0]?.index ?? -1;
+    return splitAt > 0
+      ? [renderedArticleHtml.slice(0, splitAt), renderedArticleHtml.slice(splitAt)]
+      : [renderedArticleHtml, ''];
+  }, [renderedArticleHtml]);
+
   // SEO - full OG, Twitter, hreflang, JSON-LD with Article + FAQ + Product + BreadcrumbList
   React.useEffect(() => {
     if (!post) return;
