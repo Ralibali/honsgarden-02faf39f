@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 
 const BASE_URL = 'https://honsgarden.se';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://sikbymtrbhrofysgkqsj.supabase.co';
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzaWtiYm10cmJocm9meXNna3FzaiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzcyNjY0NDIwLCJleHAiOjIwODgyNDA0MjB9.SlgJoYwkD5GWeZ2mK-GihDvEWpt8noKWE8xulzSOqaU';
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InNpa2J5bXRyYmhyb2Z5c2drcXNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NjQ0MjAsImV4cCI6MjA4ODI0MDQyMH0.SlgJoYwkD5GWeZ2mK-GihDvEWpt8noKWE8xulzSOqaU';
 
 const escapeHtml = (value = '') => String(value)
   .replace(/&/g, '&amp;')
