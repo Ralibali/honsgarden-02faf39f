@@ -78,16 +78,21 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           excerpt: string | null
+          feature_image_url: string | null
           glossary_ids: string[] | null
           id: string
           is_published: boolean
           meta_description: string | null
+          meta_keywords: string | null
           meta_title: string | null
           published_at: string | null
+          reading_time_minutes: number | null
           slug: string
           tags: string[] | null
           title: string
           updated_at: string
+          view_count: number
+          word_count: number | null
         }
         Insert: {
           author_id: string
@@ -96,16 +101,21 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
+          feature_image_url?: string | null
           glossary_ids?: string[] | null
           id?: string
           is_published?: boolean
           meta_description?: string | null
+          meta_keywords?: string | null
           meta_title?: string | null
           published_at?: string | null
+          reading_time_minutes?: number | null
           slug: string
           tags?: string[] | null
           title: string
           updated_at?: string
+          view_count?: number
+          word_count?: number | null
         }
         Update: {
           author_id?: string
@@ -114,16 +124,21 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
+          feature_image_url?: string | null
           glossary_ids?: string[] | null
           id?: string
           is_published?: boolean
           meta_description?: string | null
+          meta_keywords?: string | null
           meta_title?: string | null
           published_at?: string | null
+          reading_time_minutes?: number | null
           slug?: string
           tags?: string[] | null
           title?: string
           updated_at?: string
+          view_count?: number
+          word_count?: number | null
         }
         Relationships: []
       }
