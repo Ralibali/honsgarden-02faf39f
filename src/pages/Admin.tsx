@@ -17,6 +17,7 @@ import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserInsightsDashboard from '@/components/admin/UserInsightsDashboard';
 import UserDetailModal from '@/components/admin/UserDetailModal';
 import RevenueDashboard from '@/components/admin/RevenueDashboard';
+import SeoAdmin from '@/components/admin/SeoAdmin';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -207,6 +208,9 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="blog" className="text-xs sm:text-sm gap-1 rounded-lg">
             <BookOpen className="h-3.5 w-3.5" /> Blogg
+          </TabsTrigger>
+          <TabsTrigger value="seo" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <Search className="h-3.5 w-3.5" /> SEO
           </TabsTrigger>
           <TabsTrigger value="glossary" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Link2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Länkord</span><span className="sm:hidden">Länkar</span>
@@ -461,6 +465,10 @@ export default function Admin() {
         {/* Blog tab */}
         <TabsContent value="blog" className="space-y-3">
           <BlogEditor />
+        </TabsContent>
+
+        <TabsContent value="seo" className="space-y-3">
+          <SeoAdmin />
         </TabsContent>
 
         {/* Glossary tab */}
