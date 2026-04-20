@@ -298,7 +298,15 @@ export default function HenProfile() {
             </div>
           ) : (
             <div className="text-center">
-              <span className="text-6xl block mb-3">{isRooster ? '🐓' : '🐔'}</span>
+              <div className="flex justify-center mb-3">
+                <HenAvatar
+                  henId={hen.id}
+                  henType={hen.hen_type}
+                  imageUrl={hen.image_url}
+                  size="lg"
+                  editable
+                />
+              </div>
               <h1 className="text-2xl font-serif text-foreground mb-1">{hen.name}</h1>
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 {hen.flock_id && (() => {
