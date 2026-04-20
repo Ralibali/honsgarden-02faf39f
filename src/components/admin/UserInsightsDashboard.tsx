@@ -280,6 +280,28 @@ export default function UserInsightsDashboard() {
     };
   }, [profiles, eggLogs, hens, choreCompletions, pageViews, transactions, feedRecords]);
 
+  // Subscription Health Check mutation
+  const healthCheckMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('subscription-health-check');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      setHealthCheckResult(data);
+      if (data.totalIssues === 0) {
+        toast.success('Hälsokontroll slutförd', { description: 'Inga problem hittades! 🎉' });
+      } else {
+        toast.warning(`${data.totalIssues} problem hittades`, {
+          description: 'Kontrollera mejlet för detaljer.',
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error('Hälsokontroll misslyckades', { description: String(error) });
+    },
+  });
+
   // AI Tips generation
   const aiTipsMutation = useMutation({
     mutationFn: async () => {
