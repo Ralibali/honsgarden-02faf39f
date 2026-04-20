@@ -1,8 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+const responseHeaders = {
+  ...corsHeaders,
   "Content-Type": "application/xml; charset=utf-8",
 };
 
@@ -10,7 +10,7 @@ const BASE_URL = "https://honsgarden.se";
 
 const CATEGORIES = [
   "guide", "recension", "tips", "halsa",
-  "nyborjare", "tradgard", "hem", "friluftsliv",
+  "nyborjare", "raser", "tradgard", "hem", "friluftsliv",
 ];
 
 function escapeXml(str: string): string {
@@ -24,7 +24,7 @@ function escapeXml(str: string): string {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   const supabase = createClient(
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
   const { data: posts } = await supabase
     .from("blog_posts")
-    .select("slug, updated_at, published_at, cover_image_url, title, category, tags")
+    .select("slug, updated_at, published_at, cover_image_url, feature_image_url, title, category, tags")
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
@@ -110,8 +110,9 @@ Deno.serve(async (req) => {
   if (posts) {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
-      const imageUrl = post.cover_image_url
-        ? (post.cover_image_url.startsWith("http") ? post.cover_image_url : `${BASE_URL}${post.cover_image_url}`)
+      const featureImage = post.feature_image_url || post.cover_image_url;
+      const imageUrl = featureImage
+        ? (featureImage.startsWith("http") ? featureImage : `${BASE_URL}${featureImage}`)
         : null;
 
       xml += `  <url>
@@ -140,7 +141,7 @@ Deno.serve(async (req) => {
 
   return new Response(xml, {
     headers: {
-      ...corsHeaders,
+      ...responseHeaders,
       "Cache-Control": "public, max-age=3600, s-maxage=3600",
     },
   });
