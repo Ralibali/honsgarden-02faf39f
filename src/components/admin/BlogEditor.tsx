@@ -122,6 +122,39 @@ function getPlainWordCount(value: string) {
   return value.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
 }
 
+async function compressImageToWebP(file: File, maxWidth = 1600, quality = 0.82): Promise<File> {
+  if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.type === 'image/webp') {
+    return file;
+  }
+
+  const imageUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Kunde inte läsa bilden'));
+      img.src = imageUrl;
+    });
+
+    const scale = Math.min(1, maxWidth / image.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(image.width * scale);
+    canvas.height = Math.round(image.height * scale);
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Kunde inte komprimera bilden');
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((result) => result ? resolve(result) : reject(new Error('WebP-konvertering misslyckades')), 'image/webp', quality);
+    });
+
+    const baseName = file.name.replace(/\.[^.]+$/, '') || 'blog-image';
+    return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+}
+
 type ProductItem = {
   url: string;
   name: string;
@@ -430,13 +463,17 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
     if (!file) return;
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const optimizedFile = await compressImageToWebP(file);
+      const ext = optimizedFile.type === 'image/webp' ? 'webp' : optimizedFile.name.split('.').pop() || 'jpg';
       const path = `${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('blog-images').upload(path, file);
+      const { error } = await supabase.storage.from('blog-images').upload(path, optimizedFile, {
+        contentType: optimizedFile.type || 'image/webp',
+        cacheControl: '31536000',
+      });
       if (error) throw error;
       const { data } = supabase.storage.from('blog-images').getPublicUrl(path);
       setCoverUrl(data.publicUrl);
-      toast({ title: 'Bild uppladdad' });
+      toast({ title: optimizedFile.type === 'image/webp' ? 'Bild komprimerad till WebP och uppladdad' : 'Bild uppladdad' });
     } catch (err: any) {
       toast({ title: 'Uppladdning misslyckades', description: err.message, variant: 'destructive' });
     } finally {
@@ -597,7 +634,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
               ) : (
                 <label className="flex flex-col items-center gap-2 py-6 border-2 border-dashed border-border/60 rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <ImagePlus className="h-5 w-5 text-muted-foreground" />}
-                  <span className="text-[10px] text-muted-foreground">{uploading ? 'Laddar upp...' : 'Klicka för att ladda upp'}</span>
+                  <span className="text-[10px] text-muted-foreground">{uploading ? 'Komprimerar och laddar upp...' : 'Klicka för att ladda upp WebP-optimerad bild'}</span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                 </label>
               )}
