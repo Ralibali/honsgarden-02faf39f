@@ -262,6 +262,7 @@ export default function SeoAdmin() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [editing, setEditing] = useState<{ config: SeoConfig; row: SeoRow } | null>(null);
+  const [creating, setCreating] = useState<{ name: string; slug: string; category: string }>({ name: '', slug: '', category: '' });
   const [publishTarget, setPublishTarget] = useState<{ config: SeoConfig; row: SeoRow; next: boolean } | null>(null);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
@@ -311,6 +312,19 @@ export default function SeoAdmin() {
     onError: (error: any) => toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' }),
   });
 
+  const createRowMutation = useMutation({
+    mutationFn: async ({ config, payload }: { config: SeoConfig; payload: Record<string, any> }) => {
+      const { error } = await supabase.from(config.table as any).insert(payload);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seo-admin-rows'] });
+      setCreating({ name: '', slug: '', category: '' });
+      toast({ title: 'SEO-post skapad' });
+    },
+    onError: (error: any) => toast({ title: 'Kunde inte skapa', description: error.message, variant: 'destructive' }),
+  });
+
   const activeConfig = configs.find(config => config.type === activeTab)!;
   const filteredRows = useMemo(() => {
     const rows = rowGroups[activeTab] ?? [];
@@ -329,6 +343,24 @@ export default function SeoAdmin() {
     [...config.textFields, ...config.jsonFields.map(field => field.key)].forEach(key => { patch[key] = row[key] || null; });
     updateRowMutation.mutate({ config, id: row.id, patch });
     setEditing(null);
+  };
+
+  const handleCreate = () => {
+    const name = creating.name.trim();
+    const slug = slugify(creating.slug || creating.name);
+    if (!name || !slug) {
+      toast({ title: 'Namn och slug krävs', variant: 'destructive' });
+      return;
+    }
+    if (activeConfig.categoryRequired && !creating.category.trim()) {
+      toast({ title: `${activeConfig.categoryLabel} krävs`, variant: 'destructive' });
+      return;
+    }
+
+    const payload: Record<string, any> = { name, slug, published: false, generation_status: 'pending' };
+    if (activeConfig.type === 'months') payload.month_number = Number(creating.category) || 1;
+    else if (creating.category.trim()) payload[activeConfig.categoryField] = creating.category.trim();
+    createRowMutation.mutate({ config: activeConfig, payload });
   };
 
   const runGenerate = async (config: SeoConfig, row: SeoRow) => {
