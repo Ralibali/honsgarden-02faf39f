@@ -350,7 +350,8 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
   const [tagsInput, setTagsInput] = useState((post?.tags || []).join(', '));
   const [metaTitle, setMetaTitle] = useState(post?.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(post?.meta_description || '');
-  const [coverUrl, setCoverUrl] = useState(post?.cover_image_url || '');
+  const [metaKeywords, setMetaKeywords] = useState(post?.meta_keywords || '');
+  const [coverUrl, setCoverUrl] = useState(post?.feature_image_url || post?.cover_image_url || '');
   const [uploading, setUploading] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('edit');
   const [autoSlug, setAutoSlug] = useState(!post);
@@ -379,6 +380,7 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
       if (!user) throw new Error('Ej inloggad');
 
       const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
+      const words = getPlainWordCount(content);
       const postData: any = {
         title,
         slug,
@@ -388,7 +390,11 @@ function PostForm({ post, onBack }: { post?: BlogPost; onBack: () => void }) {
         tags,
         meta_title: metaTitle || null,
         meta_description: metaDescription || null,
+        meta_keywords: metaKeywords || null,
         cover_image_url: coverUrl || null,
+        feature_image_url: coverUrl || null,
+        reading_time_minutes: Math.max(1, Math.ceil(words / 220)),
+        word_count: words,
         author_id: user.id,
         glossary_ids: selectedGlossaryIds,
       };
