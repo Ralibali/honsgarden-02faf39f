@@ -12,6 +12,7 @@ interface HenAvatarProps {
   imageUrl?: string | null;
   size?: 'sm' | 'md' | 'lg';
   editable?: boolean;
+  showProfileActions?: boolean;
   className?: string;
 }
 
@@ -74,6 +75,7 @@ export default function HenAvatar({
   imageUrl,
   size = 'md',
   editable = false,
+  showProfileActions = false,
   className = '',
 }: HenAvatarProps) {
   const { user } = useAuth();
@@ -84,6 +86,10 @@ export default function HenAvatar({
   const emoji = henType === 'rooster' ? '🐓' : '🐔';
   const sizeClass = SIZES[size];
   const iconClass = ICON_SIZES[size];
+  const openFilePicker = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.stopPropagation();
+    if (!uploading) inputRef.current?.click();
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,7 +158,14 @@ export default function HenAvatar({
   return (
     <div className={`relative shrink-0 ${className}`}>
       <div
-        className={`${sizeClass} rounded-xl overflow-hidden flex items-center justify-center ${bgClass}`}
+        className={`${sizeClass} rounded-xl overflow-hidden flex items-center justify-center ${bgClass} ${editable && showProfileActions ? 'cursor-pointer' : ''}`}
+        onClick={editable && showProfileActions ? () => openFilePicker() : undefined}
+        onKeyDown={editable && showProfileActions ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') openFilePicker(e);
+        } : undefined}
+        role={editable && showProfileActions ? 'button' : undefined}
+        tabIndex={editable && showProfileActions ? 0 : undefined}
+        aria-label={editable && showProfileActions ? (imageUrl ? 'Byt bild' : 'Ladda upp bild') : undefined}
       >
         {imageUrl ? (
           <img
@@ -178,25 +191,24 @@ export default function HenAvatar({
             className="hidden"
             onChange={handleFileChange}
           />
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              inputRef.current?.click();
-            }}
-            disabled={uploading}
-            className={`absolute -bottom-1 -right-1 ${
-              size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'
-            } rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`}
-            aria-label={imageUrl ? 'Byt bild' : 'Ladda upp bild'}
-          >
-            {uploading ? (
-              <Loader2 className={`${iconClass} animate-spin`} />
-            ) : (
-              <Camera className={iconClass} />
-            )}
-          </button>
-          {imageUrl && !uploading && (
+          {!showProfileActions && (
+            <button
+              type="button"
+              onClick={openFilePicker}
+              disabled={uploading}
+              className={`absolute -bottom-1 -right-1 ${
+                size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'
+              } rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`}
+              aria-label={imageUrl ? 'Byt bild' : 'Ladda upp bild'}
+            >
+              {uploading ? (
+                <Loader2 className={`${iconClass} animate-spin`} />
+              ) : (
+                <Camera className={iconClass} />
+              )}
+            </button>
+          )}
+          {imageUrl && !uploading && !showProfileActions && (
             <button
               type="button"
               onClick={handleRemove}
@@ -207,6 +219,29 @@ export default function HenAvatar({
             >
               <X className={iconClass} />
             </button>
+          )}
+          {showProfileActions && (
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={openFilePicker}
+                disabled={uploading}
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                {imageUrl ? 'Byt bild' : 'Lägg till bild'}
+              </button>
+              {imageUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                  Ta bort
+                </button>
+              )}
+            </div>
           )}
         </>
       )}
