@@ -269,9 +269,9 @@ export default function SeoAdmin() {
       const entries = await Promise.all(configs.map(async config => {
         const { data, error } = await supabase.from(config.table as any).select('*').order('name', { ascending: true });
         if (error) throw new Error(error.message);
-        return [config.type, data ?? []] as const;
+        return [config.type, (data ?? []) as unknown as SeoRow[]] as const;
       }));
-      return Object.fromEntries(entries) as Record<SeoType, SeoRow[]>;
+      return Object.fromEntries(entries) as unknown as Record<SeoType, SeoRow[]>;
     },
     enabled: !!adminCheck?.is_admin,
   });
