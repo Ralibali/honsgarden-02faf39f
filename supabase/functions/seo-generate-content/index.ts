@@ -107,11 +107,14 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY") ?? "";
     if (!lovableApiKey) return jsonResponse({ error: "AI är inte konfigurerat" }, 500);
 
-    const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return jsonResponse({ error: "Unauthorized" }, 401);
-    const { data: isAdmin } = await userClient.rpc("has_role", { _user_id: user.id, _role: "admin" });
-    if (!isAdmin) return jsonResponse({ error: "Forbidden" }, 403);
+    const isServiceCall = authHeader === `Bearer ${serviceKey}`;
+    if (!isServiceCall) {
+      const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+      const { data: { user } } = await userClient.auth.getUser();
+      if (!user) return jsonResponse({ error: "Unauthorized" }, 401);
+      const { data: isAdmin } = await userClient.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (!isAdmin) return jsonResponse({ error: "Forbidden" }, 403);
+    }
 
     const body = await req.json().catch(() => null) as { type?: SeoType; id?: string; batch?: boolean; limit?: number } | null;
     const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
