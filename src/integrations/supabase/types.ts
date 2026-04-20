@@ -127,14 +127,23 @@ export type Database = {
           affiliate_url: string | null
           category: string | null
           created_at: string
+          currency: string
           description: string | null
+          description_md: string | null
+          external_id: string | null
           id: string
           image_url: string | null
+          image_urls: string[]
+          in_stock: boolean | null
           is_active: boolean
+          last_scraped_at: string | null
           name: string
           price: string | null
+          price_original: number | null
           product_url: string | null
+          short_description: string | null
           slug: string | null
+          specs: Json
           updated_at: string
         }
         Insert: {
@@ -142,14 +151,23 @@ export type Database = {
           affiliate_url?: string | null
           category?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
+          description_md?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
+          in_stock?: boolean | null
           is_active?: boolean
+          last_scraped_at?: string | null
           name: string
           price?: string | null
+          price_original?: number | null
           product_url?: string | null
+          short_description?: string | null
           slug?: string | null
+          specs?: Json
           updated_at?: string
         }
         Update: {
@@ -157,14 +175,23 @@ export type Database = {
           affiliate_url?: string | null
           category?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
+          description_md?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
+          in_stock?: boolean | null
           is_active?: boolean
+          last_scraped_at?: string | null
           name?: string
           price?: string | null
+          price_original?: number | null
           product_url?: string | null
+          short_description?: string | null
           slug?: string | null
+          specs?: Json
           updated_at?: string
         }
         Relationships: [
@@ -1196,6 +1223,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      scrape_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          product_id: string | null
+          result: Json | null
+          source_url: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          product_id?: string | null
+          result?: Json | null
+          source_url?: string | null
+          status: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          product_id?: string | null
+          result?: Json | null
+          source_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrape_jobs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
