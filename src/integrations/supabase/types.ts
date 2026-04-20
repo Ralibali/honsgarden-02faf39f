@@ -1472,6 +1472,7 @@ export type Database = {
           created_at: string
           entity_id: string
           entity_type: string
+          generation_status: string
           id: string
           processed_at: string | null
         }
@@ -1480,6 +1481,7 @@ export type Database = {
           created_at?: string
           entity_id: string
           entity_type: string
+          generation_status?: string
           id?: string
           processed_at?: string | null
         }
@@ -1488,6 +1490,7 @@ export type Database = {
           created_at?: string
           entity_id?: string
           entity_type?: string
+          generation_status?: string
           id?: string
           processed_at?: string | null
         }
@@ -1571,18 +1574,21 @@ export type Database = {
       seo_problem_breeds: {
         Row: {
           breed_id: string
+          generation_status: string
           id: string
           note: string | null
           problem_id: string
         }
         Insert: {
           breed_id: string
+          generation_status?: string
           id?: string
           note?: string | null
           problem_id: string
         }
         Update: {
           breed_id?: string
+          generation_status?: string
           id?: string
           note?: string | null
           problem_id?: string
@@ -1712,6 +1718,7 @@ export type Database = {
           default_ai_model: string
           default_medical_disclaimer: string | null
           editorial_org_name: string
+          generation_status: string
           id: string
           last_sitemap_ping_at: string | null
           llms_txt_enabled: boolean
@@ -1723,6 +1730,7 @@ export type Database = {
           default_ai_model?: string
           default_medical_disclaimer?: string | null
           editorial_org_name?: string
+          generation_status?: string
           id?: string
           last_sitemap_ping_at?: string | null
           llms_txt_enabled?: boolean
@@ -1734,6 +1742,7 @@ export type Database = {
           default_ai_model?: string
           default_medical_disclaimer?: string | null
           editorial_org_name?: string
+          generation_status?: string
           id?: string
           last_sitemap_ping_at?: string | null
           llms_txt_enabled?: boolean
