@@ -430,7 +430,10 @@ export default function SeoAdmin() {
         </CardContent>
       </Card>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as SeoType)} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value as SeoType);
+        setCreating({ name: '', slug: '', category: '' });
+      }} className="space-y-4">
         <TabsList className="flex w-full overflow-x-auto rounded-xl">
           {configs.map(config => <TabsTrigger key={config.type} value={config.type} className="rounded-lg">{config.label}</TabsTrigger>)}
         </TabsList>
