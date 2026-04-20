@@ -31,6 +31,7 @@ const tooltipStyle = {
 
 export default function UserInsightsDashboard() {
   const [aiTips, setAiTips] = useState<string | null>(null);
+  const [healthCheckResult, setHealthCheckResult] = useState<any>(null);
 
   // Fetch all users with profiles
   const { data: profiles = [], isLoading: profilesLoading } = useQuery({
