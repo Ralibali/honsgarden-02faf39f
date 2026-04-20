@@ -7,9 +7,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Users, TrendingUp, TrendingDown, Activity, Egg, Bird, ClipboardCheck,
   AlertTriangle, Sparkles, Loader2, RefreshCw, UserCheck, UserX, Zap,
-  ArrowRight, BarChart3, Target, Lightbulb
+  ArrowRight, BarChart3, Target, Lightbulb, ShieldCheck
 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
