@@ -203,7 +203,7 @@ export default function GuideArticle() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select('id, title, slug, excerpt, cover_image_url, category, tags, published_at')
+        .select('id, title, slug, excerpt, cover_image_url, feature_image_url, category, tags, published_at')
         .eq('is_published', true)
         .order('published_at', { ascending: false });
       if (error) throw error;
@@ -603,9 +603,9 @@ export default function GuideArticle() {
         )}
 
         {/* Cover */}
-        {post.cover_image_url && (
+        {(post.feature_image_url || post.cover_image_url) && (
           <img
-            src={post.cover_image_url}
+            src={post.feature_image_url || post.cover_image_url || ''}
             alt={post.title}
             className="w-full rounded-2xl aspect-video object-cover mb-8"
             loading="lazy"
@@ -692,9 +692,9 @@ export default function GuideArticle() {
                 {related.map(r => (
                   <Link key={r.id} to={`/blogg/${r.slug}`} className="group">
                     <div className="rounded-xl border border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full bg-card">
-                      {r.cover_image_url ? (
+                      {(r.feature_image_url || r.cover_image_url) ? (
                         <div className="aspect-video overflow-hidden">
-                          <img src={r.cover_image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <img src={r.feature_image_url || r.cover_image_url || ''} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         </div>
                       ) : (
                         <div className="aspect-video bg-gradient-to-br from-primary/8 to-accent/8 flex items-center justify-center">
