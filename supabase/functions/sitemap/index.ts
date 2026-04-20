@@ -8,9 +8,16 @@ const responseHeaders = {
 
 const BASE_URL = "https://honsgarden.se";
 
-const CATEGORIES = [
+const CATEGORY_FALLBACKS = [
   "guide", "recension", "tips", "halsa",
   "nyborjare", "raser", "tradgard", "hem", "friluftsliv",
+];
+
+const SEO_TABLES = [
+  { table: "seo_breeds", path: "/raser", priority: "0.8", changefreq: "monthly" },
+  { table: "seo_problems", path: "/problem", priority: "0.8", changefreq: "monthly" },
+  { table: "seo_care_topics", path: "/skotsel", priority: "0.8", changefreq: "monthly" },
+  { table: "seo_months", path: "/manad", priority: "0.7", changefreq: "monthly" },
 ];
 
 function escapeXml(str: string): string {
@@ -38,10 +45,12 @@ Deno.serve(async (req) => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
-  // Collect unique tags
+  // Collect unique tags and categories from published canonical blog content
   const allTags = new Set<string>();
+  const allCategories = new Set<string>();
   if (posts) {
     for (const post of posts) {
+      if (post.category) allCategories.add(post.category);
       if (post.tags) {
         for (const tag of post.tags) allTags.add(tag);
       }
@@ -51,11 +60,8 @@ Deno.serve(async (req) => {
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/blogg", priority: "0.9", changefreq: "daily" },
-    { loc: "/guider", priority: "0.8", changefreq: "daily" },
     { loc: "/om-oss", priority: "0.7", changefreq: "monthly" },
     { loc: "/verktyg/aggkalkylator", priority: "0.8", changefreq: "monthly" },
-    { loc: "/login", priority: "0.5", changefreq: "monthly" },
-    { loc: "/terms", priority: "0.3", changefreq: "yearly" },
   ];
 
   const now = new Date().toISOString().split("T")[0];
@@ -79,8 +85,8 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Category pages
-  for (const cat of CATEGORIES) {
+  // Category pages. Keep fallbacks so established category URLs remain discoverable.
+  for (const cat of new Set([...CATEGORY_FALLBACKS, ...allCategories])) {
     xml += `  <url>
     <loc>${BASE_URL}/blogg/kategori/${cat}</loc>
     <lastmod>${now}</lastmod>
@@ -106,7 +112,7 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Blog posts (both /blogg/ canonical and /guider/ alternate)
+  // Blog posts, canonical only. Legacy /guider URLs redirect to /blogg and must not be in sitemap.
   if (posts) {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
@@ -134,6 +140,38 @@ Deno.serve(async (req) => {
       xml += `
   </url>
 `;
+    }
+  }
+
+  // SEO content engine pages: only include when public routes are enabled and rows are published.
+  const { data: seoSettings } = await supabase
+    .from("seo_settings")
+    .select("public_routes_enabled")
+    .limit(1)
+    .maybeSingle();
+
+  if (seoSettings?.public_routes_enabled) {
+    for (const entry of SEO_TABLES) {
+      const { data: rows } = await supabase
+        .from(entry.table)
+        .select("slug, updated_at, last_generated_at")
+        .eq("published", true)
+        .order("updated_at", { ascending: false });
+
+      if (!rows) continue;
+
+      for (const row of rows) {
+        const lastmod = (row.updated_at || row.last_generated_at || now).split("T")[0];
+        xml += `  <url>
+    <loc>${BASE_URL}${entry.path}/${row.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${entry.changefreq}</changefreq>
+    <priority>${entry.priority}</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}${entry.path}/${row.slug}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}${entry.path}/${row.slug}" />
+  </url>
+`;
+      }
     }
   }
 
