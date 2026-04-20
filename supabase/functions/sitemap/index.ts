@@ -13,6 +13,13 @@ const CATEGORIES = [
   "nyborjare", "raser", "tradgard", "hem", "friluftsliv",
 ];
 
+const SEO_SOURCES = [
+  { table: "seo_breeds", base: "/raser", priority: "0.8" },
+  { table: "seo_problems", base: "/problem", priority: "0.8" },
+  { table: "seo_care_topics", base: "/skotsel", priority: "0.7" },
+  { table: "seo_months", base: "/manad", priority: "0.7" },
+];
+
 function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -38,6 +45,13 @@ Deno.serve(async (req) => {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
+  const { data: settings } = await supabase
+    .from("seo_settings")
+    .select("public_routes_enabled")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
   // Collect unique tags
   const allTags = new Set<string>();
   if (posts) {
@@ -45,17 +59,15 @@ Deno.serve(async (req) => {
       if (post.tags) {
         for (const tag of post.tags) allTags.add(tag);
       }
+      if (post.category) allTags.add(post.category);
     }
   }
 
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/blogg", priority: "0.9", changefreq: "daily" },
-    { loc: "/guider", priority: "0.8", changefreq: "daily" },
     { loc: "/om-oss", priority: "0.7", changefreq: "monthly" },
     { loc: "/verktyg/aggkalkylator", priority: "0.8", changefreq: "monthly" },
-    { loc: "/login", priority: "0.5", changefreq: "monthly" },
-    { loc: "/terms", priority: "0.3", changefreq: "yearly" },
   ];
 
   const now = new Date().toISOString().split("T")[0];
