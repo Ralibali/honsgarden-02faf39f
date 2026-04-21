@@ -190,7 +190,7 @@ export default function Admin() {
       )}
 
       <Tabs defaultValue="insights" className="space-y-4">
-        <TabsList className="flex w-full overflow-x-auto rounded-xl">
+        <TabsList className="flex w-full flex-wrap gap-1 h-auto rounded-xl p-1">
           <TabsTrigger value="insights" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Lightbulb className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Insikter</span><span className="sm:hidden">💡</span>
           </TabsTrigger>
