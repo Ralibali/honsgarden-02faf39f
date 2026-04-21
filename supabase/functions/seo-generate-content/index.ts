@@ -43,7 +43,13 @@ function parseJsonObject(text: string): Record<string, unknown> {
   return JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim());
 }
 
-async function generateOne(adminClient: ReturnType<typeof createClient>, type: SeoType, id: string, lovableApiKey: string) {
+async function generateOne(
+  adminClient: ReturnType<typeof createClient>,
+  type: SeoType,
+  id: string,
+  lovableApiKey: string,
+  autoPublish = false,
+) {
   const config = configs[type];
   const { data: row, error: rowError } = await adminClient.from(config.table).select(config.select).eq("id", id).single();
   if (rowError || !row) throw new Error(rowError?.message ?? "Posten hittades inte");
@@ -56,9 +62,11 @@ Krav:
 - Fyll bara dessa fält: ${config.fields.join(", ")}.
 - content ska vara 700–1100 ord med tydliga H2-rubriker i markdown.
 - meta_title max 60 tecken, meta_description max 155 tecken.
-- authoritative_sources ska innehålla trovärdiga svenska myndigheter/organisationer när relevant.
+- authoritative_sources ska innehålla trovärdiga svenska myndigheter/organisationer när relevant (Jordbruksverket, SVA, SLU). Format: array av {title, url, publisher}.
 - Vid djurhälsa: ingen diagnosgaranti, hänvisa till veterinär, Jordbruksverket eller SVA vid allvarliga symtom.
 - medical_disclaimer ska vara ifyllt för raser och problem.
+- key_facts ska vara array av {label, value} objekt.
+- faq ska vara array av {question, answer} objekt.
 - JSON-listor ska vara arrays av objekt, inte strängar.`;
 
   const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -83,14 +91,17 @@ Krav:
 
   const aiData = await aiResponse.json();
   const generated = parseJsonObject(aiData.choices?.[0]?.message?.content ?? "{}");
-  const patch = Object.fromEntries(config.fields.map((field) => [field, generated[field] ?? null]));
-  const { error: updateError } = await adminClient.from(config.table).update({
-    ...patch,
-    generation_status: "completed",
-    last_generated_at: new Date().toISOString(),
-    ai_model_used: "google/gemini-3-flash-preview",
-  }).eq("id", id);
+  const patch: Record<string, unknown> = Object.fromEntries(
+    config.fields.map((field) => [field, generated[field] ?? null]),
+  );
+  patch.generation_status = "completed";
+  patch.last_generated_at = new Date().toISOString();
+  patch.ai_model_used = "google/gemini-3-flash-preview";
+  if (autoPublish) patch.published = true;
+
+  const { error: updateError } = await adminClient.from(config.table).update(patch).eq("id", id);
   if (updateError) throw new Error(updateError.message);
+  return { id, autoPublished: autoPublish };
 }
 
 serve(async (req) => {
@@ -116,8 +127,9 @@ serve(async (req) => {
       if (!isAdmin) return jsonResponse({ error: "Forbidden" }, 403);
     }
 
-    const body = await req.json().catch(() => null) as { type?: SeoType; id?: string; batch?: boolean; limit?: number } | null;
+    const body = await req.json().catch(() => null) as { type?: SeoType; id?: string; batch?: boolean; limit?: number; auto_publish?: boolean } | null;
     const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+    const autoPublish = body?.auto_publish !== false;
 
     if (body?.batch) {
       const types = body.type ? [body.type] : Object.keys(configs) as SeoType[];
@@ -129,7 +141,7 @@ serve(async (req) => {
         results[type] = { done: 0, failed: 0 };
         for (const row of rows ?? []) {
           try {
-            await generateOne(adminClient, type, row.id, lovableApiKey);
+            await generateOne(adminClient, type, row.id, lovableApiKey, autoPublish);
             results[type].done += 1;
           } catch (error) {
             results[type].failed += 1;
@@ -141,8 +153,8 @@ serve(async (req) => {
     }
 
     if (!body?.type || !body?.id || !configs[body.type]) return jsonResponse({ error: "Invalid request" }, 400);
-    await generateOne(adminClient, body.type, body.id, lovableApiKey);
-    return jsonResponse({ success: true });
+    const result = await generateOne(adminClient, body.type, body.id, lovableApiKey, autoPublish);
+    return jsonResponse({ success: true, ...result });
   } catch (error) {
     console.error("seo-generate-content error", error);
     return jsonResponse({ error: error instanceof Error ? error.message : "Internt fel" }, 500);
