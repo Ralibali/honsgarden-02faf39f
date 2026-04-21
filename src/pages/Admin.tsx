@@ -139,8 +139,36 @@ export default function Admin() {
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-serif text-foreground">Admin</h1>
-          <p className="text-xs text-muted-foreground">Hantera användare, prenumerationer och feedback</p>
+          <p className="text-xs text-muted-foreground">
+            Hantera användare, prenumerationer och feedback
+            <span className="ml-2 opacity-60">· v{__BUILD_TIME__.slice(0, 16).replace('T', ' ')}</span>
+          </p>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-xl text-xs gap-1.5"
+          onClick={async () => {
+            try {
+              if ('caches' in window) {
+                const keys = await caches.keys();
+                await Promise.all(keys.map((k) => caches.delete(k)));
+              }
+              if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map((r) => r.unregister()));
+              }
+            } catch (err) {
+              console.warn('Cache clear failed', err);
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set('_v', Date.now().toString());
+            window.location.replace(url.toString());
+          }}
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Uppdatera nu
+        </Button>
         <Button
           size="sm"
           variant="outline"
