@@ -1,100 +1,146 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Lightbulb, MessageCircle, Send, Loader2, CheckCircle2, Clock, Sparkles, HeartHandshake } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
+import EmptyState from '@/components/EmptyState';
 
-const posts = [
-  {
-    id: 1,
-    author: 'Anna L.',
-    avatar: '👩‍🌾',
-    time: '2 timmar sedan',
-    content: 'Min Barnevelder la sitt första dubbelgulor idag! 🎉 Har ni tips på vad som kan orsaka det?',
-    likes: 12,
-    comments: 5,
-  },
-  {
-    id: 2,
-    author: 'Karl S.',
-    avatar: '👨‍🌾',
-    time: '5 timmar sedan',
-    content: 'Testar nytt ekologiskt foder från Lantmannen. Verkar som att hönorna gillar det mer. Ska rapportera om produktionen ökar!',
-    likes: 8,
-    comments: 3,
-  },
-  {
-    id: 3,
-    author: 'Maria G.',
-    avatar: '👩‍🌾',
-    time: 'Igår',
-    content: 'Tips: Häng en kålhuvud i hönshuset under vintern - håller hönorna aktiva och minskar hackning! 🥬🐔',
-    likes: 24,
-    comments: 7,
-  },
-];
+const statusCopy: Record<string, { label: string; icon: any; className: string; text: string }> = {
+  new: { label: 'Mottagen', icon: MessageCircle, className: 'bg-primary/10 text-primary border-primary/20', text: 'Vi har tagit emot ditt förslag.' },
+  in_progress: { label: 'Pågår', icon: Clock, className: 'bg-warning/10 text-warning border-warning/20', text: 'Vi tittar på det här just nu.' },
+  planned: { label: 'Planerad', icon: Lightbulb, className: 'bg-accent/10 text-accent border-accent/20', text: 'Det här ligger i planen.' },
+  resolved: { label: 'Löst', icon: CheckCircle2, className: 'bg-success/10 text-success border-success/20', text: 'Det här är åtgärdat eller besvarat.' },
+  support: { label: 'Support', icon: HeartHandshake, className: 'bg-primary/10 text-primary border-primary/20', text: 'Det här hanteras som ett supportärende.' },
+};
 
 export default function Community() {
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState('');
+
+  const { data: feedback = [], isLoading } = useQuery({
+    queryKey: ['user-feedback'],
+    queryFn: () => api.getUserFeedback(),
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: () => api.submitFeedback({ message: message.trim(), status: 'new' } as any),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-feedback'] });
+      setMessage('');
+      toast({ title: 'Tack! Ditt förslag är skickat 💚', description: 'Vi läser allt och använder feedbacken för att bygga Hönsgården bättre.' });
+    },
+    onError: () => toast({ title: 'Något gick fel', description: 'Vi kunde inte skicka feedbacken just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' }),
+  });
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Community 🤝</h1>
-        <p className="text-sm text-muted-foreground mt-1">Dela tips och erfarenheter med andra hönsbönder</p>
+        <p className="data-label mb-1">Bygg Hönsgården med oss</p>
+        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Feedback & förslag 💚</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
+          Berätta vad som saknas i din hönsvardag. Vi vill bygga Hönsgården tillsammans med riktiga svenska hönsägare – inte gissa bakom ett skrivbord.
+        </p>
       </div>
 
-      {/* New post */}
-      <Card className="bg-card border-border shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg shrink-0">
-              👤
+      <Card className="bg-gradient-to-br from-primary/8 via-card to-accent/5 border-primary/20 shadow-sm overflow-hidden">
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Lightbulb className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex-1 space-y-3">
-              <Input placeholder="Dela något med communityn..." className="h-11" />
-              <div className="flex justify-end">
-                <Button size="sm" className="active:scale-95 transition-transform">Publicera</Button>
+            <div className="flex-1 min-w-0 space-y-3">
+              <div>
+                <h2 className="font-serif text-lg text-foreground">Vad borde Hönsgården kunna göra bättre?</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed">
+                  Skriv som du tänker. Det kan vara en bugg, ett förslag, något som är svårt att förstå eller en funktion du saknar.
+                </p>
+              </div>
+              <Textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="T.ex. Jag vill kunna se vilka kunder som inte betalat för sina ägg..."
+                className="min-h-[120px] rounded-2xl resize-none bg-background/80"
+              />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <p className="text-[11px] text-muted-foreground">Vi svarar via notiser när det finns uppdateringar.</p>
+                <Button
+                  className="rounded-xl gap-2 w-full sm:w-auto"
+                  disabled={submitMutation.isPending || message.trim().length < 5}
+                  onClick={() => submitMutation.mutate()}
+                >
+                  {submitMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Skicka förslag
+                </Button>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Posts */}
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <Card key={post.id} className="bg-card border-border shadow-sm hover:shadow-md transition-all duration-300">
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                  {post.avatar}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{post.author}</p>
-                  <p className="text-xs text-muted-foreground">{post.time}</p>
-                </div>
-              </div>
-
-              <p className="text-sm text-foreground leading-relaxed mb-4">
-                {post.content}
-              </p>
-
-              <div className="flex items-center gap-4 pt-3 border-t border-border">
-                <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
-                  <Heart className="h-4 w-4" />
-                  {post.likes}
-                </button>
-                <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
-                  <MessageCircle className="h-4 w-4" />
-                  {post.comments}
-                </button>
-                <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
-                  <Share2 className="h-4 w-4" />
-                </button>
-              </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[
+          { icon: '🐔', title: 'Verklig vardag', text: 'Vi prioriterar sådant som faktiskt hjälper i hönshuset.' },
+          { icon: '📌', title: 'Följ status', text: 'Se om ditt förslag är mottaget, pågår eller löst.' },
+          { icon: '✨', title: 'Påverka appen', text: 'Bra förslag kan bli riktiga funktioner i Hönsgården.' },
+        ].map((item) => (
+          <Card key={item.title} className="border-border/50 shadow-sm">
+            <CardContent className="p-4">
+              <span className="text-2xl block mb-2">{item.icon}</span>
+              <h3 className="font-serif text-sm text-foreground mb-1">{item.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{item.text}</p>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <Card className="bg-card border-border shadow-sm">
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h2 className="font-serif text-base sm:text-lg text-foreground">Dina skickade förslag</h2>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : feedback.length === 0 ? (
+            <EmptyState
+              icon={MessageCircle}
+              title="Inga förslag skickade ännu"
+              description="När du skickar feedback visas den här. Då kan du följa status och se när vi har svarat eller byggt vidare på idén."
+              actionLabel="Skriv ett förslag ovanför"
+              onAction={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            />
+          ) : (
+            <div className="space-y-3">
+              {(feedback as any[]).map((fb) => {
+                const status = statusCopy[fb.status || 'new'] || statusCopy.new;
+                const Icon = status.icon;
+                return (
+                  <article key={fb.id} className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">{fb.message}</p>
+                        <p className="text-[11px] text-muted-foreground mt-2">
+                          Skickat {fb.created_at ? new Date(fb.created_at).toLocaleDateString('sv-SE') : 'nyligen'}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className={`shrink-0 ${status.className}`}>
+                        <Icon className="h-3 w-3 mr-1" />
+                        {status.label}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-3 border-t border-border/40 pt-3">{status.text}</p>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
