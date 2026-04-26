@@ -13,7 +13,9 @@ import { toast } from '@/hooks/use-toast';
 const PORTAL_ID = 'settings-trust-portal-anchor';
 
 function findSettingsRoot() {
-  return document.querySelector('main .max-w-3xl.mx-auto.space-y-6');
+  return document.querySelector('main .max-w-3xl.mx-auto.space-y-6')
+    || document.querySelector('main .max-w-3xl')
+    || document.querySelector('main#main-content > div');
 }
 
 function statusMeta(status?: string) {
@@ -32,7 +34,11 @@ function statusMeta(status?: string) {
 }
 
 function getAdminReply(item: any) {
-  return item.admin_reply || item.admin_response || item.response || item.reply || item.answer || item.admin_message || null;
+  return item.admin_reply || item.admin_response || item.response || item.reply || item.answer || item.admin_message || item.admin_note || item.note_from_admin || null;
+}
+
+function getFeedbackText(item: any) {
+  return item.message || item.text || item.description || item.content || item.feedback || 'Feedback utan text';
 }
 
 function SettingsTrustContent() {
@@ -42,11 +48,18 @@ function SettingsTrustContent() {
   const [syncing, setSyncing] = useState(false);
   const isPremium = user?.subscription_status === 'premium' || user?.is_premium;
 
-  const { data: feedbackItems = [], isLoading } = useQuery({
+  const { data: feedbackItems = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['user-feedback'],
     queryFn: () => api.getUserFeedback(),
-    staleTime: 30_000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const sortedFeedback = useMemo(() => {
     return [...(feedbackItems as any[])].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
@@ -63,6 +76,12 @@ function SettingsTrustContent() {
     } finally {
       setSyncing(false);
     }
+  };
+
+  const refreshFeedback = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['user-feedback'] });
+    await refetch();
+    toast({ title: 'Feedbackhistoriken är uppdaterad' });
   };
 
   return (
@@ -102,7 +121,7 @@ function SettingsTrustContent() {
 
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
               <p className="data-label mb-1">Feedbackhistorik</p>
               <h2 className="font-serif text-lg text-foreground">Dina skickade ärenden och svar</h2>
@@ -110,7 +129,10 @@ function SettingsTrustContent() {
                 Här ser du feedback och supportärenden du skickat in. Det gör att inget försvinner i tomma intet.
               </p>
             </div>
-            <MessageSquare className="h-5 w-5 text-primary shrink-0 mt-1" />
+            <Button variant="outline" size="sm" onClick={refreshFeedback} disabled={isFetching} className="rounded-xl gap-2 w-full sm:w-auto shrink-0">
+              {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Uppdatera ärenden
+            </Button>
           </div>
 
           {isLoading ? (
@@ -118,7 +140,7 @@ function SettingsTrustContent() {
           ) : sortedFeedback.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5 text-center">
               <p className="font-serif text-base text-foreground">Inga ärenden ännu</p>
-              <p className="text-sm text-muted-foreground mt-1">När du skickar feedback eller kontaktar support visas det här.</p>
+              <p className="text-sm text-muted-foreground mt-1">När du skickar feedback eller kontaktar support visas det här. Syns det inte direkt, tryck på “Uppdatera ärenden”.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -127,10 +149,10 @@ function SettingsTrustContent() {
                 const Icon = meta.icon;
                 const reply = getAdminReply(item);
                 return (
-                  <article key={item.id} className="rounded-2xl border border-border/60 bg-muted/15 p-4">
+                  <article key={item.id || item.created_at} className="rounded-2xl border border-border/60 bg-muted/15 p-4">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">{item.message}</p>
+                        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">{getFeedbackText(item)}</p>
                         <p className="text-[11px] text-muted-foreground mt-2">
                           Skickat {item.created_at ? new Date(item.created_at).toLocaleDateString('sv-SE') : 'nyligen'}
                         </p>
