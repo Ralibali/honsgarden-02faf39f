@@ -1,12 +1,11 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Target, Egg, Save, TrendingUp } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Target, Egg, Save, TrendingUp, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
-import { useAuth } from '@/hooks/useAuth';
-import { getEggGoal, saveEggGoal } from '@/lib/localProductState';
+import { getSyncedEggGoal, saveSyncedEggGoal } from '@/lib/syncedProductState';
 import { toast } from '@/hooks/use-toast';
 
 function todayString() {
@@ -32,12 +31,26 @@ function progress(value: number, goal: number) {
 }
 
 export default function EggGoalCard({ compact = false }: { compact?: boolean }) {
-  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
-  const initial = useMemo(() => getEggGoal(user?.id), [user?.id]);
-  const [daily, setDaily] = useState(String(initial.daily || ''));
-  const [weekly, setWeekly] = useState(String(initial.weekly || ''));
-  const [monthly, setMonthly] = useState(String(initial.monthly || ''));
+  const [saving, setSaving] = useState(false);
+
+  const { data: syncedGoal, isLoading: goalLoading } = useQuery({
+    queryKey: ['egg-goal'],
+    queryFn: getSyncedEggGoal,
+    staleTime: 30_000,
+  });
+
+  const [daily, setDaily] = useState('');
+  const [weekly, setWeekly] = useState('');
+  const [monthly, setMonthly] = useState('');
+
+  useEffect(() => {
+    if (!syncedGoal) return;
+    setDaily(String(syncedGoal.daily || ''));
+    setWeekly(String(syncedGoal.weekly || ''));
+    setMonthly(String(syncedGoal.monthly || ''));
+  }, [syncedGoal]);
 
   const { data: eggs = [] } = useQuery({ queryKey: ['eggs'], queryFn: () => api.getEggs().catch(() => []) });
 
@@ -59,10 +72,18 @@ export default function EggGoalCard({ compact = false }: { compact?: boolean }) 
     monthly: Number(monthly) || 0,
   };
 
-  const save = () => {
-    saveEggGoal({ ...goals, updatedAt: new Date().toISOString() }, user?.id);
-    setEditing(false);
-    toast({ title: 'Äggmålen är sparade 🥚', description: 'Nu kan Hönsgården visa hur nära du är dina mål.' });
+  const save = async () => {
+    setSaving(true);
+    try {
+      await saveSyncedEggGoal({ ...goals, updatedAt: new Date().toISOString() });
+      await queryClient.invalidateQueries({ queryKey: ['egg-goal'] });
+      setEditing(false);
+      toast({ title: 'Äggmålen är sparade 🥚', description: 'Målen synkas nu mellan mobil, dator och surfplatta.' });
+    } catch (err: any) {
+      toast({ title: 'Kunde inte spara äggmål', description: err?.message || 'Försök igen om en stund.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const rows = [
@@ -84,12 +105,12 @@ export default function EggGoalCard({ compact = false }: { compact?: boolean }) 
               <p className="data-label mb-1">Äggmål</p>
               <h2 className="font-serif text-lg text-foreground">Följ din progress</h2>
               <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-                Sätt mål för dag, vecka och månad så blir statistiken mer motiverande.
+                Sätt mål för dag, vecka och månad. Målen synkas mellan dina enheter.
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="rounded-xl shrink-0" onClick={() => setEditing(!editing)}>
-            {editing ? 'Stäng' : hasGoal ? 'Ändra' : 'Sätt mål'}
+          <Button variant="outline" size="sm" className="rounded-xl shrink-0" onClick={() => setEditing(!editing)} disabled={goalLoading}>
+            {goalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : editing ? 'Stäng' : hasGoal ? 'Ändra' : 'Sätt mål'}
           </Button>
         </div>
 
@@ -109,8 +130,8 @@ export default function EggGoalCard({ compact = false }: { compact?: boolean }) 
                 <Input inputMode="numeric" type="number" min="0" value={monthly} onChange={(e) => setMonthly(e.target.value)} className="rounded-xl h-11" placeholder="T.ex. 1500" />
               </label>
             </div>
-            <Button className="rounded-xl gap-2 w-full sm:w-auto" onClick={save}>
-              <Save className="h-4 w-4" />
+            <Button className="rounded-xl gap-2 w-full sm:w-auto" onClick={save} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Spara äggmål
             </Button>
           </div>
