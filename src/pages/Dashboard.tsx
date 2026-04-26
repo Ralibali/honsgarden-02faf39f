@@ -26,6 +26,7 @@ import { motion } from 'framer-motion';
 import { buildAchievements } from '@/components/Achievements';
 import EggGoalsWidget from '@/components/EggGoalsWidget';
 import DashboardAICoach from '@/components/DashboardAICoach';
+import AIDeviationAlerts from '@/components/AIDeviationAlerts';
 
 function getGreeting() {
   const now = new Date();
@@ -394,6 +395,9 @@ export default function Dashboard() {
 
       {/* ─── 4. Kompakt AI-råd: "Hönsgården har märkt…" ─── */}
       <DashboardAICoach />
+
+      {/* ─── 4b. Avvikelsevarningar ─── */}
+      <AIDeviationAlerts variant="card" />
 
 
       {/* ─── 3. Streak + Top hen ─── */}
