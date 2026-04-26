@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
-import { createEggSale, deleteEggSale, getEggSales, updateEggSale, type EggSale } from '@/lib/localProductState';
-import { Coins, Plus, Trash2, CheckCircle2, Clock, Users, ReceiptText, Sparkles } from 'lucide-react';
+import { createSyncedEggSale, deleteSyncedEggSale, getSyncedEggSales, updateSyncedEggSale } from '@/lib/syncedProductState';
+import type { EggSale } from '@/lib/localProductState';
+import { Coins, Plus, Trash2, CheckCircle2, Clock, Users, ReceiptText, Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 function todayString() {
@@ -17,13 +18,20 @@ function kr(value: number) {
 }
 
 export default function EggSales() {
-  const { user } = useAuth();
-  const [sales, setSales] = useState<EggSale[]>(() => getEggSales(user?.id));
+  const queryClient = useQueryClient();
   const [customer, setCustomer] = useState('');
   const [eggs, setEggs] = useState('12');
   const [amount, setAmount] = useState('40');
   const [date, setDate] = useState(todayString());
   const [note, setNote] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const { data: sales = [], isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['egg-sales'],
+    queryFn: getSyncedEggSales,
+    staleTime: 30_000,
+  });
 
   const stats = useMemo(() => {
     const totalAmount = sales.reduce((sum, s) => sum + (s.amount || 0), 0);
@@ -34,46 +42,80 @@ export default function EggSales() {
     return { totalAmount, paidAmount, unpaidAmount, totalEggs, customers };
   }, [sales]);
 
-  const addSale = () => {
+  const refreshSales = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['egg-sales'] });
+    await refetch();
+    toast({ title: 'Äggförsäljningen är uppdaterad' });
+  };
+
+  const addSale = async () => {
     const eggCount = Number(eggs);
     const sum = Number(amount);
     if (!customer.trim()) {
       toast({ title: 'Skriv kundens namn', description: 'Till exempel granne, kollega eller familjemedlem.', variant: 'destructive' });
       return;
     }
-    if (!eggCount || eggCount < 1 || !sum || sum < 0) {
+    if (!eggCount || eggCount < 1 || Number.isNaN(sum) || sum < 0) {
       toast({ title: 'Kontrollera antal och belopp', description: 'Antal ägg och belopp behöver vara rimliga siffror.', variant: 'destructive' });
       return;
     }
-    const next = createEggSale({ customer: customer.trim(), eggs: eggCount, amount: sum, paid: false, date, note: note.trim() || undefined }, user?.id);
-    setSales(next);
-    setCustomer('');
-    setEggs('12');
-    setAmount('40');
-    setNote('');
-    setDate(todayString());
-    toast({ title: 'Äggförsäljningen är sparad 🥚', description: 'Du kan markera den som betald när pengarna kommit in.' });
+
+    setSaving(true);
+    try {
+      await createSyncedEggSale({ customer: customer.trim(), eggs: eggCount, amount: sum, paid: false, date, note: note.trim() || undefined });
+      await queryClient.invalidateQueries({ queryKey: ['egg-sales'] });
+      setCustomer('');
+      setEggs('12');
+      setAmount('40');
+      setNote('');
+      setDate(todayString());
+      toast({ title: 'Äggförsäljningen är sparad 🥚', description: 'Den synkas nu mellan mobil, dator och surfplatta.' });
+    } catch (err: any) {
+      toast({ title: 'Kunde inte spara försäljningen', description: err?.message || 'Försök igen om en stund.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const togglePaid = (sale: EggSale) => {
-    const next = updateEggSale(sale.id, { paid: !sale.paid }, user?.id);
-    setSales(next);
+  const togglePaid = async (sale: EggSale) => {
+    setBusyId(sale.id);
+    try {
+      await updateSyncedEggSale(sale.id, { paid: !sale.paid });
+      await queryClient.invalidateQueries({ queryKey: ['egg-sales'] });
+    } catch (err: any) {
+      toast({ title: 'Kunde inte uppdatera betalstatus', description: err?.message || 'Försök igen.', variant: 'destructive' });
+    } finally {
+      setBusyId(null);
+    }
   };
 
-  const removeSale = (id: string) => {
-    const next = deleteEggSale(id, user?.id);
-    setSales(next);
-    toast({ title: 'Försäljningen är borttagen' });
+  const removeSale = async (id: string) => {
+    setBusyId(id);
+    try {
+      await deleteSyncedEggSale(id);
+      await queryClient.invalidateQueries({ queryKey: ['egg-sales'] });
+      toast({ title: 'Försäljningen är borttagen' });
+    } catch (err: any) {
+      toast({ title: 'Kunde inte ta bort försäljningen', description: err?.message || 'Försök igen.', variant: 'destructive' });
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 animate-fade-in pb-8">
-      <div>
-        <p className="data-label mb-1">Sälj ägg</p>
-        <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Äggförsäljning 🥚</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
-          Håll koll på vem som köpt ägg, vad som är betalt och vad som återstår. Perfekt för grannar, kollegor och familj.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div>
+          <p className="data-label mb-1">Sälj ägg</p>
+          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Äggförsäljning 🥚</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1 leading-relaxed">
+            Håll koll på vem som köpt ägg, vad som är betalt och vad som återstår. Datan synkas mellan dina enheter.
+          </p>
+        </div>
+        <Button variant="outline" onClick={refreshSales} disabled={isFetching} className="rounded-xl gap-2 w-full sm:w-auto">
+          {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          Uppdatera
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -128,8 +170,8 @@ export default function EggSales() {
             </label>
           </div>
 
-          <Button onClick={addSale} className="mt-4 rounded-xl gap-2 w-full sm:w-auto h-11">
-            <Plus className="h-4 w-4" />
+          <Button onClick={addSale} disabled={saving} className="mt-4 rounded-xl gap-2 w-full sm:w-auto h-11">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             Spara försäljning
           </Button>
         </CardContent>
@@ -145,7 +187,9 @@ export default function EggSales() {
             </div>
           </div>
 
-          {sales.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : sales.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-center">
               <p className="font-serif text-base text-foreground">Ingen äggförsäljning ännu</p>
               <p className="text-sm text-muted-foreground mt-1">När du säljer ägg visas kunder, belopp och betalstatus här.</p>
@@ -167,10 +211,10 @@ export default function EggSales() {
                       {sale.note && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{sale.note}</p>}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                      <Button variant={sale.paid ? 'outline' : 'default'} size="sm" className="rounded-xl w-full sm:w-auto" onClick={() => togglePaid(sale)}>
-                        {sale.paid ? 'Markera obetald' : 'Markera betald'}
+                      <Button variant={sale.paid ? 'outline' : 'default'} size="sm" className="rounded-xl w-full sm:w-auto" onClick={() => togglePaid(sale)} disabled={busyId === sale.id}>
+                        {busyId === sale.id ? <Loader2 className="h-4 w-4 animate-spin" /> : sale.paid ? 'Markera obetald' : 'Markera betald'}
                       </Button>
-                      <Button variant="ghost" size="sm" className="rounded-xl text-destructive hover:text-destructive w-full sm:w-auto" onClick={() => removeSale(sale.id)}>
+                      <Button variant="ghost" size="sm" className="rounded-xl text-destructive hover:text-destructive w-full sm:w-auto" onClick={() => removeSale(sale.id)} disabled={busyId === sale.id}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
