@@ -45,6 +45,13 @@ const Overview = React.lazy(() => import("./pages/Overview"));
 const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 
+// Konsolidering: /guider/* → /blogg/* (canonical bor på /blogg)
+const GuiderRedirect = () => {
+  const { slug } = useParams<{ slug?: string }>();
+  const target = slug ? `/blogg/${slug}` : '/blogg';
+  return <Navigate to={target} replace />;
+};
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
