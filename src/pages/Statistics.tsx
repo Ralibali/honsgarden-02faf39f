@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PremiumGate } from '@/components/PremiumGate';
 import EmptyState from '@/components/EmptyState';
+import AIDeviationAlerts from '@/components/AIDeviationAlerts';
 
 export default function Statistics() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
@@ -68,6 +69,8 @@ export default function Statistics() {
           <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Statistik 📊</h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">Förstå din hönsgård på ett enkelt och hjälpsamt sätt</p>
         </div>
+
+        <AIDeviationAlerts variant="inline" />
 
         {!hasEnoughData ? (
           <EmptyState
