@@ -1,73 +1,88 @@
-# Welcome to your Lovable project
+# Hönsgården
 
-## Project info
+Hönsgården är en svensk webbapp för hobbyhönsägare. Appen hjälper användare att logga ägg, hålla koll på hönor, foder, ekonomi, påminnelser, kläckning, statistik och säsongsrelaterade uppgifter.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Projektet är byggt med Vite, React, TypeScript, Tailwind CSS, shadcn/ui och Supabase.
 
-## How can I edit this code?
+## Funktioner
 
-There are several ways of editing your application.
+- Äggloggning och statistik
+- Hantering av hönor och individuella profiler
+- Foder-, ekonomi- och översiktsvyer
+- Påminnelser, dagliga uppgifter och kläckningsstöd
+- Blogg/guider med prerendering för bättre SEO
+- PWA-stöd med offlinevänlig installation
+- Supabase-baserad autentisering och datalagring
 
-**Use Lovable**
+## Kom igång lokalt
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Krav:
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+- Node.js 20 eller senare
+- npm
+- Ett Supabase-projekt för full funktionalitet
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+git clone https://github.com/Ralibali/honsgarden-02faf39f.git
+cd honsgarden-02faf39f
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Öppna sedan den lokala adressen som Vite visar i terminalen, vanligtvis `http://localhost:8080`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Miljövariabler
 
-**Use GitHub Codespaces**
+Skapa en `.env.local` baserad på `.env.example`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SUPABASE_PROJECT_ID=
+```
 
-## What technologies are used for this project?
+Obs: Supabase publishable/anon key är avsedd att kunna användas i frontend. Lägg däremot aldrig service role keys eller andra hemligheter i frontendkod eller publika filer.
 
-This project is built with:
+## Scripts
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```sh
+npm run dev          # Startar utvecklingsserver
+npm run build        # Bygger appen och prerenderar blogg/SEO-sidor
+npm run build:dev    # Bygger i development mode
+npm run lint         # Kör ESLint
+npm test             # Kör tester med Vitest
+npm run preview      # Förhandsgranskar produktionsbuilden lokalt
+```
 
-## How can I deploy this project?
+## SEO och prerendering
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Byggsteget kör först `vite build` och därefter `scripts/prerender-blog-posts.mjs`. Scriptet hämtar publicerade bloggartiklar från Supabase, genererar statiska bloggsidor, metadata, canonical-länkar och sitemap.
 
-## Can I connect a custom domain to my Lovable project?
+## CI
 
-Yes, you can!
+Repot innehåller en GitHub Actions-workflow som kör automatiska kontroller vid push och pull requests:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. `npm ci`
+2. `npm run lint`
+3. `npm test -- --passWithNoTests`
+4. `npm run build`
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+För bäst resultat i GitHub Actions bör följande secrets finnas i repot:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
+
+## Rekommenderade nästa förbättringar
+
+- Aktivera striktare TypeScript stegvis.
+- Lägg till tester för auth, routing och viktiga formulär.
+- Säkerställ att analytics bara körs efter relevant cookie-/integritetssamtycke.
+- Flytta hårdkodade Supabase-fallbacks ur build-konfigurationen.
+- Lägg till felrapportering i produktion, till exempel Sentry eller Supabase logging.
+- Gå igenom PWA-cache så inloggade appvyer inte riskerar att cachelagras fel.
+
+## Deployment
+
+Projektet kan publiceras via Lovable eller annan statisk hosting som stödjer Vite-buildar. Kontrollera att miljövariablerna ovan finns i produktionsmiljön innan publicering.
