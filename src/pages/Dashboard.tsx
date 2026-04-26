@@ -24,6 +24,7 @@ import TrialExpiryBanner from '@/components/TrialExpiryBanner';
 import { motion } from 'framer-motion';
 import { buildAchievements } from '@/components/Achievements';
 import EggGoalsWidget from '@/components/EggGoalsWidget';
+import DashboardAICoach from '@/components/DashboardAICoach';
 
 function getGreeting() {
   const now = new Date();
@@ -370,6 +371,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* ─── AI Coach: "Hönsgården har märkt…" ─── */}
+      <DashboardAICoach />
 
       {/* ─── 2. Quick stats (4 cards) ─── */}
       <div className="grid grid-cols-4 gap-2.5 stagger-children">
