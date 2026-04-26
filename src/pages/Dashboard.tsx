@@ -715,6 +715,26 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Daily tip sheet */}
+      <Sheet open={tipSheetOpen} onOpenChange={setTipSheetOpen}>
+        <SheetContent
+          side="bottom"
+          className="rounded-t-3xl max-h-[85vh] overflow-y-auto p-5 sm:max-w-lg sm:mx-auto"
+        >
+          <SheetHeader className="text-left mb-4">
+            <SheetTitle className="font-serif text-xl flex items-center gap-2">
+              <span className="text-2xl">{tipCard.emoji}</span>
+              {tipCard.label}
+            </SheetTitle>
+            <SheetDescription className="sr-only">Hela tipset</SheetDescription>
+          </SheetHeader>
+          <div
+            className="text-sm text-foreground leading-relaxed pb-6"
+            dangerouslySetInnerHTML={{ __html: tipCard.text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+          />
+        </SheetContent>
+      </Sheet>
+
       {/* Diary dialog */}
       <Dialog open={diaryOpen} onOpenChange={setDiaryOpen}>
         <DialogContent className="max-w-sm rounded-2xl">
