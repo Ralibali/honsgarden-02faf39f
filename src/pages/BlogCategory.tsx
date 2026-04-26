@@ -76,12 +76,13 @@ export default function BlogCategory() {
   const meta = categoryMeta[category || ''];
 
   useSeo({
-    title: meta?.title || `${category} | Hönsgården`,
-    description: meta?.description || '',
+    title: meta?.title || `Kategorin hittades inte | Hönsgården`,
+    description: meta?.description || 'Den här kategorin finns inte. Återgå till bloggen.',
     path: `/blogg/kategori/${category}`,
     ogImage: meta?.ogImage,
     ogImageAlt: meta?.label,
-    jsonLd: [
+    noindex: !meta,
+    jsonLd: !meta ? undefined : [
       {
         '@type': 'CollectionPage',
         '@id': `https://honsgarden.se/blogg/kategori/${category}`,
