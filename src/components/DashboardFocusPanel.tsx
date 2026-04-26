@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Egg, Bird, ArrowRight, Bell, Package, TrendingUp, CalendarCheck, ChevronDown, Sparkles } from 'lucide-react';
+import { Egg, Bird, ArrowRight, Bell, Package, TrendingUp, CalendarCheck, ChevronDown, Sparkles, ReceiptText } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { api } from '@/lib/api';
+import EggGoalCard from './EggGoalCard';
+import FlockHealthLight from './FlockHealthLight';
 
 function todayString() {
   return new Date().toISOString().split('T')[0];
@@ -130,7 +132,15 @@ export default function DashboardFocusPanel() {
       });
     }
 
-    return actions.slice(0, 3);
+    actions.push({
+      title: 'Sälj ägg utan att tappa bort betalningar',
+      text: 'Spara kunder, antal ägg och om betalningen är klar. Perfekt när grannar eller kollegor köper ägg.',
+      button: 'Sälj ägg',
+      path: '/app/egg-sales',
+      icon: ReceiptText,
+    });
+
+    return actions.slice(0, 4);
   }, [activeHens.length, todayEggs, feedRecords, chores, transactions]);
 
   const weekInsight = getWeekInsight(eggs as any[]);
@@ -197,41 +207,42 @@ export default function DashboardFocusPanel() {
         </CardContent>
       </Card>
 
-      {(importantChores.length > 0 || nextActions.length > 0) && (
-        <Card className="border-border/50 bg-card/80 shadow-sm">
-          <CardContent className="p-3 sm:p-4">
-            <button
-              type="button"
-              onClick={() => setDetailsOpen(true)}
-              className="w-full flex items-center justify-between gap-3 text-left rounded-xl hover:bg-muted/40 transition-colors p-1"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-serif text-sm text-foreground">Visa råd och nästa steg</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {nextActions[0]?.title || importantChores[0]?.title || 'Få en lugnare överblick'}
-                  </p>
-                </div>
+      <Card className="border-border/50 bg-card/80 shadow-sm">
+        <CardContent className="p-3 sm:p-4">
+          <button
+            type="button"
+            onClick={() => setDetailsOpen(true)}
+            className="w-full flex items-center justify-between gap-3 text-left rounded-xl hover:bg-muted/40 transition-colors p-1"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Sparkles className="h-4 w-4 text-primary" />
               </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground -rotate-90 shrink-0" />
-            </button>
-          </CardContent>
-        </Card>
-      )}
+              <div className="min-w-0">
+                <p className="font-serif text-sm text-foreground">Visa råd, mål och flockhälsa</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {nextActions[0]?.title || importantChores[0]?.title || 'Få en lugnare överblick'}
+                </p>
+              </div>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground -rotate-90 shrink-0" />
+          </button>
+        </CardContent>
+      </Card>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-lg rounded-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:max-w-2xl rounded-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl">Råd och nästa steg</DialogTitle>
+            <DialogTitle className="font-serif text-xl">Råd, mål och flockhälsa</DialogTitle>
             <DialogDescription>
-              Hönsgården håller lite koll tillsammans med dig. Välj det som känns mest relevant idag.
+              Hönsgården håller lite koll tillsammans med dig. Här finns mer utan att dashboarden blir rörig.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 pt-1">
+            <EggGoalCard compact />
+            <FlockHealthLight compact />
+
             {importantChores.length > 0 && (
               <div className="rounded-2xl bg-warning/5 border border-warning/20 p-3">
                 <div className="flex items-center gap-2 mb-2">
