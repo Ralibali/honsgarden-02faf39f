@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +35,7 @@ const flockNav = [
 const financeNav = [
   { title: 'Foder', url: '/app/feed', icon: Package, premium: true },
   { title: 'Ekonomi', url: '/app/finance', icon: Coins, premium: true },
+  { title: 'Sälj ägg', url: '/app/egg-sales', icon: ReceiptText, premium: true },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
 ];
 
