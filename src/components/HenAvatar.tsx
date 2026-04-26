@@ -84,6 +84,8 @@ export default function HenAvatar({
   const pendingImageUrlRef = useRef<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState<string>('');
 
   useEffect(() => {
     if (!pendingImageUrlRef.current) {
@@ -115,10 +117,16 @@ export default function HenAvatar({
     }
 
     setUploading(true);
+    setProgress(5);
+    setProgressLabel('Förbereder bild…');
     const previewUrl = URL.createObjectURL(file);
     setDisplayUrl(previewUrl);
     try {
+      setProgressLabel('Komprimerar…');
+      setProgress(25);
       const blob = await compressImage(file);
+      setProgress(55);
+      setProgressLabel('Laddar upp…');
       const path = `${user.id}/${henId}.webp`;
 
       const { error: uploadError } = await supabase.storage
@@ -130,6 +138,8 @@ export default function HenAvatar({
         });
 
       if (uploadError) throw uploadError;
+      setProgress(80);
+      setProgressLabel('Sparar…');
 
       // Skapa en signerad URL som gäller 1 år (privat bucket)
       const { data: signedData, error: signedErr } = await supabase.storage
@@ -146,6 +156,8 @@ export default function HenAvatar({
       setDisplayUrl(nextImageUrl);
       queryClient.setQueryData(['hen-profile', henId], (old: any) => old ? { ...old, ...updatedHen, image_url: nextImageUrl } : updatedHen);
       queryClient.setQueryData(['hens'], (old: any) => Array.isArray(old) ? old.map((hen) => hen.id === henId ? { ...hen, ...updatedHen, image_url: nextImageUrl } : hen) : old);
+      setProgress(100);
+      setProgressLabel('Klar!');
       toast({ title: 'Bild uppladdad! 📷' });
     } catch (err: any) {
       pendingImageUrlRef.current = null;
@@ -154,6 +166,10 @@ export default function HenAvatar({
     } finally {
       URL.revokeObjectURL(previewUrl);
       setUploading(false);
+      setTimeout(() => {
+        setProgress(0);
+        setProgressLabel('');
+      }, 600);
       if (inputRef.current) inputRef.current.value = '';
     }
   };
@@ -209,7 +225,35 @@ export default function HenAvatar({
         ) : (
           <span>{emoji}</span>
         )}
+        {uploading && (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/70 backdrop-blur-sm"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={progressLabel || 'Laddar upp bild'}
+          >
+            <Loader2 className={`${iconClass} animate-spin text-primary`} />
+            {size === 'lg' && (
+              <span className="text-[10px] font-medium text-foreground/80">{progress}%</span>
+            )}
+          </div>
+        )}
       </div>
+      {uploading && size === 'lg' && (
+        <div className="mt-2 w-full">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          {progressLabel && (
+            <p className="mt-1 text-center text-xs text-muted-foreground">{progressLabel}</p>
+          )}
+        </div>
+      )}
 
       {editable && (
         <>
