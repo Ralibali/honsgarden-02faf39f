@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, TrendingUp, TrendingDown, Coins, ShoppingCart, Minus, Users, Loader2, Trash2, Download, BarChart3 } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Coins, ShoppingCart, Minus, Users, Loader2, Trash2, Download, BarChart3, ReceiptText, ArrowRight } from 'lucide-react';
 import { downloadCSV, downloadPDF } from '@/lib/exportUtils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
@@ -40,6 +41,7 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export default function Finance() {
+  const navigate = useNavigate();
   const [view, setView] = useState('overview');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ type: 'income', amount: '', description: '', category: '', customDescription: '', date: format(new Date(), 'yyyy-MM-dd') });
@@ -256,6 +258,24 @@ export default function Finance() {
             </Dialog>
           </div>
         </div>
+
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/8 via-card to-accent/5 shadow-sm">
+          <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <ReceiptText className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="data-label mb-1">Ny modul</p>
+                <h2 className="font-serif text-lg text-foreground">Sälj ägg och håll koll på betalningar</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-1">Perfekt när grannar, kollegor eller familj köper ägg. Synkar mellan mobil och dator.</p>
+              </div>
+            </div>
+            <Button className="rounded-xl gap-2 w-full sm:w-auto" onClick={() => navigate('/app/egg-sales')}>
+              Öppna Sälj ägg<ArrowRight className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
 
         <Tabs value={view} onValueChange={setView}>
           <TabsList>
