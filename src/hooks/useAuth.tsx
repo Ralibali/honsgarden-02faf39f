@@ -35,22 +35,27 @@ function toBasicProfile(supaUser: SupabaseUser): UserProfile {
   };
 }
 
-async function syncSubscriptionStatus(): Promise<{ subscriptionEnd: string | null; synced: boolean }> {
+async function syncSubscriptionStatus(): Promise<{ subscribed: boolean; subscriptionEnd: string | null; synced: boolean }> {
   try {
     const { data, error } = await supabase.functions.invoke('check-subscription');
     if (error) {
       console.warn('[Auth] check-subscription error:', error.message);
-      return { subscriptionEnd: null, synced: false };
+      return { subscribed: false, subscriptionEnd: null, synced: false };
     }
-    return { subscriptionEnd: data?.subscription_end ?? null, synced: true };
+
+    return {
+      subscribed: !!data?.subscribed,
+      subscriptionEnd: data?.subscription_end ?? data?.subscriptionEnd ?? null,
+      synced: true,
+    };
   } catch (err) {
     console.warn('[Auth] check-subscription failed:', err);
-    return { subscriptionEnd: null, synced: false };
+    return { subscribed: false, subscriptionEnd: null, synced: false };
   }
 }
 
 async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
-  const { subscriptionEnd, synced } = await syncSubscriptionStatus();
+  const { subscribed, subscriptionEnd, synced } = await syncSubscriptionStatus();
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -59,18 +64,24 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
     .maybeSingle();
 
   const now = new Date();
-  const expiryDate = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-  const hasValidExpiry = !!expiryDate && expiryDate > now;
+  const profileExpiryDate = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
+  const syncedExpiryDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
+  const hasValidProfileExpiry = !!profileExpiryDate && profileExpiryDate > now;
+  const hasValidSyncedExpiry = !!syncedExpiryDate && syncedExpiryDate > now;
 
   let subStatus = profile?.subscription_status ?? 'free';
 
-  if (hasValidExpiry && subStatus !== 'premium') {
+  // Stripe/check-subscription ska väga tyngst när den lyckas.
+  // Annars kan en gammal profiles-rad som fortfarande säger "free" göra att en betalande kund låses ute.
+  if (synced && subscribed) {
     subStatus = 'premium';
-  }
-
-  if (synced && subStatus === 'premium' && expiryDate && expiryDate < now) {
+  } else if (hasValidSyncedExpiry || hasValidProfileExpiry) {
+    subStatus = 'premium';
+  } else if (synced && !subscribed) {
     subStatus = 'free';
   }
+
+  const resolvedSubscriptionEnd = subscriptionEnd ?? profile?.premium_expires_at ?? null;
 
   return {
     id: supaUser.id,
@@ -78,7 +89,7 @@ async function buildProfile(supaUser: SupabaseUser): Promise<UserProfile> {
     name: profile?.display_name ?? supaUser.user_metadata?.name ?? '',
     is_premium: subStatus === 'premium',
     subscription_status: subStatus,
-    subscription_end: subscriptionEnd ?? profile?.premium_expires_at ?? null,
+    subscription_end: resolvedSubscriptionEnd,
   };
 }
 
