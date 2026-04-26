@@ -1036,4 +1036,5 @@ export const api = {
   adminCheck, adminStats, adminUsers, adminSubscriptions,
   adminFeedback, adminUpdateFeedbackStatus, adminReplyFeedback, adminDeleteUser, adminUpdateSubscription,
   adminAcceptTerms,
+  getDashboardCoach,
 };
