@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowRight, X, Bird, Egg, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowRight, X, Bird, Egg, Sparkles, Loader2, BarChart3, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,6 @@ import { toast } from '@/hooks/use-toast';
 const ONBOARDING_KEY = 'honsgarden-onboarding-done';
 const getOnboardingKey = (userId: string) => `${ONBOARDING_KEY}-${userId}`;
 
-// Hook to let parent know if onboarding is visible
 const onboardingVisibleRef = { current: false };
 export function useOnboardingVisible() {
   const [visible, setVisible] = useState(false);
@@ -28,15 +27,14 @@ export function useOnboardingVisible() {
 export default function OnboardingGuide() {
   const [open, setOpen] = useState(false);
 
-  // Sync visibility to ref for useOnboardingVisible
   useEffect(() => {
     onboardingVisibleRef.current = open;
     return () => { onboardingVisibleRef.current = false; };
   }, [open]);
+
   const [step, setStep] = useState(0);
   const [henName, setHenName] = useState('');
   const [henBreed, setHenBreed] = useState('');
-  const [henBirthDate, setHenBirthDate] = useState('');
   const [saving, setSaving] = useState(false);
   const [loadingDemo, setLoadingDemo] = useState(false);
   const [createdHenName, setCreatedHenName] = useState('');
@@ -48,7 +46,6 @@ export default function OnboardingGuide() {
 
     const scopedKey = getOnboardingKey(user.id);
 
-    // Legacy fallback
     if (localStorage.getItem(ONBOARDING_KEY)) {
       localStorage.setItem(scopedKey, '1');
       return;
@@ -61,7 +58,6 @@ export default function OnboardingGuide() {
     let timer: number | null = null;
 
     void (async () => {
-      // Check profile preferences
       const { data: profileData } = await supabase
         .from('profiles')
         .select('preferences')
@@ -75,14 +71,12 @@ export default function OnboardingGuide() {
         return;
       }
 
-      // Check if user already has hens
       const { count } = await supabase
         .from('hens')
         .select('id', { count: 'exact', head: true });
 
       if (isCancelled) return;
       if (count && count > 0) {
-        // Has hens, mark onboarding done
         localStorage.setItem(scopedKey, '1');
         await supabase
           .from('profiles')
@@ -124,12 +118,12 @@ export default function OnboardingGuide() {
 
   const finish = () => {
     setOpen(false);
-    markDone();
+    void markDone();
   };
 
   const skipAndClose = () => {
     setOpen(false);
-    markDone();
+    void markDone();
   };
 
   const addHen = async () => {
@@ -139,7 +133,6 @@ export default function OnboardingGuide() {
       const { error } = await supabase.from('hens').insert({
         name: henName.trim(),
         breed: henBreed.trim() || null,
-        birth_date: henBirthDate || null,
         user_id: user.id,
         hen_type: 'hen',
         is_active: true,
@@ -149,7 +142,7 @@ export default function OnboardingGuide() {
       setStep(2);
       await markDone();
     } catch (err: any) {
-      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+      toast({ title: 'Något gick fel', description: 'Vi kunde inte spara hönan just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -167,7 +160,6 @@ export default function OnboardingGuide() {
       const { data: insertedHens, error: henErr } = await supabase.from('hens').insert(demoHens).select();
       if (henErr) throw henErr;
 
-      // Generate 14 days of egg data
       const eggLogs: any[] = [];
       const today = new Date();
       for (let i = 0; i < 14; i++) {
@@ -185,20 +177,18 @@ export default function OnboardingGuide() {
       const { error: eggErr } = await supabase.from('egg_logs').insert(eggLogs);
       if (eggErr) throw eggErr;
 
-      // Mark as demo data for potential cleanup
       localStorage.setItem('honsgarden-demo-data', '1');
       setCreatedHenName('Greta, Astrid & Signe');
       setStep(2);
       await markDone();
-      toast({ title: '🎉 Exempeldata laddat!', description: '3 hönor och 14 dagars äggdata har skapats.' });
+      toast({ title: 'Exempeldata är inlagt! 🐔', description: 'Nu kan du se hur Hönsgården fungerar med hönor och äggloggar.' });
     } catch (err: any) {
-      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+      toast({ title: 'Något gick fel', description: 'Vi kunde inte skapa exempeldata just nu. Försök igen om en stund.', variant: 'destructive' });
     } finally {
       setLoadingDemo(false);
     }
   };
 
-  // Confetti CSS animation
   const confettiEmojis = ['🎉', '🥚', '🐔', '✨', '💚', '🌟'];
 
   return (
@@ -212,7 +202,6 @@ export default function OnboardingGuide() {
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Step 0: Welcome */}
             {step === 0 && (
               <>
                 <div className="relative h-36 bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center">
@@ -227,19 +216,40 @@ export default function OnboardingGuide() {
                   <button
                     onClick={skipAndClose}
                     className="absolute top-3 right-3 p-1.5 rounded-full bg-foreground/10 text-foreground/50 hover:bg-foreground/15 transition-colors"
+                    aria-label="Stäng onboarding"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="px-6 pt-4 pb-6">
                   <h2 className="font-serif text-xl text-foreground mb-1">Välkommen till Hönsgården!</h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                    Låt oss sätta upp din flock. Det tar bara en minut.
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                    Börja med att lägga till dina hönor. Sedan kan du logga ägg, följa utvecklingen och få hjälp med vardagens små rutiner.
                   </p>
+
+                  <div className="grid grid-cols-2 gap-2 mb-5">
+                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
+                      <Bird className="h-4 w-4 text-primary mb-1" />
+                      <p className="text-[11px] font-medium text-foreground">1. Lägg till hönor</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
+                      <Egg className="h-4 w-4 text-primary mb-1" />
+                      <p className="text-[11px] font-medium text-foreground">2. Logga ägg</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
+                      <BarChart3 className="h-4 w-4 text-primary mb-1" />
+                      <p className="text-[11px] font-medium text-foreground">3. Se statistik</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
+                      <Bell className="h-4 w-4 text-primary mb-1" />
+                      <p className="text-[11px] font-medium text-foreground">4. Skapa påminnelser</p>
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <ProgressDots current={0} total={3} />
                     <Button size="sm" className="h-9 px-5 text-xs rounded-xl gap-1.5" onClick={() => setStep(1)}>
-                      Kom igång <ArrowRight className="h-3.5 w-3.5" />
+                      Lägg till första hönan <ArrowRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                   <div className="mt-4 pt-3 border-t border-border/40">
@@ -249,17 +259,16 @@ export default function OnboardingGuide() {
                       className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors py-2 rounded-xl hover:bg-primary/5"
                     >
                       {loadingDemo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                      {loadingDemo ? 'Skapar exempeldata...' : 'Fyll med exempeldata istället'}
+                      {loadingDemo ? 'Skapar exempeldata...' : 'Visa med exempeldata istället'}
                     </button>
                   </div>
                   <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-2 hover:text-muted-foreground transition-colors">
-                    Hoppa över
+                    Hoppa över för nu
                   </button>
                 </div>
               </>
             )}
 
-            {/* Step 1: Add hen */}
             {step === 1 && (
               <>
                 <div className="relative h-28 bg-gradient-to-br from-primary/10 to-success/10 flex items-center justify-center">
@@ -267,6 +276,7 @@ export default function OnboardingGuide() {
                   <button
                     onClick={skipAndClose}
                     className="absolute top-3 right-3 p-1.5 rounded-full bg-foreground/10 text-foreground/50 hover:bg-foreground/15 transition-colors"
+                    aria-label="Stäng onboarding"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -274,10 +284,9 @@ export default function OnboardingGuide() {
                 <div className="px-6 pt-4 pb-6">
                   <h2 className="font-serif text-xl text-foreground mb-1">Lägg till din första höna</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Ge henne ett namn så är du igång!
+                    Det räcker med ett namn. Ras och mer information kan du fylla i senare.
                   </p>
 
-                  {/* Breed presets */}
                   <div className="mb-3">
                     <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Populära raser</label>
                     <div className="flex flex-wrap gap-1.5">
@@ -330,7 +339,7 @@ export default function OnboardingGuide() {
                         onClick={addHen}
                         disabled={!henName.trim() || saving}
                       >
-                        {saving ? 'Sparar...' : 'Lägg till hönan'}
+                        {saving ? 'Sparar...' : 'Spara hönan'}
                       </Button>
                     </div>
                   </div>
@@ -341,11 +350,9 @@ export default function OnboardingGuide() {
               </>
             )}
 
-            {/* Step 2: Done */}
             {step === 2 && (
               <>
                 <div className="relative h-36 bg-gradient-to-br from-success/15 to-warning/10 flex items-center justify-center overflow-hidden">
-                  {/* Simple confetti */}
                   {confettiEmojis.map((emoji, i) => (
                     <motion.span
                       key={i}
@@ -373,7 +380,7 @@ export default function OnboardingGuide() {
                 <div className="px-6 pt-4 pb-6">
                   <h2 className="font-serif text-xl text-foreground mb-1">{createdHenName} är tillagd!</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                    Nu kan du börja logga ägg, spåra hälsa och mycket mer.
+                    Snyggt! Nästa steg är att logga dagens ägg. Då kan Hönsgården börja visa statistik och trender över tid.
                   </p>
                   <div className="flex items-center justify-between">
                     <ProgressDots current={2} total={3} />
@@ -382,14 +389,14 @@ export default function OnboardingGuide() {
                       className="h-9 px-5 text-xs rounded-xl gap-1.5"
                       onClick={() => { finish(); navigate('/app/eggs'); }}
                     >
-                      <Egg className="h-3.5 w-3.5" /> Logga första ägget →
+                      <Egg className="h-3.5 w-3.5" /> Logga dagens ägg
                     </Button>
                   </div>
                   <button
                     onClick={() => { finish(); navigate('/app'); }}
                     className="w-full text-center text-[11px] text-muted-foreground/60 mt-3 hover:text-muted-foreground transition-colors"
                   >
-                    Utforska appen
+                    Gå till dashboarden
                   </button>
                 </div>
               </>
