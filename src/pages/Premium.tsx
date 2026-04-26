@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays, Users, HeartHandshake, ShieldCheck } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays, Users, HeartHandshake, ShieldCheck, Bot, ReceiptText, HeartPulse, Wheat } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,33 +16,36 @@ const PRICES = {
 
 const valuePillars = [
   {
-    icon: BarChart3,
-    title: 'Bättre koll',
-    desc: 'Se trender, jämför veckor och förstå vad som händer i flocken innan du bara går på magkänsla.',
-    bullets: ['Avancerad statistik', 'Veckorapport', 'Flock- och hönsjämförelser'],
-  },
-  {
-    icon: Bell,
-    title: 'Mindre att minnas',
-    desc: 'Slipp hålla allt i huvudet. Hönsgården hjälper dig komma ihåg rutiner, påminnelser och kläckning.',
-    bullets: ['Smarta påminnelser', 'Dagliga uppgifter', 'Kläckningskalender'],
+    icon: Bot,
+    title: 'AI som förstår hönsgården',
+    desc: 'Få råd, veckorapporter och avvikelsevarningar som bygger på dina egna loggar – inte generiska tips.',
+    bullets: ['AI-coach på dashboarden', 'AI-veckorapport', 'Avvikelsevarningar'],
   },
   {
     icon: Calculator,
-    title: 'Smartare beslut',
-    desc: 'Få koll på foder, kostnad per ägg och ekonomi så att hönsgården blir lättare att planera.',
-    bullets: ['Foderspårning', 'Kostnad per ägg', 'Ekonomirapporter'],
+    title: 'Ekonomi som går att använda',
+    desc: 'Se foderkostnad, kostnad per ägg, intäkter och obetalda äggförsäljningar på ett praktiskt sätt.',
+    bullets: ['Foderkostnad per ägg', 'Sälj ägg-modul', 'Export och rapporter'],
+  },
+  {
+    icon: HeartPulse,
+    title: 'Tryggare vardag',
+    desc: 'Håll koll på flockens rytm, rutiner, hälsosignaler, kläckning och vad som behöver göras härnäst.',
+    bullets: ['Flockhälsa-light', 'Smarta rutiner', 'Kläckningskalender'],
   },
 ];
 
 const premiumFeatures = [
-  { text: 'Obegränsat antal hönor och flockar', icon: '🐔' },
-  { text: 'Avancerad statistik, trender och veckorapporter', icon: '📊' },
+  { text: 'AI-hönsgårdscoach med personliga råd', icon: '🤖' },
+  { text: 'AI-veckorapport och tydliga nästa steg', icon: '✨' },
+  { text: 'Avvikelsevarningar när något ändras i flocken', icon: '🔎' },
+  { text: 'Avancerad statistik, trender och äggmål', icon: '📊' },
   { text: 'Foderspårning och kostnad per ägg', icon: '🌾' },
+  { text: 'Sälj ägg: kunder, betalstatus och intäkter', icon: '🥚' },
   { text: 'Ekonomi, intäkter, kostnader och export', icon: '💰' },
-  { text: 'Smarta påminnelser och dagliga uppgifter', icon: '🔔' },
+  { text: 'Flockhälsa-light och bättre hönsprofiler', icon: '💚' },
   { text: 'Kläckningskalender med milstolpar', icon: '🐣' },
-  { text: 'Hälsologg, bilder och bättre hönsprofiler', icon: '💚' },
+  { text: 'Smarta påminnelser och dagliga uppgifter', icon: '🔔' },
   { text: 'PDF/CSV-export och rapporter', icon: '📥' },
   { text: 'Prioriterad support och framtida premiumfunktioner', icon: '⭐' },
 ];
@@ -50,13 +53,13 @@ const premiumFeatures = [
 const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Enkel hälsologg', 'Grundstatistik', 'Dagbok', 'Mobilvänlig PWA'];
 
 const highlights = [
-  { icon: Users, title: 'För dig som har mer än en enkel flock', desc: 'När flocken växer behöver du mer än bara en lista med namn.' },
-  { icon: Calculator, title: 'Räkna på verklig kostnad', desc: 'Se vad fodret kostar och vad varje ägg ungefär landar på.' },
-  { icon: TrendingUp, title: 'Följ utvecklingen över tid', desc: 'Jämför veckor, månader och se när något börjar avvika.' },
+  { icon: Bot, title: 'AI-råd som inte känns som en robot', desc: 'Hönsgården tolkar dina siffror och ger korta, snälla och praktiska råd.' },
+  { icon: TrendingUp, title: 'Förstå varför siffrorna ändras', desc: 'Se om produktionen är uppåt, nedåt eller stabil – och vad du kan göra.' },
+  { icon: ReceiptText, title: 'Sälj ägg utan att tappa bort betalningar', desc: 'Håll koll på kunder, belopp och vad som är betalt eller obetalt.' },
+  { icon: Wheat, title: 'Räkna på verklig kostnad', desc: 'Se vad fodret kostar och vad varje ägg ungefär landar på.' },
+  { icon: HeartPulse, title: 'Håll koll på flockens rytm', desc: 'Flockhälsa-light hjälper dig upptäcka när något är värt att observera.' },
   { icon: Bell, title: 'Få hjälp med rutinerna', desc: 'Påminnelser gör att vatten, foder, rengöring och kontroll inte glöms bort.' },
   { icon: Baby, title: 'Tryggare kläckningar', desc: 'Håll koll på dag 7, dag 14, lockdown och beräknad kläckning.' },
-  { icon: ClipboardCheck, title: 'Vardagen blir enklare', desc: 'Bocka av uppgifter och slipp känna att allt ligger i huvudet.' },
-  { icon: Camera, title: 'Mer personliga profiler', desc: 'Spara bilder, anteckningar och historik för varje höna.' },
   { icon: Download, title: 'Ta ut dina data', desc: 'Exportera rapporter när du vill dela, spara eller bokföra.' },
 ];
 
@@ -67,11 +70,12 @@ const testimonials = [
 ];
 
 export default function Premium() {
-  const { user } = useAuth();
+  const { user, refreshSubscription } = useAuth();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [searchParams] = useSearchParams();
-  const isPremium = user?.subscription_status === 'premium';
+  const isPremium = user?.subscription_status === 'premium' || user?.is_premium;
 
   useEffect(() => {
     if (searchParams.get('success') !== 'true') return;
@@ -82,18 +86,31 @@ export default function Premium() {
         try {
           const { data, error } = await supabase.functions.invoke('check-subscription');
           if (!error && data?.subscribed) {
-            toast({ title: 'Välkommen till Premium! 🎉', description: 'Nu har du alla verktyg för att få ännu bättre koll på flocken.' });
+            await refreshSubscription();
+            toast({ title: 'Välkommen till Premium! 🎉', description: 'Nu har du AI, insikter och ekonomiverktygen för bättre koll på flocken.' });
             window.location.replace('/app/premium');
             return;
           }
         } catch {}
         if (attempt < 10) await new Promise((r) => setTimeout(r, 2000));
       }
-      if (!cancelled) toast({ title: 'Betalningen behandlas', description: 'Det kan ta en liten stund. Sidan synkar automatiskt.' });
+      if (!cancelled) toast({ title: 'Betalningen behandlas', description: 'Det kan ta en liten stund. Tryck på Synka premiumstatus om sidan inte uppdateras.' });
     };
     pollSubscription();
     return () => { cancelled = true; };
-  }, [searchParams]);
+  }, [searchParams, refreshSubscription]);
+
+  const handleSyncPremium = async () => {
+    setSyncing(true);
+    try {
+      await refreshSubscription();
+      toast({ title: 'Premiumstatus kontrollerad ✅', description: 'Vi har synkat din prenumeration mot betalningssystemet.' });
+    } catch (err: any) {
+      toast({ title: 'Kunde inte synka just nu', description: err?.message || 'Försök igen om en stund.', variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleManageSubscription = async () => {
     setLoadingPortal(true);
@@ -140,21 +157,41 @@ export default function Premium() {
         <div className="relative">
           <div className="inline-flex items-center gap-2 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
             <Sparkles className="h-4 w-4" />
-            Premium för aktiva hönsägare
+            Premium med AI, insikter och ekonomi
           </div>
           <h1 className="text-3xl sm:text-5xl font-serif text-foreground mb-3 leading-tight">
-            För dig som vill få ännu bättre koll på flocken
+            Gör Hönsgården till din smarta gårdsassistent
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto mb-5 leading-relaxed">
-            Gratis räcker för att komma igång. Premium är för dig som vill förstå mönstren, slippa minnas allt själv och kunna fatta smartare beslut om ägg, foder, rutiner och ekonomi.
+            Gratis hjälper dig komma igång. Premium hjälper dig förstå flocken, få AI-råd, hålla koll på foderkostnad, sälja ägg och veta vad som är nästa bästa steg.
           </p>
-          {!isPremium && (
-            <div className="inline-flex items-center gap-2 bg-success/15 text-success-foreground border border-success/25 px-4 py-2 rounded-full text-sm font-medium">
-              🎁 Sju dagars gratis provperiod – känn efter i din egen hönsgård
-            </div>
-          )}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+            {!isPremium && (
+              <div className="inline-flex items-center gap-2 bg-success/15 text-success-foreground border border-success/25 px-4 py-2 rounded-full text-sm font-medium">
+                🎁 Sju dagars gratis provperiod – känn efter i din egen hönsgård
+              </div>
+            )}
+            <Button variant="outline" size="sm" className="rounded-xl gap-2" onClick={handleSyncPremium} disabled={syncing}>
+              {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+              Synka premiumstatus
+            </Button>
+          </div>
         </div>
       </div>
+
+      <Card className="border-primary/20 bg-primary/[0.04] shadow-sm">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0"><Bot className="h-5 w-5 text-primary" /></div>
+            <div>
+              <h2 className="font-serif text-lg text-foreground mb-1">Det här är intäktsmotorn</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Gratis ska skapa vanan: logga ägg och lägg till hönor. Premium ska skapa värdet: AI-råd, insikter, ekonomi, foderkostnad, sälj ägg och bättre beslut. Det är där Hönsgården blir svår att vara utan.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {valuePillars.map((pillar) => (
@@ -179,7 +216,7 @@ export default function Premium() {
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6">
             <h3 className="font-serif text-lg text-foreground mb-1">Gratis</h3>
-            <p className="text-muted-foreground text-sm mb-5">Bra för att börja logga</p>
+            <p className="text-muted-foreground text-sm mb-5">Bra för att skapa vanan</p>
             <div className="mb-2"><span className="text-4xl font-bold text-foreground">0</span><span className="text-lg text-muted-foreground ml-1">kr</span></div>
             <p className="text-xs text-muted-foreground mb-4">Ingen tidsgräns</p>
             <ul className="space-y-2.5 mb-6">
@@ -192,11 +229,11 @@ export default function Premium() {
         <Card className="bg-card border-border shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <h3 className="font-serif text-lg text-foreground mb-1">Plus – Månad</h3>
-            <p className="text-muted-foreground text-sm mb-5">För dig som vill testa fullt ut</p>
+            <p className="text-muted-foreground text-sm mb-5">För dig som vill testa allt</p>
             <div className="mb-2"><span className="text-4xl font-bold text-foreground">19</span><span className="text-lg text-muted-foreground ml-1">kr/mån</span></div>
             <p className="text-xs text-primary font-medium mb-4">Sju dagars gratis provperiod</p>
             <ul className="space-y-2.5 mb-6">
-              {premiumFeatures.slice(0, 5).map((f) => <li key={f.text} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f.text}</li>)}
+              {premiumFeatures.slice(0, 6).map((f) => <li key={f.text} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f.text}</li>)}
               <li className="text-xs text-muted-foreground pl-6">+ allt i Gratis</li>
             </ul>
             <Button variant="outline" className="w-full h-11 gap-2 active:scale-95 transition-transform" onClick={() => handleCheckout(PRICES.monthly, 'monthly')} disabled={!!loadingPlan || isPremium}>
@@ -214,7 +251,7 @@ export default function Premium() {
             <div className="mb-2"><span className="text-4xl font-bold text-foreground">149</span><span className="text-lg text-muted-foreground ml-1">kr/år</span></div>
             <p className="text-xs text-muted-foreground mb-4"><span className="line-through">228 kr</span> → ungefär 12 kr/mån</p>
             <ul className="space-y-2.5 mb-6">
-              {premiumFeatures.slice(0, 5).map((f) => <li key={f.text} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f.text}</li>)}
+              {premiumFeatures.slice(0, 6).map((f) => <li key={f.text} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f.text}</li>)}
               <li className="text-xs text-muted-foreground pl-6">+ allt i Gratis</li>
             </ul>
             <Button className="w-full h-12 gap-2 active:scale-95 transition-transform text-base font-semibold shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]" onClick={() => handleCheckout(PRICES.yearly, 'yearly')} disabled={!!loadingPlan || isPremium}>
@@ -224,20 +261,6 @@ export default function Premium() {
           </CardContent>
         </Card>
       </div>
-
-      <Card className="border-primary/20 bg-primary/[0.03] shadow-sm">
-        <CardContent className="p-5 sm:p-6">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0"><ShieldCheck className="h-5 w-5 text-primary" /></div>
-            <div>
-              <h2 className="font-serif text-lg text-foreground mb-1">Det här är inte bara fler funktioner</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Premium ska hjälpa dig få en lugnare och smartare hönsvardag. Poängen är inte att klicka runt mer – poängen är att Hönsgården ska räkna, påminna och sammanfatta så att du slipper hålla allt i huvudet.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <div>
         <h2 className="font-serif text-xl sm:text-2xl text-foreground text-center mb-5">Allt som ingår i Plus</h2>
