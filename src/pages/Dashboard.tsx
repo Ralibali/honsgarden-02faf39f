@@ -374,10 +374,7 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* ─── AI Coach: "Hönsgården har märkt…" ─── */}
-      <DashboardAICoach />
-
-      {/* ─── 2. Quick stats (4 cards) ─── */}
+      {/* ─── 2. Dagens hönsgård (quick stats) ─── */}
       <div className="grid grid-cols-4 gap-2.5 stagger-children">
         {stats.map(({ icon: Icon, value, label, color, bg }, i) => (
           <Card key={i} className="border-border/50 shadow-sm card-hover overflow-hidden active:scale-[0.97] transition-transform">
@@ -392,8 +389,12 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ─── Egg Goals ─── */}
+      {/* ─── 3. Veckosammanfattning (egg goals) ─── */}
       <EggGoalsWidget eggs={eggs} />
+
+      {/* ─── 4. Kompakt AI-råd: "Hönsgården har märkt…" ─── */}
+      <DashboardAICoach />
+
 
       {/* ─── 3. Streak + Top hen ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
