@@ -45,6 +45,7 @@ const Overview = React.lazy(() => import("./pages/Overview"));
 const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
+const EggSales = React.lazy(() => import("./pages/EggSales"));
 
 // Konsolidering: /guider/* → /blogg/* (canonical bor på /blogg)
 const GuiderRedirect = () => {
@@ -133,6 +134,7 @@ const AppRoutes = () => (
           <Route path="hatching" element={<Hatching />} />
           <Route path="tasks" element={<DailyTasks />} />
           <Route path="finance" element={<Finance />} />
+          <Route path="egg-sales" element={<EggSales />} />
           <Route path="statistics" element={<Statistics />} />
           <Route path="overview" element={<Overview />} />
           <Route path="settings" element={<SettingsPage />} />
