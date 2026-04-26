@@ -225,7 +225,35 @@ export default function HenAvatar({
         ) : (
           <span>{emoji}</span>
         )}
+        {uploading && (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/70 backdrop-blur-sm"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={progressLabel || 'Laddar upp bild'}
+          >
+            <Loader2 className={`${iconClass} animate-spin text-primary`} />
+            {size === 'lg' && (
+              <span className="text-[10px] font-medium text-foreground/80">{progress}%</span>
+            )}
+          </div>
+        )}
       </div>
+      {uploading && size === 'lg' && (
+        <div className="mt-2 w-full">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          {progressLabel && (
+            <p className="mt-1 text-center text-xs text-muted-foreground">{progressLabel}</p>
+          )}
+        </div>
+      )}
 
       {editable && (
         <>
