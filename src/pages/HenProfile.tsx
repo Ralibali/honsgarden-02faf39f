@@ -583,6 +583,71 @@ export default function HenProfile() {
           </CardContent>
         </Card>
       )}
+
+      {/* Health Note Dialog with AI Helper */}
+      <Dialog open={healthNoteOpen} onOpenChange={setHealthNoteOpen}>
+        <DialogContent className="sm:max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <Stethoscope className="h-4 w-4 text-primary" />
+              Hälsonotering – {hen.name}
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Skriv en kort observation. Hönsgården kan hjälpa dig formulera den tydligare och föreslå vad du kan hålla koll på.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs">Typ</Label>
+              <Select value={healthNoteType} onValueChange={setHealthNoteType}>
+                <SelectTrigger className="rounded-xl h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="observation">Observation</SelectItem>
+                  <SelectItem value="symptom">Symtom</SelectItem>
+                  <SelectItem value="behandling">Behandling</SelectItem>
+                  <SelectItem value="veterinär">Veterinärbesök</SelectItem>
+                  <SelectItem value="ruggning">Ruggning</SelectItem>
+                  <SelectItem value="diary">Dagbok</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Din notering</Label>
+              <Textarea
+                placeholder={`T.ex. "${hen.name} verkar lite hängig och äter sämre idag"`}
+                value={healthNoteText}
+                onChange={(e) => setHealthNoteText(e.target.value)}
+                className="min-h-[100px] resize-none rounded-xl border-border/60 focus:border-primary/40"
+              />
+            </div>
+
+            <AIHealthNoteHelper
+              noteText={healthNoteText}
+              henName={hen.name}
+              henBreed={hen.breed}
+              henAgeYears={hen.birth_date ? Math.max(0, Math.round((Date.now() - new Date(hen.birth_date).getTime()) / (365.25 * 24 * 3600 * 1000))) : null}
+              recentNotes={healthLogs.slice(0, 3).map((l: any) => ({ date: l.date, description: l.description || '' }))}
+              onUseImprovedNote={(improved) => setHealthNoteText(improved)}
+              onCreateFollowUp={followUpReminder}
+            />
+
+            <div className="flex gap-2 pt-2 border-t border-border/40">
+              <Button
+                className="flex-1 rounded-xl h-10"
+                disabled={!healthNoteText.trim() || healthNoteMutation.isPending}
+                onClick={() => healthNoteMutation.mutate({ text: healthNoteText.trim(), type: healthNoteType })}
+              >
+                {healthNoteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Spara hälsonotering'}
+              </Button>
+              <Button variant="outline" className="rounded-xl h-10" onClick={() => setHealthNoteOpen(false)}>
+                Avbryt
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
