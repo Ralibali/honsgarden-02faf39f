@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays, Users } from 'lucide-react';
+import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays, Users, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,38 +14,56 @@ const PRICES = {
   yearly: 'price_1T3jwRHzffTezY829aWQVXZr',
 };
 
-const premiumFeatures = [
-  { text: 'Obegränsat antal hönor', icon: '🐔' },
-  { text: 'Obegränsat antal flockar', icon: '🏡' },
-  { text: 'Avancerad statistik & trender', icon: '📊' },
-  { text: 'Smarta varningar & prognoser', icon: '🔔' },
-  { text: 'Hälsologg & vaccinationer', icon: '💉' },
-  { text: 'Foderspårning & kostnad/ägg', icon: '🌾' },
-  { text: 'Kläckningsräknare', icon: '🐣' },
-  { text: 'Dagliga uppgifter & påminnelser', icon: '✅' },
-  { text: 'Exportera data (PDF/CSV)', icon: '📥' },
-  { text: 'Prioriterad support', icon: '⭐' },
-  { text: 'Alla framtida funktioner', icon: '🚀' },
+const valuePillars = [
+  {
+    icon: BarChart3,
+    title: 'Bättre koll',
+    desc: 'Se trender, jämför veckor och förstå vad som händer i flocken innan du bara går på magkänsla.',
+    bullets: ['Avancerad statistik', 'Veckorapport', 'Flock- och hönsjämförelser'],
+  },
+  {
+    icon: Bell,
+    title: 'Mindre att minnas',
+    desc: 'Slipp hålla allt i huvudet. Hönsgården hjälper dig komma ihåg rutiner, påminnelser och kläckning.',
+    bullets: ['Smarta påminnelser', 'Dagliga uppgifter', 'Kläckningskalender'],
+  },
+  {
+    icon: Calculator,
+    title: 'Smartare beslut',
+    desc: 'Få koll på foder, kostnad per ägg och ekonomi så att hönsgården blir lättare att planera.',
+    bullets: ['Foderspårning', 'Kostnad per ägg', 'Ekonomirapporter'],
+  },
 ];
 
-const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Fungerar offline'];
+const premiumFeatures = [
+  { text: 'Obegränsat antal hönor och flockar', icon: '🐔' },
+  { text: 'Avancerad statistik, trender och veckorapporter', icon: '📊' },
+  { text: 'Foderspårning och kostnad per ägg', icon: '🌾' },
+  { text: 'Ekonomi, intäkter, kostnader och export', icon: '💰' },
+  { text: 'Smarta påminnelser och dagliga uppgifter', icon: '🔔' },
+  { text: 'Kläckningskalender med milstolpar', icon: '🐣' },
+  { text: 'Hälsologg, bilder och bättre hönsprofiler', icon: '💚' },
+  { text: 'PDF/CSV-export och rapporter', icon: '📥' },
+  { text: 'Prioriterad support och framtida premiumfunktioner', icon: '⭐' },
+];
+
+const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Enkel hälsologg', 'Grundstatistik', 'Dagbok', 'Mobilvänlig PWA'];
 
 const highlights = [
-  { icon: Users, title: 'Obegränsade flockar', desc: 'Gratis = 1 flock. Premium = hur många du vill.' },
-  { icon: Calculator, title: 'Kostnad per ägg', desc: 'Se exakt vad varje ägg kostar att producera.' },
-  { icon: TrendingUp, title: 'Smarta prognoser', desc: 'Förväntat antal ägg baserat på dina data.' },
-  { icon: Bell, title: 'Avmaskning & påminnelser', desc: 'Automatiska påminnelser för vaccination och veterinär.' },
-  { icon: Baby, title: 'Kläckningsräknare', desc: '21-dagars nedräkning med milstolpar.' },
-  { icon: ClipboardCheck, title: 'Dagliga uppgifter', desc: 'Checklista som återställs varje morgon.' },
-  { icon: Camera, title: 'Fotoalbum', desc: 'Dokumentera dina hönor med bilder.' },
-  { icon: BarChart3, title: 'Detaljerad statistik', desc: 'Jämför månader och hitta din bästa värpare.' },
-  { icon: Download, title: 'Exportera rapporter', desc: 'PDF eller CSV för bokföring.' },
+  { icon: Users, title: 'För dig som har mer än en enkel flock', desc: 'När flocken växer behöver du mer än bara en lista med namn.' },
+  { icon: Calculator, title: 'Räkna på verklig kostnad', desc: 'Se vad fodret kostar och vad varje ägg ungefär landar på.' },
+  { icon: TrendingUp, title: 'Följ utvecklingen över tid', desc: 'Jämför veckor, månader och se när något börjar avvika.' },
+  { icon: Bell, title: 'Få hjälp med rutinerna', desc: 'Påminnelser gör att vatten, foder, rengöring och kontroll inte glöms bort.' },
+  { icon: Baby, title: 'Tryggare kläckningar', desc: 'Håll koll på dag 7, dag 14, lockdown och beräknad kläckning.' },
+  { icon: ClipboardCheck, title: 'Vardagen blir enklare', desc: 'Bocka av uppgifter och slipp känna att allt ligger i huvudet.' },
+  { icon: Camera, title: 'Mer personliga profiler', desc: 'Spara bilder, anteckningar och historik för varje höna.' },
+  { icon: Download, title: 'Ta ut dina data', desc: 'Exportera rapporter när du vill dela, spara eller bokföra.' },
 ];
 
 const testimonials = [
-  { name: 'Anna-Lena', location: 'Dalarna', text: 'Sedan jag uppgraderade har jag koll på exakt vad varje ägg kostar. Fantastiskt!' },
-  { name: 'Per-Olof', location: 'Skåne', text: 'Kläckningsräknaren räddade min första kull – jag hade glömt sluta vända äggen!' },
-  { name: 'Margareta', location: 'Gotland', text: 'Dagliga uppgifterna gör att barnen kan hjälpa till. De älskar att bocka av!' },
+  { name: 'Anna-Lena', location: 'Dalarna', text: 'Jag trodde jag hade koll, men först när jag såg kostnad per ägg förstod jag flocken på riktigt.' },
+  { name: 'Per-Olof', location: 'Skåne', text: 'Kläckningskalendern gjorde att jag slapp dubbelkolla datum hela tiden. Det blev lugnare.' },
+  { name: 'Margareta', location: 'Gotland', text: 'Påminnelserna gör störst skillnad. Nu är det inte bara jag som behöver komma ihåg allt.' },
 ];
 
 export default function Premium() {
@@ -57,41 +75,22 @@ export default function Premium() {
 
   useEffect(() => {
     if (searchParams.get('success') !== 'true') return;
-
     let cancelled = false;
-
     const pollSubscription = async () => {
-      const MAX_ATTEMPTS = 10;
-      const DELAY_MS = 2000;
-
-      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      for (let attempt = 1; attempt <= 10; attempt++) {
         if (cancelled) return;
-
         try {
           const { data, error } = await supabase.functions.invoke('check-subscription');
           if (!error && data?.subscribed) {
-            toast({ title: '🎉 Välkommen till Premium!', description: 'Din uppgradering är klar. Njut av alla funktioner!' });
+            toast({ title: 'Välkommen till Premium! 🎉', description: 'Nu har du alla verktyg för att få ännu bättre koll på flocken.' });
             window.location.replace('/app/premium');
             return;
           }
-        } catch {
-          // Retry on failure
-        }
-
-        if (attempt < MAX_ATTEMPTS) {
-          await new Promise((r) => setTimeout(r, DELAY_MS));
-        }
+        } catch {}
+        if (attempt < 10) await new Promise((r) => setTimeout(r, 2000));
       }
-
-      // All attempts exhausted
-      if (!cancelled) {
-        toast({
-          title: 'Betalningen behandlas',
-          description: 'Det kan ta en liten stund. Sidan synkar automatiskt – du behöver inte göra något.',
-        });
-      }
+      if (!cancelled) toast({ title: 'Betalningen behandlas', description: 'Det kan ta en liten stund. Sidan synkar automatiskt.' });
     };
-
     pollSubscription();
     return () => { cancelled = true; };
   }, [searchParams]);
@@ -102,11 +101,9 @@ export default function Premium() {
       const { data, error } = await supabase.functions.invoke('customer-portal');
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      if (data?.url) window.location.href = data.url;
     } catch (err: any) {
-      toast({ title: 'Fel', description: err.message || 'Kunde inte öppna kundportalen.', variant: 'destructive' });
+      toast({ title: 'Något gick fel', description: err.message || 'Kunde inte öppna kundportalen.', variant: 'destructive' });
     } finally {
       setLoadingPortal(false);
     }
@@ -119,29 +116,17 @@ export default function Premium() {
     }
     setLoadingPlan(planName);
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId },
-      });
-
-      // Handle "already subscribed" → redirect to customer portal
+      const { data, error } = await supabase.functions.invoke('create-checkout', { body: { priceId } });
       if (data?.error === 'already_subscribed' && data?.portal_url) {
-        toast({
-          title: 'Du har redan en aktiv prenumeration',
-          description: 'Vi öppnar kundportalen där du kan hantera den.',
-        });
+        toast({ title: 'Du har redan en aktiv prenumeration', description: 'Vi öppnar kundportalen där du kan hantera den.' });
         window.location.href = data.portal_url;
         return;
       }
-
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.message || data.error);
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('Ingen checkout-URL returnerades');
-      }
+      if (data?.url) window.location.href = data.url;
+      else throw new Error('Ingen checkout-URL returnerades');
     } catch (err: any) {
-      console.error('Checkout error:', err);
       toast({ title: 'Kunde inte starta betalning', description: err.message || 'Något gick fel.', variant: 'destructive' });
     } finally {
       setLoadingPlan(null);
@@ -149,115 +134,90 @@ export default function Premium() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-8">
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 sm:p-10 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.08),transparent_70%)]" />
+    <div className="max-w-5xl mx-auto space-y-7 animate-fade-in pb-8">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/12 via-card to-accent/8 border border-primary/20 p-6 sm:p-10 text-center shadow-sm">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.10),transparent_70%)]" />
         <div className="relative">
           <div className="inline-flex items-center gap-2 bg-primary/15 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
             <Sparkles className="h-4 w-4" />
-            Premium
+            Premium för aktiva hönsägare
           </div>
-          <h1 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">
-            Uppgradera din hönsgård
+          <h1 className="text-3xl sm:text-5xl font-serif text-foreground mb-3 leading-tight">
+            För dig som vill få ännu bättre koll på flocken
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto mb-4">
-            Få full kontroll med avancerad statistik, smarta prognoser och automatiska påminnelser.
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto mb-5 leading-relaxed">
+            Gratis räcker för att komma igång. Premium är för dig som vill förstå mönstren, slippa minnas allt själv och kunna fatta smartare beslut om ägg, foder, rutiner och ekonomi.
           </p>
           {!isPremium && (
             <div className="inline-flex items-center gap-2 bg-success/15 text-success-foreground border border-success/25 px-4 py-2 rounded-full text-sm font-medium">
-              🎁 Alla nya konton får sju dagars Premium gratis!
+              🎁 Sju dagars gratis provperiod – känn efter i din egen hönsgård
             </div>
           )}
         </div>
       </div>
 
-      {/* Pricing cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {valuePillars.map((pillar) => (
+          <Card key={pillar.title} className="border-border/60 shadow-sm bg-card">
+            <CardContent className="p-5">
+              <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <pillar.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h2 className="font-serif text-lg text-foreground mb-2">{pillar.title}</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">{pillar.desc}</p>
+              <ul className="space-y-2">
+                {pillar.bullets.map((b) => (
+                  <li key={b} className="flex items-center gap-2 text-xs text-foreground"><Check className="h-3.5 w-3.5 text-primary" />{b}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Free */}
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6">
             <h3 className="font-serif text-lg text-foreground mb-1">Gratis</h3>
-            <p className="text-muted-foreground text-sm mb-5">Allt du behöver för att börja</p>
-            <div className="mb-2">
-              <span className="text-4xl font-bold text-foreground">0</span>
-              <span className="text-lg text-muted-foreground ml-1">kr</span>
-            </div>
+            <p className="text-muted-foreground text-sm mb-5">Bra för att börja logga</p>
+            <div className="mb-2"><span className="text-4xl font-bold text-foreground">0</span><span className="text-lg text-muted-foreground ml-1">kr</span></div>
             <p className="text-xs text-muted-foreground mb-4">Ingen tidsgräns</p>
             <ul className="space-y-2.5 mb-6">
-              {freeFeatures.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-foreground">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  {f}
-                </li>
-              ))}
+              {freeFeatures.map((f) => <li key={f} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f}</li>)}
             </ul>
-            <Button variant="outline" className="w-full h-11" disabled={!isPremium}>
-              {isPremium ? 'Byt till gratis' : 'Din nuvarande plan'}
-            </Button>
+            <Button variant="outline" className="w-full h-11" disabled>{isPremium ? 'Gratis finns kvar' : 'Din nuvarande plan'}</Button>
           </CardContent>
         </Card>
 
-        {/* Monthly */}
         <Card className="bg-card border-border shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <h3 className="font-serif text-lg text-foreground mb-1">Plus – Månad</h3>
-            <p className="text-muted-foreground text-sm mb-5">Flexibelt, ingen bindningstid</p>
-            <div className="mb-2">
-              <span className="text-4xl font-bold text-foreground">19</span>
-              <span className="text-lg text-muted-foreground ml-1">kr/mån</span>
-            </div>
-            <p className="text-xs text-primary font-medium mb-4">🎁 Sju dagars gratis provperiod – starta idag</p>
+            <p className="text-muted-foreground text-sm mb-5">För dig som vill testa fullt ut</p>
+            <div className="mb-2"><span className="text-4xl font-bold text-foreground">19</span><span className="text-lg text-muted-foreground ml-1">kr/mån</span></div>
+            <p className="text-xs text-primary font-medium mb-4">Sju dagars gratis provperiod</p>
             <ul className="space-y-2.5 mb-6">
-              {premiumFeatures.slice(0, 6).map((f) => (
-                <li key={f.text} className="flex items-center gap-2 text-sm text-foreground">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  {f.text}
-                </li>
-              ))}
+              {premiumFeatures.slice(0, 5).map((f) => <li key={f.text} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f.text}</li>)}
               <li className="text-xs text-muted-foreground pl-6">+ allt i Gratis</li>
             </ul>
-            <Button 
-              variant="outline"
-              className="w-full h-11 gap-2 active:scale-95 transition-transform"
-              onClick={() => handleCheckout(PRICES.monthly, 'monthly')}
-              disabled={!!loadingPlan || isPremium}
-            >
+            <Button variant="outline" className="w-full h-11 gap-2 active:scale-95 transition-transform" onClick={() => handleCheckout(PRICES.monthly, 'monthly')} disabled={!!loadingPlan || isPremium}>
               {loadingPlan === 'monthly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              {isPremium ? 'Du har redan Plus' : 'Prova 7 dagar gratis'}
+              {isPremium ? 'Du har redan Plus' : 'Prova månadsvis'}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Yearly - highlighted */}
         <Card className="bg-card border-2 border-primary shadow-lg relative overflow-hidden hover:shadow-xl transition-shadow">
-           <div className="absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-xs font-semibold py-1.5 text-center tracking-wide uppercase">
-             Spara 35% – populärast
-           </div>
-           <CardContent className="p-6 pt-10">
-             <h3 className="font-serif text-lg text-foreground mb-1">Plus – År</h3>
-             <p className="text-muted-foreground text-sm mb-5">Bästa värdet – bara 12 kr/mån</p>
-             <div className="mb-2">
-               <span className="text-4xl font-bold text-foreground">149</span>
-               <span className="text-lg text-muted-foreground ml-1">kr/år</span>
-             </div>
-             <p className="text-xs text-muted-foreground mb-4">
-               <span className="line-through">228 kr</span> → du sparar 79 kr per år
-             </p>
-             <ul className="space-y-2.5 mb-6">
-              {premiumFeatures.slice(0, 6).map((f) => (
-                <li key={f.text} className="flex items-center gap-2 text-sm text-foreground">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  {f.text}
-                </li>
-              ))}
+          <div className="absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-xs font-semibold py-1.5 text-center tracking-wide uppercase">Bäst värde – spara 35%</div>
+          <CardContent className="p-6 pt-10">
+            <h3 className="font-serif text-lg text-foreground mb-1">Plus – År</h3>
+            <p className="text-muted-foreground text-sm mb-5">För dig som vill bygga långsiktig koll</p>
+            <div className="mb-2"><span className="text-4xl font-bold text-foreground">149</span><span className="text-lg text-muted-foreground ml-1">kr/år</span></div>
+            <p className="text-xs text-muted-foreground mb-4"><span className="line-through">228 kr</span> → ungefär 12 kr/mån</p>
+            <ul className="space-y-2.5 mb-6">
+              {premiumFeatures.slice(0, 5).map((f) => <li key={f.text} className="flex items-center gap-2 text-sm text-foreground"><Check className="h-4 w-4 text-primary shrink-0" />{f.text}</li>)}
               <li className="text-xs text-muted-foreground pl-6">+ allt i Gratis</li>
             </ul>
-            <Button 
-              className="w-full h-12 gap-2 active:scale-95 transition-transform text-base font-semibold shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"
-              onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
-              disabled={!!loadingPlan || isPremium}
-            >
+            <Button className="w-full h-12 gap-2 active:scale-95 transition-transform text-base font-semibold shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]" onClick={() => handleCheckout(PRICES.yearly, 'yearly')} disabled={!!loadingPlan || isPremium}>
               {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
               {isPremium ? 'Du har redan Plus' : 'Välj årsplan – 149 kr'}
             </Button>
@@ -265,54 +225,49 @@ export default function Premium() {
         </Card>
       </div>
 
-      {/* What's included */}
+      <Card className="border-primary/20 bg-primary/[0.03] shadow-sm">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0"><ShieldCheck className="h-5 w-5 text-primary" /></div>
+            <div>
+              <h2 className="font-serif text-lg text-foreground mb-1">Det här är inte bara fler funktioner</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Premium ska hjälpa dig få en lugnare och smartare hönsvardag. Poängen är inte att klicka runt mer – poängen är att Hönsgården ska räkna, påminna och sammanfatta så att du slipper hålla allt i huvudet.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div>
-        <h2 className="font-serif text-xl sm:text-2xl text-foreground text-center mb-5">
-          Allt som ingår
-        </h2>
+        <h2 className="font-serif text-xl sm:text-2xl text-foreground text-center mb-5">Allt som ingår i Plus</h2>
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-5 sm:p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {premiumFeatures.map((f) => (
-                <div key={f.text} className="flex items-center gap-3 py-1.5">
-                  <span className="text-base shrink-0">{f.icon}</span>
-                  <span className="text-sm text-foreground">{f.text}</span>
-                </div>
-              ))}
+              {premiumFeatures.map((f) => <div key={f.text} className="flex items-center gap-3 py-1.5"><span className="text-base shrink-0">{f.icon}</span><span className="text-sm text-foreground">{f.text}</span></div>)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Feature details */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {highlights.map((f) => (
           <Card key={f.title} className="bg-card border-border shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-4 flex items-start gap-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <f.icon className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-medium text-foreground text-sm">{f.title}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{f.desc}</p>
-              </div>
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0"><f.icon className="h-4 w-4 text-primary" /></div>
+              <div><h3 className="font-medium text-foreground text-sm">{f.title}</h3><p className="text-xs text-muted-foreground mt-0.5">{f.desc}</p></div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Testimonials */}
       <div>
-        <h2 className="font-serif text-xl text-foreground text-center mb-4">Vad säger våra användare?</h2>
+        <h2 className="font-serif text-xl text-foreground text-center mb-4">Så beskriver hönsägare värdet</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {testimonials.map((t) => (
             <Card key={t.name} className="bg-card border-border shadow-sm">
               <CardContent className="p-4">
-                <div className="flex items-center gap-0.5 mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3 w-3 fill-warning text-warning" />
-                  ))}
-                </div>
+                <div className="flex items-center gap-0.5 mb-2">{[...Array(5)].map((_, i) => <Star key={i} className="h-3 w-3 fill-warning text-warning" />)}</div>
                 <p className="text-xs text-foreground italic mb-2">"{t.text}"</p>
                 <p className="text-[10px] text-muted-foreground font-medium">{t.name}, {t.location}</p>
               </CardContent>
@@ -321,66 +276,31 @@ export default function Premium() {
         </div>
       </div>
 
-      {/* No commitment */}
       <Card className="bg-primary/5 border-primary/15">
         <CardContent className="p-5 sm:p-6 text-center">
+          <HeartHandshake className="h-6 w-6 text-primary mx-auto mb-2" />
           <h3 className="font-serif text-lg text-foreground mb-2">Ingen bindningstid</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Avbryt när du vill. Inga dolda avgifter. Dina data finns kvar om du går tillbaka till gratis.
-          </p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">Avbryt när du vill. Inga dolda avgifter. Dina data finns kvar om du går tillbaka till gratis.</p>
         </CardContent>
       </Card>
 
-      {/* Manage subscription (premium users) */}
       {isPremium && (
         <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 shadow-sm">
           <CardContent className="p-5 sm:p-6 text-center space-y-3">
-            <div className="inline-flex items-center gap-2 text-foreground font-semibold text-lg">
-              <Crown className="h-5 w-5 text-warning" />
-              Du har Premium!
-            </div>
-            {user?.subscription_end && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <CalendarDays className="h-4 w-4" />
-                <span>
-                  Betald t.o.m.{' '}
-                  <span className="font-medium text-foreground">
-                    {format(new Date(user.subscription_end), 'd MMMM yyyy', { locale: sv })}
-                  </span>
-                </span>
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground">
-              Hantera din prenumeration, byt betalmetod eller avsluta.
-            </p>
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={handleManageSubscription}
-              disabled={loadingPortal}
-            >
-              {loadingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
-              Hantera prenumeration
-            </Button>
+            <div className="inline-flex items-center gap-2 text-foreground font-semibold text-lg"><Crown className="h-5 w-5 text-warning" />Du har Premium!</div>
+            {user?.subscription_end && <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground"><CalendarDays className="h-4 w-4" /><span>Betald t.o.m. <span className="font-medium text-foreground">{format(new Date(user.subscription_end), 'd MMMM yyyy', { locale: sv })}</span></span></div>}
+            <p className="text-sm text-muted-foreground">Hantera din prenumeration, byt betalmetod eller avsluta.</p>
+            <Button variant="outline" className="gap-2" onClick={handleManageSubscription} disabled={loadingPortal}>{loadingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}Hantera prenumeration</Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Bottom CTA */}
       {!isPremium && (
         <div className="text-center pb-4">
-          <Button 
-            size="lg" 
-            className="h-12 px-10 text-base gap-2 active:scale-95 transition-transform shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]"
-            onClick={() => handleCheckout(PRICES.yearly, 'yearly')}
-            disabled={!!loadingPlan}
-          >
-            {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-            Uppgradera nu – 149 kr/år
+          <Button size="lg" className="h-12 px-10 text-base gap-2 active:scale-95 transition-transform shadow-[0_4px_14px_0_hsl(var(--primary)/0.3)]" onClick={() => handleCheckout(PRICES.yearly, 'yearly')} disabled={!!loadingPlan}>
+            {loadingPlan === 'yearly' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}Börja med Plus – 149 kr/år
           </Button>
-          <p className="text-xs text-muted-foreground mt-3">
-            Frågor? <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a>
-          </p>
+          <p className="text-xs text-muted-foreground mt-3">Frågor? <a href="mailto:info@auroramedia.se" className="text-primary hover:underline">info@auroramedia.se</a></p>
         </div>
       )}
     </div>
