@@ -574,6 +574,27 @@ export async function getDailyTip() {
   return data;
 }
 
+export type CoachAdvice = {
+  title: string;
+  text: string;
+  type: 'pepp' | 'påminnelse' | 'varning' | 'tips';
+  cta?: { label: string; path: string };
+};
+
+export type CoachResponse = {
+  intro?: string | null;
+  advices: CoachAdvice[];
+};
+
+export async function getDashboardCoach(context: Record<string, unknown>): Promise<CoachResponse> {
+  const { data, error } = await supabase.functions.invoke('dashboard-coach', { body: context });
+  if (error) throw new Error(error.message);
+  if (!data || !Array.isArray((data as any).advices)) {
+    throw new Error('Invalid coach response');
+  }
+  return data as CoachResponse;
+}
+
 // ==================== PREMIUM ====================
 
 export async function getPremiumStatus() {
