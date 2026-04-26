@@ -432,17 +432,21 @@ async function main() {
     await writeRoute(`blogg/tagg/${encodeURIComponent(tag)}`, buildTagPage(template, tag));
   }
 
-  // 5. Artiklar (både /blogg/ och /guider/)
+  // 5. Artiklar – /blogg/ är canonical. /guider/ behålls bakåtkompatibelt
+  //    men levereras som noindex-redirect till motsvarande /blogg/-URL.
   await Promise.all(posts.flatMap((post) => [
     writeRoute(`blogg/${post.slug}`, buildArticlePage(template, post)),
-    writeRoute(`guider/${post.slug}`, buildArticlePage(template, post)),
+    writeRoute(`guider/${post.slug}`, buildRedirectPage(`/blogg/${post.slug}`)),
   ]));
 
-  // 6. Skriv om public sitemap.xml till färska data
+  // 5b. /guider index → /blogg
+  await writeRoute('guider', buildRedirectPage('/blogg'));
+
+  // 6. Skriv om public sitemap.xml till färska data (endast /blogg-URL:er)
   const sitemap = buildSitemap(posts, tags);
   await writeFile(join('dist', 'sitemap.xml'), sitemap, 'utf8');
 
-  console.log(`✅ Prerendered ${STATIC_PAGES.length} statiska + ${Object.keys(CATEGORY_META).length} kategori- + ${tags.length} tagg- + ${posts.length} artikel-sidor (×2). Sitemap uppdaterad.`);
+  console.log(`✅ Prerendered ${STATIC_PAGES.length} statiska + ${Object.keys(CATEGORY_META).length} kategori- + ${tags.length} tagg- + ${posts.length} artikel-sidor (+ /guider redirects). Sitemap uppdaterad.`);
 }
 
 main().catch((error) => {
