@@ -11,6 +11,7 @@ import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PremiumGate } from '@/components/PremiumGate';
+import EmptyState from '@/components/EmptyState';
 
 const milestones = [
   { day: 1, label: 'Start', emoji: '🥚' },
@@ -47,18 +48,18 @@ export default function Hatching() {
     mutationFn: (data: any) => api.createHatching(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hatching'] });
-      toast({ title: 'Kläckning startad! 🐣' });
+      toast({ title: 'Kläckningen är startad! 🐣' });
       setOpen(false);
       setNewNotes(''); setNewDate(''); setNewCount('');
     },
-    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+    onError: () => toast({ title: 'Något gick fel', description: 'Vi kunde inte starta kläckningen just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteHatching(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hatching'] });
-      toast({ title: 'Kläckning borttagen' });
+      toast({ title: 'Kläckningen är borttagen' });
     },
   });
 
@@ -91,22 +92,22 @@ export default function Hatching() {
           <DialogTrigger asChild>
             <Button className="gap-2 w-full sm:w-auto"><Plus className="h-4 w-4" />Ny kläckning</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="rounded-2xl">
             <DialogHeader><DialogTitle className="font-serif">Starta ny kläckning</DialogTitle></DialogHeader>
             <div className="space-y-3 pt-2">
               <div>
-                <Label>Namn / anteckning</Label>
-                <Input className="mt-1.5" placeholder="T.ex. Vår-kull 2026" value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
+                <Label>Namn eller anteckning</Label>
+                <Input className="mt-1.5 rounded-xl" placeholder="T.ex. Vår-kull 2026" value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
               </div>
               <div>
                 <Label>Startdatum *</Label>
-                <Input className="mt-1.5" type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} required />
+                <Input className="mt-1.5 rounded-xl" type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} required />
               </div>
               <div>
                 <Label>Antal ägg</Label>
-                <Input className="mt-1.5" placeholder="T.ex. 12" type="number" value={newCount} onChange={(e) => setNewCount(e.target.value)} />
+                <Input className="mt-1.5 rounded-xl" placeholder="T.ex. 12" type="number" value={newCount} onChange={(e) => setNewCount(e.target.value)} />
               </div>
-              <Button className="w-full" onClick={handleAdd} disabled={createMutation.isPending}>
+              <Button className="w-full rounded-xl" onClick={handleAdd} disabled={createMutation.isPending || !newDate}>
                 {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                 Starta kläckning
               </Button>
@@ -125,58 +126,61 @@ export default function Hatching() {
         </CardContent>
       </Card>
 
-      {batches.length === 0 && (
-        <Card className="bg-card border-border shadow-sm">
-          <CardContent className="p-8 text-center">
-            <Egg className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">Inga aktiva kläckningar</p>
-          </CardContent>
-        </Card>
+      {batches.length === 0 ? (
+        <EmptyState
+          icon={Egg}
+          title="Ingen kläckning pågår ännu"
+          description="Starta en kläckning när du lägger ägg i maskin eller under höna. Hönsgården hjälper dig hålla koll på dag 7, dag 14, vändning, fukt och beräknad kläckning."
+          actionLabel="Starta ny kläckning"
+          onAction={() => setOpen(true)}
+          secondaryLabel="Gå till hönor"
+          onSecondaryAction={() => window.location.assign('/app/hens')}
+        />
+      ) : (
+        batches.map((batch: any) => {
+          const batchId = batch.id;
+          const startDate = batch.start_date;
+          const { elapsed, remaining, progress, done } = getDayInfo(startDate);
+          return (
+            <Card key={batchId} className={`bg-card border-border shadow-sm ${done ? 'border-success/50' : ''}`}>
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <h3 className="font-serif text-base text-foreground flex items-center gap-2 break-words">
+                      {done ? '🐣' : '🥚'} {batch.notes || `Kläckning ${startDate}`}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{batch.egg_count} ägg · Startade {startDate}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground h-8 w-8 p-0 shrink-0" onClick={() => deleteMutation.mutate(batchId)} aria-label="Ta bort kläckning">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <div className="mb-3">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">Dag {Math.min(elapsed, 21)} av 21</span>
+                    <span className={`font-medium ${done ? 'text-success' : 'text-primary'}`}>
+                      {done ? 'Kläckt! 🎉' : `${remaining} dagar kvar`}
+                    </span>
+                  </div>
+                  <Progress value={progress} className="h-2.5" />
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                  {milestones.map((m) => {
+                    const reached = elapsed >= m.day;
+                    const isCurrent = elapsed >= m.day - 1 && elapsed < m.day;
+                    return (
+                      <div key={m.day} className={`text-center p-1.5 rounded-lg text-[10px] transition-colors ${reached ? 'bg-success/10 text-success' : isCurrent ? 'bg-primary/10 text-primary ring-1 ring-primary/30' : 'bg-muted/50 text-muted-foreground'}`}>
+                        <span className="text-sm">{reached ? '✅' : m.emoji}</span>
+                        <p className="mt-0.5 leading-tight">Dag {m.day}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })
       )}
-
-      {batches.map((batch: any) => {
-        const batchId = batch.id;
-        const startDate = batch.start_date;
-        const { elapsed, remaining, progress, done } = getDayInfo(startDate);
-        return (
-          <Card key={batchId} className={`bg-card border-border shadow-sm ${done ? 'border-success/50' : ''}`}>
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-serif text-base text-foreground flex items-center gap-2">
-                    {done ? '🐣' : '🥚'} {batch.notes || `Kläckning ${startDate}`}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{batch.egg_count} ägg · Startade {startDate}</p>
-                </div>
-                <Button variant="ghost" size="sm" className="text-muted-foreground h-8 w-8 p-0" onClick={() => deleteMutation.mutate(batchId)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <div className="mb-3">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">Dag {Math.min(elapsed, 21)} av 21</span>
-                  <span className={`font-medium ${done ? 'text-success' : 'text-primary'}`}>
-                    {done ? 'Kläckt! 🎉' : `${remaining} dagar kvar`}
-                  </span>
-                </div>
-                <Progress value={progress} className="h-2.5" />
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-                {milestones.map((m) => {
-                  const reached = elapsed >= m.day;
-                  const isCurrent = elapsed >= m.day - 1 && elapsed < m.day;
-                  return (
-                    <div key={m.day} className={`text-center p-1.5 rounded-lg text-[10px] transition-colors ${reached ? 'bg-success/10 text-success' : isCurrent ? 'bg-primary/10 text-primary ring-1 ring-primary/30' : 'bg-muted/50 text-muted-foreground'}`}>
-                      <span className="text-sm">{reached ? '✅' : m.emoji}</span>
-                      <p className="mt-0.5 leading-tight">Dag {m.day}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
     </div>
     </PremiumGate>
   );
