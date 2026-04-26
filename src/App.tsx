@@ -44,6 +44,7 @@ const Agda = React.lazy(() => import("./pages/Agda"));
 const Overview = React.lazy(() => import("./pages/Overview"));
 const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
+const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
 
 // Konsolidering: /guider/* → /blogg/* (canonical bor på /blogg)
 const GuiderRedirect = () => {
@@ -105,6 +106,12 @@ const AppRoutes = () => (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/app-for-honsagare" element={<SeoLandingPage pageKey="app-for-honsagare" />} />
+        <Route path="/agglogg" element={<SeoLandingPage pageKey="agglogg" />} />
+        <Route path="/honskalender" element={<SeoLandingPage pageKey="honskalender" />} />
+        <Route path="/foderkostnad-hons" element={<SeoLandingPage pageKey="foderkostnad-hons" />} />
+        <Route path="/klackningskalender" element={<SeoLandingPage pageKey="klackningskalender" />} />
+        <Route path="/borja-med-hons" element={<SeoLandingPage pageKey="borja-med-hons" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/reset-password" element={<ResetPassword />} />
