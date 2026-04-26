@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PremiumGate } from '@/components/PremiumGate';
 import EmptyState from '@/components/EmptyState';
 import AIDeviationAlerts from '@/components/AIDeviationAlerts';
+import SmartStatisticsOverview from '@/components/SmartStatisticsOverview';
 
 export default function Statistics() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
@@ -84,6 +85,8 @@ export default function Statistics() {
           />
         ) : (
           <>
+            <SmartStatisticsOverview />
+
             <Card className="bg-gradient-to-br from-primary/10 via-card to-accent/5 border-primary/20 shadow-sm overflow-hidden">
               <CardContent className="p-4 sm:p-5">
                 <div className="flex items-start gap-3">
@@ -91,7 +94,7 @@ export default function Statistics() {
                     <Egg className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="data-label mb-1">Din hönsgård just nu</p>
+                    <p className="data-label mb-1">Historik totalt</p>
                     <h2 className="font-serif text-lg sm:text-xl text-foreground">{totalEggs} ägg loggade totalt</h2>
                     <p className="text-sm text-muted-foreground leading-relaxed mt-1">
                       Snittet är {summary?.avg_per_day != null ? Number(summary.avg_per_day).toFixed(1) : '–'} ägg per dag. Bästa dagen hittills är {summary?.best_day ?? 'inte beräknad ännu'}. Fortsätt logga så blir insikterna ännu smartare.
@@ -150,7 +153,7 @@ export default function Statistics() {
                 <CardContent className="px-4 sm:px-6 pb-4">
                   <div className="space-y-4">
                     {flocks.map((flock: any) => (
-                      <div key={flock.id} className="space-y-1.5">
+                      <div key={flock.id} className="space-y-1.5 rounded-2xl border border-border/40 bg-muted/15 p-3 sm:border-0 sm:bg-transparent sm:p-0">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="text-sm font-medium text-foreground truncate">{flock.name}</span>
@@ -204,7 +207,7 @@ export default function Statistics() {
                       rankedHens.slice(0, 6).map((hen: any, i: number) => {
                         const eggs = hen.total_eggs || 0;
                         return (
-                          <div key={hen.id} className="flex items-center gap-2 sm:gap-3">
+                          <button key={hen.id} onClick={() => window.location.assign(`/app/hens/${hen.id}`)} className="w-full flex items-center gap-2 sm:gap-3 rounded-xl hover:bg-muted/40 p-1.5 transition-colors text-left">
                             <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground shrink-0">
                               {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
                             </span>
@@ -217,7 +220,7 @@ export default function Statistics() {
                                 <div className="bg-primary rounded-full h-1.5 transition-all duration-500" style={{ width: `${Math.min(100, (eggs / maxEggs) * 100)}%` }} />
                               </div>
                             </div>
-                          </div>
+                          </button>
                         );
                       })
                     ) : (
@@ -247,7 +250,7 @@ export default function Statistics() {
                           return acc;
                         }, {})
                       ).map(([breed, count]) => (
-                        <div key={breed} className="flex items-center justify-between gap-3 text-sm">
+                        <div key={breed} className="flex items-center justify-between gap-3 text-sm rounded-xl bg-muted/20 px-3 py-2">
                           <span className="text-foreground truncate">{breed}</span>
                           <span className="stat-number text-muted-foreground shrink-0">{count as number} st</span>
                         </div>
@@ -269,7 +272,7 @@ export default function Statistics() {
             {insights && insights.tips && (
               <Card className="bg-card border-border shadow-sm">
                 <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="font-serif text-base sm:text-lg">📈 Insikter</CardTitle>
+                  <CardTitle className="font-serif text-base sm:text-lg">📈 Fler insikter</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6 pb-4">
                   <ul className="space-y-2">
