@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EggSuccessAnimation } from './EggSuccessAnimation';
 import DashboardFocusPortal from './DashboardFocusPortal';
+import SettingsTrustPortal from './SettingsTrustPortal';
 
 const LAST_HEN_KEY = 'honsgarden-last-hen';
 
@@ -98,6 +99,7 @@ export function QuickEggFAB() {
   return (
     <>
       <DashboardFocusPortal />
+      <SettingsTrustPortal />
 
       {open && <div className="fixed inset-0 z-[60] bg-foreground/20 backdrop-blur-sm animate-fade-in" onClick={() => setOpen(false)} />}
 
