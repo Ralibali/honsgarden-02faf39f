@@ -360,6 +360,24 @@ function buildArticlePage(template, post) {
   return html;
 }
 
+/**
+ * Statisk redirect-sida för konsoliderade URL:er (t.ex. /guider/* → /blogg/*).
+ * Sätter canonical till destinationen, noindex, meta refresh + JS-fallback.
+ * Sökmotorer behandlar detta som en stark konsolideringssignal när 301 saknas.
+ */
+function buildRedirectPage(template, targetPath) {
+  const targetUrl = `${BASE_URL}${targetPath}`;
+  const head = `\n<title>Omdirigerar till ${escapeHtml(targetUrl)}</title>
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="${escapeHtml(targetUrl)}">
+<meta http-equiv="refresh" content="0; url=${escapeHtml(targetUrl)}">
+<meta property="og:url" content="${escapeHtml(targetUrl)}">
+<script>window.location.replace(${JSON.stringify(targetPath)});</script>`;
+  const bodyHtml = `<div id="root"><p>Den här sidan har flyttats. Omdirigerar till <a href="${escapeHtml(targetUrl)}">${escapeHtml(targetUrl)}</a>…</p></div>`;
+  return injectHead(template, head)
+    .replace('<div id="root"></div>', bodyHtml);
+}
+
 // ============================================================
 // Sitemap (statisk fallback genererad vid build)
 // ============================================================
@@ -432,17 +450,21 @@ async function main() {
     await writeRoute(`blogg/tagg/${encodeURIComponent(tag)}`, buildTagPage(template, tag));
   }
 
-  // 5. Artiklar (både /blogg/ och /guider/)
+  // 5. Artiklar – /blogg/ är canonical. /guider/ behålls bakåtkompatibelt
+  //    men levereras som noindex-redirect till motsvarande /blogg/-URL.
   await Promise.all(posts.flatMap((post) => [
     writeRoute(`blogg/${post.slug}`, buildArticlePage(template, post)),
-    writeRoute(`guider/${post.slug}`, buildArticlePage(template, post)),
+    writeRoute(`guider/${post.slug}`, buildRedirectPage(template, `/blogg/${post.slug}`)),
   ]));
 
-  // 6. Skriv om public sitemap.xml till färska data
+  // 5b. /guider index → /blogg
+  await writeRoute('guider', buildRedirectPage(template, '/blogg'));
+
+  // 6. Skriv om public sitemap.xml till färska data (endast /blogg-URL:er)
   const sitemap = buildSitemap(posts, tags);
   await writeFile(join('dist', 'sitemap.xml'), sitemap, 'utf8');
 
-  console.log(`✅ Prerendered ${STATIC_PAGES.length} statiska + ${Object.keys(CATEGORY_META).length} kategori- + ${tags.length} tagg- + ${posts.length} artikel-sidor (×2). Sitemap uppdaterad.`);
+  console.log(`✅ Prerendered ${STATIC_PAGES.length} statiska + ${Object.keys(CATEGORY_META).length} kategori- + ${tags.length} tagg- + ${posts.length} artikel-sidor (+ /guider redirects). Sitemap uppdaterad.`);
 }
 
 main().catch((error) => {
