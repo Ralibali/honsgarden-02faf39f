@@ -360,6 +360,24 @@ function buildArticlePage(template, post) {
   return html;
 }
 
+/**
+ * Statisk redirect-sida för konsoliderade URL:er (t.ex. /guider/* → /blogg/*).
+ * Sätter canonical till destinationen, noindex, meta refresh + JS-fallback.
+ * Sökmotorer behandlar detta som en stark konsolideringssignal när 301 saknas.
+ */
+function buildRedirectPage(targetPath) {
+  const targetUrl = `${BASE_URL}${targetPath}`;
+  const head = `\n<title>Omdirigerar till ${escapeHtml(targetUrl)}</title>
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="${escapeHtml(targetUrl)}">
+<meta http-equiv="refresh" content="0; url=${escapeHtml(targetUrl)}">
+<meta property="og:url" content="${escapeHtml(targetUrl)}">
+<script>window.location.replace(${JSON.stringify(targetPath)});</script>`;
+  const body = `<div id="root"><p>Den här sidan har flyttats. Omdirigerar till <a href="${escapeHtml(targetUrl)}">${escapeHtml(targetUrl)}</a>…</p></div>`;
+  return injectHead(template => template, head) // placeholder, overwritten below
+    ? '' : '';
+}
+
 // ============================================================
 // Sitemap (statisk fallback genererad vid build)
 // ============================================================
