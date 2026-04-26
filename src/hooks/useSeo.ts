@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 
 const BASE = 'https://honsgarden.se';
+const DEFAULT_ROBOTS = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const NOINDEX_ROBOTS = 'noindex, nofollow';
 
 interface SeoOptions {
   title: string;
@@ -21,116 +23,122 @@ interface SeoOptions {
 }
 
 /**
- * Sets document title, meta description, canonical URL, OG tags, Twitter cards,
- * hreflang, article meta and optional JSON-LD. Cleans up on unmount.
+ * Stabil SEO-hook. Uppdaterar metadata på plats i stället för att
+ * skapa/förstöra noder per route-byte. Säkerställer:
+ *   - exakt en canonical
+ *   - exakt en robots
+ *   - hreflang dupliceras inte
+ *   - JSON-LD ersätts atomärt per sida
+ * Ingen cleanup på unmount – nästa sida tar över taggarna.
  */
-export function useSeo({ title, description, path, ogType = 'website', ogImage, ogImageAlt, noindex, jsonLd, articleMeta }: SeoOptions) {
+export function useSeo({
+  title,
+  description,
+  path,
+  ogType = 'website',
+  ogImage,
+  ogImageAlt,
+  noindex,
+  jsonLd,
+  articleMeta,
+}: SeoOptions) {
   useEffect(() => {
-    const createdElements: HTMLElement[] = [];
+    const fullUrl = `${BASE}${path}`;
 
-    const setMeta = (attr: string, key: string, content: string) => {
-      let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement;
+    const upsertMeta = (attr: 'name' | 'property', key: string, content: string) => {
+      let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
       if (!el) {
         el = document.createElement('meta');
         el.setAttribute(attr, key);
         document.head.appendChild(el);
-        createdElements.push(el);
       }
       el.setAttribute('content', content);
     };
 
-    const addLink = (rel: string, href: string, attrs?: Record<string, string>) => {
-      const el = document.createElement('link');
-      el.rel = rel;
-      el.href = href;
-      if (attrs) Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-      document.head.appendChild(el);
-      createdElements.push(el);
+    const upsertLink = (rel: string, href: string, hreflang?: string) => {
+      const selector = hreflang
+        ? `link[rel="${rel}"][hreflang="${hreflang}"]`
+        : `link[rel="${rel}"]:not([hreflang])`;
+      let el = document.head.querySelector<HTMLLinkElement>(selector);
+      if (!el) {
+        el = document.createElement('link');
+        el.setAttribute('rel', rel);
+        if (hreflang) el.setAttribute('hreflang', hreflang);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('href', href);
     };
 
     // Title
     document.title = title;
 
-    // Meta description
-    setMeta('name', 'description', description);
+    // Core meta
+    upsertMeta('name', 'description', description);
+    upsertMeta('name', 'robots', noindex ? NOINDEX_ROBOTS : DEFAULT_ROBOTS);
 
-    // Robots
-    setMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+    // Canonical (en enda)
+    upsertLink('canonical', fullUrl);
 
-    // Canonical
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (canonical) canonical.remove();
-    addLink('canonical', `${BASE}${path}`);
+    // Hreflang (max ett per språk – uppdateras in-place)
+    upsertLink('alternate', fullUrl, 'sv');
+    upsertLink('alternate', fullUrl, 'x-default');
 
-    // Hreflang
-    addLink('alternate', `${BASE}${path}`, { hreflang: 'sv' });
-    addLink('alternate', `${BASE}${path}`, { hreflang: 'x-default' });
-
-    // OG tags
-    const fullUrl = `${BASE}${path}`;
-    setMeta('property', 'og:title', title);
-    setMeta('property', 'og:description', description);
-    setMeta('property', 'og:url', fullUrl);
-    setMeta('property', 'og:type', ogType);
-    setMeta('property', 'og:site_name', 'Hönsgården');
-    setMeta('property', 'og:locale', 'sv_SE');
+    // Open Graph
+    upsertMeta('property', 'og:title', title);
+    upsertMeta('property', 'og:description', description);
+    upsertMeta('property', 'og:url', fullUrl);
+    upsertMeta('property', 'og:type', ogType);
+    upsertMeta('property', 'og:site_name', 'Hönsgården');
+    upsertMeta('property', 'og:locale', 'sv_SE');
     if (ogImage) {
       const imgUrl = ogImage.startsWith('http') ? ogImage : `${BASE}${ogImage}`;
-      setMeta('property', 'og:image', imgUrl);
-      setMeta('property', 'og:image:alt', ogImageAlt || title);
+      upsertMeta('property', 'og:image', imgUrl);
+      upsertMeta('property', 'og:image:alt', ogImageAlt || title);
+      upsertMeta('name', 'twitter:image', imgUrl);
+      upsertMeta('name', 'twitter:image:alt', ogImageAlt || title);
     }
 
-    // Twitter Card
-    setMeta('name', 'twitter:card', 'summary_large_image');
-    setMeta('name', 'twitter:title', title);
-    setMeta('name', 'twitter:description', description);
-    if (ogImage) {
-      const imgUrl = ogImage.startsWith('http') ? ogImage : `${BASE}${ogImage}`;
-      setMeta('name', 'twitter:image', imgUrl);
-      setMeta('name', 'twitter:image:alt', ogImageAlt || title);
-    }
+    // Twitter
+    upsertMeta('name', 'twitter:card', 'summary_large_image');
+    upsertMeta('name', 'twitter:title', title);
+    upsertMeta('name', 'twitter:description', description);
 
-    // Article-specific meta
+    // Article-specifik meta – rensa gamla article:tag innan vi skriver nya
+    document.head.querySelectorAll('meta[property="article:tag"]').forEach((el) => el.remove());
     if (articleMeta) {
-      if (articleMeta.publishedTime) setMeta('property', 'article:published_time', articleMeta.publishedTime);
-      if (articleMeta.modifiedTime) setMeta('property', 'article:modified_time', articleMeta.modifiedTime);
-      if (articleMeta.author) setMeta('property', 'article:author', articleMeta.author);
-      if (articleMeta.section) setMeta('property', 'article:section', articleMeta.section);
+      if (articleMeta.publishedTime) upsertMeta('property', 'article:published_time', articleMeta.publishedTime);
+      if (articleMeta.modifiedTime) upsertMeta('property', 'article:modified_time', articleMeta.modifiedTime);
+      if (articleMeta.author) upsertMeta('property', 'article:author', articleMeta.author);
+      if (articleMeta.section) upsertMeta('property', 'article:section', articleMeta.section);
       if (articleMeta.tags) {
-        articleMeta.tags.forEach(tag => {
+        articleMeta.tags.forEach((tag) => {
           const el = document.createElement('meta');
           el.setAttribute('property', 'article:tag');
           el.setAttribute('content', tag);
           document.head.appendChild(el);
-          createdElements.push(el);
         });
       }
     }
 
     // AI citation meta
-    setMeta('name', 'citation_title', title);
-    setMeta('name', 'citation_author', 'Hönsgården');
-    setMeta('name', 'citation_language', 'sv');
+    upsertMeta('name', 'citation_title', title);
+    upsertMeta('name', 'citation_author', 'Hönsgården');
+    upsertMeta('name', 'citation_language', 'sv');
 
-    // JSON-LD
+    // JSON-LD per sida – ersätts atomärt
+    const existingScript = document.getElementById('json-ld-page') as HTMLScriptElement | null;
     if (jsonLd) {
-      let script = document.getElementById('json-ld-page') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'json-ld-page';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-        createdElements.push(script);
-      }
       const data = Array.isArray(jsonLd)
         ? { '@context': 'https://schema.org', '@graph': jsonLd }
         : { '@context': 'https://schema.org', ...jsonLd };
+      const script = existingScript ?? document.createElement('script');
+      script.id = 'json-ld-page';
+      script.type = 'application/ld+json';
       script.textContent = JSON.stringify(data);
+      if (!existingScript) document.head.appendChild(script);
+    } else if (existingScript) {
+      existingScript.remove();
     }
-
-    return () => {
-      document.title = 'Hönsgården – Din digitala äggloggare';
-      createdElements.forEach(el => el.remove());
-    };
+    // Ingen cleanup – nästa sida uppdaterar taggarna in-place.
   }, [title, description, path, ogType, ogImage, ogImageAlt, noindex, jsonLd, articleMeta]);
 }
