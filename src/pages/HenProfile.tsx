@@ -13,13 +13,14 @@ import {
 } from '@/components/ui/dialog';
 import {
   ArrowLeft, Egg, Heart, Calendar, TrendingUp, Share2, Edit2, Loader2, Save, X,
-  Link2, Facebook, Instagram, Mail, MessageSquare, Plus, BarChart3,
+  Link2, Facebook, Instagram, Mail, MessageSquare, Plus, BarChart3, Feather,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import HenAvatar from '@/components/HenAvatar';
+import EmptyState from '@/components/EmptyState';
 
 function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
   const [count, setCount] = useState('1');
@@ -37,10 +38,10 @@ function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
       });
       queryClient.invalidateQueries({ queryKey: ['eggs'] });
       queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
-      toast({ title: `🥚 ${count} ägg loggat för ${henName}!` });
+      toast({ title: `Snyggt, ${count} ägg är loggat för ${henName}! 🥚` });
       setCount('1');
     } catch (err: any) {
-      toast({ title: 'Fel', description: err.message, variant: 'destructive' });
+      toast({ title: 'Något gick fel', description: 'Vi kunde inte spara ägget just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -59,6 +60,7 @@ function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
               size="sm"
               className="h-9 w-9 p-0 rounded-xl"
               onClick={() => setCount(String(Math.max(1, Number(count) - 1)))}
+              aria-label="Minska antal ägg"
             >−</Button>
             <Input
               type="number"
@@ -66,12 +68,14 @@ function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
               onChange={(e) => setCount(e.target.value)}
               className="w-16 h-9 text-center rounded-xl font-semibold"
               min={1}
+              aria-label="Antal ägg"
             />
             <Button
               variant="outline"
               size="sm"
               className="h-9 w-9 p-0 rounded-xl"
               onClick={() => setCount(String(Number(count) + 1))}
+              aria-label="Öka antal ägg"
             >+</Button>
           </div>
           <Button
@@ -127,10 +131,10 @@ export default function HenProfile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
       queryClient.invalidateQueries({ queryKey: ['hens'] });
-      toast({ title: '✅ Uppdaterad!' });
+      toast({ title: 'Ändringarna är sparade! 🐔' });
       setEditing(false);
     },
-    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+    onError: (err: any) => toast({ title: 'Något gick fel', description: 'Vi kunde inte spara ändringarna just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' }),
   });
 
   const startEditing = () => {
@@ -160,18 +164,24 @@ export default function HenProfile() {
   if (henLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Laddar hönsprofilen...</p>
+        </div>
       </div>
     );
   }
 
   if (!hen) {
     return (
-      <div className="text-center py-20">
-        <p className="text-muted-foreground">Hönan hittades inte.</p>
-        <Button variant="outline" className="mt-4 rounded-xl" onClick={() => navigate('/app/hens')}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Tillbaka
-        </Button>
+      <div className="max-w-xl mx-auto py-10">
+        <EmptyState
+          icon={Feather}
+          title="Hönan hittades inte"
+          description="Den här profilen finns inte längre eller så saknar du åtkomst till den. Gå tillbaka till flocken och välj en annan höna."
+          actionLabel="Tillbaka till hönor"
+          onAction={() => navigate('/app/hens')}
+        />
       </div>
     );
   }
@@ -191,6 +201,7 @@ export default function HenProfile() {
   const dailyCounts: Record<string, number> = {};
   henEggs.forEach((e: any) => { dailyCounts[e.date] = (dailyCounts[e.date] || 0) + e.count; });
   const bestDay = Object.entries(dailyCounts).sort(([, a], [, b]) => b - a)[0];
+  const latestEgg = henEggs.slice().sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
 
   let ageText = '';
   if (hen.birth_date) {
@@ -207,13 +218,14 @@ export default function HenProfile() {
 
   const avgPerWeek = monthEggs > 0 ? Math.round((monthEggs / 30) * 7 * 10) / 10 : 0;
   const healthLogs = (hen.health_logs || []).slice(0, 5);
+  const latestNote = hen.notes || healthLogs[0]?.description || null;
 
   const shareUrl = `${window.location.origin}/app/hens/${henId}`;
   const shareText = `${isRooster ? '🐓' : '🐔'} ${hen.name}${hen.breed ? ` (${hen.breed})` : ''}\n${!isRooster ? `🥚 ${totalEggs} ägg totalt\n` : ''}Logga dina höns på honsgarden.se`;
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
-    toast({ title: '📋 Länk kopierad!' });
+    toast({ title: 'Länken är kopierad! 📋' });
     setShareOpen(false);
   };
 
@@ -224,7 +236,7 @@ export default function HenProfile() {
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`, '_blank');
     } else if (platform === 'instagram') {
       navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-      toast({ title: '📋 Text kopierad!', description: 'Klistra in i Instagram.' });
+      toast({ title: 'Texten är kopierad!', description: 'Klistra in den i Instagram när du vill dela.' });
     } else if (platform === 'email') {
       window.open(`mailto:?subject=${encodeURIComponent(`${hen.name} – Hönsgården`)}&body=${textEncoded}%0A${encoded}`, '_blank');
     } else if (platform === 'sms') {
@@ -235,15 +247,13 @@ export default function HenProfile() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5 animate-fade-in pb-8">
-      {/* Header */}
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/app/hens')}>
+        <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => navigate('/app/hens')} aria-label="Tillbaka till hönor">
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <span className="text-sm text-muted-foreground">Tillbaka till hönor</span>
       </div>
 
-      {/* Hero card / Edit form */}
       <Card className="border-border/50 shadow-sm overflow-hidden">
         <div className="h-2 bg-gradient-to-r from-primary/40 via-accent/30 to-primary/20" />
         <CardContent className="p-6">
@@ -279,12 +289,12 @@ export default function HenProfile() {
                 </Select>
               </div>
               <div>
-                <Label>Födelsedatum</Label>
+                <Label>Födelsedatum eller kläckdatum</Label>
                 <Input className="mt-1.5 rounded-xl" type="date" value={editForm.birth_date} onChange={(e) => setEditForm({ ...editForm, birth_date: e.target.value })} />
               </div>
               <div>
-                <Label>Anteckningar</Label>
-                <Textarea className="mt-1.5 rounded-xl resize-none" rows={3} value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
+                <Label>Personlighet och anteckningar</Label>
+                <Textarea className="mt-1.5 rounded-xl resize-none" rows={3} value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} placeholder="T.ex. nyfiken, lugn, gillar att ruva eller extra social." />
               </div>
               <div className="flex gap-2">
                 <Button className="flex-1 rounded-xl h-10 gap-2" onClick={handleSave} disabled={updateMutation.isPending}>
@@ -308,6 +318,7 @@ export default function HenProfile() {
                   showProfileActions
                 />
               </div>
+              <p className="text-xs text-muted-foreground mb-1">{isRooster ? 'Tupprofil' : 'Hönsprofil'}</p>
               <h1 className="text-2xl font-serif text-foreground mb-1">{hen.name}</h1>
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 {hen.flock_id && (() => {
@@ -326,15 +337,35 @@ export default function HenProfile() {
                   <Calendar className="h-3.5 w-3.5" /> {ageText} gammal
                 </p>
               )}
-              {hen.notes && (
-                <p className="text-sm text-muted-foreground mt-3 italic bg-muted/30 rounded-xl p-3">{hen.notes}</p>
+              {!hen.image_url && (
+                <p className="text-xs text-muted-foreground mt-3">Tips: lägg gärna till en bild så profilen känns mer personlig.</p>
               )}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Stats grid (only for hens) */}
+      {!editing && (
+        <Card className="border-border/50 shadow-sm bg-card/70">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Heart className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-serif text-base text-foreground">Om {hen.name}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+                  {latestNote || `Här kan du samla personlighet, hälsa, ägghistorik och viktiga händelser för ${hen.name}. Lägg gärna till en anteckning för att göra profilen mer levande.`}
+                </p>
+                {latestEgg && !isRooster && (
+                  <p className="text-xs text-muted-foreground mt-2">Senaste äggnotering: {latestEgg.count} ägg den {new Date(latestEgg.date).toLocaleDateString('sv-SE')}.</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {!isRooster && !editing && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
@@ -356,16 +387,24 @@ export default function HenProfile() {
         </div>
       )}
 
-      {/* Quick egg log */}
       {!isRooster && !editing && <QuickEggLog henId={henId!} henName={hen.name} />}
 
-      {/* Production trend (last 14 days) */}
+      {!isRooster && !editing && henEggs.length === 0 && (
+        <EmptyState
+          icon={Egg}
+          title={`Ingen ägghistorik för ${hen.name} ännu`}
+          description="När du loggar ägg direkt på den här hönan kan Hönsgården visa personlig statistik, bästa värpdag och utveckling över tid."
+          actionLabel="Logga ägg för hönan"
+          onAction={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        />
+      )}
+
       {!isRooster && !editing && henEggs.length > 0 && (
         <Card className="border-border/50 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="h-4 w-4 text-primary/60" />
-              <span className="font-serif text-sm text-foreground">Senaste 14 dagarna</span>
+              <span className="font-serif text-sm text-foreground">Ägghistorik – senaste 14 dagarna</span>
             </div>
             <div className="flex items-end gap-1 h-16">
               {Array.from({ length: 14 }).map((_, i) => {
@@ -400,13 +439,12 @@ export default function HenProfile() {
         </Card>
       )}
 
-      {/* Best day */}
       {bestDay && !editing && (
         <Card className="border-warning/15 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
             <span className="text-2xl">🏆</span>
             <div>
-              <p className="text-sm font-medium text-foreground">Bästa dagen</p>
+              <p className="text-sm font-medium text-foreground">Bästa värpdag</p>
               <p className="text-xs text-muted-foreground">
                 {new Date(bestDay[0]).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })} – {bestDay[1]} ägg
               </p>
@@ -415,13 +453,12 @@ export default function HenProfile() {
         </Card>
       )}
 
-      {/* Health logs */}
-      {healthLogs.length > 0 && !editing && (
+      {healthLogs.length > 0 && !editing ? (
         <Card className="border-border/50 shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center gap-2.5 mb-3">
               <Heart className="h-4 w-4 text-destructive/60" />
-              <h3 className="font-serif text-sm text-foreground">Hälsologg</h3>
+              <h3 className="font-serif text-sm text-foreground">Hälsa och anteckningar</h3>
             </div>
             <div className="space-y-2">
               {healthLogs.map((log: any, i: number) => (
@@ -438,9 +475,16 @@ export default function HenProfile() {
             </div>
           </CardContent>
         </Card>
+      ) : !editing && (
+        <EmptyState
+          icon={Heart}
+          title="Inga hälsonoteringar ännu"
+          description={`När något händer med ${hen.name} kan du samla anteckningar här – till exempel ruggningsperiod, sjukdom, veterinärbesök eller personliga observationer.`}
+          actionLabel="Lägg till anteckning"
+          onAction={startEditing}
+        />
       )}
 
-      {/* Action buttons */}
       {!editing && (
         <div className="flex gap-2">
           <Button className="flex-1 rounded-xl h-11 gap-2" onClick={() => setShareOpen(true)}>
@@ -454,7 +498,6 @@ export default function HenProfile() {
         </div>
       )}
 
-      {/* Share dialog */}
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
         <DialogContent className="sm:max-w-sm rounded-2xl">
           <DialogHeader>
@@ -480,7 +523,6 @@ export default function HenProfile() {
         </DialogContent>
       </Dialog>
 
-      {/* CTA – only for visitors who are not logged in */}
       {!editing && !isLoggedIn && (
         <Card className="bg-primary/5 border-primary/15">
           <CardContent className="p-4 text-center">
