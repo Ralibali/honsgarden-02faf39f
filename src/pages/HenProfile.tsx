@@ -9,11 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import {
   ArrowLeft, Egg, Heart, Calendar, TrendingUp, Share2, Edit2, Loader2, Save, X,
-  Link2, Facebook, Instagram, Mail, MessageSquare, Plus, BarChart3, Feather,
+  Link2, Facebook, Instagram, Mail, MessageSquare, Plus, BarChart3, Feather, Stethoscope,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -21,6 +21,7 @@ import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import HenAvatar from '@/components/HenAvatar';
 import EmptyState from '@/components/EmptyState';
+import AIHealthNoteHelper from '@/components/AIHealthNoteHelper';
 
 function QuickEggLog({ henId, henName }: { henId: string; henName: string }) {
   const [count, setCount] = useState('1');
@@ -101,6 +102,9 @@ export default function HenProfile() {
   const [editForm, setEditForm] = useState({ name: '', breed: '', color: '', birth_date: '', notes: '', flock_id: 'none' });
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
+  const [healthNoteOpen, setHealthNoteOpen] = useState(false);
+  const [healthNoteText, setHealthNoteText] = useState('');
+  const [healthNoteType, setHealthNoteType] = useState<string>('observation');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
