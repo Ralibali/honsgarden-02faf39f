@@ -13,6 +13,12 @@ export default {
       },
     },
     extend: {
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-top-4': 'calc(env(safe-area-inset-top) + 1rem)',
+        'safe-bottom-4': 'calc(env(safe-area-inset-bottom) + 1rem)',
+      },
       fontFamily: {
         serif: ['"Young Serif"', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],

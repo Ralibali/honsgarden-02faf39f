@@ -46,7 +46,7 @@ export function MobileNav() {
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setShowMore(false)}>
           <div className="absolute inset-0 bg-foreground/15 backdrop-blur-sm" />
           <div
-            className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-2 shadow-xl animate-fade-in-scale max-h-[60vh] overflow-y-auto"
+            className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-safe-bottom-4 shadow-xl animate-fade-in-scale max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="grid grid-cols-3 gap-1">
@@ -67,7 +67,7 @@ export function MobileNav() {
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/90 backdrop-blur-xl border-t border-border/50 pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/90 backdrop-blur-xl border-t border-border/50 pb-safe-bottom">
         <div className="flex items-center justify-around h-16 px-1">
           {primaryItems.map((item) => (
             item.url === '#more' ? (
