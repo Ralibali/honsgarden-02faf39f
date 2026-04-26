@@ -41,7 +41,6 @@ export function NotificationBell() {
 
     fetchNotifications();
 
-    // Listen for new notifications in realtime
     const channel = supabase
       .channel('notifications-bell')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload) => {
@@ -78,7 +77,10 @@ export function NotificationBell() {
   return (
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>
-        <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+        <button
+          className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          aria-label={unreadCount > 0 ? `Visa notiser, ${unreadCount} olästa` : 'Visa notiser'}
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground animate-pulse">
@@ -87,11 +89,12 @@ export function NotificationBell() {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="px-4 py-3 border-b border-border/60">
-          <p className="font-serif text-sm font-semibold text-foreground">Notiser</p>
+      <PopoverContent className="w-[calc(100vw-1rem)] sm:w-[30rem] lg:w-[34rem] p-0 rounded-2xl overflow-hidden" align="end" sideOffset={10}>
+        <div className="px-4 py-3 border-b border-border/60 bg-card sticky top-0 z-10">
+          <p className="font-serif text-base font-semibold text-foreground">Notiser</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Viktiga uppdateringar och meddelanden från Hönsgården</p>
         </div>
-        <ScrollArea className="max-h-80">
+        <ScrollArea className="max-h-[70vh] sm:max-h-[28rem]">
           {notifications.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">
               Inga notiser ännu
@@ -99,16 +102,18 @@ export function NotificationBell() {
           ) : (
             <div className="divide-y divide-border/40">
               {notifications.map(n => (
-                <div
+                <article
                   key={n.id}
-                  className={`px-4 py-3 transition-colors ${!readIds.has(n.id) ? 'bg-primary/5' : ''}`}
+                  className={`px-4 py-4 transition-colors ${!readIds.has(n.id) ? 'bg-primary/5' : ''}`}
                 >
-                  <p className="text-sm font-medium text-foreground">{n.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-line">{n.message}</p>
-                  <p className="text-[10px] text-muted-foreground/60 mt-1">
+                  <p className="text-sm sm:text-base font-medium text-foreground leading-snug break-words">{n.title}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 whitespace-pre-wrap break-words leading-relaxed">
+                    {n.message}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground/60 mt-2">
                     {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: sv })}
                   </p>
-                </div>
+                </article>
               ))}
             </div>
           )}
