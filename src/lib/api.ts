@@ -595,6 +595,30 @@ export async function getDashboardCoach(context: Record<string, unknown>): Promi
   return data as CoachResponse;
 }
 
+// ==================== DEVIATION ALERTS ====================
+
+export type DeviationAlertLevel = 'info' | 'tips' | 'viktigt';
+
+export type DeviationAlert = {
+  key: string;
+  title: string;
+  text: string;
+  level: DeviationAlertLevel;
+  cta?: { label: string; path: string };
+};
+
+export type DeviationAlertResponse = {
+  intro?: string | null;
+  alerts: DeviationAlert[];
+};
+
+export async function getDashboardAlerts(context: Record<string, unknown>): Promise<DeviationAlertResponse> {
+  const { data, error } = await supabase.functions.invoke('dashboard-alerts', { body: context });
+  if (error) throw new Error(error.message);
+  if (!data || !Array.isArray((data as any).alerts)) throw new Error('Invalid alerts response');
+  return data as DeviationAlertResponse;
+}
+
 // ==================== PREMIUM ====================
 
 export async function getPremiumStatus() {
