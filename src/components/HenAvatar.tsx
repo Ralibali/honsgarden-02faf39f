@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -28,15 +28,6 @@ const ICON_SIZES = {
   lg: 'h-4 w-4',
 };
 
-/**
- * Compress and resize an image to a square avatar before upload.
- * Optimerad för iOS/mobil:
- *  - createImageBitmap (hårdvaruaccelererad decode på iOS 16+)
- *  - DPR-medveten målstorlek (max 384px) – retinaskarp utan onödig data
- *  - Stegvis nedskalning för bättre kvalitet från stora kameror (12MP+)
- *  - WebP med JPEG-fallback (äldre iOS Safari saknar webp encode)
- *  - Frigör bitmap-minne direkt (viktigt på iPhones med begränsat RAM)
- */
 const supportsWebpEncode = (() => {
   try {
     const c = document.createElement('canvas');
@@ -47,25 +38,71 @@ const supportsWebpEncode = (() => {
   }
 })();
 
+interface CompressedImage {
+  blob: Blob;
+  extension: 'webp' | 'jpg';
+  contentType: 'image/webp' | 'image/jpeg';
+}
+
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [header, data] = dataUrl.split(',');
+  const mime = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
 function loadHTMLImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Could not load image'));
-      img.src = e.target?.result as string;
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
     };
-    reader.onerror = () => reject(new Error('Could not read file'));
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Kunde inte läsa bilden. Prova att välja en JPG/PNG-bild eller ta en ny bild med kameran.'));
+    };
+    img.src = objectUrl;
   });
 }
 
-async function compressImage(file: File): Promise<Blob> {
-  // 96px @ upp till 4x DPR = 384px max – snabb upload, fortfarande skarp
-  const TARGET = Math.min(384, Math.round(96 * Math.min(window.devicePixelRatio || 1, 4)));
+async function canvasToBlob(canvas: HTMLCanvasElement, mime: 'image/webp' | 'image/jpeg', quality: number): Promise<Blob> {
+  return await new Promise<Blob>((resolve, reject) => {
+    if (canvas.toBlob) {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else {
+          try {
+            resolve(dataUrlToBlob(canvas.toDataURL(mime, quality)));
+          } catch {
+            reject(new Error('Bilden kunde inte komprimeras på den här enheten.'));
+          }
+        }
+      }, mime, quality);
+      return;
+    }
 
-  // Decode via createImageBitmap (snabbast på iOS), fallback till HTMLImageElement
+    try {
+      resolve(dataUrlToBlob(canvas.toDataURL(mime, quality)));
+    } catch {
+      reject(new Error('Bilden kunde inte komprimeras på den här enheten.'));
+    }
+  });
+}
+
+/**
+ * Compress and resize an image to a square avatar before upload.
+ * Mobilfixar:
+ * - tvingar inte WebP när enheten bara lyckas skapa JPEG
+ * - fallbackar från createImageBitmap till vanlig img-decode
+ * - fallbackar från toBlob till dataURL på äldre Safari
+ */
+async function compressImage(file: File): Promise<CompressedImage> {
+  const TARGET = Math.min(512, Math.round(128 * Math.min(window.devicePixelRatio || 1, 4)));
+
   let bitmap: ImageBitmap | HTMLImageElement;
   let width: number;
   let height: number;
@@ -86,12 +123,12 @@ async function compressImage(file: File): Promise<Blob> {
     height = (bitmap as HTMLImageElement).naturalHeight;
   }
 
-  // Center-crop till kvadrat
+  if (!width || !height) throw new Error('Bilden verkar sakna mått. Prova en annan bild.');
+
   const min = Math.min(width, height);
   const sx = (width - min) / 2;
   const sy = (height - min) / 2;
 
-  // Stegvis nedskalning – halvera tills nära target (bevarar mer detalj än ett stort steg)
   let currentSize = min;
   let source: CanvasImageSource = bitmap as CanvasImageSource;
   let srcX = sx;
@@ -113,31 +150,23 @@ async function compressImage(file: File): Promise<Blob> {
     currentSize = next;
   }
 
-  // Slutlig render
   const canvas = document.createElement('canvas');
   canvas.width = TARGET;
   canvas.height = TARGET;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas not supported');
+  if (!ctx) throw new Error('Din webbläsare stödjer inte bildbehandling.');
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(source, srcX, srcY, currentSize, currentSize, 0, 0, TARGET, TARGET);
 
-  // Frigör bitmap-minne direkt
-  if (typeof (bitmap as ImageBitmap).close === 'function') {
-    (bitmap as ImageBitmap).close();
-  }
+  if (typeof (bitmap as ImageBitmap).close === 'function') (bitmap as ImageBitmap).close();
 
-  const mime = supportsWebpEncode ? 'image/webp' : 'image/jpeg';
-  const quality = supportsWebpEncode ? 0.82 : 0.85;
+  const contentType = supportsWebpEncode ? 'image/webp' : 'image/jpeg';
+  const extension = supportsWebpEncode ? 'webp' : 'jpg';
+  const quality = supportsWebpEncode ? 0.82 : 0.86;
+  const blob = await canvasToBlob(canvas, contentType, quality);
 
-  return await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Compression failed'))),
-      mime,
-      quality,
-    );
-  });
+  return { blob, extension, contentType };
 }
 
 export default function HenAvatar({
@@ -152,6 +181,7 @@ export default function HenAvatar({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
   const pendingImageUrlRef = useRef<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
@@ -182,8 +212,8 @@ export default function HenAvatar({
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast({ title: 'Endast bilder', description: 'Välj en bildfil (jpg, png, webp).', variant: 'destructive' });
+    if (!file.type.startsWith('image/') && !/\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name)) {
+      toast({ title: 'Endast bilder', description: 'Välj en bildfil, till exempel JPG, PNG eller WebP.', variant: 'destructive' });
       return;
     }
 
@@ -192,18 +222,24 @@ export default function HenAvatar({
     setProgressLabel('Förbereder bild…');
     const previewUrl = URL.createObjectURL(file);
     setDisplayUrl(previewUrl);
+
     try {
       setProgressLabel('Komprimerar…');
       setProgress(25);
-      const blob = await compressImage(file);
+      const compressed = await compressImage(file);
       setProgress(55);
       setProgressLabel('Laddar upp…');
-      const path = `${user.id}/${henId}.webp`;
+
+      const oldWebpPath = `${user.id}/${henId}.webp`;
+      const oldJpgPath = `${user.id}/${henId}.jpg`;
+      const path = `${user.id}/${henId}.${compressed.extension}`;
+
+      await supabase.storage.from('hen-images').remove([oldWebpPath, oldJpgPath]);
 
       const { error: uploadError } = await supabase.storage
         .from('hen-images')
-        .upload(path, blob, {
-          contentType: 'image/webp',
+        .upload(path, compressed.blob, {
+          contentType: compressed.contentType,
           upsert: true,
           cacheControl: '3600',
         });
@@ -212,14 +248,12 @@ export default function HenAvatar({
       setProgress(80);
       setProgressLabel('Sparar…');
 
-      // Skapa en signerad URL som gäller 1 år (privat bucket)
       const { data: signedData, error: signedErr } = await supabase.storage
         .from('hen-images')
         .createSignedUrl(path, 60 * 60 * 24 * 365);
       if (signedErr) throw signedErr;
-      // Cache-buster så uppdaterad bild visas direkt
-      const publicUrl = `${signedData.signedUrl}&v=${Date.now()}`;
 
+      const publicUrl = `${signedData.signedUrl}&v=${Date.now()}`;
       pendingImageUrlRef.current = publicUrl;
       const updatedHen = await api.updateHen(henId, { image_url: publicUrl } as any);
       const nextImageUrl = updatedHen.image_url || publicUrl;
@@ -227,13 +261,19 @@ export default function HenAvatar({
       setDisplayUrl(nextImageUrl);
       queryClient.setQueryData(['hen-profile', henId], (old: any) => old ? { ...old, ...updatedHen, image_url: nextImageUrl } : updatedHen);
       queryClient.setQueryData(['hens'], (old: any) => Array.isArray(old) ? old.map((hen) => hen.id === henId ? { ...hen, ...updatedHen, image_url: nextImageUrl } : hen) : old);
+      queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
+      queryClient.invalidateQueries({ queryKey: ['hens'] });
       setProgress(100);
       setProgressLabel('Klar!');
       toast({ title: 'Bild uppladdad! 📷' });
     } catch (err: any) {
       pendingImageUrlRef.current = null;
       setDisplayUrl(imageUrl || '');
-      toast({ title: 'Uppladdning misslyckades', description: err.message, variant: 'destructive' });
+      toast({
+        title: 'Uppladdning misslyckades',
+        description: err?.message || 'Bilden kunde inte laddas upp. Prova en JPG/PNG-bild eller ta en ny bild med kameran.',
+        variant: 'destructive',
+      });
     } finally {
       URL.revokeObjectURL(previewUrl);
       setUploading(false);
@@ -250,8 +290,9 @@ export default function HenAvatar({
     if (!user) return;
     setUploading(true);
     try {
-      const path = `${user.id}/${henId}.webp`;
-      await supabase.storage.from('hen-images').remove([path]);
+      const webpPath = `${user.id}/${henId}.webp`;
+      const jpgPath = `${user.id}/${henId}.jpg`;
+      await supabase.storage.from('hen-images').remove([webpPath, jpgPath]);
       await api.updateHen(henId, { image_url: null } as any);
       pendingImageUrlRef.current = null;
       setDisplayUrl('');
@@ -286,102 +327,55 @@ export default function HenAvatar({
             alt="Höna"
             className="w-full h-full object-cover"
             loading="lazy"
-            onLoad={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'block';
-            }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
+            onLoad={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'block'; }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
         ) : (
           <span>{emoji}</span>
         )}
         {uploading && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/70 backdrop-blur-sm"
-            role="progressbar"
-            aria-valuenow={progress}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={progressLabel || 'Laddar upp bild'}
-          >
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/70 backdrop-blur-sm" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={progressLabel || 'Laddar upp bild'}>
             <Loader2 className={`${iconClass} animate-spin text-primary`} />
-            {size === 'lg' && (
-              <span className="text-[10px] font-medium text-foreground/80">{progress}%</span>
-            )}
+            {size === 'lg' && <span className="text-[10px] font-medium text-foreground/80">{progress}%</span>}
           </div>
         )}
       </div>
+
       {uploading && size === 'lg' && (
         <div className="mt-2 w-full">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          {progressLabel && (
-            <p className="mt-1 text-center text-xs text-muted-foreground">{progressLabel}</p>
-          )}
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} /></div>
+          {progressLabel && <p className="mt-1 text-center text-xs text-muted-foreground">{progressLabel}</p>}
         </div>
       )}
 
       {editable && (
         <>
           <input
+            id={inputId}
             ref={inputRef}
             type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
+            accept="image/*,.heic,.heif"
+            className="sr-only"
             onChange={handleFileChange}
           />
           {!showProfileActions && (
-            <button
-              type="button"
-              onClick={openFilePicker}
-              disabled={uploading}
-              className={`absolute -bottom-1 -right-1 ${
-                size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'
-              } rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`}
-                aria-label={displayUrl ? 'Byt bild' : 'Ladda upp bild'}
-            >
-              {uploading ? (
-                <Loader2 className={`${iconClass} animate-spin`} />
-              ) : (
-                <Camera className={iconClass} />
-              )}
+            <button type="button" onClick={openFilePicker} disabled={uploading} className={`absolute -bottom-1 -right-1 ${size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'} rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`} aria-label={displayUrl ? 'Byt bild' : 'Ladda upp bild'}>
+              {uploading ? <Loader2 className={`${iconClass} animate-spin`} /> : <Camera className={iconClass} />}
             </button>
           )}
           {displayUrl && !uploading && !showProfileActions && (
-            <button
-              type="button"
-              onClick={handleRemove}
-              className={`absolute -top-1 -right-1 ${
-                size === 'lg' ? 'w-6 h-6' : 'w-4 h-4'
-              } rounded-full bg-destructive text-destructive-foreground shadow-md flex items-center justify-center hover:bg-destructive/90 transition-colors`}
-              aria-label="Ta bort bild"
-            >
+            <button type="button" onClick={handleRemove} className={`absolute -top-1 -right-1 ${size === 'lg' ? 'w-6 h-6' : 'w-4 h-4'} rounded-full bg-destructive text-destructive-foreground shadow-md flex items-center justify-center hover:bg-destructive/90 transition-colors`} aria-label="Ta bort bild">
               <X className={iconClass} />
             </button>
           )}
           {showProfileActions && (
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={openFilePicker}
-                disabled={uploading}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
-              >
+            <div className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2">
+              <label htmlFor={inputId} className="inline-flex h-11 sm:h-9 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-primary px-4 sm:px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 active:scale-[0.98]">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                 {displayUrl ? 'Byt bild' : 'Lägg till bild'}
-              </button>
+              </label>
               {displayUrl && (
-                <button
-                  type="button"
-                  onClick={handleRemove}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                >
+                <button type="button" onClick={handleRemove} disabled={uploading} className="inline-flex h-11 sm:h-9 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-4 sm:px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50">
                   <X className="h-4 w-4" />
                   Ta bort
                 </button>
