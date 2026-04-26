@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { MobileNav } from './MobileNav';
@@ -7,8 +7,12 @@ import { QuickEggFAB } from './QuickEggFAB';
 import CommandPalette from './CommandPalette';
 import { Menu, Feather, Search } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
+import DashboardFocusPanel from './DashboardFocusPanel';
 
 export default function AppLayout() {
+  const location = useLocation();
+  const isDashboard = location.pathname === '/app' || location.pathname === '/app/';
+
   // Ensure app routes are not indexed by search engines.
   // Inget cleanup – nästa publika sida uppdaterar robots via useSeo.
   useEffect(() => {
@@ -65,11 +69,12 @@ export default function AppLayout() {
           </header>
 
           <main id="main-content" className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-8 relative z-10">
+            {isDashboard && <DashboardFocusPanel />}
             <Suspense fallback={
               <div className="flex items-center justify-center py-20">
                 <div className="flex flex-col items-center gap-3">
                   <span className="text-2xl">🥚</span>
-                  <span className="text-sm text-muted-foreground">Laddar...</span>
+                  <span className="text-sm text-muted-foreground">Laddar din hönsgård...</span>
                 </div>
               </div>
             }>
