@@ -10,7 +10,6 @@ export default function CookieConsent() {
   useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
     if (!consent) {
-      // Small delay so it doesn't flash on load
       const t = setTimeout(() => setVisible(true), 1200);
       return () => clearTimeout(t);
     }
@@ -37,19 +36,19 @@ export default function CookieConsent() {
             <Cookie className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
-            <p className="text-xs sm:text-sm font-medium text-foreground">Vi använder cookies 🍪</p>
+            <p className="text-xs sm:text-sm font-medium text-foreground">Cookies och statistik 🍪</p>
             <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug sm:leading-relaxed mt-0.5">
-              Bara nödvändiga cookies.{' '}
-              <a href="/terms" className="text-primary hover:underline">Läs om vår cookiepolicy</a>
+              Hönsgården fungerar med nödvändiga cookies. Om du accepterar hjälper du oss även förstå vilka funktioner som används, så appen kan bli bättre.{' '}
+              <a href="/terms" className="text-primary hover:underline">Läs mer</a>
             </p>
           </div>
         </div>
         <div className="flex gap-1.5 sm:gap-2">
           <Button onClick={accept} size="sm" className="flex-1 h-7 sm:h-9 text-xs sm:text-sm">
-            Acceptera
+            Acceptera statistik
           </Button>
           <Button onClick={decline} variant="outline" size="sm" className="flex-1 h-7 sm:h-9 text-xs sm:text-sm">
-            Nödvändiga
+            Endast nödvändiga
           </Button>
         </div>
       </div>
