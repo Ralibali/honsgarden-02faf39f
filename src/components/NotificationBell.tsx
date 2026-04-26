@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -14,7 +15,30 @@ interface Notification {
   created_at: string;
 }
 
+function extractUrl(text: string) {
+  const match = text.match(/https?:\/\/[^\s]+|\/app\/[^\s]+/i);
+  return match?.[0] ?? null;
+}
+
+function getNotificationTarget(notification: Notification) {
+  const combined = `${notification.title} ${notification.message}`.toLowerCase();
+  const explicitUrl = extractUrl(notification.message) || extractUrl(notification.title);
+  if (explicitUrl) return explicitUrl;
+
+  if (combined.includes('feedback') || combined.includes('förslag') || combined.includes('synpunkt')) return '/app/community';
+  if (combined.includes('påminnelse') || combined.includes('reminder')) return '/app/reminders';
+  if (combined.includes('ägg') || combined.includes('egg')) return '/app/eggs';
+  if (combined.includes('höna') || combined.includes('hönor') || combined.includes('flock')) return '/app/hens';
+  if (combined.includes('premium')) return '/app/premium';
+  if (combined.includes('statistik')) return '/app/statistics';
+  if (combined.includes('ekonomi') || combined.includes('kostnad')) return '/app/finance';
+  if (combined.includes('foder')) return '/app/feed';
+
+  return '/app';
+}
+
 export function NotificationBell() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
@@ -74,6 +98,18 @@ export function NotificationBell() {
     }
   };
 
+  const handleReadMore = (notification: Notification) => {
+    const target = getNotificationTarget(notification);
+    setOpen(false);
+
+    if (target.startsWith('http')) {
+      window.open(target, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    navigate(target);
+  };
+
   return (
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>
@@ -110,9 +146,19 @@ export function NotificationBell() {
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 whitespace-pre-wrap break-words leading-relaxed">
                     {n.message}
                   </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground/60 mt-2">
-                    {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: sv })}
-                  </p>
+                  <div className="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground/60">
+                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: sv })}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleReadMore(n)}
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-primary/10 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/15 transition-colors active:scale-[0.98]"
+                    >
+                      Läs mer
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
