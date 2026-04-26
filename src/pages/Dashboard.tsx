@@ -466,18 +466,39 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* ─── 5. Unified daily tip ─── */}
-      <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className={`w-7 h-7 rounded-lg bg-${tipCard.color}/10 flex items-center justify-center`}>
-              <span className="text-sm">{tipCard.emoji}</span>
-            </div>
-            <span className="data-label">{tipCard.label}</span>
-          </div>
-          <p className="text-sm text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: tipCard.text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
-        </CardContent>
-      </Card>
+      {/* ─── 5. Unified daily tip (compact, expandable) ─── */}
+      {(() => {
+        const tipHtml = tipCard.text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        const isLong = tipCard.text.length > 140;
+        return (
+          <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className={`w-7 h-7 rounded-lg bg-${tipCard.color}/10 flex items-center justify-center`}>
+                  <span className="text-sm">{tipCard.emoji}</span>
+                </div>
+                <span className="data-label">{tipCard.label}</span>
+              </div>
+              <p
+                className="text-sm text-foreground leading-relaxed line-clamp-3"
+                dangerouslySetInnerHTML={{ __html: tipHtml }}
+              />
+              {isLong && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTipSheetOpen(true)}
+                  className="mt-2 h-9 px-3 rounded-xl text-xs font-medium text-primary hover:bg-primary/8"
+                >
+                  Läs hela tipset
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
 
       {/* ─── 6. Egg calendar ─── */}
       {showCalendar && (
