@@ -365,7 +365,7 @@ function buildArticlePage(template, post) {
  * Sätter canonical till destinationen, noindex, meta refresh + JS-fallback.
  * Sökmotorer behandlar detta som en stark konsolideringssignal när 301 saknas.
  */
-function buildRedirectPage(targetPath) {
+function buildRedirectPage(template, targetPath) {
   const targetUrl = `${BASE_URL}${targetPath}`;
   const head = `\n<title>Omdirigerar till ${escapeHtml(targetUrl)}</title>
 <meta name="robots" content="noindex, follow">
@@ -373,9 +373,9 @@ function buildRedirectPage(targetPath) {
 <meta http-equiv="refresh" content="0; url=${escapeHtml(targetUrl)}">
 <meta property="og:url" content="${escapeHtml(targetUrl)}">
 <script>window.location.replace(${JSON.stringify(targetPath)});</script>`;
-  const body = `<div id="root"><p>Den här sidan har flyttats. Omdirigerar till <a href="${escapeHtml(targetUrl)}">${escapeHtml(targetUrl)}</a>…</p></div>`;
-  return injectHead(template => template, head) // placeholder, overwritten below
-    ? '' : '';
+  const bodyHtml = `<div id="root"><p>Den här sidan har flyttats. Omdirigerar till <a href="${escapeHtml(targetUrl)}">${escapeHtml(targetUrl)}</a>…</p></div>`;
+  return injectHead(template, head)
+    .replace('<div id="root"></div>', bodyHtml);
 }
 
 // ============================================================
