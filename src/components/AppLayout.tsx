@@ -28,7 +28,7 @@ export default function AppLayout() {
 
         <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
           {/* Desktop header */}
-          <header className="h-12 hidden md:flex items-center justify-between border-b border-border/60 px-5 bg-background/60 backdrop-blur-xl sticky top-0 z-30">
+          <header className="hidden md:flex items-center justify-between border-b border-border/60 px-5 bg-background/60 backdrop-blur-xl sticky top-0 z-30 pt-safe-top h-12">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
@@ -46,7 +46,7 @@ export default function AppLayout() {
           </header>
 
           {/* Mobile header */}
-          <header className="h-14 flex md:hidden items-center justify-between border-b border-border/60 px-4 bg-background/70 backdrop-blur-xl sticky top-0 z-30">
+          <header className="flex md:hidden items-center justify-between border-b border-border/60 px-4 bg-background/70 backdrop-blur-xl sticky top-0 z-30 pt-safe-top h-14">
             <div className="w-8" />
             <div className="flex items-center gap-2">
               <Feather className="h-4 w-4 text-primary" />
