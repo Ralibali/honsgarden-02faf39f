@@ -454,11 +454,11 @@ async function main() {
   //    men levereras som noindex-redirect till motsvarande /blogg/-URL.
   await Promise.all(posts.flatMap((post) => [
     writeRoute(`blogg/${post.slug}`, buildArticlePage(template, post)),
-    writeRoute(`guider/${post.slug}`, buildRedirectPage(`/blogg/${post.slug}`)),
+    writeRoute(`guider/${post.slug}`, buildRedirectPage(template, `/blogg/${post.slug}`)),
   ]));
 
   // 5b. /guider index → /blogg
-  await writeRoute('guider', buildRedirectPage('/blogg'));
+  await writeRoute('guider', buildRedirectPage(template, '/blogg'));
 
   // 6. Skriv om public sitemap.xml till färska data (endast /blogg-URL:er)
   const sitemap = buildSitemap(posts, tags);
