@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import React, { Suspense } from "react";
 import CookieConsent from "./components/CookieConsent";
@@ -104,8 +104,8 @@ const AppRoutes = () => (
         <Route path="/om-oss" element={<About />} />
         <Route path="/verktyg/aggkalkylator" element={<EggCalculator />} />
         <Route path="/inbjudan/:token" element={<AcceptInvite />} />
-        <Route path="/guider" element={<Guides />} />
-        <Route path="/guider/:slug" element={<GuideArticle />} />
+        <Route path="/guider" element={<GuiderRedirect />} />
+        <Route path="/guider/:slug" element={<GuiderRedirect />} />
         <Route path="/blogg" element={<Guides />} />
         <Route path="/blogg/kategori/:category" element={<BlogCategory />} />
         <Route path="/blogg/tagg/:tag" element={<BlogTag />} />
