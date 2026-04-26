@@ -141,6 +141,41 @@ export default function HenProfile() {
     onError: (err: any) => toast({ title: 'Något gick fel', description: 'Vi kunde inte spara ändringarna just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' }),
   });
 
+  const healthNoteMutation = useMutation({
+    mutationFn: (payload: { text: string; type: string }) =>
+      api.createHealthLog({
+        date: new Date().toISOString().split('T')[0],
+        type: payload.type,
+        description: payload.text,
+        hen_id: henId!,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hen-profile', henId] });
+      queryClient.invalidateQueries({ queryKey: ['health-logs'] });
+      toast({ title: 'Hälsonotering sparad 💚' });
+      setHealthNoteOpen(false);
+      setHealthNoteText('');
+    },
+    onError: () => toast({ title: 'Något gick fel', description: 'Vi kunde inte spara noteringen just nu.', variant: 'destructive' }),
+  });
+
+  const followUpReminder = async () => {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9, 0, 0, 0);
+      await api.createChore(
+        `Följ upp ${hen?.name ?? 'hönan'}`,
+        'Titta till hönan och notera om något ändrats sedan igår.',
+        { recurrence: 'none', next_due_at: tomorrow.toISOString(), reminder_enabled: true, reminder_hours_before: 0 },
+      );
+      queryClient.invalidateQueries({ queryKey: ['daily-chores'] });
+      toast({ title: 'Påminnelse skapad för imorgon ✓' });
+    } catch (e: any) {
+      toast({ title: 'Kunde inte skapa påminnelse', description: e?.message ?? '', variant: 'destructive' });
+    }
+  };
+
   const startEditing = () => {
     if (!hen) return;
     setEditForm({
