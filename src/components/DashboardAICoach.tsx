@@ -211,6 +211,7 @@ function pickIcon(advice: CoachAdvice) {
 
 export default function DashboardAICoach() {
   const navigate = useNavigate();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const { data: eggs = [] } = useQuery({ queryKey: ['eggs'], queryFn: () => api.getEggs(), staleTime: 60_000 });
   const { data: hens = [] } = useQuery({ queryKey: ['hens'], queryFn: () => api.getHens(), staleTime: 60_000 });
@@ -233,7 +234,6 @@ export default function DashboardAICoach() {
 
   const fallback = useMemo(() => ruleBasedFallback(ctx), [ctx]);
 
-  // Cache key based on coarse context so AI is called sparingly (once per "state change")
   const cacheKey = useMemo(() => {
     return [
       'dashboard-coach',
@@ -259,84 +259,124 @@ export default function DashboardAICoach() {
 
   const result: CoachResponse = !isLoading && !isError && aiResp?.advices?.length ? aiResp : fallback;
   const intro = result.intro || 'Hönsgården har märkt några saker idag.';
+  const primary = result.advices[0];
+  const extraCount = Math.max(0, result.advices.length - 1);
+
+  const renderAdviceCard = (advice: CoachAdvice, idx: number, compact = false) => {
+    const meta = TYPE_META[advice.type] ?? TYPE_META.tips;
+    const Icon = pickIcon(advice);
+    return (
+      <motion.li
+        key={`${advice.title}-${idx}`}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: idx * 0.05, duration: 0.25 }}
+        className={`rounded-2xl border border-border/40 bg-background/70 ${compact ? 'p-3' : 'p-4'}`}
+      >
+        <div className="flex items-start gap-3">
+          <div className={`w-10 h-10 rounded-xl ${meta.bg} flex items-center justify-center shrink-0`}>
+            <Icon className={`h-4.5 w-4.5 ${meta.text}`} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-semibold text-foreground leading-tight">{advice.title}</p>
+              <span className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-full ${meta.bg} ${meta.text} font-medium`}>
+                {meta.label}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed mt-1.5">{advice.text}</p>
+            {advice.cta && (
+              <div className="mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 rounded-xl gap-1.5 text-xs active:scale-95"
+                  onClick={() => {
+                    setSheetOpen(false);
+                    navigate(advice.cta!.path);
+                  }}
+                >
+                  {advice.cta.label}
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.li>
+    );
+  };
 
   return (
-    <motion.section
-      aria-label="Dagens råd från Hönsgården"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <Card className="border-primary/15 bg-gradient-to-br from-primary/8 via-accent/5 to-background shadow-sm overflow-hidden">
-        <CardContent className="p-4 sm:p-5">
-          <div className="flex items-start gap-3 mb-3">
-            <div className="w-9 h-9 rounded-2xl bg-primary/12 flex items-center justify-center shrink-0">
-              <Sparkles className="h-4 w-4 text-primary" />
+    <>
+      <motion.section
+        aria-label="Dagens råd från Hönsgården"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Card className="border-primary/15 bg-gradient-to-br from-primary/8 via-accent/5 to-background shadow-sm overflow-hidden">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-9 h-9 rounded-2xl bg-primary/12 flex items-center justify-center shrink-0">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="data-label">Hönsgården har märkt…</p>
+                <p className="font-serif text-sm sm:text-base text-foreground leading-snug mt-0.5 line-clamp-2">
+                  {isLoading ? 'Tittar igenom dina senaste dagar…' : intro}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="data-label">Hönsgården har märkt…</p>
-              <p className="font-serif text-base sm:text-lg text-foreground leading-snug mt-0.5">
-                {isLoading ? 'Tittar igenom dina senaste dagar…' : intro}
-              </p>
-            </div>
-          </div>
 
-          {isLoading ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground py-3">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Hönsgården funderar…
-            </div>
-          ) : (
-            <ul className="space-y-2.5">
-              {result.advices.map((advice, idx) => {
-                const meta = TYPE_META[advice.type] ?? TYPE_META.tips;
-                const Icon = pickIcon(advice);
-                return (
-                  <motion.li
-                    key={`${advice.title}-${idx}`}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.06, duration: 0.3 }}
-                    className="rounded-2xl border border-border/40 bg-background/70 p-3 sm:p-3.5"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-9 h-9 rounded-xl ${meta.bg} flex items-center justify-center shrink-0`}>
-                        <Icon className={`h-4 w-4 ${meta.text}`} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold text-foreground leading-tight">{advice.title}</p>
-                          <span className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-full ${meta.bg} ${meta.text} font-medium`}>
-                            {meta.label}
-                          </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">{advice.text}</p>
-                        {advice.cta && (
-                          <div className="mt-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 rounded-xl gap-1.5 text-xs active:scale-95"
-                              onClick={() => navigate(advice.cta!.path)}
-                            >
-                              {advice.cta.label}
-                              <ArrowRight className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.li>
-                );
-              })}
-            </ul>
-          )}
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground py-3">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Hönsgården funderar…
+              </div>
+            ) : primary ? (
+              <ul className="space-y-2.5">
+                {renderAdviceCard(primary, 0, true)}
+              </ul>
+            ) : null}
 
-          <p className="text-[10px] text-muted-foreground/70 mt-3 leading-relaxed">
-            Hönsgården håller lite koll tillsammans med dig. Råden bygger på din egen data och ersätter inte veterinärbedömning.
+            {extraCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSheetOpen(true)}
+                className="mt-3 w-full h-10 rounded-xl text-sm font-medium text-primary hover:bg-primary/8 active:scale-[0.98]"
+              >
+                Visa fler råd ({extraCount})
+                <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </motion.section>
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent
+          side="bottom"
+          className="rounded-t-3xl max-h-[85vh] overflow-y-auto p-5 sm:max-w-lg sm:mx-auto"
+        >
+          <SheetHeader className="text-left mb-4">
+            <SheetTitle className="font-serif text-xl flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Hönsgården har märkt…
+            </SheetTitle>
+            <SheetDescription className="text-sm text-muted-foreground">
+              {intro}
+            </SheetDescription>
+          </SheetHeader>
+          <ul className="space-y-3 pb-6">
+            {result.advices.map((advice, idx) => renderAdviceCard(advice, idx, false))}
+          </ul>
+          <p className="text-[10px] text-muted-foreground/70 leading-relaxed pb-4">
+            Råden bygger på din egen data och ersätter inte veterinärbedömning.
           </p>
-        </CardContent>
-      </Card>
-    </motion.section>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
