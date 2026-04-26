@@ -285,17 +285,7 @@ export default function WeeklyReport() {
       </div>
 
       <AIWeeklySummary />
-        <CardContent className="p-4 sm:p-5">
-          <h2 className="font-serif text-xl text-foreground mb-1">
-            {weekEggs > 0 ? `${weekEggs} ägg den här veckan` : 'Rapporten väntar på veckans första ägg'}
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {weekEggs > 0
-              ? diff > 0 ? `Det är ${diff} fler än förra veckan. Bra jobbat – det här är exakt varför daglig loggning är värdefullt.` : diff < 0 ? `Det är ${Math.abs(diff)} färre än förra veckan. Nu har du ett tydligt spår att följa upp.` : 'Samma nivå som förra veckan. Stabilitet är också en viktig signal.'
-              : 'Logga ägg några dagar så börjar Hönsgården visa mönster, trender och vad som är värt att hålla koll på.'}
-          </p>
-        </CardContent>
-      </Card>
+
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
