@@ -2,6 +2,16 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+const COOKIE_CONSENT_KEY = 'cookie-consent';
+
+function hasTrackingConsent(): boolean {
+  try {
+    return localStorage.getItem(COOKIE_CONSENT_KEY) === 'accepted';
+  } catch {
+    return false;
+  }
+}
+
 function getSessionId(): string {
   let sid = sessionStorage.getItem('_track_sid');
   if (!sid) {
@@ -23,6 +33,8 @@ export function usePageTracking() {
   const lastPath = useRef('');
 
   useEffect(() => {
+    if (!hasTrackingConsent()) return;
+
     const path = location.pathname;
     if (path === lastPath.current) return;
     lastPath.current = path;
@@ -44,6 +56,8 @@ export function trackClick(eventName: string, opts?: {
   elementText?: string;
   metadata?: Record<string, any>;
 }) {
+  if (!hasTrackingConsent()) return;
+
   const sessionId = getSessionId();
   supabase.from('click_events').insert({
     event_name: eventName,
@@ -71,6 +85,8 @@ const TRACKED_ROLES = ['button', 'link', 'menuitem'];
 export function useAutoClickTracking() {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
+      if (!hasTrackingConsent()) return;
+
       const target = e.target as HTMLElement;
       if (!target) return;
 
