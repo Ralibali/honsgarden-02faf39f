@@ -29,43 +29,114 @@ const ICON_SIZES = {
 };
 
 /**
- * Compress and resize an image to a 256x256 square before upload.
- * Uses canvas to crop center & convert to webp (smaller than jpeg).
+ * Compress and resize an image to a square avatar before upload.
+ * Optimerad för iOS/mobil:
+ *  - createImageBitmap (hårdvaruaccelererad decode på iOS 16+)
+ *  - DPR-medveten målstorlek (max 384px) – retinaskarp utan onödig data
+ *  - Stegvis nedskalning för bättre kvalitet från stora kameror (12MP+)
+ *  - WebP med JPEG-fallback (äldre iOS Safari saknar webp encode)
+ *  - Frigör bitmap-minne direkt (viktigt på iPhones med begränsat RAM)
  */
-async function compressImage(file: File): Promise<Blob> {
+const supportsWebpEncode = (() => {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 1;
+    return c.toDataURL('image/webp').startsWith('data:image/webp');
+  } catch {
+    return false;
+  }
+})();
+
+function loadHTMLImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
     reader.onload = (e) => {
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Could not load image'));
       img.src = e.target?.result as string;
     };
-    reader.onerror = reject;
-
-    img.onload = () => {
-      const TARGET = 256; // small avatar size
-      const canvas = document.createElement('canvas');
-      canvas.width = TARGET;
-      canvas.height = TARGET;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return reject(new Error('Canvas not supported'));
-
-      // Center-crop square
-      const min = Math.min(img.width, img.height);
-      const sx = (img.width - min) / 2;
-      const sy = (img.height - min) / 2;
-
-      ctx.drawImage(img, sx, sy, min, min, 0, 0, TARGET, TARGET);
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) return reject(new Error('Compression failed'));
-          resolve(blob);
-        },
-        'image/webp',
-        0.82,
-      );
-    };
-    img.onerror = () => reject(new Error('Could not load image'));
+    reader.onerror = () => reject(new Error('Could not read file'));
     reader.readAsDataURL(file);
+  });
+}
+
+async function compressImage(file: File): Promise<Blob> {
+  // 96px @ upp till 4x DPR = 384px max – snabb upload, fortfarande skarp
+  const TARGET = Math.min(384, Math.round(96 * Math.min(window.devicePixelRatio || 1, 4)));
+
+  // Decode via createImageBitmap (snabbast på iOS), fallback till HTMLImageElement
+  let bitmap: ImageBitmap | HTMLImageElement;
+  let width: number;
+  let height: number;
+
+  if (typeof createImageBitmap === 'function') {
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' } as any);
+      width = (bitmap as ImageBitmap).width;
+      height = (bitmap as ImageBitmap).height;
+    } catch {
+      bitmap = await loadHTMLImage(file);
+      width = (bitmap as HTMLImageElement).naturalWidth;
+      height = (bitmap as HTMLImageElement).naturalHeight;
+    }
+  } else {
+    bitmap = await loadHTMLImage(file);
+    width = (bitmap as HTMLImageElement).naturalWidth;
+    height = (bitmap as HTMLImageElement).naturalHeight;
+  }
+
+  // Center-crop till kvadrat
+  const min = Math.min(width, height);
+  const sx = (width - min) / 2;
+  const sy = (height - min) / 2;
+
+  // Stegvis nedskalning – halvera tills nära target (bevarar mer detalj än ett stort steg)
+  let currentSize = min;
+  let source: CanvasImageSource = bitmap as CanvasImageSource;
+  let srcX = sx;
+  let srcY = sy;
+
+  while (currentSize > TARGET * 2) {
+    const next = Math.max(TARGET, Math.floor(currentSize / 2));
+    const tmp = document.createElement('canvas');
+    tmp.width = next;
+    tmp.height = next;
+    const tmpCtx = tmp.getContext('2d');
+    if (!tmpCtx) break;
+    tmpCtx.imageSmoothingEnabled = true;
+    tmpCtx.imageSmoothingQuality = 'medium';
+    tmpCtx.drawImage(source, srcX, srcY, currentSize, currentSize, 0, 0, next, next);
+    source = tmp;
+    srcX = 0;
+    srcY = 0;
+    currentSize = next;
+  }
+
+  // Slutlig render
+  const canvas = document.createElement('canvas');
+  canvas.width = TARGET;
+  canvas.height = TARGET;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas not supported');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(source, srcX, srcY, currentSize, currentSize, 0, 0, TARGET, TARGET);
+
+  // Frigör bitmap-minne direkt
+  if (typeof (bitmap as ImageBitmap).close === 'function') {
+    (bitmap as ImageBitmap).close();
+  }
+
+  const mime = supportsWebpEncode ? 'image/webp' : 'image/jpeg';
+  const quality = supportsWebpEncode ? 0.82 : 0.85;
+
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('Compression failed'))),
+      mime,
+      quality,
+    );
   });
 }
 
