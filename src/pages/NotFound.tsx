@@ -10,7 +10,7 @@ const NotFound = () => {
   useSeo({
     title: 'Sidan hittades inte – Hönsgården',
     description: 'Den här sidan finns inte. Gå tillbaka till startsidan för att hitta det du söker.',
-    path: location.pathname,
+    path: '/404',
     noindex: true,
   });
 
