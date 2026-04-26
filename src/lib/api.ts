@@ -619,6 +619,31 @@ export async function getDashboardAlerts(context: Record<string, unknown>): Prom
   return data as DeviationAlertResponse;
 }
 
+// ==================== HEALTH NOTE HELPER ====================
+
+export type HealthNoteHelperContext = {
+  noteText: string;
+  henName?: string;
+  henBreed?: string | null;
+  henAgeYears?: number | null;
+  recentNotes?: { date: string; description: string }[];
+};
+
+export type HealthNoteHelperResponse = {
+  observe_title: string;
+  observe_text: string;
+  checklist: string[];
+  improved_note: string;
+  next_steps: { title: string; text: string }[];
+};
+
+export async function getHealthNoteHelp(ctx: HealthNoteHelperContext): Promise<HealthNoteHelperResponse> {
+  const { data, error } = await supabase.functions.invoke('health-note-helper', { body: ctx });
+  if (error) throw new Error(error.message);
+  if (!data || typeof (data as any).observe_text !== 'string') throw new Error('Invalid helper response');
+  return data as HealthNoteHelperResponse;
+}
+
 // ==================== PREMIUM ====================
 
 export async function getPremiumStatus() {
@@ -1062,4 +1087,5 @@ export const api = {
   adminAcceptTerms,
   getDashboardCoach,
   getDashboardAlerts,
+  getHealthNoteHelp,
 };
