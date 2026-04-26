@@ -1,10 +1,10 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Loader2, X } from 'lucide-react';
+import { Camera, ImagePlus, Loader2, X } from 'lucide-react';
 
 interface HenAvatarProps {
   henId: string;
@@ -93,13 +93,6 @@ async function canvasToBlob(canvas: HTMLCanvasElement, mime: 'image/webp' | 'ima
   });
 }
 
-/**
- * Compress and resize an image to a square avatar before upload.
- * Mobilfixar:
- * - tvingar inte WebP när enheten bara lyckas skapa JPEG
- * - fallbackar från createImageBitmap till vanlig img-decode
- * - fallbackar från toBlob till dataURL på äldre Safari
- */
 async function compressImage(file: File): Promise<CompressedImage> {
   const TARGET = Math.min(512, Math.round(128 * Math.min(window.devicePixelRatio || 1, 4)));
 
@@ -180,13 +173,14 @@ export default function HenAvatar({
 }: HenAvatarProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const inputId = useId();
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const pendingImageUrlRef = useRef<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState<string>('');
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     if (!pendingImageUrlRef.current) {
@@ -203,9 +197,20 @@ export default function HenAvatar({
   const emoji = henType === 'rooster' ? '🐓' : '🐔';
   const sizeClass = SIZES[size];
   const iconClass = ICON_SIZES[size];
-  const openFilePicker = (e?: React.MouseEvent | React.KeyboardEvent) => {
+
+  const openImagePicker = (e?: React.MouseEvent | React.KeyboardEvent) => {
     e?.stopPropagation();
-    if (!uploading) inputRef.current?.click();
+    if (!uploading) setPickerOpen(true);
+  };
+
+  const openGallery = () => {
+    setPickerOpen(false);
+    window.setTimeout(() => galleryInputRef.current?.click(), 0);
+  };
+
+  const openCamera = () => {
+    setPickerOpen(false);
+    window.setTimeout(() => cameraInputRef.current?.click(), 0);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,6 +219,7 @@ export default function HenAvatar({
 
     if (!file.type.startsWith('image/') && !/\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name)) {
       toast({ title: 'Endast bilder', description: 'Välj en bildfil, till exempel JPG, PNG eller WebP.', variant: 'destructive' });
+      e.target.value = '';
       return;
     }
 
@@ -281,12 +287,13 @@ export default function HenAvatar({
         setProgress(0);
         setProgressLabel('');
       }, 600);
-      if (inputRef.current) inputRef.current.value = '';
+      e.target.value = '';
     }
   };
 
   const handleRemove = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    setPickerOpen(false);
     if (!user) return;
     setUploading(true);
     try {
@@ -312,9 +319,9 @@ export default function HenAvatar({
     <div className={`relative shrink-0 ${className}`}>
       <div
         className={`${sizeClass} rounded-xl overflow-hidden flex items-center justify-center ${bgClass} ${editable && showProfileActions ? 'cursor-pointer' : ''}`}
-        onClick={editable && showProfileActions ? () => openFilePicker() : undefined}
+        onClick={editable && showProfileActions ? () => openImagePicker() : undefined}
         onKeyDown={editable && showProfileActions ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') openFilePicker(e);
+          if (e.key === 'Enter' || e.key === ' ') openImagePicker(e);
         } : undefined}
         role={editable && showProfileActions ? 'button' : undefined}
         tabIndex={editable && showProfileActions ? 0 : undefined}
@@ -350,36 +357,64 @@ export default function HenAvatar({
 
       {editable && (
         <>
-          <input
-            id={inputId}
-            ref={inputRef}
-            type="file"
-            accept="image/*,.heic,.heif"
-            className="sr-only"
-            onChange={handleFileChange}
-          />
+          <input ref={galleryInputRef} type="file" accept="image/*,.heic,.heif" className="sr-only" onChange={handleFileChange} />
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={handleFileChange} />
+
           {!showProfileActions && (
-            <button type="button" onClick={openFilePicker} disabled={uploading} className={`absolute -bottom-1 -right-1 ${size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'} rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`} aria-label={displayUrl ? 'Byt bild' : 'Ladda upp bild'}>
+            <button type="button" onClick={openImagePicker} disabled={uploading} className={`absolute -bottom-1 -right-1 ${size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'} rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50`} aria-label={displayUrl ? 'Byt bild' : 'Ladda upp bild'}>
               {uploading ? <Loader2 className={`${iconClass} animate-spin`} /> : <Camera className={iconClass} />}
             </button>
           )}
+
           {displayUrl && !uploading && !showProfileActions && (
             <button type="button" onClick={handleRemove} className={`absolute -top-1 -right-1 ${size === 'lg' ? 'w-6 h-6' : 'w-4 h-4'} rounded-full bg-destructive text-destructive-foreground shadow-md flex items-center justify-center hover:bg-destructive/90 transition-colors`} aria-label="Ta bort bild">
               <X className={iconClass} />
             </button>
           )}
+
           {showProfileActions && (
             <div className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2">
-              <label htmlFor={inputId} className="inline-flex h-11 sm:h-9 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-primary px-4 sm:px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 active:scale-[0.98]">
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+              <button type="button" onClick={openImagePicker} disabled={uploading} className="inline-flex h-11 sm:h-9 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 sm:px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
                 {displayUrl ? 'Byt bild' : 'Lägg till bild'}
-              </label>
+              </button>
               {displayUrl && (
                 <button type="button" onClick={handleRemove} disabled={uploading} className="inline-flex h-11 sm:h-9 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-4 sm:px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50">
                   <X className="h-4 w-4" />
                   Ta bort
                 </button>
               )}
+            </div>
+          )}
+
+          {pickerOpen && (
+            <div className="fixed inset-0 z-[80] bg-foreground/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-3" onClick={() => setPickerOpen(false)}>
+              <div className="w-full max-w-sm rounded-3xl bg-card border border-border shadow-2xl p-4 sm:p-5 animate-fade-in" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Välj bildkälla">
+                <div className="text-center mb-4">
+                  <p className="font-serif text-lg text-foreground">Välj bild på hönan</p>
+                  <p className="text-xs text-muted-foreground mt-1">Ta en ny bild eller välj en du redan har sparad.</p>
+                </div>
+                <div className="space-y-2">
+                  <button type="button" onClick={openCamera} className="w-full min-h-12 rounded-2xl bg-primary text-primary-foreground px-4 py-3 flex items-center justify-center gap-2 font-medium active:scale-[0.98] transition-transform">
+                    <Camera className="h-4 w-4" />
+                    Ta bild
+                  </button>
+                  <button type="button" onClick={openGallery} className="w-full min-h-12 rounded-2xl border border-border bg-background px-4 py-3 flex items-center justify-center gap-2 font-medium text-foreground hover:bg-muted active:scale-[0.98] transition-colors">
+                    <ImagePlus className="h-4 w-4" />
+                    <span className="sm:hidden">Välj från galleri</span>
+                    <span className="hidden sm:inline">Välj bild från datorn</span>
+                  </button>
+                  {displayUrl && (
+                    <button type="button" onClick={handleRemove} className="w-full min-h-12 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 flex items-center justify-center gap-2 font-medium text-destructive hover:bg-destructive/10 active:scale-[0.98] transition-colors">
+                      <X className="h-4 w-4" />
+                      Ta bort bild
+                    </button>
+                  )}
+                  <button type="button" onClick={() => setPickerOpen(false)} className="w-full min-h-11 rounded-2xl px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                    Avbryt
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </>
