@@ -177,6 +177,7 @@ export default function Dashboard() {
   const [diaryText, setDiaryText] = useState('');
   const [weatherExpanded, setWeatherExpanded] = useState(false);
   const [showMoreSection, setShowMoreSection] = useState(false);
+  const [tipSheetOpen, setTipSheetOpen] = useState(false);
   const now = new Date();
   const onboardingVisible = useOnboardingVisible();
 
