@@ -84,6 +84,8 @@ export default function HenAvatar({
   const pendingImageUrlRef = useRef<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [displayUrl, setDisplayUrl] = useState(imageUrl || '');
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState<string>('');
 
   useEffect(() => {
     if (!pendingImageUrlRef.current) {
