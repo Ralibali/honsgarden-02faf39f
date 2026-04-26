@@ -117,10 +117,16 @@ export default function HenAvatar({
     }
 
     setUploading(true);
+    setProgress(5);
+    setProgressLabel('Förbereder bild…');
     const previewUrl = URL.createObjectURL(file);
     setDisplayUrl(previewUrl);
     try {
+      setProgressLabel('Komprimerar…');
+      setProgress(25);
       const blob = await compressImage(file);
+      setProgress(55);
+      setProgressLabel('Laddar upp…');
       const path = `${user.id}/${henId}.webp`;
 
       const { error: uploadError } = await supabase.storage
@@ -132,6 +138,8 @@ export default function HenAvatar({
         });
 
       if (uploadError) throw uploadError;
+      setProgress(80);
+      setProgressLabel('Sparar…');
 
       // Skapa en signerad URL som gäller 1 år (privat bucket)
       const { data: signedData, error: signedErr } = await supabase.storage
@@ -148,6 +156,8 @@ export default function HenAvatar({
       setDisplayUrl(nextImageUrl);
       queryClient.setQueryData(['hen-profile', henId], (old: any) => old ? { ...old, ...updatedHen, image_url: nextImageUrl } : updatedHen);
       queryClient.setQueryData(['hens'], (old: any) => Array.isArray(old) ? old.map((hen) => hen.id === henId ? { ...hen, ...updatedHen, image_url: nextImageUrl } : hen) : old);
+      setProgress(100);
+      setProgressLabel('Klar!');
       toast({ title: 'Bild uppladdad! 📷' });
     } catch (err: any) {
       pendingImageUrlRef.current = null;
@@ -156,6 +166,10 @@ export default function HenAvatar({
     } finally {
       URL.revokeObjectURL(previewUrl);
       setUploading(false);
+      setTimeout(() => {
+        setProgress(0);
+        setProgressLabel('');
+      }, 600);
       if (inputRef.current) inputRef.current.value = '';
     }
   };
