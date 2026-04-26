@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart, ClipboardCheck, CalendarDays, Upload } from 'lucide-react';
+import { Home, Egg, Bird, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart, ClipboardCheck, CalendarDays, Upload, ReceiptText } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +34,7 @@ const moreGroups = [
     items: [
       { title: 'Foder', url: '/app/feed', icon: Package },
       { title: 'Ekonomi', url: '/app/finance', icon: Coins },
+      { title: 'Sälj ägg', url: '/app/egg-sales', icon: ReceiptText },
     ],
   },
   {
