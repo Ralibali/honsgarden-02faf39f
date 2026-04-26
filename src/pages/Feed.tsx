@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PremiumGate } from '@/components/PremiumGate';
+import EmptyState from '@/components/EmptyState';
 
 export default function Feed() {
   const queryClient = useQueryClient();
@@ -38,11 +39,11 @@ export default function Feed() {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['feed-stats'] });
       queryClient.invalidateQueries({ queryKey: ['feed-inventory'] });
-      toast({ title: 'Foderinköp sparat!' });
+      toast({ title: 'Foderinköpet är sparat! 🥣' });
       setOpen(false);
       setNewType(''); setNewCost(''); setNewKg('');
     },
-    onError: (err: any) => toast({ title: 'Fel', description: err.message, variant: 'destructive' }),
+    onError: () => toast({ title: 'Något gick fel', description: 'Vi kunde inte spara foderinköpet just nu. Kontrollera anslutningen och försök igen.', variant: 'destructive' }),
   });
 
   const deleteMutation = useMutation({
@@ -50,6 +51,7 @@ export default function Feed() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['feed-stats'] });
+      toast({ title: 'Foderinköpet är borttaget' });
     },
   });
 
@@ -88,15 +90,15 @@ export default function Feed() {
           <DialogTrigger asChild>
             <Button className="gap-2 w-full sm:w-auto"><Plus className="h-4 w-4" />Nytt inköp</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="rounded-2xl">
             <DialogHeader><DialogTitle className="font-serif">Registrera foderinköp</DialogTitle></DialogHeader>
             <div className="space-y-3 pt-2">
-              <Input placeholder="Typ (t.ex. Hönsfoder 25kg)" value={newType} onChange={(e) => setNewType(e.target.value)} />
-              <div className="grid grid-cols-2 gap-3">
-                <Input placeholder="Kostnad (kr)" type="number" value={newCost} onChange={(e) => setNewCost(e.target.value)} />
-                <Input placeholder="Vikt (kg)" type="number" value={newKg} onChange={(e) => setNewKg(e.target.value)} />
+              <Input className="rounded-xl" placeholder="Typ (t.ex. Hönsfoder 25 kg)" value={newType} onChange={(e) => setNewType(e.target.value)} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input className="rounded-xl" placeholder="Kostnad (kr)" type="number" value={newCost} onChange={(e) => setNewCost(e.target.value)} />
+                <Input className="rounded-xl" placeholder="Vikt (kg)" type="number" value={newKg} onChange={(e) => setNewKg(e.target.value)} />
               </div>
-              <Button className="w-full" onClick={handleAdd} disabled={createMutation.isPending}>
+              <Button className="w-full rounded-xl" onClick={handleAdd} disabled={createMutation.isPending || !newType || !newCost}>
                 {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                 Spara inköp
               </Button>
@@ -105,80 +107,91 @@ export default function Feed() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="bg-card border-border shadow-sm">
-          <CardContent className="p-3 sm:p-4 text-center">
-            <ShoppingCart className="h-4 w-4 text-primary mx-auto mb-1" />
-            <p className="stat-number text-xl text-foreground">{totalCost} kr</p>
-            <p className="data-label text-[10px] mt-1">Total foderkostnad</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border shadow-sm">
-          <CardContent className="p-3 sm:p-4 text-center">
-            <Package className="h-4 w-4 text-accent mx-auto mb-1" />
-            <p className="stat-number text-xl text-foreground">{totalKg} kg</p>
-            <p className="data-label text-[10px] mt-1">Totalt foder</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border shadow-sm">
-          <CardContent className="p-3 sm:p-4 text-center">
-            <Egg className="h-4 w-4 text-warning mx-auto mb-1" />
-            <p className="stat-number text-xl text-foreground">{feedStats?.total_eggs || '–'}</p>
-            <p className="data-label text-[10px] mt-1">Ägg totalt</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border shadow-sm border-l-4 border-l-primary">
-          <CardContent className="p-3 sm:p-4 text-center">
-            <Calculator className="h-4 w-4 text-primary mx-auto mb-1" />
-            <p className="stat-number text-xl text-primary">{costPerEgg ? `${costPerEgg.toFixed(1)} kr` : '–'}</p>
-            <p className="data-label text-[10px] mt-1">Kostnad/ägg</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {feedInventory && (
-        <Card className="bg-primary/5 border-primary/20 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingDown className="h-4 w-4 text-primary" />
-              <span className="font-serif text-sm text-primary">Förbrukningsprognos</span>
-            </div>
-            <p className="text-sm text-foreground">
-              {feedInventory.days_remaining ? `Fodret räcker i ca ${feedInventory.days_remaining} dagar` : 'Ingen prognos tillgänglig'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="bg-card border-border shadow-sm">
-        <CardHeader className="px-4 sm:px-6">
-          <CardTitle className="font-serif text-base sm:text-lg">Inköpshistorik</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y divide-border">
-            {feedRecords.map((p: any) => {
-              const id = p._id || p.id;
-              return (
-                <div key={id} className="flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-secondary/50 transition-colors">
-                  <div className="min-w-0 mr-3">
-                    <p className="text-xs sm:text-sm font-medium text-foreground truncate">{p.feed_type || p.type}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">{p.date} · {p.amount_kg || p.kg} kg</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="stat-number text-sm text-destructive shrink-0">-{p.cost} kr</span>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground" onClick={() => deleteMutation.mutate(id)}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            {feedRecords.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground text-sm">Inga foderinköp registrerade</div>
-            )}
+      {feedRecords.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title="Inga foderinköp ännu"
+          description="Lägg in ditt första foderinköp så kan Hönsgården börja räkna på foderkostnad, total förbrukning och ungefärlig kostnad per ägg."
+          actionLabel="Lägg till foderinköp"
+          onAction={() => setOpen(true)}
+          secondaryLabel="Logga ägg först"
+          onSecondaryAction={() => window.location.assign('/app/eggs')}
+        />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <ShoppingCart className="h-4 w-4 text-primary mx-auto mb-1" />
+                <p className="stat-number text-xl text-foreground">{totalCost} kr</p>
+                <p className="data-label text-[10px] mt-1">Total foderkostnad</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <Package className="h-4 w-4 text-accent mx-auto mb-1" />
+                <p className="stat-number text-xl text-foreground">{totalKg} kg</p>
+                <p className="data-label text-[10px] mt-1">Totalt foder</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border shadow-sm">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <Egg className="h-4 w-4 text-warning mx-auto mb-1" />
+                <p className="stat-number text-xl text-foreground">{feedStats?.total_eggs || '–'}</p>
+                <p className="data-label text-[10px] mt-1">Ägg totalt</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border shadow-sm border-l-4 border-l-primary">
+              <CardContent className="p-3 sm:p-4 text-center">
+                <Calculator className="h-4 w-4 text-primary mx-auto mb-1" />
+                <p className="stat-number text-xl text-primary">{costPerEgg ? `${costPerEgg.toFixed(1)} kr` : '–'}</p>
+                <p className="data-label text-[10px] mt-1">Kostnad/ägg</p>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          {feedInventory && (
+            <Card className="bg-primary/5 border-primary/20 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingDown className="h-4 w-4 text-primary" />
+                  <span className="font-serif text-sm text-primary">Förbrukningsprognos</span>
+                </div>
+                <p className="text-sm text-foreground">
+                  {feedInventory.days_remaining ? `Fodret räcker i ca ${feedInventory.days_remaining} dagar` : 'Logga några fler foderposter så kan vi visa en bättre prognos.'}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="font-serif text-base sm:text-lg">Inköpshistorik</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-border">
+                {feedRecords.map((p: any) => {
+                  const id = p._id || p.id;
+                  return (
+                    <div key={id} className="flex items-center justify-between px-4 sm:px-6 py-3 hover:bg-secondary/50 transition-colors">
+                      <div className="min-w-0 mr-3">
+                        <p className="text-xs sm:text-sm font-medium text-foreground truncate">{p.feed_type || p.type}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{p.date} · {p.amount_kg || p.kg} kg</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="stat-number text-sm text-destructive">-{p.cost} kr</span>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground" onClick={() => deleteMutation.mutate(id)} aria-label="Ta bort foderinköp">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
     </PremiumGate>
   );
