@@ -9,7 +9,8 @@ import { Menu, Feather, Search } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 
 export default function AppLayout() {
-  // Ensure app routes are not indexed by search engines
+  // Ensure app routes are not indexed by search engines.
+  // Inget cleanup – nästa publika sida uppdaterar robots via useSeo.
   useEffect(() => {
     let meta = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
     if (!meta) {
@@ -18,7 +19,6 @@ export default function AppLayout() {
       document.head.appendChild(meta);
     }
     meta.content = 'noindex, nofollow';
-    return () => { meta.content = 'index, follow'; };
   }, []);
 
   return (

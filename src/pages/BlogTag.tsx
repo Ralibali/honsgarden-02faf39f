@@ -19,13 +19,33 @@ export default function BlogTag() {
   const decodedTag = decodeURIComponent(tag || '');
   const displayTag = decodedTag.charAt(0).toUpperCase() + decodedTag.slice(1);
 
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['blog-posts-tag', tag],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, excerpt, cover_image_url, feature_image_url, category, tags, published_at, reading_time_minutes')
+        .eq('is_published', true)
+        .contains('tags', [decodedTag])
+        .order('published_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tag,
+  });
+
+  // Noindex om taggen saknar artiklar (när laddningen är klar) eller är tom
+  const isEmpty = !isLoading && posts.length === 0;
+  const shouldNoindex = !decodedTag || isEmpty;
+
   useSeo({
     title: `${displayTag} – Artiklar om ${decodedTag} | Hönsgården`,
     description: `Läs alla artiklar om ${decodedTag}. Tips, guider och information från Hönsgården – Sveriges bästa resurs för hönsägare.`,
     path: `/blogg/tagg/${tag}`,
     ogImage: '/blog-images/hens-garden.jpg',
     ogImageAlt: displayTag,
-    jsonLd: [
+    noindex: shouldNoindex,
+    jsonLd: shouldNoindex ? undefined : [
       {
         '@type': 'CollectionPage',
         '@id': `https://honsgarden.se/blogg/tagg/${tag}`,
@@ -44,21 +64,6 @@ export default function BlogTag() {
         ],
       },
     ],
-  });
-
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ['blog-posts-tag', tag],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('id, title, slug, excerpt, cover_image_url, feature_image_url, category, tags, published_at, reading_time_minutes')
-        .eq('is_published', true)
-        .contains('tags', [decodedTag])
-        .order('published_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!tag,
   });
 
   // Fetch all unique tags for navigation
