@@ -13,6 +13,7 @@ import { DailySummaryModal } from '@/components/DailySummaryModal';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
 import Achievements from '@/components/Achievements';
 import ShareCard from '@/components/ShareCard';
