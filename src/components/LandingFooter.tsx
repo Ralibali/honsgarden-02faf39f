@@ -12,9 +12,20 @@ const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Produkt',
     links: [
-      { label: 'Funktioner', href: '#funktioner' },
-      { label: 'Priser', href: '#priser' },
-      { label: 'Äggkalkylator', href: '/kalkylator' },
+      { label: 'Funktioner', href: '/#funktioner' },
+      { label: 'Priser', href: '/#priser' },
+      { label: 'App för hönsägare', href: '/app-for-honsagare' },
+      { label: 'Digital ägglogg', href: '/agglogg' },
+      { label: 'Hönskalender', href: '/honskalender' },
+      { label: 'Foderkostnad för höns', href: '/foderkostnad-hons' },
+      { label: 'Kläckningskalender', href: '/klackningskalender' },
+      { label: 'Börja med höns', href: '/borja-med-hons' },
+    ],
+  },
+  {
+    title: 'Guider & verktyg',
+    links: [
+      { label: 'Äggkalkylator', href: '/verktyg/aggkalkylator' },
       { label: 'Höns & ägg-guider', href: '/blogg' },
       { label: 'Hur många ägg lägger en höna?', href: '/blogg/hur-manga-agg-lagger-en-hona' },
       { label: 'Nybörjarguide – skaffa höns', href: '/blogg/hobbyhons-nyborjarguide' },
@@ -50,7 +61,7 @@ export default function LandingFooter() {
               <span className="font-serif text-lg text-white">Hönsgården</span>
             </div>
             <p className="text-sm text-white/60 leading-relaxed mb-4">
-              Digital äggloggare för moderna hönsägare
+              Svensk app och digital äggloggare för hobbyhönsägare som vill få riktig koll på ägg, flock, foder och rutiner.
             </p>
             <p className="text-xs text-white/60">© {new Date().getFullYear()} Hönsgården</p>
           </div>
