@@ -495,9 +495,20 @@ export default function HenProfile() {
       {healthLogs.length > 0 && !editing ? (
         <Card className="border-border/50 shadow-sm">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2.5 mb-3">
-              <Heart className="h-4 w-4 text-destructive/60" />
-              <h3 className="font-serif text-sm text-foreground">Hälsa och anteckningar</h3>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2.5">
+                <Heart className="h-4 w-4 text-destructive/60" />
+                <h3 className="font-serif text-sm text-foreground">Hälsa och anteckningar</h3>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl h-8 text-xs gap-1.5"
+                onClick={() => setHealthNoteOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Ny notering
+              </Button>
             </div>
             <div className="space-y-2">
               {healthLogs.map((log: any, i: number) => (
@@ -518,9 +529,9 @@ export default function HenProfile() {
         <EmptyState
           icon={Heart}
           title="Inga hälsonoteringar ännu"
-          description={`När något händer med ${hen.name} kan du samla anteckningar här – till exempel ruggningsperiod, sjukdom, veterinärbesök eller personliga observationer.`}
-          actionLabel="Lägg till anteckning"
-          onAction={startEditing}
+          description={`När något händer med ${hen.name} kan du samla anteckningar här – till exempel ruggningsperiod, sjukdom, veterinärbesök eller personliga observationer. Hönsgården hjälper dig formulera och påminner om vad du kan hålla koll på.`}
+          actionLabel="Lägg till hälsonotering"
+          onAction={() => setHealthNoteOpen(true)}
         />
       )}
 
