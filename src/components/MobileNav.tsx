@@ -1,4 +1,4 @@
-import { Home, Egg, Bird, ClipboardCheck, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart } from 'lucide-react';
+import { Home, Egg, Bird, BarChart3, MoreHorizontal, Package, Syringe, Baby, Coins, Settings, Crown, Shield, Bot, PieChart, ClipboardCheck, CalendarDays, Upload } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,22 +6,44 @@ import { supabase } from '@/integrations/supabase/client';
 
 const primaryItems = [
   { title: 'Hem', url: '/app', icon: Home },
-  { title: 'Ägg', url: '/app/eggs', icon: Egg },
+  { title: 'Logga', url: '/app/eggs', icon: Egg },
   { title: 'Hönor', url: '/app/hens', icon: Bird },
-  { title: 'Uppgifter', url: '/app/tasks', icon: ClipboardCheck },
+  { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
   { title: 'Mer', url: '#more', icon: MoreHorizontal },
 ];
 
-const moreItems = [
-  { title: 'Agda AI', url: '/app/agda', icon: Bot },
-  { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
-  { title: 'Foder', url: '/app/feed', icon: Package },
-  { title: 'Kläckning', url: '/app/hatching', icon: Baby },
-  { title: 'Ekonomi', url: '/app/finance', icon: Coins },
-  { title: 'Statistik', url: '/app/statistics', icon: BarChart3 },
-  { title: 'Översikt', url: '/app/overview', icon: PieChart },
-  { title: 'Premium', url: '/app/premium', icon: Crown },
-  { title: 'Inställningar', url: '/app/settings', icon: Settings },
+const moreGroups = [
+  {
+    label: 'Dagligt',
+    items: [
+      { title: 'Uppgifter', url: '/app/tasks', icon: ClipboardCheck },
+      { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
+      { title: 'Agda AI', url: '/app/agda', icon: Bot },
+    ],
+  },
+  {
+    label: 'Flocken',
+    items: [
+      { title: 'Kläckning', url: '/app/hatching', icon: Baby },
+      { title: 'Kalender', url: '/app/calendar', icon: CalendarDays },
+      { title: 'Översikt', url: '/app/overview', icon: PieChart },
+    ],
+  },
+  {
+    label: 'Ekonomi',
+    items: [
+      { title: 'Foder', url: '/app/feed', icon: Package },
+      { title: 'Ekonomi', url: '/app/finance', icon: Coins },
+    ],
+  },
+  {
+    label: 'Mer',
+    items: [
+      { title: 'Premium', url: '/app/premium', icon: Crown },
+      { title: 'Import', url: '/app/import', icon: Upload },
+      { title: 'Inställningar', url: '/app/settings', icon: Settings },
+    ],
+  },
 ];
 
 export function MobileNav() {
@@ -36,9 +58,9 @@ export function MobileNav() {
     });
   }, [user?.id]);
 
-  const allMoreItems = isAdmin
-    ? [...moreItems, { title: 'Admin', url: '/app/admin', icon: Shield }]
-    : moreItems;
+  const groups = isAdmin
+    ? [...moreGroups, { label: 'Admin', items: [{ title: 'Admin', url: '/app/admin', icon: Shield }] }]
+    : moreGroups;
 
   return (
     <>
@@ -49,18 +71,25 @@ export function MobileNav() {
             className="absolute bottom-16 left-2 right-2 bg-card border border-border/60 rounded-2xl p-3 pb-safe-bottom-4 shadow-xl animate-fade-in-scale max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-3 gap-1">
-              {allMoreItems.map((item) => (
-                <NavLink
-                  key={item.url}
-                  to={item.url}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-[0.95]"
-                  activeClassName="text-primary bg-primary/8"
-                  onClick={() => setShowMore(false)}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="text-[10px] font-medium text-center leading-tight">{item.title}</span>
-                </NavLink>
+            <div className="space-y-3">
+              {groups.map((group) => (
+                <div key={group.label}>
+                  <p className="px-2 pb-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 font-medium">{group.label}</p>
+                  <div className="grid grid-cols-3 gap-1">
+                    {group.items.map((item) => (
+                      <NavLink
+                        key={item.url}
+                        to={item.url}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-[0.95]"
+                        activeClassName="text-primary bg-primary/8"
+                        onClick={() => setShowMore(false)}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <span className="text-[10px] font-medium text-center leading-tight">{item.title}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
