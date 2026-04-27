@@ -43,7 +43,7 @@ const Overview = React.lazy(() => import("./pages/Overview"));
 const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
-const EggSales = React.lazy(() => import("./pages/EggSalesProV3"));
+const EggSales = React.lazy(() => import("./pages/EggSalesProV4"));
 const PublicEggSale = React.lazy(() => import("./pages/PublicEggSaleV3"));
 
 const GuiderRedirect = () => {
