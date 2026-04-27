@@ -8,16 +8,21 @@ import {
   Egg,
   ArrowRight,
   ChartBar as BarChart2,
-  Heart,
   Star,
   Check,
   Bot,
-  Smartphone,
   Wheat,
   CalendarDays,
   Bird,
   ClipboardCheck,
   Calculator,
+  ReceiptText,
+  Camera,
+  Wallet,
+  ShoppingBasket,
+  Download,
+  Share2,
+  Link as LinkIcon,
 } from 'lucide-react';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -50,23 +55,34 @@ const staggerItem = {
 const features = [
   { icon: Egg, title: 'Äggloggning', desc: 'Logga dagens ägg på några sekunder och se hur värpningen förändras över tid.', href: '/agglogg' },
   { icon: Bird, title: 'Flock och hönsprofiler', desc: 'Samla namn, ras, bild, anteckningar och historik för varje höna i flocken.', href: '/app-for-honsagare' },
+  { icon: ReceiptText, title: 'Agda-säljgenerator', desc: 'Skapa egna säljsidor för ägg med bild, Swish, bokningsförfrågningar, lager och delningslänk.', href: '/login?mode=register', badge: 'NYHET' },
   { icon: CalendarDays, title: 'Hönskalender', desc: 'Håll koll på rutiner, rengöring, kvalsterkontroll, ruggning och säsong.', href: '/honskalender' },
   { icon: Wheat, title: 'Foderkostnad', desc: 'Registrera foderinköp och förstå vad dina ägg faktiskt kostar att producera.', href: '/foderkostnad-hons' },
   { icon: Egg, title: 'Kläckningskalender', desc: 'Följ dag 1 till 21 med milstolpar för lysning, vändning och kläckning.', href: '/klackningskalender' },
-  { icon: Bot, title: 'Agda AI', desc: 'Få hjälp och vardagstips baserat på din egen hönsgård och logghistorik.', href: '/login?mode=register', badge: 'PLUS' },
+  { icon: Bot, title: 'Agda AI', desc: 'Få hjälp, säljte xter och vardagstips baserat på din egen hönsgård och logghistorik.', href: '/login?mode=register', badge: 'PLUS' },
+  { icon: BarChart2, title: 'Statistik och insikter', desc: 'Följ trender, topplistor, snitt per höna och utveckling över tid.', href: '/login?mode=register' },
+];
+
+const agdaFeatures = [
+  { icon: LinkIcon, title: 'Egen försäljningslänk', desc: 'Skapa en enkel länk som honsgarden.se/s/bergs-agg och dela den i Facebookgrupper, SMS eller på gården.' },
+  { icon: Camera, title: 'Bild på det du säljer', desc: 'Ta en ny bild eller välj från galleri. Bilden visas som banner på säljsidan.' },
+  { icon: Wallet, title: 'Swish och prislista', desc: 'Visa Swishnummer, Swish-meddelande, pris per karta och prisförslag för 6-, 12- och 30-pack.' },
+  { icon: ShoppingBasket, title: 'Bokningsförfrågningar', desc: 'Köpare kan skicka namn, kontakt, antal kartor och meddelande direkt via säljsidan.' },
+  { icon: ClipboardCheck, title: 'Ordervy i appen', desc: 'Se alla bokningar, summa, status, säljlista, kundkontakt och markera betald eller hämtad.' },
+  { icon: Download, title: 'Export och kundlista', desc: 'Kopiera kundlista eller exportera bokningar som CSV för Excel eller Google Sheets.' },
 ];
 
 const problems = [
   'Du minns inte exakt när äggproduktionen började gå ner.',
   'Du vet inte vad fodret faktiskt kostar per ägg.',
   'Du har hälsoanteckningar i mobilen, lappar och huvudet samtidigt.',
-  'Du blandar ihop datum för kläckning, rengöring och påminnelser.',
+  'Du vill sälja ägg men saknar en enkel sida för pris, Swish, bild och bokningar.',
 ];
 
 const betterThanNotes = [
   { icon: ClipboardCheck, title: 'Appen påminner dig', desc: 'En anteckningsbok säger inte till när du borde kolla kvalster, fylla på foder eller följa upp en kläckning.' },
-  { icon: BarChart2, title: 'Historiken blir användbar', desc: 'Du ser trender, jämförelser och snitt – inte bara gamla siffror i en lista.' },
-  { icon: Calculator, title: 'Ekonomin blir tydlig', desc: 'När ägg och foder finns på samma plats kan du börja förstå kostnaden per ägg.' },
+  { icon: BarChart2, title: 'Historiken blir användbar', desc: 'Du ser trender, jämförelser, topplistor och snitt – inte bara gamla siffror i en lista.' },
+  { icon: Calculator, title: 'Ekonomin blir tydlig', desc: 'När ägg, foder och försäljning finns på samma plats kan du förstå kostnad och intäkt bättre.' },
 ];
 
 const testimonials = [
@@ -76,20 +92,22 @@ const testimonials = [
 ];
 
 const faqs = [
-  { q: 'Vad är Hönsgården?', a: 'Hönsgården är en svensk app för hobbyhönsägare. Du kan logga ägg, följa hönor och flockar, skapa rutiner, räkna foderkostnad och få bättre koll på hönsgårdens vardag.' },
-  { q: 'Vem är appen gjord för?', a: 'För dig som har höns hemma, på gården eller som hobbyuppfödning. Appen passar både små flockar på några hönor och större hobbyflockar.' },
-  { q: 'Varför är det bättre än anteckningsbok eller Excel?', a: 'Anteckningar är bra, men de räknar inte åt dig. Hönsgården gör historiken användbar: du får trender, statistik, påminnelser, kostnad per ägg och tydligare överblick.' },
-  { q: 'Är Hönsgården gratis?', a: 'Ja, du kan börja gratis. Grundfunktioner som äggloggning, hönsprofiler och enkel statistik räcker långt för att komma igång.' },
-  { q: 'Fungerar appen i mobilen?', a: 'Ja. Hönsgården är byggd mobil först, eftersom hönsägare oftast loggar ägg och rutiner direkt ute vid hönshuset.' },
+  { q: 'Vad är Hönsgården?', a: 'Hönsgården är en svensk app för hobbyhönsägare. Du kan logga ägg, följa hönor och flockar, skapa rutiner, räkna foderkostnad, sälja ägg via Agda-säljgeneratorn och få bättre koll på hönsgårdens vardag.' },
+  { q: 'Vad är Agda-säljgeneratorn?', a: 'Agda-säljgeneratorn hjälper dig skapa en egen försäljningssida för ägg. Du kan lägga upp bild, pris, Swish, hämtinformation och låta köpare skicka bokningsförfrågningar via en enkel länk.' },
+  { q: 'Kan jag se vem som beställt ägg?', a: 'Ja. Bokningsförfrågningar visas inne i appen under Agda sälj. Du ser kundnamn, kontakt, antal kartor, säljlista, summa, status och kan markera betald, hämtad eller avbokad.' },
+  { q: 'Kan jag exportera beställningar?', a: 'Ja. Du kan kopiera kundlista och exportera bokningar som CSV, så att de kan öppnas i Excel eller Google Sheets.' },
+  { q: 'Varför är det bättre än anteckningsbok eller Excel?', a: 'Anteckningar är bra, men de räknar inte åt dig. Hönsgården gör historiken användbar: du får trender, statistik, påminnelser, kostnad per ägg, säljsidor och tydligare överblick.' },
+  { q: 'Är Hönsgården gratis?', a: 'Ja, du kan börja gratis. Vissa mer avancerade funktioner, som AI, ekonomi, foder och utökade säljfunktioner kan ingå i Plus.' },
+  { q: 'Fungerar appen i mobilen och på dator?', a: 'Ja. Hönsgården är byggd för mobil, tablet och dator. Du kan logga ute vid hönshuset och hantera säljlistor eller export på större skärm.' },
 ];
 
 const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Fungerar i mobilen'];
-const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'Agda AI', 'Avancerad statistik', 'Foder och ekonomi', 'Smarta påminnelser', 'Kläckningsstöd'];
+const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'Agda AI', 'Agda-säljgenerator', 'Bokningsförfrågningar', 'Foder och ekonomi', 'Smarta påminnelser', 'Kläckningsstöd'];
 
 export default function Index() {
   useSeo({
-    title: 'Hönsgården – svensk app för hönsägare, ägglogg och hönskalender',
-    description: 'Hönsgården är en svensk app för hobbyhönsägare. Logga ägg, följ flocken, räkna foderkostnad, skapa påminnelser och få koll på hönsgården i mobilen.',
+    title: 'Hönsgården – ägglogg, hönskalender och Agda-säljgenerator',
+    description: 'Hönsgården är en svensk app för hönsägare. Logga ägg, följ flocken, räkna foderkostnad, skapa påminnelser och sälj ägg med Agda-säljgeneratorn.',
     path: '/',
     ogImage: 'https://honsgarden.se/blog-images/hens-garden.jpg',
     jsonLd: [
@@ -98,7 +116,7 @@ export default function Index() {
         name: 'Hönsgården',
         applicationCategory: 'LifestyleApplication',
         operatingSystem: 'Web, iOS, Android',
-        description: 'Svensk app för hobbyhönsägare med ägglogg, hönsprofiler, hönskalender, foderkostnad och statistik.',
+        description: 'Svensk app för hobbyhönsägare med ägglogg, hönsprofiler, hönskalender, foderkostnad, statistik och Agda-säljgenerator för äggförsäljning.',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
       },
       {
@@ -127,6 +145,9 @@ export default function Index() {
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1">
                   Svensk app för hobbyhönsägare
                 </Badge>
+                <Badge variant="secondary" className="bg-warning/15 text-warning-foreground border-warning/30 text-xs px-3 py-1">
+                  Nyhet: Agda-säljgenerator
+                </Badge>
                 <Badge variant="secondary" className="bg-background/70 text-foreground border-border text-xs px-3 py-1">
                   Gratis att börja
                 </Badge>
@@ -136,14 +157,14 @@ export default function Index() {
                 {...fadeUp(0.05)}
                 className="font-serif text-[2rem] sm:text-5xl md:text-6xl text-foreground leading-[1.08] mb-4 sm:mb-5"
               >
-                Få riktig koll på dina hönor – <span className="text-primary">ägg, flock, foder och rutiner</span>
+                Få riktig koll på dina hönor – <span className="text-primary">och sälj ägg enklare</span>
               </motion.h1>
 
               <motion.p
                 {...fadeUp(0.08)}
                 className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-5 sm:mb-6"
               >
-                Hönsgården är appen för dig som vill slippa lösa lappar, halva minnen och Excel-filer. Logga ägg, följ hönornas historik, räkna foderkostnad och få ordning på vardagen i hönshuset.
+                Hönsgården hjälper dig logga ägg, följa flocken, räkna foderkostnad och hantera vardagen i hönshuset. Med Agda-säljgeneratorn kan du dessutom skapa egna säljsidor med bild, Swish, bokningsförfrågningar och lagerkoll.
               </motion.p>
 
               <motion.div {...fadeUp(0.12)} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-5">
@@ -154,12 +175,12 @@ export default function Index() {
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="h-12 sm:h-13 px-8 text-base border-primary/30 text-primary hover:bg-primary/5">
-                  <a href="/agglogg">Se äggloggen</a>
+                  <a href="/login?mode=register">Testa Agda sälj</a>
                 </Button>
               </motion.div>
 
               <motion.div {...fadeUp(0.15)} className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-2xl mx-auto lg:mx-0">
-                {['Ägglogg på sekunder', 'Hönsprofiler och hälsa', 'Foderkostnad per ägg'].map((item) => (
+                {['Ägglogg på sekunder', 'Säljsida med Swish', 'Bokningar och export'].map((item) => (
                   <div key={item} className="flex items-center justify-center lg:justify-start gap-2 rounded-xl bg-background/70 border border-border/50 px-3 py-2 text-sm text-foreground">
                     <Check className="h-4 w-4 text-primary shrink-0" />
                     {item}
@@ -197,7 +218,7 @@ export default function Index() {
           <motion.div {...fadeUp()} className="text-center max-w-3xl mx-auto mb-10">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Vad löser Hönsgården?</h2>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Efter ett tag med höns är det inte själva äggen som är svåra. Det svåra är att komma ihåg allt runt omkring: vem värper, vad fodret kostar, när du gjorde rent, om en höna varit hängig och hur flocken faktiskt utvecklas.
+              Efter ett tag med höns är det inte själva äggen som är svåra. Det svåra är att komma ihåg allt runt omkring: vem värper, vad fodret kostar, när du gjorde rent, om en höna varit hängig och hur du smidigast säljer överskottet.
             </p>
           </motion.div>
 
@@ -228,6 +249,44 @@ export default function Index() {
         </div>
       </section>
 
+      <section className="py-16 sm:py-24 bg-secondary/20">
+        <div className="container max-w-6xl mx-auto px-5 sm:px-6">
+          <motion.div {...fadeUp()} className="text-center max-w-3xl mx-auto mb-12">
+            <Badge className="mb-3 bg-primary/10 text-primary border-primary/20">Nyhet</Badge>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Agda-säljgeneratorn gör äggförsäljning enklare</h2>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              Skapa en egen säljsida för dina ägg, dela länken i en lokal grupp och samla bokningsförfrågningar direkt i Hönsgården.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+          >
+            {agdaFeatures.map((f) => (
+              <motion.div key={f.title} variants={staggerItem} className="p-6 rounded-2xl bg-card border border-border shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <f.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-serif text-lg text-foreground mb-1.5">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div {...fadeUp(0.1)} className="mt-10 rounded-3xl bg-background border border-primary/15 p-6 sm:p-8 text-center shadow-sm">
+            <p className="text-sm text-muted-foreground mb-2">Exempel på länk</p>
+            <p className="font-mono text-sm sm:text-base text-foreground break-all bg-muted/40 rounded-xl px-4 py-3 mb-5">https://honsgarden.se/s/bergs-agg</p>
+            <Button asChild size="lg" className="gap-2">
+              <a href="/login?mode=register">Skapa din första säljsida <ArrowRight className="h-4 w-4" /></a>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
       <section id="sa-funkar-det" className="relative z-10 py-16 sm:py-20"
         style={{ background: 'linear-gradient(180deg, hsl(var(--secondary)/0.25) 0%, hsl(var(--background)) 100%)' }}
       >
@@ -246,8 +305,8 @@ export default function Index() {
           >
             {[
               { step: '1', emoji: '🐔', title: 'Lägg till hönor', desc: 'Börja med namn. Ras, bild och anteckningar kan du fylla i senare.' },
-              { step: '2', emoji: '🥚', title: 'Logga dagens ägg', desc: 'Ange antal, spara och låt historiken växa dag för dag.' },
-              { step: '3', emoji: '📊', title: 'Se mönster', desc: 'Följ trender, kostnader, rutiner och vad som händer i flocken.' },
+              { step: '2', emoji: '🥚', title: 'Logga eller sälj ägg', desc: 'Logga dagens ägg eller skapa en säljsida när du har överskott.' },
+              { step: '3', emoji: '📊', title: 'Se mönster och följ upp', desc: 'Följ statistik, kostnader, bokningar, rutiner och vad som händer i flocken.' },
             ].map((s) => (
               <motion.div key={s.step} variants={staggerItem} className="text-center p-6 rounded-2xl bg-background border border-border shadow-sm">
                 <span className="text-3xl mb-3 block">{s.emoji}</span>
@@ -265,7 +324,7 @@ export default function Index() {
           <motion.div {...fadeUp()} className="text-center mb-12 sm:mb-16">
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Funktioner som hönsägare faktiskt använder</h2>
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Hönsgården är inte byggd för att se avancerad ut. Den är byggd för att hjälpa dig göra rätt saker i rätt tid – ute i den riktiga hönsvardagen.
+              Hönsgården är byggd för den riktiga hönsvardagen: loggning, flock, foder, ekonomi, påminnelser, AI och försäljning.
             </p>
           </motion.div>
 
@@ -274,7 +333,7 @@ export default function Index() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-60px' }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
           >
             {features.map((f) => (
               <motion.a
@@ -395,7 +454,7 @@ export default function Index() {
             <div className="text-5xl mb-4">🐔</div>
             <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Flocken berättar mer än man tror</h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
-              När du loggar ägg, foder, hälsa och rutiner får du till slut något mycket bättre än magkänsla: du får riktig erfarenhet sparad över tid.
+              När du loggar ägg, foder, hälsa, försäljning och rutiner får du till slut något mycket bättre än magkänsla: du får riktig erfarenhet sparad över tid.
             </p>
             <Button asChild size="lg" className="h-14 px-10 text-lg gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.4)] hover:scale-[1.02] transition-transform">
               <a href="/login?mode=register">
