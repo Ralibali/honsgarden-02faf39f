@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
   Camera,
-  CheckCircle2,
   Copy,
   ExternalLink,
   Facebook,
@@ -113,6 +113,22 @@ export default function EggSalesProV2() {
   const [aiLoading, setAiLoading] = useState(false);
   const [generatedTexts, setGeneratedTexts] = useState<MarketingTexts | null>(null);
 
+  const { data: existingListings = [], refetch: refetchListings } = useQuery({
+    queryKey: ['my-public-egg-sale-listings'],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return [];
+      const { data, error } = await (supabase as any)
+        .from('public_egg_sale_listings')
+        .select('*')
+        .eq('user_id', userData.user.id)
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 30_000,
+  });
+
   const packCount = Math.max(1, safeNumber(salePacks, 1));
   const eggsPerPack = Math.max(1, safeNumber(packSize, 12));
   const price = Math.max(1, safeNumber(pricePerPack, 60));
@@ -134,6 +150,33 @@ export default function EggSalesProV2() {
   const saleUrl = `${PUBLIC_BASE_URL}/s/${publishedSlug || draftSlug}`;
 
   const resetGenerated = () => setGeneratedTexts(null);
+
+  const loadListingForEdit = (listing: any) => {
+    setPublishedId(listing.id);
+    setPublishedSlug(listing.slug || '');
+    setCustomSlug(listing.slug || '');
+    setTitle(listing.title || 'Färska ägg till salu');
+    setSellingPoint(listing.description || 'Färska ägg från lokal hönsgård.');
+    setImageUrl(listing.image_url || '');
+    setSalePacks(String(listing.packs_available || 1));
+    setPackSize(String(listing.eggs_per_pack || 12));
+    setPricePerPack(String(Math.round(Number(listing.price_per_pack || 60))));
+    setLocation(listing.location || '');
+    setPickupInfo(listing.pickup_info || 'Hämtas efter överenskommelse.');
+    setContact(listing.contact_info || 'Skicka meddelande vid intresse');
+    setSwishNumber(listing.swish_number || '');
+    setSwishName(listing.swish_name || '');
+    setSwishMessage(listing.swish_message || 'Ägg');
+    setGeneratedTexts(null);
+    toast({ title: 'Säljlistan är öppnad för redigering', description: `${PUBLIC_BASE_URL}/s/${listing.slug}` });
+  };
+
+  const startNewListing = () => {
+    setPublishedId(null);
+    setPublishedSlug('');
+    setCustomSlug('');
+    toast({ title: 'Ny säljlista', description: 'Nästa publicering skapar en ny unik länk.' });
+  };
 
   const templateTexts = useMemo<MarketingTexts>(() => {
     const place = location.trim() || 'lokalt i området';
@@ -235,7 +278,9 @@ export default function EggSalesProV2() {
       if (result.error) throw result.error;
       setPublishedId(result.data.id);
       setPublishedSlug(result.data.slug);
-      toast({ title: 'Säljlistan är publicerad ✨', description: `${PUBLIC_BASE_URL}/s/${result.data.slug}` });
+      setCustomSlug(result.data.slug);
+      await refetchListings();
+      toast({ title: publishedId ? 'Säljlistan är uppdaterad ✨' : 'Säljlistan är publicerad ✨', description: `${PUBLIC_BASE_URL}/s/${result.data.slug}` });
     } catch (err: any) {
       toast({ title: 'Kunde inte publicera säljlistan', description: err?.message || 'Försök igen.', variant: 'destructive' });
     } finally {
@@ -292,11 +337,41 @@ export default function EggSalesProV2() {
             Skapa en unik säljlista med bild, Swish, AI-texter och enkel länk som {PUBLIC_BASE_URL}/s/bergs-agg.
           </p>
         </div>
-        <Button onClick={publishListing} disabled={publishing} className="rounded-xl gap-2">
-          {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />}
-          {publishedSlug ? 'Uppdatera säljlista' : 'Publicera säljlista'}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          {publishedId && <Button variant="outline" onClick={startNewListing} className="rounded-xl">Skapa ny</Button>}
+          <Button onClick={publishListing} disabled={publishing} className="rounded-xl gap-2">
+            {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />}
+            {publishedSlug ? 'Uppdatera säljlista' : 'Publicera säljlista'}
+          </Button>
+        </div>
       </div>
+
+      {existingListings.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h2 className="font-serif text-base text-foreground">Mina publicerade säljlistor</h2>
+                <p className="text-xs text-muted-foreground">Öppna en befintlig sida för att redigera och uppdatera samma länk.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {existingListings.slice(0, 6).map((listing: any) => (
+                <div key={listing.id} className={`rounded-2xl border p-3 space-y-2 ${publishedId === listing.id ? 'border-primary/40 bg-primary/5' : 'border-border/50 bg-muted/15'}`}>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{listing.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{PUBLIC_BASE_URL}/s/{listing.slug}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button size="sm" variant="outline" className="rounded-xl" onClick={() => loadListingForEdit(listing)}>Redigera</Button>
+                    <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => window.open(`${PUBLIC_BASE_URL}/s/${listing.slug}`, '_blank')}>Visa</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
         <div className="xl:col-span-3 space-y-4">
@@ -407,7 +482,7 @@ export default function EggSalesProV2() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Button onClick={publishListing} disabled={publishing} className="rounded-xl gap-2">
                     {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />}
-                    Publicera
+                    {publishedId ? 'Uppdatera' : 'Publicera'}
                   </Button>
                   <Button variant="outline" onClick={() => copyText(saleUrl, 'Säljlänken')} className="rounded-xl gap-2"><Copy className="h-4 w-4" /> Kopiera</Button>
                   <Button variant="outline" onClick={() => window.open(saleUrl, '_blank')} className="rounded-xl gap-2"><ExternalLink className="h-4 w-4" /> Visa</Button>
