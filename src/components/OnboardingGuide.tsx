@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowRight, X, Bird, Egg, Sparkles, Loader2, BarChart3, Bell } from 'lucide-react';
+import { ArrowRight, X, Bird, Egg, Sparkles, Loader2, BarChart3, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -222,34 +222,22 @@ export default function OnboardingGuide() {
                   </button>
                 </div>
                 <div className="px-6 pt-4 pb-6">
-                  <h2 className="font-serif text-xl text-foreground mb-1">Välkommen till Hönsgården!</h2>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary mb-2">Kom igång på under en minut</p>
+                  <h2 className="font-serif text-xl text-foreground mb-1">Låt oss skapa din hönsgård</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    Börja med att lägga till dina hönor. Sedan kan du logga ägg, följa utvecklingen och få hjälp med vardagens små rutiner.
+                    Först lägger du till en höna. Sedan kan du logga dagens ägg och få statistik direkt på dashboarden.
                   </p>
 
-                  <div className="grid grid-cols-2 gap-2 mb-5">
-                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
-                      <Bird className="h-4 w-4 text-primary mb-1" />
-                      <p className="text-[11px] font-medium text-foreground">1. Lägg till hönor</p>
-                    </div>
-                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
-                      <Egg className="h-4 w-4 text-primary mb-1" />
-                      <p className="text-[11px] font-medium text-foreground">2. Logga ägg</p>
-                    </div>
-                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
-                      <BarChart3 className="h-4 w-4 text-primary mb-1" />
-                      <p className="text-[11px] font-medium text-foreground">3. Se statistik</p>
-                    </div>
-                    <div className="rounded-xl bg-muted/30 border border-border/50 p-3">
-                      <Bell className="h-4 w-4 text-primary mb-1" />
-                      <p className="text-[11px] font-medium text-foreground">4. Skapa påminnelser</p>
-                    </div>
+                  <div className="space-y-2 mb-5">
+                    <ActivationStep icon={Bird} title="1. Lägg till första hönan" text="Det räcker med ett namn. Resten kan du fylla i senare." active />
+                    <ActivationStep icon={Egg} title="2. Logga dagens ägg" text="Första äggloggen gör att appen börjar visa trender." />
+                    <ActivationStep icon={BarChart3} title="3. Se din dashboard vakna" text="Följ vecka, månad, streak och bästa höna." />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <ProgressDots current={0} total={3} />
                     <Button size="sm" className="h-9 px-5 text-xs rounded-xl gap-1.5" onClick={() => setStep(1)}>
-                      Lägg till första hönan <ArrowRight className="h-3.5 w-3.5" />
+                      Lägg till höna <ArrowRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                   <div className="mt-4 pt-3 border-t border-border/40">
@@ -259,7 +247,7 @@ export default function OnboardingGuide() {
                       className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors py-2 rounded-xl hover:bg-primary/5"
                     >
                       {loadingDemo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                      {loadingDemo ? 'Skapar exempeldata...' : 'Visa med exempeldata istället'}
+                      {loadingDemo ? 'Skapar exempeldata...' : 'Testa med exempeldata istället'}
                     </button>
                   </div>
                   <button onClick={skipAndClose} className="w-full text-center text-[11px] text-muted-foreground/60 mt-2 hover:text-muted-foreground transition-colors">
@@ -284,7 +272,7 @@ export default function OnboardingGuide() {
                 <div className="px-6 pt-4 pb-6">
                   <h2 className="font-serif text-xl text-foreground mb-1">Lägg till din första höna</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Det räcker med ett namn. Ras och mer information kan du fylla i senare.
+                    Namnet är det viktiga. Ras är valfritt och hjälper bara statistiken kännas mer personlig.
                   </p>
 
                   <div className="mb-3">
@@ -380,8 +368,14 @@ export default function OnboardingGuide() {
                 <div className="px-6 pt-4 pb-6">
                   <h2 className="font-serif text-xl text-foreground mb-1">{createdHenName} är tillagd!</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                    Snyggt! Nästa steg är att logga dagens ägg. Då kan Hönsgården börja visa statistik och trender över tid.
+                    Perfekt. Logga dagens ägg nu så får dashboarden direkt bättre veckostatistik, streak och produktion per höna.
                   </p>
+                  <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 mb-5 flex gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Du kan alltid använda den gröna äggknappen längst ned för att logga ägg från vilken sida som helst.
+                    </p>
+                  </div>
                   <div className="flex items-center justify-between">
                     <ProgressDots current={2} total={3} />
                     <Button
@@ -405,6 +399,20 @@ export default function OnboardingGuide() {
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ActivationStep({ icon: Icon, title, text, active = false }: { icon: any; title: string; text: string; active?: boolean }) {
+  return (
+    <div className={`flex gap-3 rounded-xl border p-3 ${active ? 'border-primary/20 bg-primary/5' : 'border-border/50 bg-muted/20'}`}>
+      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${active ? 'bg-primary/10 text-primary' : 'bg-background text-muted-foreground'}`}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-foreground">{title}</p>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">{text}</p>
+      </div>
+    </div>
   );
 }
 
