@@ -2044,6 +2044,10 @@ export type Database = {
         }[]
       }
       get_farm_user_ids: { Args: { _uid: string }; Returns: string[] }
+      get_public_egg_sale_reserved_packs: {
+        Args: { p_listing_id: string }
+        Returns: number
+      }
       get_user_farm_ids: { Args: { _uid: string }; Returns: string[] }
       grant_premium_days: {
         Args: { _days: number; _user_id: string }
