@@ -24,6 +24,25 @@ function asCurrency(value: unknown, fallback = '') {
   return Number.isFinite(n) && n > 0 ? `${Math.round(n)} kr` : fallback;
 }
 
+function cleanSwishNumber(value: string) {
+  return value.replace(/[^0-9]/g, '');
+}
+
+function toBase64Utf8(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  return btoa(binary);
+}
+
+function buildSwishUrl(number: string, amount: number, message: string) {
+  const cleaned = cleanSwishNumber(number);
+  if (!cleaned || !amount || amount < 1) return '';
+  const safeMessage = message.replace(/[;\n\r]/g, ' ').trim().slice(0, 50) || 'Ägg';
+  const payload = `C${cleaned};${Math.round(amount)};${safeMessage};`;
+  return `swish://payment?data=${encodeURIComponent(toBase64Utf8(payload))}`;
+}
+
 export default function PublicEggSaleV2() {
   const [params] = useSearchParams();
   const { slug } = useParams<{ slug?: string }>();
@@ -111,10 +130,26 @@ export default function PublicEggSaleV2() {
 
   const remainingPacks = Math.max(0, sale.packs - bookedPacks);
   const isSoldOut = sale.soldOutManually || remainingPacks <= 0;
+  const selectedPacks = Math.max(1, Math.min(remainingPacks || 1, Number(packsToBook) || 1));
+  const selectedAmount = selectedPacks * (Number(sale.price) || 0);
+  const swishMessage = `${sale.swishMsg || 'Ägg'}${customerName.trim() ? ` ${customerName.trim()}` : ''}`.trim();
+  const swishUrl = buildSwishUrl(sale.swish, selectedAmount, swishMessage);
 
   const swishText = sale.swish
-    ? `Swish: ${sale.swish}${sale.swishName ? ` (${sale.swishName})` : ''}\nMeddelande: ${sale.swishMsg}`
+    ? `Swish: ${sale.swish}${sale.swishName ? ` (${sale.swishName})` : ''}\nBelopp: ${selectedAmount || sale.price} kr\nMeddelande: ${swishMessage}`
     : 'Swishuppgifter saknas. Kontakta säljaren för betalning.';
+
+  const openSwish = () => {
+    if (!swishUrl) {
+      copy(swishText);
+      toast({ title: 'Swishuppgifter kopierade', description: 'Öppna Swish och klistra in uppgifterna manuellt.' });
+      return;
+    }
+    window.location.href = swishUrl;
+    window.setTimeout(() => {
+      toast({ title: 'Öppnade Swish?', description: 'Om inget hände kan du kopiera Swishuppgifterna och fylla i manuellt.' });
+    }, 900);
+  };
 
   const shareText = `${sale.title}\n\n${sale.description}\n\n${sale.size}-pack: ${sale.price} kr\n${remainingPacks} kartor kvar\nHämtas: ${sale.location}\n${sale.pickup}\n\n${sale.contact}\n${sale.swish ? `\n${swishText}` : ''}`;
 
@@ -141,7 +176,7 @@ export default function PublicEggSaleV2() {
       setCustomerMessage('');
       setPacksToBook('1');
       await queryClient.invalidateQueries({ queryKey: ['public-egg-sale-reserved-packs', listing?.id] });
-      toast({ title: 'Bokningen är skickad 🥚', description: 'Kontakta gärna säljaren om du vill bekräfta hämtning och Swish.' });
+      toast({ title: 'Bokningen är skickad 🥚', description: 'Du kan Swisha enligt uppgifterna på sidan.' });
     },
     onError: (err: any) => toast({ title: 'Kunde inte boka', description: err?.message || 'Försök igen.', variant: 'destructive' }),
   });
@@ -198,7 +233,7 @@ export default function PublicEggSaleV2() {
           <CardContent className="p-5 sm:p-6 space-y-5">
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="rounded-2xl bg-card/80 border border-border/50 p-4"><p className="text-2xl font-bold tabular-nums text-foreground">{sale.size}</p><p className="data-label text-[10px] mt-1">ägg/karta</p></div>
-              <div className="rounded-2xl bg-card/80 border border-border/50 p-4"><p className="text-2xl font-bold tabular-nums text-foreground">{sale.price}</p><p className="data-label text-[10px] mt-1">kr</p></div>
+              <div className="rounded-2xl bg-card/80 border border-border/50 p-4"><p className="text-2xl font-bold tabular-nums text-foreground">{sale.price}</p><p className="data-label text-[10px] mt-1">kr/karta</p></div>
               <div className={`rounded-2xl border p-4 ${isSoldOut ? 'bg-destructive/5 border-destructive/20' : 'bg-card/80 border-border/50'}`}><p className="text-2xl font-bold tabular-nums text-foreground">{isSoldOut ? 0 : remainingPacks}</p><p className="data-label text-[10px] mt-1">kartor kvar</p></div>
             </div>
 
@@ -210,7 +245,7 @@ export default function PublicEggSaleV2() {
               <div className="flex gap-3 border-t border-border/40 pt-3"><MessageCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" /><div><p className="text-sm font-medium text-foreground">Boka / kontakta</p><p className="text-sm text-muted-foreground whitespace-pre-wrap">{sale.contact}</p></div></div>
             </div>
 
-            <Card className="border-primary/20 bg-primary/5 shadow-none"><CardContent className="p-4 space-y-3"><div className="flex gap-3"><Wallet className="h-5 w-5 text-primary shrink-0 mt-0.5" /><div><p className="text-sm font-medium text-foreground">Betala med Swish</p><p className="text-sm text-muted-foreground whitespace-pre-wrap">{swishText}</p></div></div>{sale.swish && <Button variant="outline" className="w-full rounded-xl gap-2" onClick={() => copy(swishText)}><Copy className="h-4 w-4" /> Kopiera Swishuppgifter</Button>}</CardContent></Card>
+            <Card className="border-primary/20 bg-primary/5 shadow-none"><CardContent className="p-4 space-y-3"><div className="flex gap-3"><Wallet className="h-5 w-5 text-primary shrink-0 mt-0.5" /><div><p className="text-sm font-medium text-foreground">Betala med Swish</p><p className="text-sm text-muted-foreground whitespace-pre-wrap">{swishText}</p></div></div>{sale.swish && <div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><Button className="w-full rounded-xl gap-2" onClick={openSwish}><Wallet className="h-4 w-4" /> Öppna Swish</Button><Button variant="outline" className="w-full rounded-xl gap-2" onClick={() => copy(swishText)}><Copy className="h-4 w-4" /> Kopiera uppgifter</Button></div>}<p className="text-[11px] text-muted-foreground leading-relaxed">Välj antal kartor i bokningsfältet nedan innan du öppnar Swish, så räknas beloppet automatiskt.</p></CardContent></Card>
 
             {listing?.id && (
               <Card className="border-border/50 bg-card/80 shadow-none"><CardContent className="p-4 space-y-3">
@@ -220,7 +255,8 @@ export default function PublicEggSaleV2() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Namn *" className="rounded-xl" /><Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Telefon / kontakt" className="rounded-xl" /></div>
                     <Input type="number" min="1" max={remainingPacks} value={packsToBook} onChange={(e) => setPacksToBook(e.target.value)} placeholder="Antal kartor" className="rounded-xl" />
                     <Textarea value={customerMessage} onChange={(e) => setCustomerMessage(e.target.value)} placeholder="Meddelande, t.ex. när du vill hämta" className="rounded-xl min-h-[80px]" />
-                    <Button onClick={() => bookingMutation.mutate()} disabled={bookingMutation.isPending} className="w-full rounded-xl gap-2"><CheckCircle2 className="h-4 w-4" /> {bookingMutation.isPending ? 'Bokar...' : 'Boka ägg'}</Button>
+                    <div className="rounded-xl bg-muted/30 border border-border/40 p-3 text-sm text-muted-foreground">Att betala: <strong className="text-foreground">{selectedAmount} kr</strong> · Meddelande: <strong className="text-foreground">{swishMessage}</strong></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><Button onClick={() => bookingMutation.mutate()} disabled={bookingMutation.isPending} className="w-full rounded-xl gap-2"><CheckCircle2 className="h-4 w-4" /> {bookingMutation.isPending ? 'Bokar...' : 'Boka ägg'}</Button>{sale.swish && <Button type="button" variant="outline" onClick={openSwish} className="w-full rounded-xl gap-2"><Wallet className="h-4 w-4" /> Öppna Swish</Button>}</div>
                   </>
                 )}
               </CardContent></Card>
