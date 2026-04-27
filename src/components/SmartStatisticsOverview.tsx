@@ -74,8 +74,8 @@ export default function SmartStatisticsOverview() {
 
   const topHen = useMemo(() => {
     return [...(hensWithEggs as any[])]
-      .filter((h) => h.hen_type !== 'rooster')
-      .sort((a, b) => (b.total_eggs || 0) - (a.total_eggs || 0))[0] || null;
+      .filter((h) => h.hen_type !== 'rooster' && Number(h.total_eggs || 0) > 0)
+      .sort((a, b) => Number(b.total_eggs || 0) - Number(a.total_eggs || 0))[0] || null;
   }, [hensWithEggs]);
 
   const insights = useMemo(() => {
@@ -104,7 +104,7 @@ export default function SmartStatisticsOverview() {
     if (!topHen && activeHens.length > 0) {
       items.push({ title: 'Koppla ägg till hönor', text: 'Logga ägg på enskilda hönor om du vill se vem som värper mest och vem som behöver extra koll.', icon: Target, path: '/app/hens', cta: 'Se hönor', tone: 'info' });
     } else if (topHen) {
-      items.push({ title: `${topHen.name} leder topplistan`, text: `${topHen.name} har ${topHen.total_eggs || 0} ägg loggade totalt. Det här gör hönsprofilerna mer levande och användbara.`, icon: Target, path: `/app/hens/${topHen.id}`, cta: 'Öppna profil', tone: 'good' });
+      items.push({ title: `${topHen.name} leder topplistan`, text: `${topHen.name} har ${Number(topHen.total_eggs || 0)} ägg loggade totalt. Det här gör hönsprofilerna mer levande och användbara.`, icon: Target, path: `/app/hens/${topHen.id}`, cta: 'Öppna profil', tone: 'good' });
     }
 
     return items.slice(0, 4);
