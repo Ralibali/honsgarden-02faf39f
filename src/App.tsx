@@ -46,6 +46,7 @@ const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
 const EggSales = React.lazy(() => import("./pages/EggSales"));
+const PublicEggSale = React.lazy(() => import("./pages/PublicEggSale"));
 
 // Konsolidering: /guider/* → /blogg/* (canonical bor på /blogg)
 const GuiderRedirect = () => {
@@ -80,7 +81,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Clear React Query cache when user changes to prevent data leakage
 function CacheClearer() {
   const { user } = useAuth();
   const prevUserId = React.useRef<string | null>(user?.id ?? null);
@@ -113,6 +113,7 @@ const AppRoutes = () => (
         <Route path="/foderkostnad-hons" element={<SeoLandingPage pageKey="foderkostnad-hons" />} />
         <Route path="/klackningskalender" element={<SeoLandingPage pageKey="klackningskalender" />} />
         <Route path="/borja-med-hons" element={<SeoLandingPage pageKey="borja-med-hons" />} />
+        <Route path="/s/agg" element={<PublicEggSale />} />
         <Route path="/login" element={<Login />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/reset-password" element={<ResetPassword />} />
