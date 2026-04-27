@@ -9,11 +9,9 @@ import CookieConsent from "./components/CookieConsent";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { usePageTracking, useAutoClickTracking } from "@/hooks/useTracking";
 
-// Eager: landing + login (critical path)
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 
-// Lazy: everything behind auth
 const AppLayout = React.lazy(() => import("./components/AppLayout"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Eggs = React.lazy(() => import("./pages/Eggs"));
@@ -45,7 +43,7 @@ const Overview = React.lazy(() => import("./pages/Overview"));
 const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
-const EggSales = React.lazy(() => import("./pages/EggSales"));
+const EggSales = React.lazy(() => import("./pages/EggSalesPro"));
 const PublicEggSale = React.lazy(() => import("./pages/PublicEggSale"));
 
 const GuiderRedirect = () => {
