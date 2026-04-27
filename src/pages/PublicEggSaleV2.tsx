@@ -50,16 +50,14 @@ export default function PublicEggSaleV2() {
     staleTime: 30_000,
   });
 
-  const { data: bookings = [] } = useQuery({
-    queryKey: ['public-egg-sale-bookings-public', listing?.id],
+  const { data: bookedPacks = 0 } = useQuery({
+    queryKey: ['public-egg-sale-reserved-packs', listing?.id],
     enabled: Boolean(listing?.id),
     queryFn: async () => {
       const { data, error } = await (supabase as any)
-        .from('public_egg_sale_bookings')
-        .select('packs,status')
-        .eq('listing_id', listing.id);
-      if (error) return [];
-      return data || [];
+        .rpc('get_public_egg_sale_reserved_packs', { p_listing_id: listing.id });
+      if (error) return 0;
+      return Number(data) || 0;
     },
     staleTime: 15_000,
   });
@@ -111,9 +109,6 @@ export default function PublicEggSaleV2() {
     };
   }, [listing, params]);
 
-  const bookedPacks = (bookings as any[])
-    .filter((b) => b.status !== 'cancelled')
-    .reduce((sum, b) => sum + (Number(b.packs) || 0), 0);
   const remainingPacks = Math.max(0, sale.packs - bookedPacks);
   const isSoldOut = sale.soldOutManually || remainingPacks <= 0;
 
@@ -145,7 +140,7 @@ export default function PublicEggSaleV2() {
       setCustomerPhone('');
       setCustomerMessage('');
       setPacksToBook('1');
-      await queryClient.invalidateQueries({ queryKey: ['public-egg-sale-bookings-public', listing?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['public-egg-sale-reserved-packs', listing?.id] });
       toast({ title: 'Bokningen är skickad 🥚', description: 'Kontakta gärna säljaren om du vill bekräfta hämtning och Swish.' });
     },
     onError: (err: any) => toast({ title: 'Kunde inte boka', description: err?.message || 'Försök igen.', variant: 'destructive' }),
