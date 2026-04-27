@@ -21,3 +21,5 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = false
   [functions.sync-soro-blog]
     verify_jwt = false
+  [functions.egg-sales-marketing]
+    verify_jwt = true
