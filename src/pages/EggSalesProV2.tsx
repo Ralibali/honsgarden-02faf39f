@@ -306,7 +306,7 @@ export default function EggSalesProV2() {
                 <Wand2 className="h-5 w-5 text-primary mt-1" />
                 <div>
                   <h2 className="font-serif text-lg text-foreground">Säljlista</h2>
-                  <p className="text-sm text-muted-foreground">Fyll i erbjudandet och ladda upp en bild från mobilen.</p>
+                  <p className="text-sm text-muted-foreground">Fyll i erbjudandet och välj om du vill ta en ny bild eller använda en befintlig bild.</p>
                 </div>
               </div>
 
@@ -342,12 +342,33 @@ export default function EggSalesProV2() {
                       }}
                     />
                     <span className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                      {imageUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      {imageUploading ? 'Laddar upp...' : 'Ta/ladda upp bild'}
+                      {imageUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                      {imageUploading ? 'Laddar upp...' : 'Ta ny bild'}
                     </span>
                   </label>
-                  <Input value={imageUrl} onChange={(e) => { setImageUrl(e.target.value); resetGenerated(); }} placeholder="Eller klistra in bildlänk" className="rounded-xl h-10" />
+
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      disabled={imageUploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadImage(file);
+                        e.currentTarget.value = '';
+                      }}
+                    />
+                    <span className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background text-sm font-medium text-foreground hover:bg-muted/50 transition-colors">
+                      {imageUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      Välj från galleri
+                    </span>
+                  </label>
                 </div>
+                <Input value={imageUrl} onChange={(e) => { setImageUrl(e.target.value); resetGenerated(); }} placeholder="Eller klistra in bildlänk" className="rounded-xl h-10" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  På mobil öppnar “Ta ny bild” kameran. “Välj från galleri” låter dig välja en befintlig bild från bildbiblioteket eller filer.
+                </p>
               </div>
 
               <label className="space-y-1.5 block">
