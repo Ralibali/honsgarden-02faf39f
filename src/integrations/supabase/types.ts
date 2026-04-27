@@ -1137,6 +1137,131 @@ export type Database = {
         }
         Relationships: []
       }
+      public_egg_sale_bookings: {
+        Row: {
+          created_at: string
+          customer_message: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          listing_id: string
+          packs: number
+          seller_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_message?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          listing_id: string
+          packs?: number
+          seller_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_message?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          listing_id?: string
+          packs?: number
+          seller_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_egg_sale_bookings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_egg_sale_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_egg_sale_listings: {
+        Row: {
+          contact_info: string | null
+          created_at: string
+          description: string
+          eggs_per_pack: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location: string | null
+          p12_price: number | null
+          p30_price: number | null
+          p6_price: number | null
+          packs_available: number
+          pickup_info: string | null
+          price_per_pack: number
+          reserved_packs: number
+          slug: string
+          sold_out_manually: boolean
+          swish_message: string | null
+          swish_name: string | null
+          swish_number: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string
+          description?: string
+          eggs_per_pack?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          p12_price?: number | null
+          p30_price?: number | null
+          p6_price?: number | null
+          packs_available?: number
+          pickup_info?: string | null
+          price_per_pack?: number
+          reserved_packs?: number
+          slug: string
+          sold_out_manually?: boolean
+          swish_message?: string | null
+          swish_name?: string | null
+          swish_number?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string
+          description?: string
+          eggs_per_pack?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          p12_price?: number | null
+          p30_price?: number | null
+          p6_price?: number | null
+          packs_available?: number
+          pickup_info?: string | null
+          price_per_pack?: number
+          reserved_packs?: number
+          slug?: string
+          sold_out_manually?: boolean
+          swish_message?: string | null
+          swish_name?: string | null
+          swish_number?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           function_name: string
