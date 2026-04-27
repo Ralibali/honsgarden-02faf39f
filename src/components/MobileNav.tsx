@@ -34,7 +34,7 @@ const moreGroups = [
     items: [
       { title: 'Foder', url: '/app/feed', icon: Package },
       { title: 'Ekonomi', url: '/app/finance', icon: Coins },
-      { title: 'Sälj ägg', url: '/app/egg-sales', icon: ReceiptText },
+      { title: 'Agda sälj', url: '/app/egg-sales', icon: ReceiptText },
     ],
   },
   {
