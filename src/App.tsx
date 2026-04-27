@@ -48,7 +48,6 @@ const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
 const EggSales = React.lazy(() => import("./pages/EggSales"));
 const PublicEggSale = React.lazy(() => import("./pages/PublicEggSale"));
 
-// Konsolidering: /guider/* → /blogg/* (canonical bor på /blogg)
 const GuiderRedirect = () => {
   const { slug } = useParams<{ slug?: string }>();
   const target = slug ? `/blogg/${slug}` : '/blogg';
@@ -114,6 +113,7 @@ const AppRoutes = () => (
         <Route path="/klackningskalender" element={<SeoLandingPage pageKey="klackningskalender" />} />
         <Route path="/borja-med-hons" element={<SeoLandingPage pageKey="borja-med-hons" />} />
         <Route path="/s/agg" element={<PublicEggSale />} />
+        <Route path="/s/:slug" element={<PublicEggSale />} />
         <Route path="/login" element={<Login />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/reset-password" element={<ResetPassword />} />
