@@ -381,6 +381,10 @@ export default function EggSalesProV6() {
   };
 
   const updateBookingStatus = async (id: string, status: string) => {
+    const current = (bookings as Booking[]).find((b) => b.id === id);
+    if (current?.status === 'picked_up' && status === 'paid') {
+      return toast({ title: 'Hämtade bokningar kan inte nedgraderas', description: 'En hämtad bokning är redan betald och avslutad.', variant: 'destructive' });
+    }
     const { error } = await (supabase as any).from('public_egg_sale_bookings').update({ status }).eq('id', id);
     if (error) return toast({ title: 'Kunde inte uppdatera bokningen', description: error.message, variant: 'destructive' });
     await invalidateAgda();
