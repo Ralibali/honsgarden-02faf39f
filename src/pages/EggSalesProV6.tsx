@@ -528,11 +528,14 @@ export default function EggSalesProV6() {
                 const isPaid = b.status === 'paid' || b.status === 'picked_up';
                 const isPickedUp = b.status === 'picked_up';
                 return (
-                  <div key={b.id} className={`rounded-2xl border bg-card p-4 space-y-3 shadow-sm ${b.status === 'reserved' ? 'border-blue-200' : b.status === 'paid' ? 'border-amber-200' : b.status === 'picked_up' ? 'border-emerald-200 bg-emerald-50/30' : 'opacity-70'}`}>
-                    <div className="flex justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{b.customer_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{b.customer_phone || 'Ingen kontakt angiven'}</p>
+                  <div key={b.id} className={`rounded-2xl border-2 bg-card p-4 space-y-3 shadow-sm ${b.status === 'reserved' ? 'border-amber-300 bg-amber-50/40' : b.status === 'paid' ? 'border-blue-300 bg-blue-50/40' : b.status === 'picked_up' ? 'border-emerald-300 bg-emerald-50/40' : 'border-border opacity-60'}`}>
+                    <div className="flex justify-between gap-2 items-start">
+                      <div className="min-w-0 flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusDot(b.status)}`} aria-hidden />
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate">{b.customer_name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{b.customer_phone || 'Ingen kontakt angiven'}</p>
+                        </div>
                       </div>
                       <Badge className={statusTone(b.status)}>{statusLabel(b.status)}</Badge>
                     </div>
