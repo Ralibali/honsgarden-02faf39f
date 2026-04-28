@@ -90,6 +90,19 @@ serve(async (req) => {
   if (!supabaseUrl || !serviceRole) return jsonResponse({ ok: false, error: 'Backend är inte konfigurerat' }, 500);
 
   const supabase = createClient(supabaseUrl, serviceRole, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  // Require authenticated admin caller — this function uses service role and writes to the DB.
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) return jsonResponse({ ok: false, error: 'Unauthorized' }, 401);
+  const token = authHeader.replace('Bearer ', '');
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  if (!anonKey) return jsonResponse({ ok: false, error: 'Backend är inte konfigurerat' }, 500);
+  const supabaseAuth = createClient(supabaseUrl, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: userData, error: userError } = await supabaseAuth.auth.getUser(token);
+  if (userError || !userData?.user) return jsonResponse({ ok: false, error: 'Unauthorized' }, 401);
+  const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', { _user_id: userData.user.id, _role: 'admin' });
+  if (roleError || !isAdmin) return jsonResponse({ ok: false, error: 'Forbidden' }, 403);
+
   const body = await req.json().catch(() => ({}));
 
   try {
