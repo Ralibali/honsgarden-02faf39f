@@ -545,7 +545,7 @@ export default function EggSalesProV6() {
                     {b.customer_message && <p className="text-xs text-muted-foreground whitespace-pre-wrap">{b.customer_message}</p>}
 
                     <div className="grid grid-cols-2 gap-2">
-                      <Button size="sm" variant={isPaid ? 'default' : 'outline'} className="rounded-xl" onClick={() => updateBookingStatus(b.id, 'paid')} disabled={b.status === 'cancelled'}><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Betald</Button>
+                      <Button size="sm" variant={isPaid ? 'default' : 'outline'} className="rounded-xl" onClick={() => updateBookingStatus(b.id, 'paid')} disabled={b.status === 'cancelled' || isPickedUp} title={isPickedUp ? 'Hämtade bokningar kan inte nedgraderas' : undefined}><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Betald</Button>
                       <Button size="sm" variant={isPickedUp ? 'default' : 'outline'} className="rounded-xl" onClick={() => updateBookingStatus(b.id, 'picked_up')} disabled={b.status === 'cancelled'}><Truck className="h-3.5 w-3.5 mr-1" /> Hämtad</Button>
                       <Button size="sm" variant="outline" className="rounded-xl col-span-2" onClick={() => copyText(customerReply(b), 'Svar till kund')}><MessageCircle className="h-3.5 w-3.5 mr-1" /> Kopiera svar till kund</Button>
                       {b.status !== 'cancelled' && <Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive col-span-2" onClick={() => updateBookingStatus(b.id, 'cancelled')}><Trash2 className="h-3.5 w-3.5 mr-1" /> Avboka</Button>}
