@@ -9,7 +9,7 @@ import CookieConsent from "./components/CookieConsent";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { usePageTracking, useAutoClickTracking } from "@/hooks/useTracking";
 
-import Index from "./pages/Index";
+import Index from "./pages/IndexUpdated";
 import Login from "./pages/Login";
 
 const AppLayout = React.lazy(() => import("./components/AppLayout"));
