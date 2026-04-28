@@ -530,7 +530,7 @@ export default function EggSalesProV6() {
             <div className="rounded-2xl border border-dashed p-5 text-center"><Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" /><p className="font-medium">Inga bokningsförfrågningar ännu</p><p className="text-sm text-muted-foreground mt-1">När någon beställer via din publika länk visas det här direkt.</p></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {(bookings as Booking[]).map((b) => {
+              {sortedBookings.map((b) => {
                 const listing = listingById[b.listing_id];
                 const unitPrice = Number(listing?.price_per_pack || 0);
                 const total = unitPrice ? Number(b.packs || 0) * unitPrice : 0;
