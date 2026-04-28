@@ -79,10 +79,17 @@ function statusLabel(status: string) {
 }
 
 function statusTone(status: string) {
-  if (status === 'paid') return 'bg-amber-100 text-amber-900 border-amber-200';
+  if (status === 'paid') return 'bg-blue-100 text-blue-900 border-blue-200';
   if (status === 'picked_up') return 'bg-emerald-100 text-emerald-900 border-emerald-200';
-  if (status === 'cancelled') return 'bg-destructive/10 text-destructive border-destructive/20';
-  return 'bg-blue-100 text-blue-900 border-blue-200';
+  if (status === 'cancelled') return 'bg-muted text-muted-foreground border-border';
+  return 'bg-amber-100 text-amber-900 border-amber-200';
+}
+
+function statusDot(status: string) {
+  if (status === 'paid') return 'bg-blue-500';
+  if (status === 'picked_up') return 'bg-emerald-500';
+  if (status === 'cancelled') return 'bg-muted-foreground';
+  return 'bg-amber-500';
 }
 
 function nextAction(status: string) {
