@@ -208,6 +208,15 @@ export default function EggSalesProV6() {
     return map;
   }, [listings]);
 
+  const sortedBookings = useMemo(() => {
+    const order: Record<string, number> = { reserved: 0, paid: 1, picked_up: 2, cancelled: 3 };
+    return [...(bookings as Booking[])].sort((a, b) => {
+      const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
+      if (diff !== 0) return diff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [bookings]);
+
   const bookingCounts = useMemo(() => {
     const map: Record<string, number> = {};
     (bookings as Booking[]).forEach((b) => {
