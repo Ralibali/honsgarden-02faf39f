@@ -79,10 +79,17 @@ function statusLabel(status: string) {
 }
 
 function statusTone(status: string) {
-  if (status === 'paid') return 'bg-amber-100 text-amber-900 border-amber-200';
+  if (status === 'paid') return 'bg-blue-100 text-blue-900 border-blue-200';
   if (status === 'picked_up') return 'bg-emerald-100 text-emerald-900 border-emerald-200';
-  if (status === 'cancelled') return 'bg-destructive/10 text-destructive border-destructive/20';
-  return 'bg-blue-100 text-blue-900 border-blue-200';
+  if (status === 'cancelled') return 'bg-muted text-muted-foreground border-border';
+  return 'bg-amber-100 text-amber-900 border-amber-200';
+}
+
+function statusDot(status: string) {
+  if (status === 'paid') return 'bg-blue-500';
+  if (status === 'picked_up') return 'bg-emerald-500';
+  if (status === 'cancelled') return 'bg-muted-foreground';
+  return 'bg-amber-500';
 }
 
 function nextAction(status: string) {
@@ -200,6 +207,15 @@ export default function EggSalesProV6() {
     (listings as Listing[]).forEach((l) => { map[l.id] = l; });
     return map;
   }, [listings]);
+
+  const sortedBookings = useMemo(() => {
+    const order: Record<string, number> = { reserved: 0, paid: 1, picked_up: 2, cancelled: 3 };
+    return [...(bookings as Booking[])].sort((a, b) => {
+      const diff = (order[a.status] ?? 9) - (order[b.status] ?? 9);
+      if (diff !== 0) return diff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [bookings]);
 
   const bookingCounts = useMemo(() => {
     const map: Record<string, number> = {};
@@ -502,9 +518,9 @@ export default function EggSalesProV6() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <SalesStat icon={AlertCircle} label="Nya förfrågningar" value={salesStats.reservedCount} sub={`${salesStats.reservedPacks} kartor · ${kr(salesStats.reservedAmount)}`} tone="blue" />
-            <SalesStat icon={CircleDollarSign} label="Betalda" value={salesStats.paidCount} sub={`${salesStats.paidPacks} kartor · ${kr(salesStats.paidAmount)}`} tone="amber" />
-            <SalesStat icon={Truck} label="Hämtade" value={salesStats.pickedUpCount} sub={`${salesStats.pickedUpPacks} kartor · ${kr(salesStats.pickedUpAmount)}`} tone="green" />
+            <SalesStat icon={AlertCircle} label="Nya förfrågningar" value={salesStats.reservedCount} sub={`${salesStats.reservedPacks} kartor · ${kr(salesStats.reservedAmount)}`} tone="amber" />
+            <SalesStat icon={CircleDollarSign} label="Betalda (ej hämtade)" value={salesStats.paidCount} sub={`${salesStats.paidPacks} kartor · ${kr(salesStats.paidAmount)}`} tone="blue" />
+            <SalesStat icon={Truck} label="Hämtade & klara" value={salesStats.pickedUpCount} sub={`${salesStats.pickedUpPacks} kartor · ${kr(salesStats.pickedUpAmount)}`} tone="green" />
             <SalesStat icon={Wallet} label="Bekräftat värde" value={kr(salesStats.confirmedAmount)} sub={`${salesStats.paidPacks + salesStats.pickedUpPacks} kartor betalda/hämtade`} tone="default" />
           </div>
 
@@ -514,18 +530,21 @@ export default function EggSalesProV6() {
             <div className="rounded-2xl border border-dashed p-5 text-center"><Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" /><p className="font-medium">Inga bokningsförfrågningar ännu</p><p className="text-sm text-muted-foreground mt-1">När någon beställer via din publika länk visas det här direkt.</p></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {(bookings as Booking[]).map((b) => {
+              {sortedBookings.map((b) => {
                 const listing = listingById[b.listing_id];
                 const unitPrice = Number(listing?.price_per_pack || 0);
                 const total = unitPrice ? Number(b.packs || 0) * unitPrice : 0;
                 const isPaid = b.status === 'paid' || b.status === 'picked_up';
                 const isPickedUp = b.status === 'picked_up';
                 return (
-                  <div key={b.id} className={`rounded-2xl border bg-card p-4 space-y-3 shadow-sm ${b.status === 'reserved' ? 'border-blue-200' : b.status === 'paid' ? 'border-amber-200' : b.status === 'picked_up' ? 'border-emerald-200 bg-emerald-50/30' : 'opacity-70'}`}>
-                    <div className="flex justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{b.customer_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{b.customer_phone || 'Ingen kontakt angiven'}</p>
+                  <div key={b.id} className={`rounded-2xl border-2 bg-card p-4 space-y-3 shadow-sm ${b.status === 'reserved' ? 'border-amber-300 bg-amber-50/40' : b.status === 'paid' ? 'border-blue-300 bg-blue-50/40' : b.status === 'picked_up' ? 'border-emerald-300 bg-emerald-50/40' : 'border-border opacity-60'}`}>
+                    <div className="flex justify-between gap-2 items-start">
+                      <div className="min-w-0 flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusDot(b.status)}`} aria-hidden />
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate">{b.customer_name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{b.customer_phone || 'Ingen kontakt angiven'}</p>
+                        </div>
                       </div>
                       <Badge className={statusTone(b.status)}>{statusLabel(b.status)}</Badge>
                     </div>
