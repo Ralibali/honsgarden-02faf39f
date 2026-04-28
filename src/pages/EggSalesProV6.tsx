@@ -509,9 +509,9 @@ export default function EggSalesProV6() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <SalesStat icon={AlertCircle} label="Nya förfrågningar" value={salesStats.reservedCount} sub={`${salesStats.reservedPacks} kartor · ${kr(salesStats.reservedAmount)}`} tone="blue" />
-            <SalesStat icon={CircleDollarSign} label="Betalda" value={salesStats.paidCount} sub={`${salesStats.paidPacks} kartor · ${kr(salesStats.paidAmount)}`} tone="amber" />
-            <SalesStat icon={Truck} label="Hämtade" value={salesStats.pickedUpCount} sub={`${salesStats.pickedUpPacks} kartor · ${kr(salesStats.pickedUpAmount)}`} tone="green" />
+            <SalesStat icon={AlertCircle} label="Nya förfrågningar" value={salesStats.reservedCount} sub={`${salesStats.reservedPacks} kartor · ${kr(salesStats.reservedAmount)}`} tone="amber" />
+            <SalesStat icon={CircleDollarSign} label="Betalda (ej hämtade)" value={salesStats.paidCount} sub={`${salesStats.paidPacks} kartor · ${kr(salesStats.paidAmount)}`} tone="blue" />
+            <SalesStat icon={Truck} label="Hämtade & klara" value={salesStats.pickedUpCount} sub={`${salesStats.pickedUpPacks} kartor · ${kr(salesStats.pickedUpAmount)}`} tone="green" />
             <SalesStat icon={Wallet} label="Bekräftat värde" value={kr(salesStats.confirmedAmount)} sub={`${salesStats.paidPacks + salesStats.pickedUpPacks} kartor betalda/hämtade`} tone="default" />
           </div>
 
