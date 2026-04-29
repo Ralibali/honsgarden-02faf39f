@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText, Newspaper, CloudSun } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText, Newspaper, CloudSun, Sparkles } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 
 const dailyNav = [
   { title: 'Dashboard', url: '/app', icon: Home },
+  { title: 'Smart rapport', url: '/app/smart-report', icon: Sparkles, premium: true },
   { title: 'Logga ägg', url: '/app/eggs', icon: Egg },
   { title: 'Uppgifter', url: '/app/tasks', icon: ClipboardCheck },
   { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
