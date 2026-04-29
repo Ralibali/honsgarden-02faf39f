@@ -105,22 +105,64 @@ async function writeRoute(route, html) {
   await writeFile(target, html, 'utf8');
 }
 
+async function readOrter() {
+  const source = await readFile('src/data/saljaAggOrter.ts', 'utf8');
+  const rows = [...source.matchAll(/\{ slug: '([^']+)', name: '([^']+)', lan: '([^']+)', region: '([^']+)'(?:, invanare: '([^']+)')?/g)];
+  return rows.map((m) => ({ slug: m[1], name: m[2], lan: m[3], region: m[4], invanare: m[5] || '' }));
+}
+
+function buildOrtMeta(ort) {
+  return {
+    title: `Sälja ägg i ${ort.name} – gratis säljsida med Swish | Hönsgården`,
+    description: `Sälj ägg lokalt i ${ort.name}. Skapa en gratis säljsida med pris, bild, Swish, bokningar och hämtinformation. Perfekt för småskaliga hönsägare.`,
+  };
+}
+
+function buildSaljaAggRootHtml(orter) {
+  const links = orter.slice(0, 80).map((o) => `<a href="/salja-agg/${o.slug}" class="inline-flex rounded-full border border-border px-3 py-1.5 text-sm hover:text-primary">Sälja ägg i ${escapeHtml(o.name)}</a>`).join('\n');
+  return `<div class="min-h-screen bg-background"><main class="max-w-5xl mx-auto px-4 py-12"><nav class="text-sm text-muted-foreground mb-6"><a href="/">Hönsgården</a> / Sälja ägg</nav><h1 class="font-serif text-4xl sm:text-5xl text-foreground mb-4">Sälja ägg lokalt med egen säljsida</h1><p class="text-lg text-muted-foreground mb-6 max-w-3xl">Med Hönsgården kan du skapa en egen säljsida för dina ägg, visa Swish, lägga upp bilder, ta emot bokningsförfrågningar och följa försäljningen i Agdas Bod.</p><a href="/login?mode=register" class="inline-flex rounded-xl bg-primary px-5 py-3 text-primary-foreground font-medium mb-10">Skapa säljsida gratis</a><section class="grid sm:grid-cols-3 gap-4 mb-10"><div class="rounded-2xl border p-5"><h2 class="font-serif text-xl mb-2">Egen länk</h2><p class="text-sm text-muted-foreground">Dela en enkel länk i Facebookgrupper, SMS eller direkt till återkommande kunder.</p></div><div class="rounded-2xl border p-5"><h2 class="font-serif text-xl mb-2">Swish & bokning</h2><p class="text-sm text-muted-foreground">Köpare ser pris och hämtning och kan skicka bokningsförfrågan direkt.</p></div><div class="rounded-2xl border p-5"><h2 class="font-serif text-xl mb-2">Koll på försäljning</h2><p class="text-sm text-muted-foreground">Se nya, betalda och hämtade bokningar samt exportera kundlista.</p></div></section><h2 class="font-serif text-2xl mb-4">Populära orter</h2><div class="flex flex-wrap gap-2">${links}</div></main></div>`;
+}
+
+function buildOrtHtml(ort) {
+  const meta = buildOrtMeta(ort);
+  const faq = [
+    { q: `Hur säljer jag ägg i ${ort.name}?`, a: `Skapa en säljsida i Hönsgården, fyll i pris, bild, Swish och hämtinformation och dela länken lokalt i ${ort.name}.` },
+    { q: `Kan kunder boka ägg online i ${ort.name}?`, a: 'Ja. Köpare kan skicka bokningsförfrågan via säljsidan och du ser den direkt i Agdas Bod.' },
+    { q: 'Kan jag ta betalt med Swish?', a: 'Ja. Du kan visa Swishnummer och Swish-meddelande direkt på säljsidan.' },
+    { q: 'Kostar det något att börja?', a: 'Du kan börja gratis och uppgradera till Plus när du vill ha mer statistik, AI och försäljningsfunktioner.' },
+  ];
+  return `<div class="min-h-screen bg-background"><main class="max-w-4xl mx-auto px-4 py-12"><nav class="text-sm text-muted-foreground mb-6"><a href="/">Hönsgården</a> / <a href="/salja-agg">Sälja ägg</a> / ${escapeHtml(ort.name)}</nav><h1 class="font-serif text-4xl sm:text-5xl text-foreground mb-4">Sälja ägg i ${escapeHtml(ort.name)}</h1><p class="text-lg text-muted-foreground mb-6">${escapeHtml(meta.description)}</p><a href="/login?mode=register&utm_source=ort_page&utm_campaign=salja_agg&utm_content=${escapeHtml(ort.slug)}" class="inline-flex rounded-xl bg-primary px-5 py-3 text-primary-foreground font-medium mb-10">Skapa min säljsida gratis</a><section class="space-y-6"><h2 class="font-serif text-2xl">Så funkar lokal äggförsäljning i ${escapeHtml(ort.name)}</h2><p class="text-foreground/85 leading-relaxed">I ${escapeHtml(ort.name)} och resten av ${escapeHtml(ort.lan)} finns många köpare som vill hitta färska, lokala ägg direkt från hönsägare. Med en egen säljsida blir det enklare att visa pris, antal kartor, bilder, hämtning och Swish utan att hålla allt i sms-trådar.</p><p class="text-foreground/85 leading-relaxed">Agdas Bod i Hönsgården hjälper dig samla bokningar, markera betalt och hämtat, exportera kundlista och följa försäljningen över tid. Det gör småskalig försäljning mer professionell utan att bli krånglig.</p><h2 class="font-serif text-2xl">Tips för att få fler kunder i ${escapeHtml(ort.name)}</h2><ul class="list-disc ml-6 text-foreground/85 leading-relaxed"><li>Dela länken i lokala Facebookgrupper och Messenger.</li><li>Lägg upp en tydlig bild på äggen eller hönsen.</li><li>Skriv hämtplats, hämtdagar och Swishinformation tydligt.</li><li>Håll lagret uppdaterat så du inte lovar bort fler kartor än du har.</li></ul><h2 class="font-serif text-2xl">Vanliga frågor</h2>${faq.map((f) => `<details class="rounded-xl border p-4"><summary class="font-medium">${escapeHtml(f.q)}</summary><p class="mt-2 text-sm text-muted-foreground">${escapeHtml(f.a)}</p></details>`).join('')}</section></main></div>`;
+}
+
+function buildSaljaAggJsonLd(orter) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', name: 'Sälja ägg lokalt', url: `${BASE_URL}/salja-agg`, inLanguage: 'sv-SE' },
+      { '@type': 'SoftwareApplication', name: 'Hönsgården Agdas Bod', applicationCategory: 'BusinessApplication', offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' } },
+      { '@type': 'ItemList', itemListElement: orter.slice(0, 50).map((o, i) => ({ '@type': 'ListItem', position: i + 1, name: `Sälja ägg i ${o.name}`, url: `${BASE_URL}/salja-agg/${o.slug}` })) },
+    ],
+  };
+}
+
+function buildOrtJsonLd(ort) {
+  const meta = buildOrtMeta(ort);
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Hönsgården', item: BASE_URL }, { '@type': 'ListItem', position: 2, name: 'Sälja ägg', item: `${BASE_URL}/salja-agg` }, { '@type': 'ListItem', position: 3, name: ort.name, item: `${BASE_URL}/salja-agg/${ort.slug}` }] },
+      { '@type': 'Service', name: `Sälja ägg i ${ort.name}`, areaServed: { '@type': 'City', name: ort.name, address: { '@type': 'PostalAddress', addressRegion: ort.lan, addressCountry: 'SE' } }, provider: { '@type': 'Organization', name: 'Hönsgården', url: BASE_URL }, description: meta.description, offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' } },
+      { '@type': 'FAQPage', mainEntity: [{ '@type': 'Question', name: `Hur säljer jag ägg i ${ort.name}?`, acceptedAnswer: { '@type': 'Answer', text: `Skapa en säljsida i Hönsgården och dela länken lokalt i ${ort.name}.` } }, { '@type': 'Question', name: 'Kan jag ta betalt med Swish?', acceptedAnswer: { '@type': 'Answer', text: 'Ja, du kan visa Swish direkt på säljsidan.' } }] },
+    ],
+  };
+}
+
 function renderArticle(post) {
   const image = post.feature_image_url || post.cover_image_url || '/blog-images/hens-garden.jpg';
   const imageUrl = image.startsWith('http') ? image : `${BASE_URL}${image}`;
   const date = post.published_at ? new Date(post.published_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
   const content = sanitizeHtml(isHtmlContent(post.content) ? post.content : renderMarkdown(post.content));
-
-  return `<div class="min-h-screen bg-background">
-<header class="border-b border-border/50 bg-card/50"><div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between"><a href="/blogg" class="text-sm text-muted-foreground hover:text-foreground">← Blogg</a><a href="/login" class="inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-xs font-medium text-primary-foreground">Kom igång</a></div></header>
-<main class="max-w-4xl mx-auto px-4 py-8" id="main-content"><article>
-<nav class="text-xs text-muted-foreground mb-5"><a href="/">Hem</a> / <a href="/blogg">Blogg</a> / ${escapeHtml(post.title)}</nav>
-<div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">${post.category ? `<span class="rounded-full border border-border px-2 py-1">${escapeHtml(post.category)}</span>` : ''}${date ? `<time datetime="${escapeHtml(post.published_at)}">${date}</time>` : ''}<span>${post.reading_time_minutes || Math.max(1, Math.ceil(stripTags(post.content).split(/\s+/).length / 220))} min läsning</span></div>
-<h1 class="font-serif text-3xl sm:text-5xl text-foreground leading-tight mb-4">${escapeHtml(post.title)}</h1>
-${post.excerpt ? `<p class="text-lg text-muted-foreground leading-relaxed mb-6">${escapeHtml(post.excerpt)}</p>` : ''}
-<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(post.title)}" class="w-full aspect-[16/9] object-cover rounded-2xl mb-8" loading="eager" />
-<div class="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/85 prose-a:text-primary prose-strong:text-foreground">${content}</div>
-</article></main></div>`;
+  return `<div class="min-h-screen bg-background"><header class="border-b border-border/50 bg-card/50"><div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between"><a href="/blogg" class="text-sm text-muted-foreground hover:text-foreground">← Blogg</a><a href="/login" class="inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-xs font-medium text-primary-foreground">Kom igång</a></div></header><main class="max-w-4xl mx-auto px-4 py-8" id="main-content"><article><nav class="text-xs text-muted-foreground mb-5"><a href="/">Hem</a> / <a href="/blogg">Blogg</a> / ${escapeHtml(post.title)}</nav><div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">${post.category ? `<span class="rounded-full border border-border px-2 py-1">${escapeHtml(post.category)}</span>` : ''}${date ? `<time datetime="${escapeHtml(post.published_at)}">${date}</time>` : ''}<span>${post.reading_time_minutes || Math.max(1, Math.ceil(stripTags(post.content).split(/\s+/).length / 220))} min läsning</span></div><h1 class="font-serif text-3xl sm:text-5xl text-foreground leading-tight mb-4">${escapeHtml(post.title)}</h1>${post.excerpt ? `<p class="text-lg text-muted-foreground leading-relaxed mb-6">${escapeHtml(post.excerpt)}</p>` : ''}<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(post.title)}" class="w-full aspect-[16/9] object-cover rounded-2xl mb-8" loading="eager" /><div class="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/85 prose-a:text-primary prose-strong:text-foreground">${content}</div></article></main></div>`;
 }
 
 function buildArticleHead(post) {
@@ -130,13 +172,7 @@ function buildArticleHead(post) {
   const url = `${BASE_URL}${path}`;
   const image = post.feature_image_url || post.cover_image_url || '/blog-images/hens-garden.jpg';
   const imageUrl = image.startsWith('http') ? image : `${BASE_URL}${image}`;
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      { '@type': 'Article', '@id': `${url}#article`, headline: post.title, description, image: imageUrl, datePublished: post.published_at, dateModified: post.updated_at || post.published_at, author: { '@type': 'Organization', name: 'Hönsgården', url: BASE_URL }, publisher: { '@type': 'Organization', name: 'Hönsgården', url: BASE_URL }, mainEntityOfPage: { '@type': 'WebPage', '@id': url }, inLanguage: 'sv-SE', wordCount: post.word_count || stripTags(post.content).split(/\s+/).length },
-      { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Hem', item: BASE_URL }, { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE_URL}/blogg` }, { '@type': 'ListItem', position: 3, name: post.title, item: url }] },
-    ],
-  };
+  const jsonLd = { '@context': 'https://schema.org', '@graph': [{ '@type': 'Article', '@id': `${url}#article`, headline: post.title, description, image: imageUrl, datePublished: post.published_at, dateModified: post.updated_at || post.published_at, author: { '@type': 'Organization', name: 'Hönsgården', url: BASE_URL }, publisher: { '@type': 'Organization', name: 'Hönsgården', url: BASE_URL }, mainEntityOfPage: { '@type': 'WebPage', '@id': url }, inLanguage: 'sv-SE', wordCount: post.word_count || stripTags(post.content).split(/\s+/).length }, { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Hem', item: BASE_URL }, { '@type': 'ListItem', position: 2, name: 'Blogg', item: `${BASE_URL}/blogg` }, { '@type': 'ListItem', position: 3, name: post.title, item: url }] }] };
   return buildHeadGeneric({ title, description, path, ogImage: image, ogImageAlt: post.title, ogType: 'article', jsonLd });
 }
 
@@ -145,13 +181,7 @@ async function fetchPosts() {
     console.warn('⚠️ Saknar Supabase env vars för prerendering. Bloggartiklar hoppas över.');
     return [];
   }
-
-  const params = new URLSearchParams({
-    select: 'slug,title,excerpt,content,cover_image_url,feature_image_url,category,tags,meta_description,meta_keywords,reading_time_minutes,word_count,published_at,updated_at',
-    is_published: 'eq.true',
-    order: 'published_at.desc',
-    limit: '1000',
-  });
+  const params = new URLSearchParams({ select: 'slug,title,excerpt,content,cover_image_url,feature_image_url,category,tags,meta_description,meta_keywords,reading_time_minutes,word_count,published_at,updated_at', is_published: 'eq.true', order: 'published_at.desc', limit: '1000' });
   const response = await fetch(`${SUPABASE_URL}/rest/v1/blog_posts?${params}`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
   if (!response.ok) throw new Error(`Kunde inte hämta bloggartiklar (${response.status})`);
   return response.json();
@@ -213,16 +243,30 @@ function buildRedirectPage(template, targetPath) {
   return injectHead(template, head).replace('<div id="root"></div>', `<div id="root"><p>Den här sidan har flyttats. Omdirigerar till <a href="${escapeHtml(targetUrl)}">${escapeHtml(targetUrl)}</a>…</p></div>`);
 }
 
-function buildSitemap(posts, tags) {
+function buildSaljaAggPage(template, orter) {
+  const path = '/salja-agg';
+  const title = 'Sälja ägg lokalt – egen säljsida med Swish | Hönsgården';
+  const description = 'Skapa en egen säljsida för ägg med bild, Swish, bokningsförfrågningar, lager och kundlista. Perfekt för småskalig äggförsäljning.';
+  const html = buildSaljaAggRootHtml(orter);
+  return injectHead(template, buildHeadGeneric({ title, description, path, ogImage: '/og-image.jpg', jsonLd: buildSaljaAggJsonLd(orter) })).replace('<div id="root"></div>', `<div id="root">${html}</div>`);
+}
+
+function buildSaljaAggOrtPage(template, ort) {
+  const path = `/salja-agg/${ort.slug}`;
+  const meta = buildOrtMeta(ort);
+  return injectHead(template, buildHeadGeneric({ title: meta.title, description: meta.description, path, ogImage: '/og-image.jpg', ogImageAlt: `Sälja ägg i ${ort.name}`, jsonLd: buildOrtJsonLd(ort) })).replace('<div id="root"></div>', `<div id="root">${buildOrtHtml(ort)}</div>`);
+}
+
+function buildSitemap(posts, tags, orter) {
   const now = new Date().toISOString().split('T')[0];
   const urls = [];
   const push = (loc, opts = {}) => urls.push({ loc, lastmod: opts.lastmod || now, changefreq: opts.changefreq || 'monthly', priority: opts.priority || '0.7' });
-
   STATIC_PAGES.forEach((page) => push(`${BASE_URL}${page.path}`, { changefreq: page.changefreq, priority: page.priority }));
+  push(`${BASE_URL}/salja-agg`, { changefreq: 'weekly', priority: '0.9' });
+  orter.forEach((ort) => push(`${BASE_URL}/salja-agg/${ort.slug}`, { changefreq: 'weekly', priority: '0.7' }));
   Object.keys(CATEGORY_META).forEach((slug) => push(`${BASE_URL}/blogg/kategori/${slug}`, { changefreq: 'weekly', priority: '0.7' }));
   tags.forEach((tag) => push(`${BASE_URL}/blogg/tagg/${encodeURIComponent(tag)}`, { changefreq: 'weekly', priority: '0.6' }));
   posts.forEach((post) => push(`${BASE_URL}/blogg/${post.slug}`, { lastmod: (post.updated_at || post.published_at || now).split('T')[0], changefreq: 'weekly', priority: '0.8' }));
-
   const body = urls.map(u => `  <url>\n    <loc>${escapeXml(u.loc)}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
@@ -230,24 +274,20 @@ function buildSitemap(posts, tags) {
 async function main() {
   const template = await readFile('dist/index.html', 'utf8');
   const posts = await fetchPosts();
-
+  const orter = await readOrter();
   for (const page of STATIC_PAGES) await writeRoute(page.route, buildStaticPage(template, page));
   await writeRoute('terms', buildTermsPage(template));
+  await writeRoute('salja-agg', buildSaljaAggPage(template, orter));
+  await Promise.all(orter.map((ort) => writeRoute(`salja-agg/${ort.slug}`, buildSaljaAggOrtPage(template, ort))));
   for (const [slug, meta] of Object.entries(CATEGORY_META)) await writeRoute(`blogg/kategori/${slug}`, buildCategoryPage(template, slug, meta));
-
   const tagSet = new Set();
   for (const post of posts) if (Array.isArray(post.tags)) post.tags.forEach(t => t && tagSet.add(t));
   const tags = Array.from(tagSet);
   for (const tag of tags) await writeRoute(`blogg/tagg/${encodeURIComponent(tag)}`, buildTagPage(template, tag));
-
-  await Promise.all(posts.flatMap((post) => [
-    writeRoute(`blogg/${post.slug}`, buildArticlePage(template, post)),
-    writeRoute(`guider/${post.slug}`, buildRedirectPage(template, `/blogg/${post.slug}`)),
-  ]));
+  await Promise.all(posts.flatMap((post) => [writeRoute(`blogg/${post.slug}`, buildArticlePage(template, post)), writeRoute(`guider/${post.slug}`, buildRedirectPage(template, `/blogg/${post.slug}`))]));
   await writeRoute('guider', buildRedirectPage(template, '/blogg'));
-
-  await writeFile(join('dist', 'sitemap.xml'), buildSitemap(posts, tags), 'utf8');
-  console.log(`✅ Prerendered ${STATIC_PAGES.length} statiska + ${Object.keys(CATEGORY_META).length} kategori- + ${tags.length} tagg- + ${posts.length} artikel-sidor. Sitemap uppdaterad.`);
+  await writeFile(join('dist', 'sitemap.xml'), buildSitemap(posts, tags, orter), 'utf8');
+  console.log(`✅ Prerendered ${STATIC_PAGES.length} statiska + ${orter.length + 1} sälja-ägg + ${Object.keys(CATEGORY_META).length} kategori- + ${tags.length} tagg- + ${posts.length} artikel-sidor. Sitemap uppdaterad.`);
 }
 
 main().catch((error) => {
