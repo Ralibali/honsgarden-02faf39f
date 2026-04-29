@@ -126,6 +126,7 @@ const AppRoutes = () => (
         <Route path="/blogg/:slug" element={<GuideArticle />} />
         <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Navigate to="/app" replace />} />
           <Route path="eggs" element={<Eggs />} />
           <Route path="hens" element={<Hens />} />
           <Route path="feed" element={<Feed />} />
