@@ -86,7 +86,7 @@ export default function SmartStatisticsOverview() {
     } else if (stats.diff > 0 && period !== 'all') {
       items.push({ title: 'Produktionen är uppåt', text: `Du ligger ${stats.diff} ägg över föregående period. Det är värt att fortsätta med samma rutiner och foder.`, icon: TrendingUp, path: '/app/weekly-report', cta: 'Se veckorapport', tone: 'good' });
     } else if (stats.diff < 0 && period !== 'all') {
-      items.push({ title: 'Produktionen är lägre', text: `Du ligger ${Math.abs(stats.diff)} ägg under föregående period. Det kan vara normalt, men håll koll på ruggning, väder, foderbyte och stress.`, icon: AlertCircle, path: '/app/health', cta: 'Lägg notering', tone: 'warn' });
+      items.push({ title: 'Produktionen är lägre', text: `Du ligger ${Math.abs(stats.diff)} ägg under föregående period. Det kan vara normalt, men håll koll på ruggning, väder, foderbyte och stress. Öppna en höna och lägg en hälsonotering så har du historiken kvar.`, icon: AlertCircle, path: '/app/hens', cta: 'Öppna hönor', tone: 'warn' });
     } else if (period !== 'all') {
       items.push({ title: 'Stabil värpning', text: 'Produktionen ligger ungefär på samma nivå som föregående period. Stabilitet är också en bra signal.', icon: Minus, tone: 'info' });
     }
