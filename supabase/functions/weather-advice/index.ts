@@ -138,10 +138,21 @@ Deno.serve(async (req) => {
       )
       .join("\n");
 
-    const eggSummary = Object.entries(eggsByDay)
+    const eggEntries = Object.entries(eggsByDay);
+    const eggSummary = eggEntries
       .slice(-14)
       .map(([d, c]) => `${d}: ${c} ägg`)
       .join("\n");
+
+    // Beräkna snitt för kontext
+    const last7 = eggEntries.slice(-7).map(([, c]) => c);
+    const prev7 = eggEntries.slice(-14, -7).map(([, c]) => c);
+    const avg = (arr: number[]) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+    const avg7 = avg(last7).toFixed(1);
+    const avgPrev7 = avg(prev7).toFixed(1);
+    const trend = eggEntries.length >= 14
+      ? `Snitt senaste 7 dagar: ${avg7} ägg/dag (föregående vecka: ${avgPrev7}).`
+      : `Otillräcklig historik för trendberäkning.`;
 
     const systemPrompt = `Du är Agda, en varm och kunnig svensk hönsexpert. Skriv på naturlig svenska, kortfattat och konkret. Inga emojis. Ge inga medicinska råd – hänvisa till veterinär vid hälsoproblem. Format: ren text utan rubriker, max 3-4 meningar per fält.`;
 
