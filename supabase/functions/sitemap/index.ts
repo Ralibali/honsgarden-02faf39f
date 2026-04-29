@@ -31,13 +31,6 @@ const SALJA_AGG_ORTER = [
   "ornskoldsvik","ostersund","umea","skelleftea","pitea","lulea","boden","kiruna",
 ];
 
-const SEO_SOURCES = [
-  { table: "seo_breeds", base: "/raser", priority: "0.8" },
-  { table: "seo_problems", base: "/problem", priority: "0.8" },
-  { table: "seo_care_topics", base: "/skotsel", priority: "0.7" },
-  { table: "seo_months", base: "/manad", priority: "0.7" },
-];
-
 function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -62,13 +55,6 @@ Deno.serve(async (req) => {
     .select("slug, updated_at, published_at, cover_image_url, feature_image_url, title, category, tags")
     .eq("is_published", true)
     .order("published_at", { ascending: false });
-
-  const { data: settings } = await supabase
-    .from("seo_settings")
-    .select("public_routes_enabled")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
 
   // Collect unique tags
   const allTags = new Set<string>();
@@ -97,7 +83,6 @@ Deno.serve(async (req) => {
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 `;
 
-  // Static pages
   for (const page of staticPages) {
     xml += `  <url>
     <loc>${BASE_URL}${page.loc}</loc>
@@ -110,7 +95,6 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Category pages
   for (const cat of CATEGORIES) {
     xml += `  <url>
     <loc>${BASE_URL}/blogg/kategori/${cat}</loc>
@@ -123,7 +107,6 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Lokala ortsidor – /salja-agg/[ort]
   for (const slug of SALJA_AGG_ORTER) {
     xml += `  <url>
     <loc>${BASE_URL}/salja-agg/${slug}</loc>
@@ -136,7 +119,6 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Tag pages
   for (const tag of allTags) {
     const encoded = encodeURIComponent(tag);
     xml += `  <url>
@@ -150,7 +132,6 @@ Deno.serve(async (req) => {
 `;
   }
 
-  // Blog posts (both /blogg/ canonical and /guider/ alternate)
   if (posts) {
     for (const post of posts) {
       const lastmod = (post.updated_at || post.published_at || now).split("T")[0];
@@ -178,30 +159,6 @@ Deno.serve(async (req) => {
       xml += `
   </url>
 `;
-    }
-  }
-
-  if (settings?.public_routes_enabled) {
-    for (const source of SEO_SOURCES) {
-      const { data: rows } = await supabase
-        .from(source.table)
-        .select("slug, updated_at, last_generated_at")
-        .eq("published", true)
-        .order("updated_at", { ascending: false });
-
-      for (const row of rows ?? []) {
-        const lastmod = (row.updated_at || row.last_generated_at || now).split("T")[0];
-        const loc = `${source.base}/${row.slug}`;
-        xml += `  <url>
-    <loc>${BASE_URL}${loc}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>${source.priority}</priority>
-    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}${loc}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}${loc}" />
-  </url>
-`;
-      }
     }
   }
 
