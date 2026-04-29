@@ -390,6 +390,9 @@ export default function EggSalesProV6() {
         p12_price: p12,
         p30_price: p30,
         is_active: true,
+        stock_packs: Math.max(0, safeNumber(stockPacks, 0)),
+        stock_source: stockSource,
+        auto_publish: autoPublish,
       };
       const result = editingId
         ? await (supabase as any).from('public_egg_sale_listings').update(row).eq('id', editingId).select('id, slug').single()
