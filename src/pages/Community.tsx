@@ -119,6 +119,39 @@ export default function Community() {
 
   const userId = userData?.id;
 
+  const { data: isAdmin = false } = useQuery({
+    queryKey: ['community-is-admin', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId!)
+        .eq('role', 'admin')
+        .maybeSingle();
+      if (error) return false;
+      return !!data;
+    },
+  });
+
+  const togglePin = async (post: Post) => {
+    const { error } = await (supabase as any)
+      .from('community_posts')
+      .update({ is_pinned: !post.is_pinned })
+      .eq('id', post.id);
+    if (error) return toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' });
+    await qc.invalidateQueries({ queryKey: ['community-posts'] });
+    toast({ title: post.is_pinned ? 'Inlägget är inte längre fäst' : 'Inlägget är fäst högst upp 📌' });
+  };
+
+  const deleteComment = async (comment: Comment) => {
+    if (!window.confirm('Vill du ta bort kommentaren?')) return;
+    const { error } = await (supabase as any).from('community_comments').delete().eq('id', comment.id);
+    if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' });
+    await qc.invalidateQueries({ queryKey: ['community-comments'] });
+    toast({ title: 'Kommentaren är borttagen' });
+  };
+
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['community-posts'],
     queryFn: async () => {
@@ -361,9 +394,12 @@ export default function Community() {
                       <Button size="sm" variant={likedByMe ? 'default' : 'outline'} className="rounded-xl gap-1.5" onClick={() => toggleLike(post)}><Heart className="h-3.5 w-3.5" /> {likes.length}</Button>
                       <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={() => setOpenPostId(isOpen ? null : post.id)}><MessageCircle className="h-3.5 w-3.5" /> {postComments.length} svar</Button>
                       <Button size="sm" variant="ghost" className="rounded-xl gap-1.5" onClick={() => reportPost(post)}><AlertTriangle className="h-3.5 w-3.5" /> Anmäl</Button>
-                      {isOwner && isMarketCategory(post.category) && <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={async () => { await (supabase as any).from('community_posts').update({ is_sold: !post.is_sold }).eq('id', post.id); await qc.invalidateQueries({ queryKey: ['community-posts'] }); }}><CheckCircle2 className="h-3.5 w-3.5" /> {post.is_sold ? 'Öppna igen' : 'Markera såld'}</Button>}
-                      {isOwner && <Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive gap-1.5" onClick={() => deletePost(post)}><Trash2 className="h-3.5 w-3.5" /> Ta bort</Button>}
+                      {(isOwner || isAdmin) && isMarketCategory(post.category) && <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={async () => { await (supabase as any).from('community_posts').update({ is_sold: !post.is_sold }).eq('id', post.id); await qc.invalidateQueries({ queryKey: ['community-posts'] }); }}><CheckCircle2 className="h-3.5 w-3.5" /> {post.is_sold ? 'Öppna igen' : 'Markera såld'}</Button>}
+                      {isAdmin && <Button size="sm" variant="outline" className="rounded-xl gap-1.5 border-primary/40 text-primary" onClick={() => togglePin(post)} title={post.is_pinned ? 'Lossa fäst' : 'Fäst högst upp'}>📌 {post.is_pinned ? 'Lossa' : 'Fäst'}</Button>}
+                      {(isOwner || isAdmin) && <Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive gap-1.5" onClick={() => deletePost(post)}><Trash2 className="h-3.5 w-3.5" /> Ta bort{isAdmin && !isOwner ? ' (admin)' : ''}</Button>}
                     </div>
+
+                    {isOpen && <div className="border-t border-border/50 pt-4 space-y-3"><h3 className="font-serif text-sm text-foreground flex items-center gap-2"><Reply className="h-4 w-4 text-primary" /> Svar</h3>{postComments.length === 0 ? <p className="text-sm text-muted-foreground">Inga svar ännu. Var först att hjälpa till.</p> : postComments.map((comment) => <div key={comment.id} className="rounded-xl bg-muted/30 border p-3"><p className="text-sm whitespace-pre-wrap">{comment.content}</p>{comment.image_url && <img src={comment.image_url} alt="Svarbild" className="mt-2 rounded-xl max-h-56 w-full object-cover" />}<div className="flex items-center justify-between mt-2 gap-2"><p className="text-[11px] text-muted-foreground">{comment.created_at ? new Date(comment.created_at).toLocaleString('sv-SE') : 'nyligen'}</p>{(comment.user_id === userId || isAdmin) && <Button size="sm" variant="ghost" className="h-7 px-2 text-destructive hover:text-destructive gap-1" onClick={() => deleteComment(comment)}><Trash2 className="h-3 w-3" /> Ta bort</Button>}</div></div>)}<div className="rounded-xl border bg-background p-3 space-y-2"><Textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} className="rounded-xl min-h-[80px]" placeholder="Skriv ett svar..." />{replyImageUrl && <img src={replyImageUrl} alt="Svarbild" className="h-36 w-full rounded-xl object-cover" />}<div className="flex flex-col sm:flex-row gap-2 justify-between"><FileButton small uploading={replyUploading} onFile={async (file) => { setReplyUploading(true); try { setReplyImageUrl(await uploadCommunityImage(file)); toast({ title: 'Bilden är uppladdad' }); } catch (e: any) { toast({ title: 'Kunde inte ladda upp bild', description: e.message, variant: 'destructive' }); } finally { setReplyUploading(false); } }} /><Button size="sm" className="rounded-xl gap-1.5" disabled={createComment.isPending} onClick={() => createComment.mutate(post.id)}>{createComment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Svara</Button></div></div></div>}
 
                     {isOpen && <div className="border-t border-border/50 pt-4 space-y-3"><h3 className="font-serif text-sm text-foreground flex items-center gap-2"><Reply className="h-4 w-4 text-primary" /> Svar</h3>{postComments.length === 0 ? <p className="text-sm text-muted-foreground">Inga svar ännu. Var först att hjälpa till.</p> : postComments.map((comment) => <div key={comment.id} className="rounded-xl bg-muted/30 border p-3"><p className="text-sm whitespace-pre-wrap">{comment.content}</p>{comment.image_url && <img src={comment.image_url} alt="Svarbild" className="mt-2 rounded-xl max-h-56 w-full object-cover" />}<p className="text-[11px] text-muted-foreground mt-2">{comment.created_at ? new Date(comment.created_at).toLocaleString('sv-SE') : 'nyligen'}</p></div>)}<div className="rounded-xl border bg-background p-3 space-y-2"><Textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} className="rounded-xl min-h-[80px]" placeholder="Skriv ett svar..." />{replyImageUrl && <img src={replyImageUrl} alt="Svarbild" className="h-36 w-full rounded-xl object-cover" />}<div className="flex flex-col sm:flex-row gap-2 justify-between"><FileButton small uploading={replyUploading} onFile={async (file) => { setReplyUploading(true); try { setReplyImageUrl(await uploadCommunityImage(file)); toast({ title: 'Bilden är uppladdad' }); } catch (e: any) { toast({ title: 'Kunde inte ladda upp bild', description: e.message, variant: 'destructive' }); } finally { setReplyUploading(false); } }} /><Button size="sm" className="rounded-xl gap-1.5" disabled={createComment.isPending} onClick={() => createComment.mutate(post.id)}>{createComment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Svara</Button></div></div></div>}
                   </div>
