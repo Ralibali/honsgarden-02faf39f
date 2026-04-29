@@ -120,30 +120,46 @@ export default function SaljaAggOrt() {
         {/* HERO */}
         <section className="relative pt-8 pb-16 sm:pt-14 sm:pb-24 overflow-hidden noise-bg">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-warning/[0.04] to-transparent pointer-events-none" />
-          <div className="container max-w-5xl mx-auto px-5 sm:px-6 relative">
-            <motion.div {...fadeUp()} className="max-w-3xl">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 inline-flex items-center gap-1.5">
-                <MapPin className="h-3 w-3" /> {ort.lan}
-              </Badge>
-              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-foreground leading-[1.05] mb-5">
-                Sälja ägg i <span className="text-primary">{ort.name}</span> – gratis säljsida på 2 minuter
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground mb-7 leading-relaxed max-w-2xl">
-                Har du höns och fler ägg än ni hinner äta hemma? Skapa en lokal säljsida för {ort.name} och
-                närliggande orter. Köpare bokar själva, betalar via Swish och du behåller hela försäljningen –
-                inga avgifter, ingen mellanhand.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
-                  <Link to="/login?mode=register&utm_source=ort_page&utm_campaign=salja_agg&utm_content={ort.slug}">
-                    Skapa min säljsida gratis <ArrowRight className="h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="h-12 px-7 text-base">
-                  <Link to="/salja-agg#ai-pitch">Testa AI-säljtext först</Link>
-                </Button>
-              </div>
-            </motion.div>
+          <div className="container max-w-6xl mx-auto px-5 sm:px-6 relative">
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
+              <motion.div {...fadeUp()} className="max-w-3xl">
+                <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 inline-flex items-center gap-1.5">
+                  <MapPin className="h-3 w-3" /> {ort.lan}
+                </Badge>
+                <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-foreground leading-[1.05] mb-5">
+                  Sälja ägg i <span className="text-primary">{ort.name}</span> – gratis säljsida på 2 minuter
+                </h1>
+                <p className="text-base sm:text-lg text-muted-foreground mb-7 leading-relaxed max-w-2xl">
+                  Har du höns och fler ägg än ni hinner äta hemma? Skapa en lokal säljsida för {ort.name} och
+                  närliggande orter. Köpare bokar själva, betalar via Swish och du behåller hela försäljningen –
+                  inga avgifter, ingen mellanhand.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button asChild size="lg" className="h-12 px-8 text-base gap-2 shadow-[0_8px_30px_hsl(var(--primary)/0.3)]">
+                    <Link to={`/login?mode=register&utm_source=ort_page&utm_campaign=salja_agg&utm_content=${ort.slug}`}>
+                      Skapa min säljsida gratis <ArrowRight className="h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="h-12 px-7 text-base">
+                    <Link to="/salja-agg#ai-pitch">Testa AI-säljtext först</Link>
+                  </Button>
+                </div>
+              </motion.div>
+
+              <motion.figure {...fadeUp(0.1)} className="hidden lg:block">
+                <img
+                  src={ASSET_BY_KEY[images.coop.assetKey]}
+                  alt={images.coop.alt}
+                  loading="eager"
+                  width={640}
+                  height={480}
+                  className="w-full h-auto rounded-3xl shadow-xl object-cover aspect-[4/3]"
+                />
+                <figcaption className="mt-2 text-xs text-muted-foreground text-center">
+                  {images.coop.caption}
+                </figcaption>
+              </motion.figure>
+            </div>
           </div>
         </section>
 
