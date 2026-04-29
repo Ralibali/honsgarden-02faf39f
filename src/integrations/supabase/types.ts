@@ -569,6 +569,146 @@ export type Database = {
           },
         ]
       }
+      egg_sale_review_tokens: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          seller_user_id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          seller_user_id: string
+          token?: string
+          used_at?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          seller_user_id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "egg_sale_review_tokens_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "public_egg_sale_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "egg_sale_review_tokens_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_egg_sale_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      egg_sale_reviews: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          customer_name: string
+          id: string
+          is_published: boolean
+          listing_id: string
+          rating: number
+          seller_user_id: string
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          customer_name: string
+          id?: string
+          is_published?: boolean
+          listing_id: string
+          rating: number
+          seller_user_id: string
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          customer_name?: string
+          id?: string
+          is_published?: boolean
+          listing_id?: string
+          rating?: number
+          seller_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "egg_sale_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "public_egg_sale_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "egg_sale_reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_egg_sale_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      egg_sale_waitlist: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          listing_id: string
+          notified_at: string | null
+          packs_wanted: number
+          seller_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          listing_id: string
+          notified_at?: string | null
+          packs_wanted?: number
+          seller_user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          listing_id?: string
+          notified_at?: string | null
+          packs_wanted?: number
+          seller_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "egg_sale_waitlist_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_egg_sale_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1186,6 +1326,7 @@ export type Database = {
       }
       public_egg_sale_listings: {
         Row: {
+          auto_publish: boolean
           contact_info: string | null
           created_at: string
           description: string
@@ -1200,9 +1341,12 @@ export type Database = {
           packs_available: number
           pickup_info: string | null
           price_per_pack: number
+          regular_customer_threshold: number
           reserved_packs: number
           slug: string
           sold_out_manually: boolean
+          stock_packs: number
+          stock_source: string
           swish_message: string | null
           swish_name: string | null
           swish_number: string | null
@@ -1211,6 +1355,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_publish?: boolean
           contact_info?: string | null
           created_at?: string
           description?: string
@@ -1225,9 +1370,12 @@ export type Database = {
           packs_available?: number
           pickup_info?: string | null
           price_per_pack?: number
+          regular_customer_threshold?: number
           reserved_packs?: number
           slug: string
           sold_out_manually?: boolean
+          stock_packs?: number
+          stock_source?: string
           swish_message?: string | null
           swish_name?: string | null
           swish_number?: string | null
@@ -1236,6 +1384,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_publish?: boolean
           contact_info?: string | null
           created_at?: string
           description?: string
@@ -1250,9 +1399,12 @@ export type Database = {
           packs_available?: number
           pickup_info?: string | null
           price_per_pack?: number
+          regular_customer_threshold?: number
           reserved_packs?: number
           slug?: string
           sold_out_manually?: boolean
+          stock_packs?: number
+          stock_source?: string
           swish_message?: string | null
           swish_name?: string | null
           swish_number?: string | null
