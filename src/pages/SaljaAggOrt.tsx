@@ -300,7 +300,7 @@ export default function SaljaAggOrt() {
                 </ul>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="sasong">
                 <h2 className="font-serif text-2xl sm:text-3xl">Säsong och klimat i {ort.region}</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.klimatNot}</p>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
