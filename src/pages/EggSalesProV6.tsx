@@ -223,6 +223,21 @@ export default function EggSalesProV6() {
     refetchInterval: 30_000,
   });
 
+  const { data: waitlist = [] } = useQuery({
+    queryKey: ['my-egg-sale-waitlist-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any)
+        .from('egg_sale_waitlist')
+        .select('*')
+        .eq('seller_user_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
+
   const listingById = useMemo(() => {
     const map: Record<string, Listing> = {};
     (listings as Listing[]).forEach((l) => { map[l.id] = l; });
