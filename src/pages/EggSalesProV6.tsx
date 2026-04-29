@@ -208,6 +208,8 @@ export default function EggSalesProV6() {
     return map;
   }, [listings]);
 
+  const [statusFilter, setStatusFilter] = useState<'all' | 'reserved' | 'paid' | 'picked_up' | 'cancelled'>('all');
+
   const sortedBookings = useMemo(() => {
     const order: Record<string, number> = { reserved: 0, paid: 1, picked_up: 2, cancelled: 3 };
     return [...(bookings as Booking[])].sort((a, b) => {
@@ -216,6 +218,11 @@ export default function EggSalesProV6() {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [bookings]);
+
+  const filteredBookings = useMemo(() => {
+    if (statusFilter === 'all') return sortedBookings;
+    return sortedBookings.filter((b) => b.status === statusFilter);
+  }, [sortedBookings, statusFilter]);
 
   const bookingCounts = useMemo(() => {
     const map: Record<string, number> = {};
