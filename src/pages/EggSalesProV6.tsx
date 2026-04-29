@@ -322,6 +322,9 @@ export default function EggSalesProV6() {
     setSwishNumber(l.swish_number || '');
     setSwishName(l.swish_name || '');
     setSwishMessage(l.swish_message || 'Ägg');
+    setStockPacks(String(l.stock_packs ?? 0));
+    setStockSource((l.stock_source as 'manual' | 'egg_log') || 'manual');
+    setAutoPublish(l.auto_publish !== false);
     setGeneratedTexts(null);
     toast({ title: 'Säljlistan är öppnad för redigering' });
   };
