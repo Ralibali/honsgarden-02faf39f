@@ -28,6 +28,7 @@ import EggGoalsWidget from '@/components/EggGoalsWidget';
 import DashboardAICoach from '@/components/DashboardAICoach';
 import AIDeviationAlerts from '@/components/AIDeviationAlerts';
 import DashboardCustomizeSheet, { type DashboardWidgetMeta } from '@/components/DashboardCustomizeSheet';
+import { readScoped, writeScoped } from '@/lib/userScopedStorage';
 import { useDashboardLayout } from '@/hooks/useDashboardLayout';
 import { Button as UIButton } from '@/components/ui/button';
 
@@ -272,14 +273,14 @@ export default function Dashboard() {
   // Adaptive visibility - use egg data to determine user maturity instead of created_at
   const firstEggDate = eggs.length > 0 ? new Date(Math.min(...eggs.map((e: any) => new Date(e.date).getTime()))) : null;
   const daysSinceFirstEgg = firstEggDate ? Math.floor((Date.now() - firstEggDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-  const hasImported = localStorage.getItem('honsgarden-imported') === '1';
+  const hasImported = readScoped(user?.id, 'honsgarden-imported') === '1';
   const showImportCard = !hasImported && daysSinceFirstEgg < 7;
   const hasFeedRecords = (feedRecords as any[]).length > 0;
   const hasTransactions = (transactions as any[]).length > 0;
-  const feedDismissed = localStorage.getItem('dashboard-feed-nudge-dismissed') === '1';
-  const financeDismissed = localStorage.getItem('dashboard-finance-nudge-dismissed') === '1';
-  const showFeedNudge = !hasFeedRecords && !feedDismissed;
-  const showFinanceNudge = !hasTransactions && !financeDismissed;
+  const [feedNudgeDismissed, setFeedNudgeDismissed] = useState(() => readScoped(user?.id, 'dashboard-feed-nudge-dismissed') === '1');
+  const [financeNudgeDismissed, setFinanceNudgeDismissed] = useState(() => readScoped(user?.id, 'dashboard-finance-nudge-dismissed') === '1');
+  const showFeedNudge = !hasFeedRecords && !feedNudgeDismissed;
+  const showFinanceNudge = !hasTransactions && !financeNudgeDismissed;
   const showDiary = daysSinceFirstEgg >= 7 || (healthLogs as any[]).some((l: any) => l.type === 'diary');
   const showCalendar = eggs.length > 0;
 
@@ -667,7 +668,7 @@ export default function Dashboard() {
                           <Button size="sm" variant="outline" className="border-warning/40 text-warning hover:bg-warning/10 rounded-xl text-xs" onClick={() => navigate('/app/feed')}>
                             Prova →
                           </Button>
-                          <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-feed-nudge-dismissed', '1')}>
+                          <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => { writeScoped(user?.id, 'dashboard-feed-nudge-dismissed', '1'); setFeedNudgeDismissed(true); }}>
                             Göm
                           </button>
                         </div>
@@ -686,7 +687,7 @@ export default function Dashboard() {
                           <Button size="sm" variant="outline" className="border-success/40 text-success hover:bg-success/10 rounded-xl text-xs" onClick={() => navigate('/app/finance')}>
                             Prova →
                           </Button>
-                          <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-finance-nudge-dismissed', '1')}>
+                          <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => { writeScoped(user?.id, 'dashboard-finance-nudge-dismissed', '1'); setFinanceNudgeDismissed(true); }}>
                             Göm
                           </button>
                         </div>

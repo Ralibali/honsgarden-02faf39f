@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { readScoped, writeScoped } from '@/lib/userScopedStorage';
 import {
   AlertCircle,
   BellRing,
@@ -143,6 +145,7 @@ async function getUniqueSlug(baseSlug: string, currentId?: string | null) {
 
 export default function EggSalesProV6() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [title, setTitle] = useState('Färska ägg till salu');
   const [description, setDescription] = useState('Färska ägg från vår lilla hönsgård. Perfekt till frukost, bakning och helgmys.');
   const [salePacks, setSalePacks] = useState('6');
@@ -645,10 +648,10 @@ export default function EggSalesProV6() {
 
   const [showOnboarding, setShowOnboarding] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return localStorage.getItem('agdas-bod-onboarding-dismissed') !== '1';
+    return readScoped(user?.id, 'agdas-bod-onboarding-dismissed') !== '1';
   });
   const dismissOnboarding = () => {
-    localStorage.setItem('agdas-bod-onboarding-dismissed', '1');
+    writeScoped(user?.id, 'agdas-bod-onboarding-dismissed', '1');
     setShowOnboarding(false);
   };
 
