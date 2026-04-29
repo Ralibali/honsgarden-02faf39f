@@ -73,12 +73,13 @@ export default function WeatherImpactCard({ daily, latitude, longitude }: Props)
       const ids = (farmIds ?? []).map((r: any) => r.get_user_farm_ids ?? r);
       if (!ids.length) return { eggsByDay: {} as Record<string, number>, weatherByDay: {} as Record<string, any> };
 
-      const eggsRes = await supabase
+      const sb = supabase as any;
+      const eggsRes = await sb
         .from('eggs')
         .select('date, count')
         .in('farm_id', ids)
         .gte('date', since);
-      const weatherRes = await supabase
+      const weatherRes = await sb
         .from('weather_advice_cache')
         .select('cache_date, weather_snapshot')
         .eq('user_id', user!.id)
