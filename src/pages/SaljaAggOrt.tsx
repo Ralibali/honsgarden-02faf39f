@@ -478,7 +478,7 @@ export default function SaljaAggOrt() {
 
 
         {/* FAQ */}
-        <section className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
+        <section id="faq" className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
           <div className="container max-w-3xl mx-auto px-5 sm:px-6">
             <motion.div {...fadeUp()} className="text-center mb-8">
               <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 inline-flex items-center gap-1.5">
