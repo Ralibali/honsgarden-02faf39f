@@ -1,0 +1,1 @@
+ALTER TABLE public.public_egg_sale_bookings ADD COLUMN IF NOT EXISTS customer_email TEXT;

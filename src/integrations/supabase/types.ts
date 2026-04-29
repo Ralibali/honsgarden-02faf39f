@@ -1280,6 +1280,7 @@ export type Database = {
       public_egg_sale_bookings: {
         Row: {
           created_at: string
+          customer_email: string | null
           customer_message: string | null
           customer_name: string
           customer_phone: string | null
@@ -1292,6 +1293,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          customer_email?: string | null
           customer_message?: string | null
           customer_name: string
           customer_phone?: string | null
@@ -1304,6 +1306,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          customer_email?: string | null
           customer_message?: string | null
           customer_name?: string
           customer_phone?: string | null

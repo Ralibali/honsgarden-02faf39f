@@ -10,7 +10,8 @@ interface Body { booking_id: string; customer_email?: string }
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   try {
-    const { booking_id, customer_email } = (await req.json()) as Body;
+    const body = (await req.json()) as Body;
+    const booking_id = body.booking_id;
     if (!booking_id) return new Response(JSON.stringify({ error: 'booking_id krävs' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -18,10 +19,11 @@ Deno.serve(async (req) => {
     const { data: token } = await supabase.from('egg_sale_review_tokens').select('token, listing_id').eq('booking_id', booking_id).is('used_at', null).maybeSingle();
     if (!token) return new Response(JSON.stringify({ error: 'Ingen giltig recensions-länk hittades' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-    const { data: booking } = await supabase.from('public_egg_sale_bookings').select('customer_name').eq('id', booking_id).maybeSingle();
+    const { data: booking } = await supabase.from('public_egg_sale_bookings').select('customer_name, customer_email').eq('id', booking_id).maybeSingle();
     const { data: listing } = await supabase.from('public_egg_sale_listings').select('title, slug').eq('id', token.listing_id).maybeSingle();
 
     const reviewUrl = `https://honsgarden.se/r/${token.token}`;
+    const customer_email = body.customer_email || booking?.customer_email || null;
 
     if (!customer_email) {
       // Returnera bara länken så säljaren kan kopiera/SMS:a själv
