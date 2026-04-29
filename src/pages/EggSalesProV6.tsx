@@ -648,7 +648,7 @@ export default function EggSalesProV6() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
         <div>
           <p className="data-label mb-1">Sälj ägg</p>
-          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Agda-säljgenerator 🥚</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Agdas Bod 🥚</h1>
           <p className="text-sm text-muted-foreground mt-1">Skapa säljlistor, ta emot bokningsförfrågningar, visa Swish och håll koll på lagret.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
