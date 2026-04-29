@@ -13,6 +13,8 @@ import SmartStatisticsOverview from '@/components/SmartStatisticsOverview';
 
 export default function Statistics() {
   const [showAllInsights, setShowAllInsights] = useState(false);
+  const [showAllHens, setShowAllHens] = useState(false);
+  const [showAllBreeds, setShowAllBreeds] = useState(false);
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['stats-summary'],
     queryFn: () => api.getSummaryStats().catch(() => null),
@@ -244,25 +246,32 @@ export default function Statistics() {
                 <CardContent className="px-4 sm:px-6 pb-4">
                   <div className="space-y-3">
                     {rankedHens.length > 0 ? (
-                      rankedHens.slice(0, 6).map((hen: any, i: number) => {
-                        const eggs = hen.total_eggs || 0;
-                        return (
-                          <button key={hen.id} onClick={() => window.location.assign(`/app/hens/${hen.id}`)} className="w-full flex items-center gap-2 sm:gap-3 rounded-xl hover:bg-muted/40 p-1.5 transition-colors text-left">
-                            <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground shrink-0">
-                              {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2 mb-1">
-                                <span className="text-xs sm:text-sm font-medium text-foreground truncate">{hen.name}</span>
-                                <span className="stat-number text-xs sm:text-sm text-primary shrink-0">{eggs} ägg</span>
+                      <>
+                        {(showAllHens ? rankedHens : rankedHens.slice(0, 5)).map((hen: any, i: number) => {
+                          const eggs = hen.total_eggs || 0;
+                          return (
+                            <button key={hen.id} onClick={() => window.location.assign(`/app/hens/${hen.id}`)} className="w-full flex items-center gap-2 sm:gap-3 rounded-xl hover:bg-muted/40 p-1.5 transition-colors text-left">
+                              <span className="stat-number text-base sm:text-lg w-6 text-center text-muted-foreground shrink-0">
+                                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2 mb-1">
+                                  <span className="text-xs sm:text-sm font-medium text-foreground truncate">{hen.name}</span>
+                                  <span className="stat-number text-xs sm:text-sm text-primary shrink-0">{eggs} ägg</span>
+                                </div>
+                                <div className="w-full bg-secondary rounded-full h-1.5">
+                                  <div className="bg-primary rounded-full h-1.5 transition-all duration-500" style={{ width: `${Math.min(100, (eggs / maxEggs) * 100)}%` }} />
+                                </div>
                               </div>
-                              <div className="w-full bg-secondary rounded-full h-1.5">
-                                <div className="bg-primary rounded-full h-1.5 transition-all duration-500" style={{ width: `${Math.min(100, (eggs / maxEggs) * 100)}%` }} />
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })
+                            </button>
+                          );
+                        })}
+                        {rankedHens.length > 5 && (
+                          <Button variant="ghost" size="sm" className="w-full mt-1" onClick={() => setShowAllHens(v => !v)}>
+                            {showAllHens ? 'Visa mindre' : `Visa ${rankedHens.length - 5} till`}
+                          </Button>
+                        )}
+                      </>
                     ) : (
                       <EmptyState
                         icon={Bird}
@@ -281,22 +290,31 @@ export default function Statistics() {
                   <CardTitle className="font-serif text-base sm:text-lg">Rasfördelning</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6 pb-4">
-                  {hensWithEggs.length > 0 ? (
-                    <div className="space-y-2">
-                      {Object.entries(
-                        hensWithEggs.reduce((acc: Record<string, number>, hen: any) => {
-                          const breed = hen.breed || 'Okänd';
-                          acc[breed] = (acc[breed] || 0) + 1;
-                          return acc;
-                        }, {})
-                      ).map(([breed, count]) => (
-                        <div key={breed} className="flex items-center justify-between gap-3 text-sm rounded-xl bg-muted/20 px-3 py-2">
-                          <span className="text-foreground truncate">{breed}</span>
-                          <span className="stat-number text-muted-foreground shrink-0">{count as number} st</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
+                  {hensWithEggs.length > 0 ? (() => {
+                    const breedEntries = Object.entries(
+                      hensWithEggs.reduce((acc: Record<string, number>, hen: any) => {
+                        const breed = hen.breed || 'Okänd';
+                        acc[breed] = (acc[breed] || 0) + 1;
+                        return acc;
+                      }, {})
+                    ).sort((a, b) => (b[1] as number) - (a[1] as number));
+                    const visibleBreeds = showAllBreeds ? breedEntries : breedEntries.slice(0, 5);
+                    return (
+                      <div className="space-y-2">
+                        {visibleBreeds.map(([breed, count]) => (
+                          <div key={breed} className="flex items-center justify-between gap-3 text-sm rounded-xl bg-muted/20 px-3 py-2">
+                            <span className="text-foreground truncate">{breed}</span>
+                            <span className="stat-number text-muted-foreground shrink-0">{count as number} st</span>
+                          </div>
+                        ))}
+                        {breedEntries.length > 5 && (
+                          <Button variant="ghost" size="sm" className="w-full mt-1" onClick={() => setShowAllBreeds(v => !v)}>
+                            {showAllBreeds ? 'Visa mindre' : `Visa ${breedEntries.length - 5} till`}
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })() : (
                     <EmptyState
                       emoji="🌿"
                       title="Ingen rasdata ännu"
