@@ -30,7 +30,7 @@ function getNotificationTarget(n: Notification): string | null {
   const explicit = extractUrl(n.message) || extractUrl(n.title);
   if (explicit) return explicit;
   const c = `${n.title} ${n.message}`.toLowerCase();
-  if (c.includes('sälj') || c.includes('agda sälj') || c.includes('bokning')) return '/app/egg-sales';
+  if (c.includes('agdas bod') || c.includes('gårdsbutik') || c.includes('sälj') || c.includes('agda sälj') || c.includes('bokning')) return '/app/egg-sales';
   if (c.includes('feedback') || c.includes('förslag')) return '/app/community';
   if (c.includes('ägg')) return '/app/eggs';
   if (c.includes('hön') || c.includes('flock')) return '/app/hens';
