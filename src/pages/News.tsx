@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Sparkles, CheckCheck, ArrowRight, Newspaper, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format, formatDistanceToNow, isAfter, subDays } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +19,7 @@ interface Notification {
   created_at: string;
 }
 
-type FilterKey = 'all' | 'week' | 'unread';
+type FilterKey = 'all' | 'unread';
 
 function extractUrl(text: string) {
   const match = text.match(/https?:\/\/[^\s]+|\/app\/[^\s]+/i);
@@ -47,7 +47,7 @@ export default function News() {
   const navigate = useNavigate();
   const [items, setItems] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
-  const [filter, setFilter] = useState<FilterKey>('week');
+  const [filter, setFilter] = useState<FilterKey>('all');
   const [loading, setLoading] = useState(true);
 
   useTitleEffect(() => { document.title = 'Nyheter | Hönsgården'; }, []);
@@ -80,15 +80,13 @@ export default function News() {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  const sevenDaysAgo = useMemo(() => subDays(new Date(), 7), []);
-  const newCount = useMemo(() => items.filter((n) => isAfter(new Date(n.created_at), sevenDaysAgo) && !readIds.has(n.id)).length, [items, readIds, sevenDaysAgo]);
-  const unreadCount = useMemo(() => items.filter((n) => !readIds.has(n.id)).length, [items, readIds]);
+  const newCount = useMemo(() => items.filter((n) => !readIds.has(n.id)).length, [items, readIds]);
+  const unreadCount = newCount;
 
   const filtered = useMemo(() => {
-    if (filter === 'week') return items.filter((n) => isAfter(new Date(n.created_at), sevenDaysAgo));
     if (filter === 'unread') return items.filter((n) => !readIds.has(n.id));
     return items;
-  }, [items, filter, readIds, sevenDaysAgo]);
+  }, [items, filter, readIds]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Notification[]>();
@@ -153,9 +151,8 @@ export default function News() {
 
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrera nyheter">
             {([
-              { key: 'week' as FilterKey, label: 'Senaste 7 dagarna' },
-              { key: 'unread' as FilterKey, label: `Olästa${unreadCount ? ` (${unreadCount})` : ''}` },
               { key: 'all' as FilterKey, label: 'Alla' },
+              { key: 'unread' as FilterKey, label: `Olästa${unreadCount ? ` (${unreadCount})` : ''}` },
             ]).map((chip) => {
               const active = filter === chip.key;
               return (
@@ -194,7 +191,6 @@ export default function News() {
                 <div className="relative pl-6 border-l-2 border-border/60 space-y-4">
                   {group.map((n) => {
                     const isUnread = !readIds.has(n.id);
-                    const isRecent = isAfter(new Date(n.created_at), sevenDaysAgo);
                     const target = getNotificationTarget(n);
                     return (
                       <article key={n.id} className="relative">
@@ -203,7 +199,6 @@ export default function News() {
                           <CardContent className="p-4 sm:p-5 space-y-3">
                             <div className="flex flex-wrap items-center gap-2">
                               {isUnread && <Badge className="bg-primary text-primary-foreground border-primary text-[10px]">Ny</Badge>}
-                              {isRecent && !isUnread && <Badge variant="outline" className="text-[10px]">Denna vecka</Badge>}
                               <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"><Clock className="h-3 w-3" /> {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: sv })}</span>
                               <span className="text-[11px] text-muted-foreground/60">· {format(new Date(n.created_at), 'd MMM yyyy', { locale: sv })}</span>
                             </div>
