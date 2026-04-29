@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  ArrowRight, Check, MapPin, ShoppingBag, Megaphone, CalendarClock, CreditCard, Egg,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  ArrowRight, Check, MapPin, ShoppingBag, Megaphone, CalendarClock, CreditCard, Egg, HelpCircle,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ORTER, getOrt } from '@/data/saljaAggOrter';
-import { buildOrtContent } from '@/data/saljaAggOrtContent';
+import { buildOrtContent, buildOrtFaq } from '@/data/saljaAggOrtContent';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 
