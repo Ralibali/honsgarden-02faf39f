@@ -27,3 +27,5 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = false
   [functions.public-egg-pitch]
     verify_jwt = false
+  [functions.capture-pitch-lead]
+    verify_jwt = false
