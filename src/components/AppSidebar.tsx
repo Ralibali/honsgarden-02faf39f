@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText, Newspaper } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,6 +40,7 @@ const financeNav = [
 ];
 
 const moreNav = [
+  { title: 'Nyheter', url: '/app/news', icon: Newspaper },
   { title: 'Agda AI', url: '/app/agda', icon: Bot, premium: true },
   { title: 'Community', url: '/app/community', icon: Users },
   { title: 'Premium', url: '/app/premium', icon: Crown },
