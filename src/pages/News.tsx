@@ -50,6 +50,8 @@ export default function News() {
   const [filter, setFilter] = useState<FilterKey>('week');
   const [loading, setLoading] = useState(true);
 
+  useTitleEffect(() => { document.title = 'Nyheter | Hönsgården'; }, []);
+
   useEffect(() => {
     if (!user?.id) return;
     let cancelled = false;
