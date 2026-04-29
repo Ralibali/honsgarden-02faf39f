@@ -167,17 +167,31 @@ export default function AiPitchGenerator() {
                     {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <div className="mt-5 rounded-2xl bg-primary/[0.06] border border-primary/15 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <p className="text-sm text-foreground">
-                    <strong className="font-semibold">Snyggt!</strong> Vill du också ha en{' '}
-                    <em>bokningssida</em> så köpare kan boka själva med Swish?
-                  </p>
-                  <Button asChild size="sm" className="gap-1.5 shrink-0">
-                    <a href="/login?mode=register">
-                      Skapa gratis säljsida <ArrowRight className="h-4 w-4" />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.15, duration: 0.4 }}
+                  className="mt-6"
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full h-14 text-base gap-2 shadow-[0_10px_40px_hsl(var(--primary)/0.35)] hover:shadow-[0_14px_50px_hsl(var(--primary)/0.45)] transition-shadow"
+                  >
+                    <a
+                      href={`/login?mode=register&utm_source=ai_pitch&utm_medium=landing&utm_campaign=salja_agg&pitch=${encodeURIComponent(
+                        pitch.slice(0, 1500),
+                      )}&price=${encodeURIComponent(price)}&packs=${encodeURIComponent(packs)}&location=${encodeURIComponent(location)}`}
+                    >
+                      <Sparkles className="h-5 w-5" />
+                      Skapa min gratis säljsida med denna text
+                      <ArrowRight className="h-5 w-5" />
                     </a>
                   </Button>
-                </div>
+                  <p className="text-center text-xs text-muted-foreground mt-3">
+                    Vi sparar din text så du kan publicera direkt efter registrering – tar 30 sekunder.
+                  </p>
+                </motion.div>
               </motion.div>
             )}
           </CardContent>
