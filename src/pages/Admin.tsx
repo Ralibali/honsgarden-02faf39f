@@ -254,6 +254,9 @@ export default function Admin() {
           <TabsTrigger value="marketing" className="text-xs sm:text-sm gap-1 rounded-lg">
             <Mail className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Marknad</span><span className="sm:hidden">📧</span>
           </TabsTrigger>
+          <TabsTrigger value="moderation" className="text-xs sm:text-sm gap-1 rounded-lg">
+            <MessageSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Moderation</span><span className="sm:hidden">🛡️</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Insights tab */}
