@@ -9,6 +9,8 @@ import CookieConsent from "./components/CookieConsent";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { usePageTracking, useAutoClickTracking } from "@/hooks/useTracking";
 
+const PwaUpdatePrompt = React.lazy(() => import("./components/PwaUpdatePrompt"));
+
 import Index from "./pages/IndexUpdated";
 import Login from "./pages/Login";
 
@@ -179,6 +181,9 @@ const App = () => (
           <CacheClearer />
           <AppRoutes />
           <CookieConsent />
+          <Suspense fallback={null}>
+            <PwaUpdatePrompt />
+          </Suspense>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
