@@ -250,3 +250,70 @@ export function buildOrtFaq(ort: Ort): FaqItem[] {
   }
   return indices.map((idx) => all[idx]);
 }
+
+// ===== SEO-meta per ort =====
+// Genererar unika title- och meta description-varianter per ort.
+// Mål: <60 tecken (title), <160 tecken (description), unik kombination per slug.
+
+export type OrtMeta = {
+  title: string;
+  description: string;
+  keywords: string[];
+};
+
+function clampTitle(s: string, max = 60): string {
+  if (s.length <= max) return s;
+  // Klipp vid sista mellanslag före max
+  const cut = s.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 30 ? cut.slice(0, lastSpace) : cut).replace(/[–\-,:\s]+$/, '');
+}
+
+function clampDesc(s: string, max = 158): string {
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 80 ? cut.slice(0, lastSpace) : cut).replace(/[.,;:\s]+$/, '') + '…';
+}
+
+export function buildOrtMeta(ort: Ort): OrtMeta {
+  const n = ort.name;
+  const lan = ort.lan.replace(/ län$/, '');
+
+  // 6 title-varianter med olika long-tail-vinklar
+  const titleVariants = [
+    `Sälja ägg i ${n} – gratis säljsida med Swish | Hönsgården`,
+    `Sälja ägg ${n} – ta emot bokningar & Swish gratis`,
+    `Äggförsäljning i ${n} – egen säljsida på 2 min | Hönsgården`,
+    `Sälj färska gårdsägg i ${n} – Swish, 0 kr provision`,
+    `Lokala ägg ${n} – starta försäljning gratis | Hönsgården`,
+    `Sälja ägg från höns i ${n} (${lan}) – gratis bokningssida`,
+  ];
+
+  // 6 description-varianter
+  const descVariants = [
+    `Sälj dina ägg lokalt i ${n} (${ort.lan}). Skapa en gratis säljsida på 2 minuter, ta emot bokningar och få betalt direkt via Swish – utan avgifter eller mellanhand.`,
+    `Har du höns i ${n}? Skapa en gratis säljsida med pris, hämtning och Swish-betalning. Köpare i ${lan} bokar själva – du behåller hela försäljningen.`,
+    `Starta äggförsäljning i ${n} på 2 minuter. Lokal säljsida, bokningskalender och Swish – helt gratis. Slipp sms-pingla och håll koll på lagret automatiskt.`,
+    `Allt fler i ${n} söker färska gårdsägg. Skapa en egen säljsida hos Hönsgården, dela länken lokalt och låt köparna i ${lan} boka själva. 0 kr i avgift.`,
+    `Sälj ägg från dina höns i ${n} utan mellanhänder. Egen säljsida, lager, bokningar och Swish-betalning – färdigt på minuter, helt gratis att starta.`,
+    `Säljmodul för hönsägare i ${n} och hela ${lan}: pris, hämtdagar, lagersaldo och Swish. Skapa kontot gratis och få första bokningen redan i veckan.`,
+  ];
+
+  const tIdx = seed(ort.slug + 'title') % titleVariants.length;
+  const dIdx = seed(ort.slug + 'desc') % descVariants.length;
+
+  return {
+    title: clampTitle(titleVariants[tIdx]),
+    description: clampDesc(descVariants[dIdx]),
+    keywords: [
+      `sälja ägg ${n.toLowerCase()}`,
+      `äggförsäljning ${n.toLowerCase()}`,
+      `färska ägg ${n.toLowerCase()}`,
+      `gårdsägg ${n.toLowerCase()}`,
+      `sälja ägg ${lan.toLowerCase()}`,
+      `äggförsäljning swish`,
+      `sälja ägg från höns`,
+    ],
+  };
+}
