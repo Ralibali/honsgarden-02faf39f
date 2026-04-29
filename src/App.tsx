@@ -114,6 +114,7 @@ const AppRoutes = () => (
         <Route path="/borja-med-hons" element={<SeoLandingPage pageKey="borja-med-hons" />} />
         <Route path="/s/agg" element={<PublicEggSale />} />
         <Route path="/s/:slug" element={<PublicEggSale />} />
+        <Route path="/r/:token" element={<PublicReview />} />
         <Route path="/login" element={<Login />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/reset-password" element={<ResetPassword />} />
