@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Sparkles, CheckCheck, ArrowRight, Newspaper, Clock } from 'lucide-react';
+import { Sparkles, CheckCheck, ArrowRight, Newspaper, Clock, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -48,6 +48,7 @@ export default function News() {
   const [items, setItems] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   useTitleEffect(() => { document.title = 'Nyheter | Hönsgården'; }, []);
@@ -84,9 +85,13 @@ export default function News() {
   const unreadCount = newCount;
 
   const filtered = useMemo(() => {
-    if (filter === 'unread') return items.filter((n) => !readIds.has(n.id));
-    return items;
-  }, [items, filter, readIds]);
+    let list = filter === 'unread' ? items.filter((n) => !readIds.has(n.id)) : items;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((n) => `${n.title} ${n.message}`.toLowerCase().includes(q));
+    }
+    return list;
+  }, [items, filter, readIds, search]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Notification[]>();
