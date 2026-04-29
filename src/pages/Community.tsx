@@ -141,6 +141,15 @@ export default function Community() {
       .update({ is_pinned: !post.is_pinned })
       .eq('id', post.id);
     if (error) return toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' });
+    if (isAdmin) {
+      await logModerationAction({
+        action: post.is_pinned ? 'unpin' : 'pin',
+        targetType: 'post',
+        targetId: post.id,
+        targetUserId: post.user_id,
+        snapshot: { title: post.title, category: post.category },
+      });
+    }
     await qc.invalidateQueries({ queryKey: ['community-posts'] });
     toast({ title: post.is_pinned ? 'Inlägget är inte längre fäst' : 'Inlägget är fäst högst upp 📌' });
   };
@@ -149,6 +158,15 @@ export default function Community() {
     if (!window.confirm('Vill du ta bort kommentaren?')) return;
     const { error } = await (supabase as any).from('community_comments').delete().eq('id', comment.id);
     if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' });
+    if (isAdmin && comment.user_id !== userId) {
+      await logModerationAction({
+        action: 'delete_comment',
+        targetType: 'comment',
+        targetId: comment.id,
+        targetUserId: comment.user_id,
+        snapshot: { content: comment.content, post_id: comment.post_id, image_url: comment.image_url },
+      });
+    }
     await qc.invalidateQueries({ queryKey: ['community-comments'] });
     toast({ title: 'Kommentaren är borttagen' });
   };
