@@ -134,11 +134,6 @@ export default function News() {
 
   return (
     <div className="space-y-5 max-w-3xl mx-auto">
-      <Helmet>
-        <title>Nyheter | Hönsgården</title>
-        <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
-
       <Card className="border-primary/25 bg-gradient-to-br from-primary/10 via-card to-accent/10 shadow-sm">
         <CardContent className="p-5 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
