@@ -23,6 +23,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ORTER } from '@/data/saljaAggOrter';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
