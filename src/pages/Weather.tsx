@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Wind, Droplets, CalendarDays, Lightbulb, TrendingUp, Egg } from 'lucide-react';
 import { toast } from 'sonner';
+import WeatherAlertSettings from '@/components/WeatherAlertSettings';
 
 const WEATHER_ICONS: Record<string, string> = {
   '0': '☀️', '1': '🌤️', '2': '⛅', '3': '☁️',
@@ -307,6 +308,12 @@ export default function Weather() {
               </div>
             </CardContent>
           </Card>
+
+          <WeatherAlertSettings
+            latitude={w.lat}
+            longitude={w.lon}
+            cityName={w.city}
+          />
 
           <p className="text-[10px] text-muted-foreground text-center">
             Väderdata från Open-Meteo • AI-råd genereras dagligen av Agda
