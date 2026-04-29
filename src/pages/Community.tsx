@@ -327,6 +327,15 @@ export default function Community() {
     if (!window.confirm('Vill du ta bort inlägget?')) return;
     const { error } = await (supabase as any).from('community_posts').delete().eq('id', post.id);
     if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' });
+    if (isAdmin && post.user_id !== userId) {
+      await logModerationAction({
+        action: 'delete_post',
+        targetType: 'post',
+        targetId: post.id,
+        targetUserId: post.user_id,
+        snapshot: { title: post.title, content: post.content, category: post.category, image_url: post.image_url },
+      });
+    }
     await qc.invalidateQueries({ queryKey: ['community-posts'] });
     toast({ title: 'Inlägget är borttaget' });
   };
