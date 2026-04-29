@@ -49,6 +49,7 @@ const PublicEggSale = React.lazy(() => import("./pages/PublicEggSaleV3"));
 const PublicReview = React.lazy(() => import("./pages/PublicReview"));
 const News = React.lazy(() => import("./pages/News"));
 const Weather = React.lazy(() => import("./pages/Weather"));
+const WeatherHistoryDetail = React.lazy(() => import("./pages/WeatherHistoryDetail"));
 const SaljaAgg = React.lazy(() => import("./pages/SaljaAgg"));
 
 const GuiderRedirect = () => {
