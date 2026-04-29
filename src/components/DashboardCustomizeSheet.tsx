@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -6,9 +6,20 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { GripVertical, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   DndContext,
   closestCenter,
@@ -109,11 +120,18 @@ export default function DashboardCustomizeSheet({
   onToggleHidden,
   onReset,
 }: Props) {
+  const [confirmReset, setConfirmReset] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  const handleReset = () => {
+    onReset();
+    setConfirmReset(false);
+    toast.success('Dashboard återställd till standard');
+  };
 
   const byId = new Map(widgets.map((w) => [w.id, w]));
   const orderedWidgets = order.map((id) => byId.get(id)).filter(Boolean) as DashboardWidgetMeta[];
@@ -157,14 +175,33 @@ export default function DashboardCustomizeSheet({
         </DndContext>
 
         <div className="flex gap-2 mt-5 pt-4 border-t border-border/40">
-          <Button variant="outline" className="flex-1 rounded-xl gap-2" onClick={onReset}>
+          <Button
+            variant="outline"
+            className="flex-1 rounded-xl gap-2"
+            onClick={() => setConfirmReset(true)}
+          >
             <RotateCcw className="h-4 w-4" />
-            Återställ
+            Återställ till standard
           </Button>
           <Button className="flex-1 rounded-xl" onClick={() => onOpenChange(false)}>
             Klart
           </Button>
         </div>
+
+        <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Återställa dashboard?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Detta nollställer ordning och visar alla widgets igen. Dina egna data påverkas inte.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Avbryt</AlertDialogCancel>
+              <AlertDialogAction onClick={handleReset}>Återställ</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SheetContent>
     </Sheet>
   );
