@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import EmptyState from '@/components/EmptyState';
+import { logModerationAction } from '@/lib/communityModerationLog';
 import {
   AlertTriangle,
   Camera,
@@ -140,6 +141,15 @@ export default function Community() {
       .update({ is_pinned: !post.is_pinned })
       .eq('id', post.id);
     if (error) return toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' });
+    if (isAdmin) {
+      await logModerationAction({
+        action: post.is_pinned ? 'unpin' : 'pin',
+        targetType: 'post',
+        targetId: post.id,
+        targetUserId: post.user_id,
+        snapshot: { title: post.title, category: post.category },
+      });
+    }
     await qc.invalidateQueries({ queryKey: ['community-posts'] });
     toast({ title: post.is_pinned ? 'Inlägget är inte längre fäst' : 'Inlägget är fäst högst upp 📌' });
   };
@@ -148,6 +158,15 @@ export default function Community() {
     if (!window.confirm('Vill du ta bort kommentaren?')) return;
     const { error } = await (supabase as any).from('community_comments').delete().eq('id', comment.id);
     if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' });
+    if (isAdmin && comment.user_id !== userId) {
+      await logModerationAction({
+        action: 'delete_comment',
+        targetType: 'comment',
+        targetId: comment.id,
+        targetUserId: comment.user_id,
+        snapshot: { content: comment.content, post_id: comment.post_id, image_url: comment.image_url },
+      });
+    }
     await qc.invalidateQueries({ queryKey: ['community-comments'] });
     toast({ title: 'Kommentaren är borttagen' });
   };
@@ -308,6 +327,15 @@ export default function Community() {
     if (!window.confirm('Vill du ta bort inlägget?')) return;
     const { error } = await (supabase as any).from('community_posts').delete().eq('id', post.id);
     if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' });
+    if (isAdmin && post.user_id !== userId) {
+      await logModerationAction({
+        action: 'delete_post',
+        targetType: 'post',
+        targetId: post.id,
+        targetUserId: post.user_id,
+        snapshot: { title: post.title, content: post.content, category: post.category, image_url: post.image_url },
+      });
+    }
     await qc.invalidateQueries({ queryKey: ['community-posts'] });
     toast({ title: 'Inlägget är borttaget' });
   };
@@ -394,7 +422,7 @@ export default function Community() {
                       <Button size="sm" variant={likedByMe ? 'default' : 'outline'} className="rounded-xl gap-1.5" onClick={() => toggleLike(post)}><Heart className="h-3.5 w-3.5" /> {likes.length}</Button>
                       <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={() => setOpenPostId(isOpen ? null : post.id)}><MessageCircle className="h-3.5 w-3.5" /> {postComments.length} svar</Button>
                       <Button size="sm" variant="ghost" className="rounded-xl gap-1.5" onClick={() => reportPost(post)}><AlertTriangle className="h-3.5 w-3.5" /> Anmäl</Button>
-                      {(isOwner || isAdmin) && isMarketCategory(post.category) && <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={async () => { await (supabase as any).from('community_posts').update({ is_sold: !post.is_sold }).eq('id', post.id); await qc.invalidateQueries({ queryKey: ['community-posts'] }); }}><CheckCircle2 className="h-3.5 w-3.5" /> {post.is_sold ? 'Öppna igen' : 'Markera såld'}</Button>}
+                      {(isOwner || isAdmin) && isMarketCategory(post.category) && <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={async () => { const newVal = !post.is_sold; await (supabase as any).from('community_posts').update({ is_sold: newVal }).eq('id', post.id); if (isAdmin && post.user_id !== userId) { await logModerationAction({ action: newVal ? 'mark_sold' : 'unmark_sold', targetType: 'post', targetId: post.id, targetUserId: post.user_id, snapshot: { title: post.title } }); } await qc.invalidateQueries({ queryKey: ['community-posts'] }); }}><CheckCircle2 className="h-3.5 w-3.5" /> {post.is_sold ? 'Öppna igen' : 'Markera såld'}</Button>}
                       {isAdmin && <Button size="sm" variant="outline" className="rounded-xl gap-1.5 border-primary/40 text-primary" onClick={() => togglePin(post)} title={post.is_pinned ? 'Lossa fäst' : 'Fäst högst upp'}>📌 {post.is_pinned ? 'Lossa' : 'Fäst'}</Button>}
                       {(isOwner || isAdmin) && <Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive gap-1.5" onClick={() => deletePost(post)}><Trash2 className="h-3.5 w-3.5" /> Ta bort{isAdmin && !isOwner ? ' (admin)' : ''}</Button>}
                     </div>

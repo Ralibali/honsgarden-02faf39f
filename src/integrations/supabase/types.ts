@@ -421,6 +421,48 @@ export type Database = {
           },
         ]
       }
+      community_moderation_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          moderator_id: string
+          moderator_name: string | null
+          reason: string | null
+          snapshot: Json | null
+          target_id: string
+          target_type: string
+          target_user_id: string | null
+          target_user_name: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          moderator_id: string
+          moderator_name?: string | null
+          reason?: string | null
+          snapshot?: Json | null
+          target_id: string
+          target_type: string
+          target_user_id?: string | null
+          target_user_name?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          moderator_id?: string
+          moderator_name?: string | null
+          reason?: string | null
+          snapshot?: Json | null
+          target_id?: string
+          target_type?: string
+          target_user_id?: string | null
+          target_user_name?: string | null
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           category: string
