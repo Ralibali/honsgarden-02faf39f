@@ -149,22 +149,101 @@ export default function SaljaAggOrt() {
           </div>
         </section>
 
-        {/* Lokal kontext */}
+        {/* Lokal kontext - djuplodande SEO-innehåll */}
         <section className="py-14 sm:py-20">
-          <div className="container max-w-4xl mx-auto px-5 sm:px-6 prose-text">
-            <motion.div {...fadeUp()} className="space-y-5 text-foreground">
-              <h2 className="font-serif text-2xl sm:text-3xl">Varför säljer hönsägare i {ort.name} via Hönsgården?</h2>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">
-                Allt fler i {ort.name} ({ort.invanare ? `${ort.invanare} invånare` : ort.lan}) söker efter
-                lokalt producerade ägg från frigående höns. Med en egen säljsida hittar köparna lätt till dig
-                via Google, Facebook eller en QR-kod på vägen ut till tomten – utan att du behöver bygga en
-                hemsida eller betala provision till en marknadsplats.
-              </p>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">
-                Du sätter själv pris, antal förpackningar och hur ofta du har leverans. Hönsgården sköter
-                bokningskalendern, lagerstatusen och påminnelserna åt dig. När köparen kommer hem till
-                {' '}{ort.name} med kartongen så ligger pengarna redan på din Swish.
-              </p>
+          <div className="container max-w-3xl mx-auto px-5 sm:px-6">
+            <motion.div {...fadeUp()} className="space-y-10 text-foreground">
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Sälja ägg i {ort.name} – så ser läget ut idag</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.intro}</p>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.marknadAvsnitt}</p>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Så resonerar köpare av lokala ägg i {ort.name}</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.saResonerarKöpare}</p>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.vardagsexempel}</p>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Vad får man för ägg i {ort.name}?</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.prisIOrt}</p>
+                <ul className="space-y-2.5 pt-2">
+                  {content.prisTips.map((t) => (
+                    <li key={t} className="flex items-start gap-2.5 text-[15px]">
+                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Så får du fler kunder i {ort.name}</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.saSäljerDuMer}</p>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Hämtning, leverans och logistik i {ort.name}</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                  En av de vanligaste orsakerna till att hönsägare i {ort.name} tappar köpare är otydlig logistik.
+                  Med en tydlig hämtdag och en sval plats för avhämtning slipper både du och köparen onödigt
+                  pingande. Här är några konkreta tips som funkar bra i {ort.lan}:
+                </p>
+                <ul className="space-y-2.5 pt-2">
+                  {content.leveransTips.map((t) => (
+                    <li key={t} className="flex items-start gap-2.5 text-[15px]">
+                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Hygien, märkning och regler i korthet</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                  För småskalig försäljning av ägg direkt från gård i Sverige (under 350 värphöns) räcker det i
+                  de flesta fall att registrera primärproduktion hos Länsstyrelsen i {ort.lan}. Du behöver inte
+                  stämpla varje ägg, men du ansvarar för att hanteringen är hygienisk och spårbar. Köpare i
+                  {' '}{ort.name} förväntar sig idag ren förpackning, tydligt värpdatum och svar på enkla frågor
+                  om uppfödning. Följ dessa råd så ligger du tryggt:
+                </p>
+                <ul className="space-y-2.5 pt-2">
+                  {content.hygienTips.map((t) => (
+                    <li key={t} className="flex items-start gap-2.5 text-[15px]">
+                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Säsong och klimat i {ort.region}</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">{content.klimatNot}</p>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                  Många framgångsrika säljare i {ort.name} arbetar med en kort säsongsbeskrivning på säljsidan,
+                  där de förklarar varför värpningen varierar över året. Det skapar trovärdighet och
+                  förebygger irriterade köpare när det blir lägre tillgång under vintern.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl sm:text-3xl">Vanliga frågor från köpare i {ort.name}</h2>
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
+                  Genom att svara på de här frågorna direkt på säljsidan halverar du antalet sms du behöver
+                  besvara, och de flesta köpare bokar direkt utan att behöva höra av sig först:
+                </p>
+                <ul className="space-y-2.5 pt-2">
+                  {content.vanligaFragor.map((q) => (
+                    <li key={q} className="flex items-start gap-2.5 text-[15px]">
+                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{q}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </motion.div>
           </div>
         </section>
