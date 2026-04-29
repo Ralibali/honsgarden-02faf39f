@@ -157,7 +157,7 @@ export default function SaljaAgg() {
     description:
       'Sälja ägg från egna höns? Skapa en gratis säljsida med bokning och Swish-betalning på 2 minuter. Få stamkunder, hantera lager och äggförsäljning enkelt med Hönsgården.',
     path: '/salja-agg',
-    keywords: 'sälja ägg, sälja ägg lokalt, äggförsäljning swish, sälja ägg pris, sälja ägg från egna höns, hobbyförsäljning ägg, sälja ägg utan f-skatt',
+    keywords: ['sälja ägg', 'sälja ägg lokalt', 'äggförsäljning swish', 'sälja ägg pris', 'sälja ägg från egna höns', 'hobbyförsäljning ägg'],
     jsonLd,
   });
 
