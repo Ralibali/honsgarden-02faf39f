@@ -25,3 +25,5 @@ project_id = "sikbymtrbhrofysgkqsj"
     verify_jwt = true
   [functions.weather-alerts]
     verify_jwt = false
+  [functions.public-egg-pitch]
+    verify_jwt = false
