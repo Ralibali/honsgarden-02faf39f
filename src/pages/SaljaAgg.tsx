@@ -23,6 +23,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ORTER } from '@/data/saljaAggOrter';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
@@ -452,6 +454,44 @@ export default function SaljaAgg() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* LOKALA SIDOR */}
+        <section className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
+          <div className="container max-w-5xl mx-auto px-5 sm:px-6">
+            <motion.div {...fadeUp()} className="text-center mb-8">
+              <Badge className="mb-3 bg-primary/10 text-primary border-primary/20">Lokalt nära dig</Badge>
+              <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-3">
+                Säljer du ägg i din ort?
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Vi har dedikerade säljsidor för fler än 100 svenska orter. Hitta din kommun nedan eller
+                gå direkt till registreringen.
+              </p>
+            </motion.div>
+            <motion.div {...fadeUp(0.05)} className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
+              {[
+                'stockholm','goteborg','malmo','uppsala','linkoping','orebro','vasteras',
+                'jonkoping','norrkoping','helsingborg','umea','lund','karlstad','gavle',
+                'sundsvall','vaxjo','halmstad','boras','eskilstuna','kalmar',
+              ].map((slug) => {
+                const ort = ORTER.find((o) => o.slug === slug);
+                if (!ort) return null;
+                return (
+                  <Link
+                    key={slug}
+                    to={`/salja-agg/${slug}`}
+                    className="inline-flex items-center gap-1.5 text-sm rounded-full border border-border/60 bg-background hover:border-primary/40 hover:text-primary px-3.5 py-1.5 transition-colors"
+                  >
+                    <MapPin className="h-3.5 w-3.5" /> {ort.name}
+                  </Link>
+                );
+              })}
+            </motion.div>
+            <p className="text-center text-xs text-muted-foreground mt-6">
+              Är din ort inte med? Det funkar lika bra ändå – skapa kontot så syns du på lokala sökningar i din kommun.
+            </p>
           </div>
         </section>
 

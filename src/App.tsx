@@ -51,6 +51,7 @@ const News = React.lazy(() => import("./pages/News"));
 const Weather = React.lazy(() => import("./pages/Weather"));
 const WeatherHistoryDetail = React.lazy(() => import("./pages/WeatherHistoryDetail"));
 const SaljaAgg = React.lazy(() => import("./pages/SaljaAgg"));
+const SaljaAggOrt = React.lazy(() => import("./pages/SaljaAggOrt"));
 
 const GuiderRedirect = () => {
   const { slug } = useParams<{ slug?: string }>();
@@ -117,6 +118,7 @@ const AppRoutes = () => (
         <Route path="/klackningskalender" element={<SeoLandingPage pageKey="klackningskalender" />} />
         <Route path="/borja-med-hons" element={<SeoLandingPage pageKey="borja-med-hons" />} />
         <Route path="/salja-agg" element={<SaljaAgg />} />
+        <Route path="/salja-agg/:ort" element={<SaljaAggOrt />} />
         <Route path="/s/agg" element={<PublicEggSale />} />
         <Route path="/s/:slug" element={<PublicEggSale />} />
         <Route path="/r/:token" element={<PublicReview />} />
