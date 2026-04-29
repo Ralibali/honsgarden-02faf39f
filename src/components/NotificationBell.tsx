@@ -148,6 +148,11 @@ export function NotificationBell() {
             </div>
           )}
         </ScrollArea>
+        <div className="px-4 py-2.5 border-t border-border/60 bg-card">
+          <button type="button" onClick={() => { setOpen(false); navigate('/app/news'); }} className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-primary hover:bg-primary/10 transition-colors">
+            Visa alla nyheter <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </PopoverContent>
     </Popover>
   );
