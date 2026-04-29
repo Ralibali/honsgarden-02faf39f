@@ -451,12 +451,18 @@ export default function EggSalesProV6() {
 
   const exportBookingsCsv = () => {
     const rows = [
-      ['Datum', 'Säljlista', 'Länk', 'Kundnamn', 'Kontakt', 'Antal kartor', 'Pris per karta', 'Summa', 'Status', 'Meddelande'],
-      ...(bookings as Booking[]).map((b) => {
+      ['Ordning', 'Status', 'Bokat datum', 'Bokad tid', 'Senast uppdaterad', 'Säljlista', 'Länk', 'Kundnamn', 'Kontakt', 'Antal kartor', 'Pris per karta', 'Summa', 'Meddelande'],
+      ...sortedBookings.map((b, index) => {
         const listing = listingById[b.listing_id];
         const unitPrice = Number(listing?.price_per_pack || 0);
+        const created = new Date(b.created_at);
+        const updated = b.updated_at ? new Date(b.updated_at) : null;
         return [
-          new Date(b.created_at).toLocaleString('sv-SE'),
+          index + 1,
+          statusLabel(b.status),
+          created.toLocaleDateString('sv-SE'),
+          created.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+          updated ? updated.toLocaleString('sv-SE') : '',
           listing?.title || 'Okänd säljlista',
           listing?.slug ? `${PUBLIC_BASE_URL}/s/${listing.slug}` : '',
           b.customer_name,
@@ -464,7 +470,6 @@ export default function EggSalesProV6() {
           b.packs,
           unitPrice || '',
           unitPrice ? Number(b.packs || 0) * unitPrice : '',
-          statusLabel(b.status),
           b.customer_message || '',
         ];
       }),
