@@ -543,6 +543,16 @@ export default function EggSalesProV6() {
     if (error) return toast({ title: 'Kunde inte uppdatera bokningen', description: error.message, variant: 'destructive' });
     await invalidateAgda();
     toast({ title: status === 'paid' ? 'Bokningen är markerad som betald' : status === 'picked_up' ? 'Bokningen är markerad som hämtad' : 'Bokningen är uppdaterad' });
+    // Auto-skicka recensions-länk när bokningen markeras som hämtad
+    if (status === 'picked_up' && current?.status !== 'picked_up') {
+      try {
+        const { data } = await (supabase as any).functions.invoke('send-review-request', { body: { booking_id: id } });
+        if (data?.review_url) {
+          try { await navigator.clipboard?.writeText(data.review_url); } catch { /* ignore */ }
+          toast({ title: 'Recensions-länk skapad ⭐', description: 'Länken är kopierad – skicka till kunden via SMS eller mejl.' });
+        }
+      } catch { /* tyst */ }
+    }
   };
 
   const generateWithAI = async () => {
