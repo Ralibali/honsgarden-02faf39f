@@ -239,7 +239,34 @@ export default function EggSalesProV6() {
     refetchInterval: 60_000,
   });
 
-  const listingById = useMemo(() => {
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+    queryKey: ['my-egg-sale-reviews-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any)
+        .from('egg_sale_reviews')
+        .select('*')
+        .eq('seller_user_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
+
+  const { data: reviewTokens = [] } = useQuery({
+    queryKey: ['my-egg-sale-review-tokens-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any)
+        .from('egg_sale_review_tokens')
+        .select('*')
+        .eq('seller_user_id', userId);
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
     const map: Record<string, Listing> = {};
     (listings as Listing[]).forEach((l) => { map[l.id] = l; });
     return map;
