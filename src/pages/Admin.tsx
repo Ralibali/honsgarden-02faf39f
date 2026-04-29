@@ -19,6 +19,7 @@ import UserDetailModal from '@/components/admin/UserDetailModal';
 import RevenueDashboard from '@/components/admin/RevenueDashboard';
 import SeoAdmin from '@/components/admin/SeoAdmin';
 import { MarketingOptInPanel } from '@/components/admin/MarketingOptInPanel';
+import CommunityModerationLog from '@/components/admin/CommunityModerationLog';
 import { Input } from '@/components/ui/input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
