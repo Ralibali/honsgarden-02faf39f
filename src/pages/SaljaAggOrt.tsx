@@ -465,6 +465,35 @@ export default function SaljaAggOrt() {
               </div>
             )}
 
+            {/* Se även – kategorier per län (jump-länkar inom sidan) */}
+            <div className="pt-2 border-t border-border/40">
+              <h2 className="font-serif text-xl sm:text-2xl mb-2">
+                Se även: kategorier för {ort.lan}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                Hoppa direkt till en specifik del av guiden för {ort.name} och {ort.lan}:
+              </p>
+              <ul className="flex flex-wrap gap-2 list-none p-0">
+                {[
+                  { hash: 'priser', label: `Priser i ${ort.lan}` },
+                  { hash: 'leverans', label: `Leverans i ${ort.lan}` },
+                  { hash: 'regler', label: `Regler i ${ort.lan}` },
+                  { hash: 'sasong', label: `Säsong i ${ort.region}` },
+                  { hash: 'faq', label: `Vanliga frågor – ${ort.name}` },
+                ].map((c) => (
+                  <li key={c.hash}>
+                    <a
+                      href={`#${c.hash}`}
+                      title={c.label}
+                      className="inline-flex items-center gap-1.5 text-sm rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 px-3.5 py-1.5 transition-colors"
+                    >
+                      {c.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div className="pt-2">
               <Link
                 to="/salja-agg"
