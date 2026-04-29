@@ -42,6 +42,8 @@ export default function SaljaAggOrt() {
   const title = `Sälja ägg i ${ort.name} – gratis säljsida med Swish | Hönsgården`;
   const description = `Sälj dina ägg lokalt i ${ort.name} (${ort.lan}). Skapa en gratis säljsida på 2 minuter, ta emot bokningar och få betalt direkt via Swish – utan avgifter eller mellanhand.`;
 
+  const faq = buildOrtFaq(ort);
+
   const jsonLd = [
     {
       '@type': 'BreadcrumbList',
@@ -61,32 +63,11 @@ export default function SaljaAggOrt() {
     },
     {
       '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: `Hur säljer jag ägg lokalt i ${ort.name}?`,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: `Med Hönsgården skapar du en gratis säljsida på 2 minuter. Du anger pris och hämtadress i ${ort.name} och delar länken med köpare. De bokar själva och betalar via Swish.`,
-          },
-        },
-        {
-          '@type': 'Question',
-          name: `Vad får man för ägg i ${ort.name}?`,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: `Priset varierar men ligger oftast mellan 35 och 60 kr per förpackning om sex ägg, beroende på efterfrågan i ${ort.name} och om hönsen är frigående. Du sätter själv ditt pris.`,
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Krävs det tillstånd för att sälja ägg?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'För småskalig försäljning direkt från gård i Sverige (under 350 höns) räcker det oftast att registrera primärproduktion hos Länsstyrelsen. Inga ytterligare tillstånd behövs för Hönsgårdens säljmodul.',
-          },
-        },
-      ],
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+      })),
     },
   ];
 
