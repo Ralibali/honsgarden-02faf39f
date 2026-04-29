@@ -22,6 +22,7 @@ import { motion } from 'framer-motion';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 const StickyMobileCTA = lazy(() => import('@/components/StickyMobileCTA'));
+const AiPitchGenerator = lazy(() => import('@/components/landing/AiPitchGenerator'));
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -74,20 +75,28 @@ const faq = [
     a: 'Ja. Du kan skapa säljsida, ta emot bokningar och hantera kunder helt gratis. Vi tar inga avgifter på din försäljning – Swish går direkt mellan dig och köparen.',
   },
   {
-    q: 'Hur fungerar betalningen?',
-    a: 'Köparen betalar med Swish till dig direkt. Hönsgården hanterar bara bokningen och påminnelsen – inga mellanhänder, inga avgifter.',
+    q: 'Hur fungerar äggförsäljning med Swish?',
+    a: 'Köparen bokar antal kartor på din säljsida och betalar med Swish till dig direkt vid hämtning eller i förväg. Hönsgården hanterar bokningen, lagret och påminnelsen – inga mellanhänder och inga avgifter.',
   },
   {
     q: 'Vad är "Agdas Bod"?',
     a: 'Agdas Bod är vår säljmodul i Hönsgården-appen. Det är där du skapar din säljsida och ser bokningar och kunder.',
   },
   {
-    q: 'Behöver jag F-skatt eller företag?',
+    q: 'Behöver jag F-skatt eller företag för att sälja ägg?',
     a: 'Nej, inte för enstaka försäljning av ägg från egna höns. Hobbyförsäljning är skattefritt upp till en viss gräns. Tjänar du över 50 000 kr/år bör du kontakta Skatteverket.',
   },
   {
     q: 'Får jag verkligen sälja ägg från mina höns?',
     a: 'Ja, du får sälja ägg direkt från gården till privatpersoner. Det kallas "primärproduktion till slutkonsument" och är tillåtet utan tillstånd. Säljer du till butik gäller andra regler – då måste du anmäla till Livsmedelsverket.',
+  },
+  {
+    q: 'Vad är ett bra pris på hemmagjorda ägg 2026?',
+    a: 'Marknadspriset ligger oftast mellan 40 och 70 kr per karta (10–12 ägg) i Sverige. Frigående och unika rasägg kan tas ut högre. Hönsgården räknar din faktiska foderkostnad så du vet om du går plus.',
+  },
+  {
+    q: 'Hur hittar jag köpare till mina ägg lokalt?',
+    a: 'De flesta hittar köpare via lokala Facebook-grupper, anslag i butiker, vägskyltar och word-of-mouth. Med Hönsgården får du en delbar länk att klistra in överallt – köparen bokar själv.',
   },
   {
     q: 'Vad händer om jag inte har ägg en vecka?',
@@ -144,10 +153,11 @@ const jsonLd = [
 
 export default function SaljaAgg() {
   useSeo({
-    title: 'Sälja ägg lokalt – skapa egen säljsida med Swish | Hönsgården',
+    title: 'Sälja ägg lokalt med Swish – gratis säljsida | Hönsgården',
     description:
-      'Sälj ägg från egna höns. Skapa gratis säljsida med bokning, Swish-betalning och kundlista. Bygg upp stamkunder på 2 minuter med Hönsgården.',
+      'Sälja ägg från egna höns? Skapa en gratis säljsida med bokning och Swish-betalning på 2 minuter. Få stamkunder, hantera lager och äggförsäljning enkelt med Hönsgården.',
     path: '/salja-agg',
+    keywords: 'sälja ägg, sälja ägg lokalt, äggförsäljning swish, sälja ägg pris, sälja ägg från egna höns, hobbyförsäljning ägg, sälja ägg utan f-skatt',
     jsonLd,
   });
 
