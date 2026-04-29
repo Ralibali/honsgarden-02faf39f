@@ -24,7 +24,7 @@ export default function PublicEggSaleV3() {
   const [message, setMessage] = useState('');
   const [packs, setPacks] = useState('1');
 
-  const { data: listing, isLoading } = useQuery({
+  const { data: listing, isLoading: queryLoading, isFetching } = useQuery({
     queryKey: ['public-egg-sale-listing-v3', slug],
     enabled: shouldLoadSlug,
     queryFn: async () => {
@@ -34,6 +34,7 @@ export default function PublicEggSaleV3() {
     },
     staleTime: 30_000,
   });
+  const isLoading = shouldLoadSlug && (queryLoading || isFetching);
 
   const { data: bookedPacks = 0 } = useQuery({
     queryKey: ['public-egg-sale-reserved-packs-v3', listing?.id],
