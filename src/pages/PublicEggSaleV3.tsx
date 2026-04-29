@@ -51,6 +51,22 @@ export default function PublicEggSaleV3() {
     staleTime: 15_000,
   });
 
+  const { data: publicReviews = [] } = useQuery({
+    queryKey: ['public-egg-sale-reviews-v3', listing?.id],
+    enabled: Boolean(listing?.id),
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from('egg_sale_reviews')
+        .select('id, customer_name, rating, comment, created_at')
+        .eq('listing_id', listing.id)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      return data || [];
+    },
+    staleTime: 60_000,
+  });
+
   const sale = useMemo(() => {
     if (listing) return {
       id: listing.id, sellerUserId: listing.user_id, title: listing.title || 'Färska ägg till salu', description: listing.description || 'Färska ägg från lokal hönsgård.', imageUrl: listing.image_url || '', packs: Number(listing.packs_available || 1), size: String(listing.eggs_per_pack || 12), price: String(Math.round(Number(listing.price_per_pack || 60))), location: listing.location || 'Lokalt område', pickup: listing.pickup_info || 'Hämtning efter överenskommelse', contact: listing.contact_info || 'Kontakta säljaren', swish: listing.swish_number || '', swishName: listing.swish_name || '', swishMsg: listing.swish_message || 'Ägg', p6: asKr(listing.p6_price), p12: asKr(listing.p12_price, asKr(listing.price_per_pack)), p30: asKr(listing.p30_price), soldOut: Boolean(listing.sold_out_manually)
