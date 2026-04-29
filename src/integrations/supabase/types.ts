@@ -2339,6 +2339,54 @@ export type Database = {
         }
         Relationships: []
       }
+      weather_advice_cache: {
+        Row: {
+          cache_date: string
+          city_name: string | null
+          created_at: string
+          history_insight: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          model: string | null
+          today_advice: string | null
+          updated_at: string
+          user_id: string
+          weather_snapshot: Json | null
+          week_advice: string | null
+        }
+        Insert: {
+          cache_date?: string
+          city_name?: string | null
+          created_at?: string
+          history_insight?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          model?: string | null
+          today_advice?: string | null
+          updated_at?: string
+          user_id: string
+          weather_snapshot?: Json | null
+          week_advice?: string | null
+        }
+        Update: {
+          cache_date?: string
+          city_name?: string | null
+          created_at?: string
+          history_insight?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          model?: string | null
+          today_advice?: string | null
+          updated_at?: string
+          user_id?: string
+          weather_snapshot?: Json | null
+          week_advice?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       advertiser_config: {

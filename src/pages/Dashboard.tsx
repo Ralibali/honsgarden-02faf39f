@@ -340,8 +340,15 @@ export default function Dashboard() {
           </h1>
         </div>
         <button
-          onClick={() => setWeatherExpanded(!weatherExpanded)}
+          onClick={() => {
+            if (user?.subscription_status === 'premium') {
+              navigate('/app/weather');
+            } else {
+              setWeatherExpanded(!weatherExpanded);
+            }
+          }}
           className="flex items-center gap-2 bg-card border border-border/60 rounded-2xl px-3.5 py-2 shadow-sm shrink-0 hover:shadow-md transition-shadow cursor-pointer active:scale-[0.97] transition-transform"
+          aria-label={user?.subscription_status === 'premium' ? 'Öppna väder & AI-råd' : 'Visa väderprognos'}
         >
           {weatherLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
@@ -353,6 +360,9 @@ export default function Dashboard() {
               </span>
               {weatherData?.cityName && (
                 <span className="text-xs text-muted-foreground hidden sm:inline">{weatherData.cityName}</span>
+              )}
+              {user?.subscription_status === 'premium' && (
+                <span className="text-[9px] text-primary/70 font-medium uppercase tracking-wider hidden sm:inline">Mer →</span>
               )}
             </>
           )}

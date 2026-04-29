@@ -48,6 +48,7 @@ const EggSales = React.lazy(() => import("./pages/EggSalesProV6"));
 const PublicEggSale = React.lazy(() => import("./pages/PublicEggSaleV3"));
 const PublicReview = React.lazy(() => import("./pages/PublicReview"));
 const News = React.lazy(() => import("./pages/News"));
+const Weather = React.lazy(() => import("./pages/Weather"));
 
 const GuiderRedirect = () => {
   const { slug } = useParams<{ slug?: string }>();
@@ -152,6 +153,7 @@ const AppRoutes = () => (
           <Route path="import" element={<Import />} />
           <Route path="calendar" element={<SeasonalCalendar />} />
           <Route path="news" element={<News />} />
+          <Route path="weather" element={<Weather />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText, Newspaper } from 'lucide-react';
+import { Home, Egg, Bird, Coins, BarChart3, Settings, LogOut, Package, Syringe, Baby, ClipboardCheck, Crown, Shield, Feather, Bot, PieChart, Upload, CalendarDays, Users, ReceiptText, Newspaper, CloudSun } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +29,7 @@ const flockNav = [
   { title: 'Hönor', url: '/app/hens', icon: Bird },
   { title: 'Kläckning', url: '/app/hatching', icon: Baby, premium: true },
   { title: 'Kalender', url: '/app/calendar', icon: CalendarDays },
+  { title: 'Väder & råd', url: '/app/weather', icon: CloudSun, premium: true },
   { title: 'Översikt', url: '/app/overview', icon: PieChart, premium: true },
 ];
 
