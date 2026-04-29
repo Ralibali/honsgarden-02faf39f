@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  ArrowRight, Check, MapPin, ShoppingBag, Megaphone, CalendarClock, CreditCard, Egg,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  ArrowRight, Check, MapPin, ShoppingBag, Megaphone, CalendarClock, CreditCard, Egg, HelpCircle,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ORTER, getOrt } from '@/data/saljaAggOrter';
-import { buildOrtContent } from '@/data/saljaAggOrtContent';
+import { buildOrtContent, buildOrtFaq } from '@/data/saljaAggOrtContent';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 
@@ -39,6 +42,8 @@ export default function SaljaAggOrt() {
   const title = `Sälja ägg i ${ort.name} – gratis säljsida med Swish | Hönsgården`;
   const description = `Sälj dina ägg lokalt i ${ort.name} (${ort.lan}). Skapa en gratis säljsida på 2 minuter, ta emot bokningar och få betalt direkt via Swish – utan avgifter eller mellanhand.`;
 
+  const faq = buildOrtFaq(ort);
+
   const jsonLd = [
     {
       '@type': 'BreadcrumbList',
@@ -58,32 +63,11 @@ export default function SaljaAggOrt() {
     },
     {
       '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: `Hur säljer jag ägg lokalt i ${ort.name}?`,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: `Med Hönsgården skapar du en gratis säljsida på 2 minuter. Du anger pris och hämtadress i ${ort.name} och delar länken med köpare. De bokar själva och betalar via Swish.`,
-          },
-        },
-        {
-          '@type': 'Question',
-          name: `Vad får man för ägg i ${ort.name}?`,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: `Priset varierar men ligger oftast mellan 35 och 60 kr per förpackning om sex ägg, beroende på efterfrågan i ${ort.name} och om hönsen är frigående. Du sätter själv ditt pris.`,
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Krävs det tillstånd för att sälja ägg?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'För småskalig försäljning direkt från gård i Sverige (under 350 höns) räcker det oftast att registrera primärproduktion hos Länsstyrelsen. Inga ytterligare tillstånd behövs för Hönsgårdens säljmodul.',
-          },
-        },
-      ],
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+      })),
     },
   ];
 
@@ -323,6 +307,36 @@ export default function SaljaAggOrt() {
             </div>
           </section>
         )}
+
+        {/* FAQ */}
+        <section className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
+          <div className="container max-w-3xl mx-auto px-5 sm:px-6">
+            <motion.div {...fadeUp()} className="text-center mb-8">
+              <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 inline-flex items-center gap-1.5">
+                <HelpCircle className="h-3 w-3" /> Vanliga frågor
+              </Badge>
+              <h2 className="font-serif text-2xl sm:text-3xl mb-2">
+                Vanliga frågor om att sälja ägg i {ort.name}
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                Snabba svar på det hönsägare i {ort.lan} oftast undrar innan de börjar sälja sina ägg lokalt.
+              </p>
+            </motion.div>
+
+            <Accordion type="single" collapsible className="rounded-2xl border border-border/50 bg-background divide-y divide-border/40">
+              {faq.map((f, i) => (
+                <AccordionItem key={i} value={`faq-${i}`} className="border-0 px-5 sm:px-6">
+                  <AccordionTrigger className="text-left text-[15px] sm:text-base font-medium py-4 hover:no-underline">
+                    {f.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-[15px] text-muted-foreground leading-relaxed pb-5">
+                    {f.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
 
         {/* Slut-CTA */}
         <section className="py-16 sm:py-24">
