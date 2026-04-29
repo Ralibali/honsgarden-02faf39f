@@ -541,15 +541,44 @@ export default function EggSalesProV6() {
           ) : (bookings as Booking[]).length === 0 ? (
             <div className="rounded-2xl border border-dashed p-5 text-center"><Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" /><p className="font-medium">Inga bokningsförfrågningar ännu</p><p className="text-sm text-muted-foreground mt-1">När någon beställer via din publika länk visas det här direkt.</p></div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {sortedBookings.map((b) => {
-                const listing = listingById[b.listing_id];
-                const unitPrice = Number(listing?.price_per_pack || 0);
-                const total = unitPrice ? Number(b.packs || 0) * unitPrice : 0;
-                const isPaid = b.status === 'paid' || b.status === 'picked_up';
-                const isPickedUp = b.status === 'picked_up';
-                return (
-                  <div key={b.id} className={`rounded-2xl border-2 bg-card p-4 space-y-3 shadow-sm ${b.status === 'reserved' ? 'border-amber-300 bg-amber-50/40' : b.status === 'paid' ? 'border-blue-300 bg-blue-50/40' : b.status === 'picked_up' ? 'border-emerald-300 bg-emerald-50/40' : 'border-border opacity-60'}`}>
+            <>
+              <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrera bokningar">
+                {([
+                  { key: 'all', label: 'Alla', count: bookingCounts.total, cls: 'bg-card text-foreground border-border hover:bg-muted', active: 'bg-primary text-primary-foreground border-primary' },
+                  { key: 'reserved', label: 'Ny', count: bookingCounts.reserved, cls: 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100', active: 'bg-amber-500 text-white border-amber-500' },
+                  { key: 'paid', label: 'Betald', count: bookingCounts.paid, cls: 'bg-blue-50 text-blue-900 border-blue-200 hover:bg-blue-100', active: 'bg-blue-600 text-white border-blue-600' },
+                  { key: 'picked_up', label: 'Hämtad', count: bookingCounts.picked_up, cls: 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100', active: 'bg-emerald-600 text-white border-emerald-600' },
+                  { key: 'cancelled', label: 'Ej hämtad / Avbokad', count: bookingCounts.cancelled, cls: 'bg-muted text-muted-foreground border-border hover:bg-muted/80', active: 'bg-foreground text-background border-foreground' },
+                ] as const).map((chip) => {
+                  const isActive = statusFilter === chip.key;
+                  return (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setStatusFilter(chip.key as typeof statusFilter)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${isActive ? chip.active : chip.cls}`}
+                    >
+                      {chip.label}
+                      <span className={`inline-flex min-w-5 justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${isActive ? 'bg-white/25 text-current' : 'bg-background/70 text-current'}`}>{chip.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {filteredBookings.length === 0 ? (
+                <div className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">Inga bokningar med vald status.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {filteredBookings.map((b) => {
+                    const listing = listingById[b.listing_id];
+                    const unitPrice = Number(listing?.price_per_pack || 0);
+                    const total = unitPrice ? Number(b.packs || 0) * unitPrice : 0;
+                    const isPaid = b.status === 'paid' || b.status === 'picked_up';
+                    const isPickedUp = b.status === 'picked_up';
+                    return (
+                      <div key={b.id} className={`rounded-2xl border-2 bg-card p-4 space-y-3 shadow-sm ${b.status === 'reserved' ? 'border-amber-300 bg-amber-50/40' : b.status === 'paid' ? 'border-blue-300 bg-blue-50/40' : b.status === 'picked_up' ? 'border-emerald-300 bg-emerald-50/40' : 'border-border opacity-60'}`}>
                     <div className="flex justify-between gap-2 items-start">
                       <div className="min-w-0 flex items-center gap-2">
                         <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusDot(b.status)}`} aria-hidden />
