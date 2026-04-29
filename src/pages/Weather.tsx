@@ -323,6 +323,54 @@ export default function Weather() {
             </CardContent>
           </Card>
 
+          {/* Tidigare väder */}
+          {history && history.length > 0 && (
+            <Card className="border-border/60 shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="font-serif text-lg">Tidigare väder & råd</h2>
+                </div>
+                <div className="divide-y divide-border/40">
+                  {history.map((h: any) => {
+                    const snap = h.weather_snapshot ?? {};
+                    const cur = snap.current ?? {};
+                    const code = cur.weathercode ?? 0;
+                    const temp = cur.temperature_2m;
+                    return (
+                      <Link
+                        key={h.cache_date}
+                        to={`/app/weather/history/${h.cache_date}`}
+                        className="flex items-center gap-3 py-3 hover:bg-muted/40 -mx-2 px-2 rounded-lg transition-colors"
+                      >
+                        <span className="text-2xl shrink-0">{getIcon(code)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium capitalize">
+                            {new Date(h.cache_date).toLocaleDateString('sv-SE', {
+                              weekday: 'short', day: 'numeric', month: 'long',
+                            })}
+                          </p>
+                          {h.summary && (
+                            <p className="text-xs text-muted-foreground line-clamp-1">{h.summary}</p>
+                          )}
+                          {!h.summary && h.city_name && (
+                            <p className="text-xs text-muted-foreground">{h.city_name}</p>
+                          )}
+                        </div>
+                        {typeof temp === 'number' && (
+                          <span className="text-sm font-medium tabular-nums shrink-0">
+                            {Math.round(temp)}°
+                          </span>
+                        )}
+                        <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground rotate-180 shrink-0" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <WeatherAlertSettings
             latitude={w.lat}
             longitude={w.lon}
