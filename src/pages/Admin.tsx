@@ -616,6 +616,10 @@ export default function Admin() {
         <TabsContent value="marketing" className="space-y-3">
           <MarketingOptInPanel />
         </TabsContent>
+
+        <TabsContent value="moderation" className="space-y-3">
+          <CommunityModerationLog />
+        </TabsContent>
       </Tabs>
 
       <UserDetailModal
