@@ -608,6 +608,10 @@ export default function Admin() {
         <TabsContent value="notifications" className="space-y-3">
           <NotificationSender />
         </TabsContent>
+
+        <TabsContent value="marketing" className="space-y-3">
+          <MarketingOptInPanel />
+        </TabsContent>
       </Tabs>
 
       <UserDetailModal
