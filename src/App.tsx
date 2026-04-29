@@ -23,6 +23,7 @@ const Reminders = React.lazy(() => import("./pages/Reminders"));
 const Hatching = React.lazy(() => import("./pages/Hatching"));
 const DailyTasks = React.lazy(() => import("./pages/DailyTasks"));
 const SettingsPage = React.lazy(() => import("./pages/Settings"));
+const Feedback = React.lazy(() => import("./pages/Feedback"));
 const Premium = React.lazy(() => import("./pages/Premium"));
 const Community = React.lazy(() => import("./pages/Community"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
@@ -141,6 +142,7 @@ const AppRoutes = () => (
           <Route path="statistics" element={<Statistics />} />
           <Route path="overview" element={<Overview />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="feedback" element={<Feedback />} />
           <Route path="premium" element={<Premium />} />
           <Route path="community" element={<Community />} />
           <Route path="admin" element={<Admin />} />
