@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Sparkles, CheckCheck, ArrowRight, Newspaper, Clock } from 'lucide-react';
+import { Sparkles, CheckCheck, ArrowRight, Newspaper, Clock, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -48,6 +48,7 @@ export default function News() {
   const [items, setItems] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   useTitleEffect(() => { document.title = 'Nyheter | Hönsgården'; }, []);
@@ -84,9 +85,13 @@ export default function News() {
   const unreadCount = newCount;
 
   const filtered = useMemo(() => {
-    if (filter === 'unread') return items.filter((n) => !readIds.has(n.id));
-    return items;
-  }, [items, filter, readIds]);
+    let list = filter === 'unread' ? items.filter((n) => !readIds.has(n.id)) : items;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((n) => `${n.title} ${n.message}`.toLowerCase().includes(q));
+    }
+    return list;
+  }, [items, filter, readIds, search]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Notification[]>();
@@ -147,6 +152,28 @@ export default function News() {
             <Button variant="outline" className="rounded-xl gap-2 shrink-0" onClick={markAllRead} disabled={unreadCount === 0}>
               <CheckCheck className="h-4 w-4" /> Markera allt som läst
             </Button>
+          </div>
+
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Sök i titel eller text…"
+              aria-label="Sök i nyheter"
+              className="w-full rounded-xl border border-border bg-card pl-9 pr-9 py-2 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                aria-label="Rensa sökning"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrera nyheter">
