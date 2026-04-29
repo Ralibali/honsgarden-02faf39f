@@ -81,7 +81,18 @@ export default function SaljaAggOrt() {
         acceptedAnswer: { '@type': 'Answer', text: f.answer },
       })),
     },
-  ];
+    {
+      '@type': 'SiteNavigationElement',
+      name: `Sälja ägg i orter nära ${ort.name}`,
+      hasPart: (ort.narliggande ?? [])
+        .map((s) => getOrt(s))
+        .filter((o): o is NonNullable<ReturnType<typeof getOrt>> => Boolean(o))
+        .map((o) => ({
+          '@type': 'SiteNavigationElement',
+          name: `Sälja ägg i ${o.name}`,
+          url: `https://honsgarden.se/salja-agg/${o.slug}`,
+        })),
+    },
 
   useSeo({
     title,
