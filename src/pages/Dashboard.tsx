@@ -410,333 +410,345 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ─── 3. Veckosammanfattning (egg goals) ─── */}
-      <EggGoalsWidget eggs={eggs} />
-
-      {/* ─── 4. Kompakt AI-råd: "Hönsgården har märkt…" ─── */}
-      <DashboardAICoach />
-
-      {/* ─── 4b. Avvikelsevarningar ─── */}
-      <AIDeviationAlerts variant="card" />
-
-
-      {/* ─── 3. Streak + Top hen ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
-          <CardContent className="p-4 flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
-              <Flame className={`h-5 w-5 ${streak >= 7 ? 'text-warning' : 'text-muted-foreground'}`} />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground tabular-nums leading-none">
-                {streak} <span className="text-sm font-normal text-muted-foreground">dagar</span>
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                {streak === 0 ? 'Logga ägg för att starta din streak!' : streak >= 7 ? '🔥 Fantastisk streak!' : 'Loggningssvit i rad'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
-          <CardContent className="p-4 flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-              <Award className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              {topHen ? (
-                <>
-                  <p className="text-sm font-semibold text-foreground leading-tight">🏆 {topHen.name}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{topHen.count} ägg denna vecka</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-medium text-muted-foreground">Ingen data</p>
-                  <p className="text-[11px] text-muted-foreground/60 mt-0.5">Logga ägg per höna för att se veckans bästa</p>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ─── 4. Upcoming chores (if any) ─── */}
-      {upcomingChores.length > 0 && (
-        <Card className={`border-warning/25 shadow-sm active:scale-[0.98] transition-transform ${pastDueChores.length > 0 ? 'bg-destructive/3' : 'bg-warning/3'}`}>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="text-lg">📋</span>
-              <p className="text-sm font-semibold text-foreground">
-                {upcomingChores.length} uppgift{upcomingChores.length > 1 ? 'er' : ''} förfaller snart
-              </p>
-            </div>
-            <div className="space-y-1.5">
-              {upcomingChores.slice(0, 3).map((chore: any) => {
-                const isPast = new Date(chore.next_due_at) < new Date();
-                return (
-                  <div key={chore.id} className="flex items-center gap-2">
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isPast ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
-                      {isPast ? '⚠️ Försenad' : '📌 Idag'}
-                    </span>
-                    <span className="text-xs text-foreground">{chore.title}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <button onClick={() => navigate('/app/tasks')} className="text-xs text-warning hover:underline mt-2.5 font-medium">
-              Se alla uppgifter →
-            </button>
-          </CardContent>
-        </Card>
+      {/* ─── Customize entry (Plus only) ─── */}
+      {isPlus && (
+        <div className="flex justify-end -mb-2">
+          <UIButton
+            variant="ghost"
+            size="sm"
+            onClick={() => setCustomizeOpen(true)}
+            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 rounded-xl"
+          >
+            <Settings2 className="h-3.5 w-3.5" />
+            Anpassa
+          </UIButton>
+        </div>
       )}
 
-      {/* ─── 5. Unified daily tip (compact, expandable) ─── */}
+      {/* ─── Customizable widgets ─── */}
       {(() => {
-        const tipHtml = tipCard.text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        const isLong = tipCard.text.length > 140;
-        return (
-          <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className={`w-7 h-7 rounded-lg bg-${tipCard.color}/10 flex items-center justify-center`}>
-                  <span className="text-sm">{tipCard.emoji}</span>
-                </div>
-                <span className="data-label">{tipCard.label}</span>
-              </div>
-              <p
-                className="text-sm text-foreground leading-relaxed line-clamp-3"
-                dangerouslySetInnerHTML={{ __html: tipHtml }}
-              />
-              {isLong && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTipSheetOpen(true)}
-                  className="mt-2 h-9 px-3 rounded-xl text-xs font-medium text-primary hover:bg-primary/8"
-                >
-                  Läs hela tipset
-                  <ArrowRight className="h-3 w-3 ml-1" />
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })()}
-
-
-      {/* ─── 6. Egg calendar ─── */}
-      {showCalendar && (
-        <Card className="border-border/50 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-primary/8 flex items-center justify-center">
-                  <CalendarDays className="h-4 w-4 text-primary" />
-                </div>
-                <h2 className="font-serif text-sm text-foreground">{getMonthName(now.getMonth())}</h2>
-              </div>
-              <span className="text-xs text-muted-foreground font-medium">
-                {Object.values(eggCalendarData).reduce((a, b) => a + b, 0)} ägg totalt
-              </span>
-            </div>
-            <div className="grid grid-cols-7 gap-1.5 mb-2">
-              {['M', 'T', 'O', 'T', 'F', 'L', 'S'].map((d, i) => (
-                <div key={`${d}-${i}`} className={`text-[10px] text-center font-medium ${i >= 5 ? 'text-accent/60' : 'text-muted-foreground'}`}>{d}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-1.5">
-              {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1;
-                const eggCount = eggCalendarData[day] || 0;
-                const isToday = day === now.getDate();
-                const isFuture = day > now.getDate();
-                return (
-                  <div
-                    key={day}
-                    className={`rounded-lg text-center py-1.5 text-[11px] transition-all
-                      ${isFuture ? 'bg-muted/20 text-muted-foreground/25' : getEggColor(eggCount)}
-                      ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-background shadow-sm' : ''}
-                    `}
-                  >
-                    <span className="leading-none">{day}</span>
-                    {!isFuture && eggCount > 0 && (
-                      <span className="block text-[8px] leading-none opacity-70 mt-0.5">{eggCount}</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ─── 7. Diary (shown after first week) ─── */}
-      {showDiary && (
-        <Card className="border-border/50 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-accent/8 flex items-center justify-center">
-                  <BookOpen className="h-4 w-4 text-accent" />
-                </div>
-                <h2 className="font-serif text-sm text-foreground">Dagbok</h2>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-3 text-xs text-primary hover:text-primary hover:bg-primary/8 rounded-xl gap-1.5"
-                onClick={() => setDiaryOpen(true)}
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Skriv
-              </Button>
-            </div>
-            {diaryEntries.length > 0 ? (
-              <div className="space-y-2">
-                {diaryEntries.map((entry, i) => (
-                  <div key={i} className="flex gap-3 items-start p-3 rounded-xl bg-muted/30 border border-border/30">
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5 font-medium bg-muted/60 px-2 py-0.5 rounded-md">{entry.date}</span>
-                    <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 card-inset rounded-xl">
-                <Feather className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2.5" />
-                <p className="text-sm text-muted-foreground font-medium">Inga inlägg ännu</p>
-                <p className="text-xs text-muted-foreground/60 mt-0.5">Skriv om vad som händer med dina höns</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ─── 8. "Mer" collapsible section ─── */}
-      <button
-        onClick={() => setShowMoreSection(!showMoreSection)}
-        className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors active:scale-[0.98]"
-      >
-        {showMoreSection ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        {showMoreSection ? 'Visa mindre' : 'Visa mer'}
-      </button>
-
-      {showMoreSection && (
-        <div className="space-y-5 animate-fade-in">
-          {/* Install app card (mobile) */}
-          <div className="block md:hidden">
-            <InstallAppCard />
-          </div>
-
-          {/* Achievement nudge */}
-          <AchievementNudge achievements={achievements} />
-
-          {/* Import data shortcut (adaptive) */}
-          {showImportCard && (
-            <Card className="border-border/50 shadow-sm card-hover cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate('/app/import')}>
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                    <Plus className="h-5 w-5 text-accent" />
+        const widgetNodes: Record<string, React.ReactNode> = {
+          'egg-goals': <EggGoalsWidget eggs={eggs} />,
+          'ai-coach': <DashboardAICoach />,
+          'ai-alerts': <AIDeviationAlerts variant="card" />,
+          'streak-tophen': (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
+                <CardContent className="p-4 flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+                    <Flame className={`h-5 w-5 ${streak >= 7 ? 'text-warning' : 'text-muted-foreground'}`} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Importera data</p>
-                    <p className="text-[11px] text-muted-foreground">Läs in hönor & ägg från fil eller Google Sheets</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums leading-none">
+                      {streak} <span className="text-sm font-normal text-muted-foreground">dagar</span>
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {streak === 0 ? 'Logga ägg för att starta din streak!' : streak >= 7 ? '🔥 Fantastisk streak!' : 'Loggningssvit i rad'}
+                    </p>
                   </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
+                <CardContent className="p-4 flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                    <Award className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    {topHen ? (
+                      <>
+                        <p className="text-sm font-semibold text-foreground leading-tight">🏆 {topHen.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{topHen.count} ägg denna vecka</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-muted-foreground">Ingen data</p>
+                        <p className="text-[11px] text-muted-foreground/60 mt-0.5">Logga ägg per höna för att se veckans bästa</p>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ),
+          'chores': upcomingChores.length > 0 ? (
+            <Card className={`border-warning/25 shadow-sm active:scale-[0.98] transition-transform ${pastDueChores.length > 0 ? 'bg-destructive/3' : 'bg-warning/3'}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="text-lg">📋</span>
+                  <p className="text-sm font-semibold text-foreground">
+                    {upcomingChores.length} uppgift{upcomingChores.length > 1 ? 'er' : ''} förfaller snart
+                  </p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                <div className="space-y-1.5">
+                  {upcomingChores.slice(0, 3).map((chore: any) => {
+                    const isPast = new Date(chore.next_due_at) < new Date();
+                    return (
+                      <div key={chore.id} className="flex items-center gap-2">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${isPast ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
+                          {isPast ? '⚠️ Försenad' : '📌 Idag'}
+                        </span>
+                        <span className="text-xs text-foreground">{chore.title}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button onClick={() => navigate('/app/tasks')} className="text-xs text-warning hover:underline mt-2.5 font-medium">
+                  Se alla uppgifter →
+                </button>
               </CardContent>
             </Card>
-          )}
-
-          {/* Feature discovery nudges (dismissible, adaptive) */}
-          {showFeedNudge && (
-            <Card className="border-warning/20 bg-warning/3 shadow-sm">
-              <CardContent className="p-4 flex items-center gap-3.5">
-                <span className="text-2xl shrink-0">🌾</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Spåra foderkostnader</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Vet du vad varje ägg kostar dig? Börja logga foder idag.</p>
+          ) : null,
+          'daily-tip': (() => {
+            const tipHtml = tipCard.text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            const isLong = tipCard.text.length > 140;
+            return (
+              <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className={`w-7 h-7 rounded-lg bg-${tipCard.color}/10 flex items-center justify-center`}>
+                      <span className="text-sm">{tipCard.emoji}</span>
+                    </div>
+                    <span className="data-label">{tipCard.label}</span>
+                  </div>
+                  <p
+                    className="text-sm text-foreground leading-relaxed line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: tipHtml }}
+                  />
+                  {isLong && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setTipSheetOpen(true)}
+                      className="mt-2 h-9 px-3 rounded-xl text-xs font-medium text-primary hover:bg-primary/8"
+                    >
+                      Läs hela tipset
+                      <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })(),
+          'calendar': showCalendar ? (
+            <Card className="border-border/50 shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-primary/8 flex items-center justify-center">
+                      <CalendarDays className="h-4 w-4 text-primary" />
+                    </div>
+                    <h2 className="font-serif text-sm text-foreground">{getMonthName(now.getMonth())}</h2>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-medium">
+                    {Object.values(eggCalendarData).reduce((a, b) => a + b, 0)} ägg totalt
+                  </span>
                 </div>
-                <div className="flex flex-col gap-1 shrink-0">
-                  <Button size="sm" variant="outline" className="border-warning/40 text-warning hover:bg-warning/10 rounded-xl text-xs" onClick={() => navigate('/app/feed')}>
-                    Prova →
+                <div className="grid grid-cols-7 gap-1.5 mb-2">
+                  {['M', 'T', 'O', 'T', 'F', 'L', 'S'].map((d, i) => (
+                    <div key={`${d}-${i}`} className={`text-[10px] text-center font-medium ${i >= 5 ? 'text-accent/60' : 'text-muted-foreground'}`}>{d}</div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-1.5">
+                  {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
+                  {Array.from({ length: daysInMonth }).map((_, i) => {
+                    const day = i + 1;
+                    const eggCount = eggCalendarData[day] || 0;
+                    const isToday = day === now.getDate();
+                    const isFuture = day > now.getDate();
+                    return (
+                      <div
+                        key={day}
+                        className={`rounded-lg text-center py-1.5 text-[11px] transition-all
+                          ${isFuture ? 'bg-muted/20 text-muted-foreground/25' : getEggColor(eggCount)}
+                          ${isToday ? 'ring-2 ring-primary/50 ring-offset-1 ring-offset-background shadow-sm' : ''}
+                        `}
+                      >
+                        <span className="leading-none">{day}</span>
+                        {!isFuture && eggCount > 0 && (
+                          <span className="block text-[8px] leading-none opacity-70 mt-0.5">{eggCount}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ) : null,
+          'diary': showDiary ? (
+            <Card className="border-border/50 shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-accent/8 flex items-center justify-center">
+                      <BookOpen className="h-4 w-4 text-accent" />
+                    </div>
+                    <h2 className="font-serif text-sm text-foreground">Dagbok</h2>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-xs text-primary hover:text-primary hover:bg-primary/8 rounded-xl gap-1.5"
+                    onClick={() => setDiaryOpen(true)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Skriv
                   </Button>
-                  <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-feed-nudge-dismissed', '1')}>
-                    Göm
-                  </button>
                 </div>
+                {diaryEntries.length > 0 ? (
+                  <div className="space-y-2">
+                    {diaryEntries.map((entry, i) => (
+                      <div key={i} className="flex gap-3 items-start p-3 rounded-xl bg-muted/30 border border-border/30">
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5 font-medium bg-muted/60 px-2 py-0.5 rounded-md">{entry.date}</span>
+                        <p className="text-sm text-foreground leading-relaxed">{entry.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 card-inset rounded-xl">
+                    <Feather className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2.5" />
+                    <p className="text-sm text-muted-foreground font-medium">Inga inlägg ännu</p>
+                    <p className="text-xs text-muted-foreground/60 mt-0.5">Skriv om vad som händer med dina höns</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          )}
+          ) : null,
+          'more': (
+            <>
+              <button
+                onClick={() => setShowMoreSection(!showMoreSection)}
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors active:scale-[0.98]"
+              >
+                {showMoreSection ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {showMoreSection ? 'Visa mindre' : 'Visa mer'}
+              </button>
 
-          {showFinanceNudge && (
-            <Card className="border-success/20 bg-success/3 shadow-sm">
-              <CardContent className="p-4 flex items-center gap-3.5">
-                <span className="text-2xl shrink-0">💰</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Håll koll på ekonomin</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Logga äggförsäljning och utgifter – se om hönsen går med vinst.</p>
+              {showMoreSection && (
+                <div className="space-y-5 animate-fade-in mt-3">
+                  <div className="block md:hidden">
+                    <InstallAppCard />
+                  </div>
+                  <AchievementNudge achievements={achievements} />
+                  {showImportCard && (
+                    <Card className="border-border/50 shadow-sm card-hover cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate('/app/import')}>
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                            <Plus className="h-5 w-5 text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">Importera data</p>
+                            <p className="text-[11px] text-muted-foreground">Läs in hönor & ägg från fil eller Google Sheets</p>
+                          </div>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      </CardContent>
+                    </Card>
+                  )}
+                  {showFeedNudge && (
+                    <Card className="border-warning/20 bg-warning/3 shadow-sm">
+                      <CardContent className="p-4 flex items-center gap-3.5">
+                        <span className="text-2xl shrink-0">🌾</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground">Spåra foderkostnader</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Vet du vad varje ägg kostar dig? Börja logga foder idag.</p>
+                        </div>
+                        <div className="flex flex-col gap-1 shrink-0">
+                          <Button size="sm" variant="outline" className="border-warning/40 text-warning hover:bg-warning/10 rounded-xl text-xs" onClick={() => navigate('/app/feed')}>
+                            Prova →
+                          </Button>
+                          <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-feed-nudge-dismissed', '1')}>
+                            Göm
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {showFinanceNudge && (
+                    <Card className="border-success/20 bg-success/3 shadow-sm">
+                      <CardContent className="p-4 flex items-center gap-3.5">
+                        <span className="text-2xl shrink-0">💰</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground">Håll koll på ekonomin</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Logga äggförsäljning och utgifter – se om hönsen går med vinst.</p>
+                        </div>
+                        <div className="flex flex-col gap-1 shrink-0">
+                          <Button size="sm" variant="outline" className="border-success/40 text-success hover:bg-success/10 rounded-xl text-xs" onClick={() => navigate('/app/finance')}>
+                            Prova →
+                          </Button>
+                          <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-finance-nudge-dismissed', '1')}>
+                            Göm
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <Card
+                      className="border-primary/10 cursor-pointer hover:bg-primary/4 transition-all duration-200 shadow-sm card-hover group active:scale-[0.97] transition-transform"
+                      onClick={() => navigate('/app/eggs')}
+                    >
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors shrink-0">
+                          <Egg className="h-4.5 w-4.5 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">Ägghistorik</p>
+                          <p className="text-[10px] text-muted-foreground">{todayEggs} idag</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card
+                      className="border-accent/10 cursor-pointer hover:bg-accent/4 transition-all duration-200 shadow-sm card-hover group active:scale-[0.97] transition-transform"
+                      onClick={() => navigate('/app/hens')}
+                    >
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-accent/8 flex items-center justify-center group-hover:bg-accent/12 transition-colors shrink-0">
+                          <Bird className="h-4.5 w-4.5 text-accent" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">Mina hönor</p>
+                          <p className="text-[10px] text-muted-foreground">{activeHens} aktiva</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <Achievements achievements={achievements} eggs={eggs} hens={hens as any[]} streak={streak} />
+                  <ShareCard
+                    weekEggs={weekEggs}
+                    totalEggs={eggs.reduce((s: number, e: any) => s + (e.count || 0), 0)}
+                    henCount={activeHens}
+                    streak={streak}
+                    userName={user?.name?.split(' ')[0]}
+                  />
+                  <ReferralCard />
                 </div>
-                <div className="flex flex-col gap-1 shrink-0">
-                  <Button size="sm" variant="outline" className="border-success/40 text-success hover:bg-success/10 rounded-xl text-xs" onClick={() => navigate('/app/finance')}>
-                    Prova →
-                  </Button>
-                  <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={() => localStorage.setItem('dashboard-finance-nudge-dismissed', '1')}>
-                    Göm
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </>
+          ),
+        };
 
-          {/* Quick links */}
-          <div className="grid grid-cols-2 gap-3">
-            <Card
-              className="border-primary/10 cursor-pointer hover:bg-primary/4 transition-all duration-200 shadow-sm card-hover group active:scale-[0.97] transition-transform"
-              onClick={() => navigate('/app/eggs')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors shrink-0">
-                  <Egg className="h-4.5 w-4.5 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">Ägghistorik</p>
-                  <p className="text-[10px] text-muted-foreground">{todayEggs} idag</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card
-              className="border-accent/10 cursor-pointer hover:bg-accent/4 transition-all duration-200 shadow-sm card-hover group active:scale-[0.97] transition-transform"
-              onClick={() => navigate('/app/hens')}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-accent/8 flex items-center justify-center group-hover:bg-accent/12 transition-colors shrink-0">
-                  <Bird className="h-4.5 w-4.5 text-accent" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">Mina hönor</p>
-                  <p className="text-[10px] text-muted-foreground">{activeHens} aktiva</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        return layout.order
+          .filter((id) => !isHidden(id))
+          .map((id) => {
+            const node = widgetNodes[id];
+            if (!node) return null;
+            return <React.Fragment key={id}>{node}</React.Fragment>;
+          });
+      })()}
 
-          {/* Achievements */}
-          <Achievements achievements={achievements} eggs={eggs} hens={hens as any[]} streak={streak} />
-
-          {/* Share card */}
-          <ShareCard
-            weekEggs={weekEggs}
-            totalEggs={eggs.reduce((s: number, e: any) => s + (e.count || 0), 0)}
-            henCount={activeHens}
-            streak={streak}
-            userName={user?.name?.split(' ')[0]}
-          />
-
-          {/* Referral */}
-          <ReferralCard />
-        </div>
+      {/* Customize sheet */}
+      {isPlus && (
+        <DashboardCustomizeSheet
+          open={customizeOpen}
+          onOpenChange={setCustomizeOpen}
+          widgets={widgetMeta}
+          order={layout.order}
+          hiddenIds={layout.hidden}
+          onReorder={setOrder}
+          onToggleHidden={toggleHidden}
+          onReset={reset}
+        />
       )}
 
       {/* Daily tip sheet */}
