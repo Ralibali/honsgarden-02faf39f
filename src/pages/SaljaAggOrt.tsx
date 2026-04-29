@@ -228,6 +228,34 @@ export default function SaljaAggOrt() {
                 </ul>
               </div>
 
+              <figure className="rounded-2xl overflow-hidden border border-border/50 bg-background">
+                <img
+                  src={ASSET_BY_KEY[images.farm.assetKey]}
+                  alt={images.farm.alt}
+                  loading="lazy"
+                  width={1200}
+                  height={675}
+                  className="w-full h-auto object-cover aspect-[16/9]"
+                />
+                <figcaption className="px-4 py-2.5 text-xs text-muted-foreground bg-muted/30 border-t border-border/40">
+                  {images.farm.caption}
+                </figcaption>
+              </figure>
+
+              <figure className="rounded-2xl overflow-hidden border border-border/50 bg-background sm:max-w-md">
+                <img
+                  src={ASSET_BY_KEY[henImg.assetKey]}
+                  alt={henImg.alt}
+                  loading="lazy"
+                  width={800}
+                  height={800}
+                  className="w-full h-auto object-cover aspect-square"
+                />
+                <figcaption className="px-4 py-2.5 text-xs text-muted-foreground bg-muted/30 border-t border-border/40">
+                  {henImg.caption}
+                </figcaption>
+              </figure>
+
               <div className="space-y-4">
                 <h2 className="font-serif text-2xl sm:text-3xl">Hygien, märkning och regler i korthet</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
