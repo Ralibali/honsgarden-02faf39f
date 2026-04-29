@@ -430,7 +430,7 @@ export default function Dashboard() {
           'ai-coach': <DashboardAICoach />,
           'ai-alerts': <AIDeviationAlerts variant="card" />,
           'streak-tophen': (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className={`grid grid-cols-1 ${topHen ? 'sm:grid-cols-2' : ''} gap-3`}>
               <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
                 <CardContent className="p-4 flex items-center gap-3.5">
                   <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
@@ -446,26 +446,19 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
-                <CardContent className="p-4 flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-                    <Award className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    {topHen ? (
-                      <>
-                        <p className="text-sm font-semibold text-foreground leading-tight">🏆 {topHen.name}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{topHen.count} ägg denna vecka</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-muted-foreground">Ingen data</p>
-                        <p className="text-[11px] text-muted-foreground/60 mt-0.5">Logga ägg per höna för att se veckans bästa</p>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              {topHen && (
+                <Card className="border-border/50 shadow-sm card-hover active:scale-[0.98] transition-transform">
+                  <CardContent className="p-4 flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                      <Award className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground leading-tight">🏆 {topHen.name}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{topHen.count} ägg denna vecka</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           ),
           'chores': upcomingChores.length > 0 ? (
