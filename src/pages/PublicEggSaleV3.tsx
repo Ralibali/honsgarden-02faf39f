@@ -128,6 +128,31 @@ export default function PublicEggSaleV3() {
       {listing?.id && <Card className="shadow-none"><CardContent className="p-4 space-y-3">{isSoldOut ? <><p className="font-serif text-sm flex items-center gap-2"><BellRing className="h-4 w-4 text-primary" /> Anmäl dig till väntelistan</p><p className="text-xs text-muted-foreground">Få ett mejl direkt när säljaren har ägg i lager igen.</p><div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><Input value={wlName} onChange={(e) => setWlName(e.target.value)} placeholder="Namn *" /><Input type="email" value={wlEmail} onChange={(e) => setWlEmail(e.target.value)} placeholder="E-post (för notis)" /></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><Input value={wlPhone} onChange={(e) => setWlPhone(e.target.value)} placeholder="Telefon (valfritt)" /><Input type="number" min="1" value={wlPacks} onChange={(e) => setWlPacks(e.target.value)} placeholder="Önskat antal kartor" /></div><Button onClick={() => waitlistMutation.mutate()} disabled={waitlistMutation.isPending} className="w-full rounded-xl"><BellRing className="h-4 w-4 mr-2" /> {waitlistMutation.isPending ? 'Skickar...' : 'Anmäl mig'}</Button></> : <><p className="font-serif text-sm flex items-center gap-2"><ShoppingBasket className="h-4 w-4 text-primary" /> Skicka bokningsförfrågan</p><div className="grid grid-cols-1 sm:grid-cols-2 gap-2"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Namn *" /><Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefon / kontakt" /></div><Input type="number" min="1" max={remaining} value={packs} onChange={(e) => setPacks(e.target.value)} placeholder="Antal kartor" /><Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Meddelande, t.ex. önskad hämtningstid" /><Button onClick={() => bookingMutation.mutate()} disabled={bookingMutation.isPending} className="w-full rounded-xl"><CheckCircle2 className="h-4 w-4 mr-2" /> {bookingMutation.isPending ? 'Skickar...' : 'Skicka bokningsförfrågan'}</Button></>}</CardContent></Card>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"><Button onClick={() => copy(shareText)}><Copy className="h-4 w-4 mr-2" /> Kopiera info</Button><Button variant="outline" onClick={share}><Share2 className="h-4 w-4 mr-2" /> Dela sidan</Button></div>
     </CardContent></Card>
+    {(publicReviews as any[]).length > 0 && (() => {
+      const avg = (publicReviews as any[]).reduce((s, r) => s + Number(r.rating || 0), 0) / (publicReviews as any[]).length;
+      return (
+        <Card><CardContent className="p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <p className="stat-number text-2xl text-amber-700">{avg.toFixed(1)}</p>
+            <div>
+              <div className="flex">{[1,2,3,4,5].map((n) => <Star key={n} className={`h-4 w-4 ${n <= Math.round(avg) ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'}`} />)}</div>
+              <p className="text-xs text-muted-foreground">{(publicReviews as any[]).length} recension(er) från kunder</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {(publicReviews as any[]).slice(0, 5).map((r: any) => (
+              <div key={r.id} className="rounded-2xl border p-3 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{r.customer_name}</p>
+                  <div className="flex">{[1,2,3,4,5].map((n) => <Star key={n} className={`h-3 w-3 ${n <= Number(r.rating) ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'}`} />)}</div>
+                </div>
+                {r.comment && <p className="text-sm text-muted-foreground italic">"{r.comment}"</p>}
+              </div>
+            ))}
+          </div>
+        </CardContent></Card>
+      );
+    })()}
     <Card><CardContent className="p-4 flex gap-3"><ShieldCheck className="h-5 w-5 text-primary shrink-0" /><div><p className="text-sm font-medium">Tips till köpare</p><p className="text-sm text-muted-foreground">Bokningen är en förfrågan. Kontakta säljaren för att bekräfta tillgång, hämtning och betalning innan du Swishar.</p></div></CardContent></Card>
     <details className="rounded-2xl border bg-card/60 p-4 text-center"><summary className="cursor-pointer list-none text-xs text-muted-foreground">Skapad med <strong>Hönsgården.se</strong></summary><div className="pt-4 space-y-3"><Sparkles className="h-5 w-5 mx-auto text-primary" /><p className="text-sm font-medium">Vill du också sälja ägg enklare?</p><p className="text-xs text-muted-foreground">Med Hönsgården kan du logga ägg, skapa säljannonser, dela försäljningssidor och hålla koll på betalningar.</p><Button variant="outline" size="sm" onClick={() => window.open('https://honsgarden.se', '_blank')}><ExternalLink className="h-3.5 w-3.5 mr-2" /> Besök Hönsgården.se</Button></div></details>
   </div></main>;
