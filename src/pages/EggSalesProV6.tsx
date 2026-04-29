@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertCircle,
+  BellRing,
   Camera,
   CheckCircle2,
   CircleDollarSign,
@@ -25,6 +26,7 @@ import {
   PauseCircle,
   PlayCircle,
   Plus,
+  Send,
   Share2,
   ShoppingBasket,
   Store,
@@ -221,6 +223,21 @@ export default function EggSalesProV6() {
     refetchInterval: 30_000,
   });
 
+  const { data: waitlist = [] } = useQuery({
+    queryKey: ['my-egg-sale-waitlist-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any)
+        .from('egg_sale_waitlist')
+        .select('*')
+        .eq('seller_user_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
+
   const listingById = useMemo(() => {
     const map: Record<string, Listing> = {};
     (listings as Listing[]).forEach((l) => { map[l.id] = l; });
@@ -303,7 +320,18 @@ export default function EggSalesProV6() {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-listings-v6'] }),
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-bookings-v6'] }),
+      qc.invalidateQueries({ queryKey: ['my-egg-sale-waitlist-v6'] }),
     ]);
+  };
+
+  const triggerWaitlistNotify = async (listingId: string) => {
+    try {
+      const { data } = await (supabase as any).functions.invoke('notify-waitlist', { body: { listing_id: listingId } });
+      const n = Number(data?.notified ?? 0);
+      if (n > 0) toast({ title: `Väntelistan är notifierad 🔔`, description: `${n} intresserade fick mejl om att lagret är påfyllt.` });
+    } catch {
+      // tyst – notifiering är best-effort
+    }
   };
 
   const loadListing = (l: Listing) => {
@@ -371,6 +399,8 @@ export default function EggSalesProV6() {
       const userId = await getCurrentUserId();
       const requestedSlug = publishedSlug || customSlug || draftSlug;
       const slug = await getUniqueSlug(requestedSlug, editingId);
+      const newStock = Math.max(0, safeNumber(stockPacks, 0));
+      const prevStock = editingId ? Number((listings as Listing[]).find((x) => x.id === editingId)?.stock_packs ?? 0) : 0;
       const row = {
         user_id: userId,
         slug,
@@ -390,7 +420,7 @@ export default function EggSalesProV6() {
         p12_price: p12,
         p30_price: p30,
         is_active: true,
-        stock_packs: Math.max(0, safeNumber(stockPacks, 0)),
+        stock_packs: newStock,
         stock_source: stockSource,
         auto_publish: autoPublish,
       };
@@ -404,6 +434,10 @@ export default function EggSalesProV6() {
       await invalidateAgda();
       toast({ title: editingId ? 'Säljlistan är uppdaterad ✨' : 'Säljlistan är publicerad ✨', description: `${PUBLIC_BASE_URL}/s/${result.data.slug}` });
       if (slug !== requestedSlug) toast({ title: 'Länken justerades automatiskt', description: `Den blev /s/${slug} eftersom önskad länk var upptagen.` });
+      // Notifiera väntelistan om lager precis fyllts på (manuellt lager)
+      if (stockSource === 'manual' && prevStock <= 0 && newStock > 0) {
+        await triggerWaitlistNotify(result.data.id);
+      }
     } catch (e: any) {
       toast({ title: 'Kunde inte publicera', description: e.message, variant: 'destructive' });
     } finally {
@@ -740,7 +774,44 @@ export default function EggSalesProV6() {
         <div className="space-y-5">
           <Card className="overflow-hidden shadow-sm">{imageUrl ? <img src={imageUrl} className="h-48 w-full object-cover" /> : <div className="h-40 bg-muted/30 flex items-center justify-center"><ImageIcon className="h-8 w-8 text-muted-foreground" /></div>}<CardContent className="p-4 space-y-3"><Badge>Förhandsvisning</Badge><h2 className="font-serif text-2xl">{title}</h2><p className="text-sm text-muted-foreground">{description}</p><div className="grid grid-cols-3 gap-2 text-center"><MiniStat label="Kartor" value={packCount} /><MiniStat label="Ägg" value={eggsPerPack} /><MiniStat label="Pris" value={`${price} kr`} /></div><div className="rounded-2xl border bg-muted/20 p-4 text-sm space-y-1"><PriceRow label="6-pack" value={`${p6} kr`} /><PriceRow label="12-pack" value={`${p12} kr`} /><PriceRow label="30-pack" value={`${p30} kr`} /></div><div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm"><Wallet className="h-4 w-4 inline mr-1 text-primary" /> {swishNumber || 'Swishnummer visas här'}</div></CardContent></Card>
 
-          <Card className="shadow-sm"><CardContent className="p-4 space-y-3"><h2 className="font-serif text-lg">Mina säljlistor</h2>{listingsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (listings as Listing[]).length === 0 ? <p className="text-sm text-muted-foreground">Inga publicerade säljlistor ännu.</p> : <div className="space-y-2">{(listings as Listing[]).slice(0, 8).map((l) => { const booked = bookingCounts[l.id] || 0; const left = Math.max(0, Number(l.packs_available || 0) - booked); const stockLeft = Number(l.stock_packs ?? 0); const isAuto = l.auto_publish !== false; return <div key={l.id} className="rounded-2xl border p-3 space-y-2"><div><p className="font-medium text-sm truncate">{l.title}</p><p className="text-xs text-muted-foreground truncate">{PUBLIC_BASE_URL}/s/{l.slug}</p></div><div className="flex flex-wrap gap-1"><Badge variant={l.is_active ? 'default' : 'secondary'}>{l.is_active ? 'Aktiv' : 'Pausad'}</Badge>{l.sold_out_manually && <Badge variant="destructive">Slutsåld</Badge>}<Badge variant="outline" className={stockLeft === 0 ? 'border-destructive text-destructive' : stockLeft <= 3 ? 'border-amber-500 text-amber-700' : 'border-emerald-500 text-emerald-700'}><Package className="h-3 w-3 mr-1" />{stockLeft} i lager</Badge>{isAuto && <Badge variant="outline" className="text-xs">Auto</Badge>}<Badge variant="outline">{left} kvar (bokn.)</Badge></div><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="outline" className="rounded-xl" onClick={() => loadListing(l)}><Edit3 className="h-3.5 w-3.5 mr-1" /> Redigera</Button><Button size="sm" variant="ghost" className="rounded-xl" onClick={() => window.open(`${PUBLIC_BASE_URL}/s/${l.slug}`, '_blank')}><ExternalLink className="h-3.5 w-3.5 mr-1" /> Visa</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => duplicateListing(l)}><Copy className="h-3.5 w-3.5 mr-1" /> Duplicera</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { is_active: !l.is_active }, l.is_active ? 'Säljlistan är pausad' : 'Säljlistan är aktiv igen')}>{l.is_active ? <PauseCircle className="h-3.5 w-3.5 mr-1" /> : <PlayCircle className="h-3.5 w-3.5 mr-1" />}{l.is_active ? 'Pausa' : 'Aktivera'}</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { sold_out_manually: !l.sold_out_manually }, l.sold_out_manually ? 'Säljlistan är inte längre slutsåld' : 'Säljlistan är markerad som slutsåld')}>{l.sold_out_manually ? 'Öppna' : 'Slutsåld'}</Button><Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive" onClick={() => deleteListing(l)}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button></div></div>; })}</div>}</CardContent></Card>
+          <Card className="shadow-sm"><CardContent className="p-4 space-y-3"><h2 className="font-serif text-lg">Mina säljlistor</h2>{listingsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (listings as Listing[]).length === 0 ? <p className="text-sm text-muted-foreground">Inga publicerade säljlistor ännu.</p> : <div className="space-y-2">{(listings as Listing[]).slice(0, 8).map((l) => { const booked = bookingCounts[l.id] || 0; const left = Math.max(0, Number(l.packs_available || 0) - booked); const stockLeft = Number(l.stock_packs ?? 0); const isAuto = l.auto_publish !== false; const wlPending = (waitlist as any[]).filter((w) => w.listing_id === l.id && !w.notified_at).length; return <div key={l.id} className="rounded-2xl border p-3 space-y-2"><div><p className="font-medium text-sm truncate">{l.title}</p><p className="text-xs text-muted-foreground truncate">{PUBLIC_BASE_URL}/s/{l.slug}</p></div><div className="flex flex-wrap gap-1"><Badge variant={l.is_active ? 'default' : 'secondary'}>{l.is_active ? 'Aktiv' : 'Pausad'}</Badge>{l.sold_out_manually && <Badge variant="destructive">Slutsåld</Badge>}<Badge variant="outline" className={stockLeft === 0 ? 'border-destructive text-destructive' : stockLeft <= 3 ? 'border-amber-500 text-amber-700' : 'border-emerald-500 text-emerald-700'}><Package className="h-3 w-3 mr-1" />{stockLeft} i lager</Badge>{isAuto && <Badge variant="outline" className="text-xs">Auto</Badge>}<Badge variant="outline">{left} kvar (bokn.)</Badge>{wlPending > 0 && <Badge variant="outline" className="border-primary/40 text-primary"><BellRing className="h-3 w-3 mr-1" />{wlPending} på väntelistan</Badge>}</div><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="outline" className="rounded-xl" onClick={() => loadListing(l)}><Edit3 className="h-3.5 w-3.5 mr-1" /> Redigera</Button><Button size="sm" variant="ghost" className="rounded-xl" onClick={() => window.open(`${PUBLIC_BASE_URL}/s/${l.slug}`, '_blank')}><ExternalLink className="h-3.5 w-3.5 mr-1" /> Visa</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => duplicateListing(l)}><Copy className="h-3.5 w-3.5 mr-1" /> Duplicera</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { is_active: !l.is_active }, l.is_active ? 'Säljlistan är pausad' : 'Säljlistan är aktiv igen')}>{l.is_active ? <PauseCircle className="h-3.5 w-3.5 mr-1" /> : <PlayCircle className="h-3.5 w-3.5 mr-1" />}{l.is_active ? 'Pausa' : 'Aktivera'}</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { sold_out_manually: !l.sold_out_manually }, l.sold_out_manually ? 'Säljlistan är inte längre slutsåld' : 'Säljlistan är markerad som slutsåld')}>{l.sold_out_manually ? 'Öppna' : 'Slutsåld'}</Button><Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive" onClick={() => deleteListing(l)}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button></div></div>; })}</div>}</CardContent></Card>
+
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif text-lg flex items-center gap-2"><BellRing className="h-4 w-4 text-primary" /> Väntelista</h2>
+                <Badge variant="outline">{(waitlist as any[]).filter((w) => !w.notified_at).length} aktiva</Badge>
+              </div>
+              {(waitlist as any[]).length === 0 ? (
+                <p className="text-sm text-muted-foreground">När en säljlista är slutsåld kan kunder anmäla intresse här. De får automatiskt mejl när du fyller på lagret.</p>
+              ) : (
+                <div className="space-y-2">
+                  {(waitlist as any[]).slice(0, 12).map((w) => {
+                    const l = listingById[w.listing_id];
+                    const notified = Boolean(w.notified_at);
+                    return (
+                      <div key={w.id} className="rounded-2xl border p-3 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{w.customer_name} <span className="text-muted-foreground font-normal">vill {w.packs_wanted} st</span></p>
+                            <p className="text-xs text-muted-foreground truncate">{l?.title || 'Säljlista borttagen'}</p>
+                            <p className="text-xs text-muted-foreground truncate">{w.customer_email || ''}{w.customer_email && w.customer_phone ? ' · ' : ''}{w.customer_phone || ''}</p>
+                          </div>
+                          <Badge variant={notified ? 'secondary' : 'default'} className="shrink-0">{notified ? 'Notifierad' : 'Väntar'}</Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {w.customer_email && <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.open(`mailto:${w.customer_email}?subject=${encode(`Ägg från ${l?.title || 'Hönsgården'}`)}`, '_blank')}><Mail className="h-3.5 w-3.5 mr-1" /> Mejla</Button>}
+                          {w.customer_phone && <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.open(`sms:${w.customer_phone}`, '_blank')}><MessageCircle className="h-3.5 w-3.5 mr-1" /> SMS</Button>}
+                          {!notified && l && <Button size="sm" variant="outline" className="rounded-xl" onClick={() => triggerWaitlistNotify(l.id)}><Send className="h-3.5 w-3.5 mr-1" /> Skicka notis nu</Button>}
+                          <Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive" onClick={async () => { const { error } = await (supabase as any).from('egg_sale_waitlist').delete().eq('id', w.id); if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' }); await invalidateAgda(); toast({ title: 'Borttagen från väntelistan' }); }}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
