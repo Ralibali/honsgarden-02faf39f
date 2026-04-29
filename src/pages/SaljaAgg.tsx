@@ -295,6 +295,11 @@ export default function SaljaAgg() {
           </div>
         </section>
 
+        {/* AI PITCH GENERATOR */}
+        <Suspense fallback={<div className="h-96" />}>
+          <AiPitchGenerator />
+        </Suspense>
+
         {/* FEATURES */}
         <section className="py-16 sm:py-24 bg-muted/30 border-y border-border/40">
           <div className="container max-w-6xl mx-auto px-5 sm:px-6">
