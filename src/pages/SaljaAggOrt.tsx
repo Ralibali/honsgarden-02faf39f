@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ORTER, getOrt } from '@/data/saljaAggOrter';
-import { buildOrtContent, buildOrtFaq } from '@/data/saljaAggOrtContent';
+import { buildOrtContent, buildOrtFaq, buildOrtMeta } from '@/data/saljaAggOrtContent';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 
@@ -39,8 +39,9 @@ export default function SaljaAggOrt() {
     return <Navigate to="/salja-agg" replace />;
   }
 
-  const title = `Sälja ägg i ${ort.name} – gratis säljsida med Swish | Hönsgården`;
-  const description = `Sälj dina ägg lokalt i ${ort.name} (${ort.lan}). Skapa en gratis säljsida på 2 minuter, ta emot bokningar och få betalt direkt via Swish – utan avgifter eller mellanhand.`;
+  const meta = buildOrtMeta(ort);
+  const title = meta.title;
+  const description = meta.description;
 
   const faq = buildOrtFaq(ort);
 
