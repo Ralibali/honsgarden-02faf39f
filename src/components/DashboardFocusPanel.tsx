@@ -25,18 +25,34 @@ function sumEggsSince(eggs: any[], start: Date) {
     .reduce((sum, egg) => sum + (egg.count || 0), 0);
 }
 
-function getWeekInsight(eggs: any[]) {
-  const thisWeekStart = daysAgo(7);
-  const lastWeekStart = daysAgo(14);
-  const lastWeekEnd = daysAgo(7);
+function startOfIsoWeek(d: Date) {
+  const date = new Date(d);
+  const day = date.getDay(); // 0 = Sön
+  const diff = day === 0 ? -6 : 1 - day;
+  date.setDate(date.getDate() + diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
 
-  const thisWeek = sumEggsSince(eggs, thisWeekStart);
-  const lastWeek = eggs
+function sumEggsBetween(eggs: any[], start: Date, end: Date) {
+  return eggs
     .filter((egg) => {
-      const date = new Date(egg.date);
-      return date >= lastWeekStart && date < lastWeekEnd;
+      const d = new Date(egg.date);
+      return d >= start && d <= end;
     })
     .reduce((sum, egg) => sum + (egg.count || 0), 0);
+}
+
+function getWeekInsight(eggs: any[]) {
+  const thisWeekStart = startOfIsoWeek(new Date());
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  const lastWeekEnd = new Date(thisWeekStart);
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+  lastWeekEnd.setHours(23, 59, 59, 999);
+
+  const thisWeek = sumEggsSince(eggs, thisWeekStart);
+  const lastWeek = sumEggsBetween(eggs, lastWeekStart, lastWeekEnd);
 
   const diff = thisWeek - lastWeek;
 
