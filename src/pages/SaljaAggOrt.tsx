@@ -281,7 +281,7 @@ export default function SaljaAggOrt() {
                 </figcaption>
               </figure>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="regler">
                 <h2 className="font-serif text-2xl sm:text-3xl">Hygien, märkning och regler i korthet</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
                   För småskalig försäljning av ägg direkt från gård i Sverige (under 350 värphöns) räcker det i
