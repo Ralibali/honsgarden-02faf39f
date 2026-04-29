@@ -13,6 +13,8 @@ import SmartStatisticsOverview from '@/components/SmartStatisticsOverview';
 
 export default function Statistics() {
   const [showAllInsights, setShowAllInsights] = useState(false);
+  const [showAllHens, setShowAllHens] = useState(false);
+  const [showAllBreeds, setShowAllBreeds] = useState(false);
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['stats-summary'],
     queryFn: () => api.getSummaryStats().catch(() => null),
