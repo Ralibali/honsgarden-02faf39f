@@ -93,6 +93,7 @@ export default function SaljaAggOrt() {
           url: `https://honsgarden.se/salja-agg/${o.slug}`,
         })),
     },
+  ];
 
   useSeo({
     title,
