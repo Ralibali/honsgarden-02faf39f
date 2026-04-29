@@ -204,7 +204,7 @@ export default function SaljaAggOrt() {
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.vardagsexempel}</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="priser">
                 <h2 className="font-serif text-2xl sm:text-3xl">Vad får man för ägg i {ort.name}?</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.prisIOrt}</p>
                 <ul className="space-y-2.5 pt-2">
