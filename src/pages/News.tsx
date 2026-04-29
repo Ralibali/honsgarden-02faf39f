@@ -80,15 +80,13 @@ export default function News() {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  const sevenDaysAgo = useMemo(() => subDays(new Date(), 7), []);
-  const newCount = useMemo(() => items.filter((n) => isAfter(new Date(n.created_at), sevenDaysAgo) && !readIds.has(n.id)).length, [items, readIds, sevenDaysAgo]);
-  const unreadCount = useMemo(() => items.filter((n) => !readIds.has(n.id)).length, [items, readIds]);
+  const newCount = useMemo(() => items.filter((n) => !readIds.has(n.id)).length, [items, readIds]);
+  const unreadCount = newCount;
 
   const filtered = useMemo(() => {
-    if (filter === 'week') return items.filter((n) => isAfter(new Date(n.created_at), sevenDaysAgo));
     if (filter === 'unread') return items.filter((n) => !readIds.has(n.id));
     return items;
-  }, [items, filter, readIds, sevenDaysAgo]);
+  }, [items, filter, readIds]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Notification[]>();
