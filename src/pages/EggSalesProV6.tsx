@@ -390,6 +390,8 @@ export default function EggSalesProV6() {
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-listings-v6'] }),
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-bookings-v6'] }),
       qc.invalidateQueries({ queryKey: ['my-egg-sale-waitlist-v6'] }),
+      qc.invalidateQueries({ queryKey: ['my-egg-sale-reviews-v6'] }),
+      qc.invalidateQueries({ queryKey: ['my-egg-sale-review-tokens-v6'] }),
     ]);
   };
 
