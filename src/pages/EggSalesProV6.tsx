@@ -649,7 +649,7 @@ export default function EggSalesProV6() {
         <div>
           <p className="data-label mb-1">Sälj ägg</p>
           <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Agdas Bod 🥚</h1>
-          <p className="text-sm text-muted-foreground mt-1">Skapa säljlistor, ta emot bokningsförfrågningar, visa Swish och håll koll på lagret.</p>
+          <p className="text-sm text-muted-foreground mt-1">Din digitala gårdsbutik – publicera säljsidor för dina ägg, ta emot bokningar från kunder och håll koll på lager och Swish-betalningar på ett ställe.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={newListing} className="rounded-xl gap-2"><Plus className="h-4 w-4" /> Ny lista</Button>
