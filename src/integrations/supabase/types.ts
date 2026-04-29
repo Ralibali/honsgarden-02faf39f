@@ -1441,6 +1441,45 @@ export type Database = {
         }
         Relationships: []
       }
+      pitch_leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          location: string | null
+          packs: string | null
+          phone: string | null
+          pitch: string | null
+          price: string | null
+          source: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          packs?: string | null
+          phone?: string | null
+          pitch?: string | null
+          price?: string | null
+          source?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          packs?: string | null
+          phone?: string | null
+          pitch?: string | null
+          price?: string | null
+          source?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
