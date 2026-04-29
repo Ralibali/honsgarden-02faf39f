@@ -159,10 +159,29 @@ export default function EggSalesProV6() {
   const [publishing, setPublishing] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [generatedTexts, setGeneratedTexts] = useState<MarketingTexts | null>(null);
+  const [stockPacks, setStockPacks] = useState('0');
+  const [stockSource, setStockSource] = useState<'manual' | 'egg_log'>('manual');
+  const [autoPublish, setAutoPublish] = useState(true);
 
   useEffect(() => {
     document.title = 'Agda sälj | Hönsgården';
   }, []);
+
+  // Hämta tillgängliga ägg (från äggloggen senaste 14 dagarna minus redan sålt)
+  const { data: eggLogStock = 0 } = useQuery({
+    queryKey: ['egg-log-stock-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const [{ data: logs }, { data: bookings }] = await Promise.all([
+        (supabase as any).from('egg_logs').select('count').eq('user_id', userId).gte('date', since),
+        (supabase as any).from('public_egg_sale_bookings').select('packs').eq('seller_user_id', userId).neq('status', 'cancelled').gte('created_at', since),
+      ]);
+      const totalEggs = (logs || []).reduce((s: number, r: any) => s + Number(r.count || 0), 0);
+      const soldEggs = (bookings || []).reduce((s: number, b: any) => s + Number(b.packs || 0), 0) * Math.max(1, safeNumber(packSize, 12));
+      return Math.max(0, Math.floor((totalEggs - soldEggs) / Math.max(1, safeNumber(packSize, 12))));
+    },
+  });
 
   const packCount = Math.max(1, safeNumber(salePacks, 1));
   const eggsPerPack = Math.max(1, safeNumber(packSize, 12));
