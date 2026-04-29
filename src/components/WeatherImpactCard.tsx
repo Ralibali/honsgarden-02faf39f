@@ -73,17 +73,19 @@ export default function WeatherImpactCard({ daily, latitude, longitude }: Props)
       const ids = (farmIds ?? []).map((r: any) => r.get_user_farm_ids ?? r);
       if (!ids.length) return { eggsByDay: {} as Record<string, number>, weatherByDay: {} as Record<string, any> };
 
-      const [eggsRes, weatherRes] = await Promise.all([
-        supabase.from('eggs').select('date, count').in('farm_id', ids).gte('date', since),
-        supabase
-          .from('weather_advice_cache')
-          .select('cache_date, weather_snapshot')
-          .eq('user_id', user!.id)
-          .gte('cache_date', since),
-      ]);
+      const eggsRes = await supabase
+        .from('eggs')
+        .select('date, count')
+        .in('farm_id', ids)
+        .gte('date', since);
+      const weatherRes = await supabase
+        .from('weather_advice_cache')
+        .select('cache_date, weather_snapshot')
+        .eq('user_id', user!.id)
+        .gte('cache_date', since);
 
       const eggsByDay: Record<string, number> = {};
-      for (const e of eggsRes.data ?? []) {
+      for (const e of (eggsRes.data ?? []) as Array<{ date: string; count: number | null }>) {
         eggsByDay[e.date] = (eggsByDay[e.date] ?? 0) + (e.count ?? 0);
       }
 
