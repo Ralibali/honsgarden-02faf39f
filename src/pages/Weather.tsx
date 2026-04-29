@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Wind, Droplets, CalendarDays, Lightbulb, TrendingUp, Egg } from 'lucide-react';
 import { toast } from 'sonner';
 import WeatherAlertSettings from '@/components/WeatherAlertSettings';
+import WeatherImpactCard from '@/components/WeatherImpactCard';
 
 const WEATHER_ICONS: Record<string, string> = {
   '0': '☀️', '1': '🌤️', '2': '⛅', '3': '☁️',
@@ -289,6 +290,9 @@ export default function Weather() {
               )}
             </CardContent>
           </Card>
+
+          {/* Väderpåverkan baserat på din egen historik */}
+          <WeatherImpactCard daily={daily} latitude={w.lat} longitude={w.lon} />
 
           {/* 10-day forecast */}
           <Card className="border-border/60 shadow-sm">
