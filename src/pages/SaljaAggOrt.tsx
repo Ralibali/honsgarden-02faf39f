@@ -236,7 +236,7 @@ export default function SaljaAggOrt() {
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.saSäljerDuMer}</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="leverans">
                 <h2 className="font-serif text-2xl sm:text-3xl">Hämtning, leverans och logistik i {ort.name}</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
                   En av de vanligaste orsakerna till att hönsägare i {ort.name} tappar köpare är otydlig logistik.
