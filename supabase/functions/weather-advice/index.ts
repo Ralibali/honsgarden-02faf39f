@@ -165,8 +165,9 @@ ${dailySummary}
 
 Äggproduktion senaste 14 dagarna:
 ${eggSummary || "Inga loggade ägg"}
+${trend}
 
-Generera tre korta råd som JSON via verktyget weather_advice.`;
+Generera en sammanfattning, en produktionsprognos och tre korta råd som JSON via verktyget weather_advice.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
