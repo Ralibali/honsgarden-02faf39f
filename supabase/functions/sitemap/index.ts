@@ -13,6 +13,24 @@ const CATEGORIES = [
   "nyborjare", "raser", "tradgard", "hem", "friluftsliv",
 ];
 
+// Lokala ortsidor för "sälja ägg [ort]" – håll i synk med src/data/saljaAggOrter.ts
+const SALJA_AGG_ORTER = [
+  "goteborg","malmo","lund","helsingborg","angelholm","bastad","kristianstad","ystad",
+  "simrishamn","trelleborg","eslov","hassleholm","landskrona","lomma","staffanstorp",
+  "laholm","halmstad","falkenberg","varberg","kungsbacka","molndal","partille","lerum",
+  "alingsas","kungalv","stenungsund","uddevalla","trollhattan","vanersborg","boras",
+  "ulricehamn","vargarda","skovde","mariestad","lidkoping","jonkoping","huskvarna",
+  "vetlanda","eksjo","nassjo","varnamo","vaxjo","alvesta","kalmar","nybro","oskarshamn",
+  "vastervik","visby","karlskrona","ronneby","karlshamn","linkoping","norrkoping","motala",
+  "mjolby","soderkoping","finspang","vadstena","stockholm","solna","sundbyberg","jarfalla",
+  "taby","vallentuna","osteraker","norrtalje","nacka","varmdo","tyreso","haninge","nynashamn",
+  "huddinge","botkyrka","sodertalje","nykvarn","uppsala","enkoping","knivsta","tierp",
+  "vasteras","koping","eskilstuna","strangnas","nykoping","katrineholm","orebro","kumla",
+  "lindesberg","karlskoga","karlstad","kristinehamn","arvika","forshaga","falun","borlange",
+  "leksand","mora","gavle","sandviken","soderhamn","hudiksvall","sundsvall","harnosand",
+  "ornskoldsvik","ostersund","umea","skelleftea","pitea","lulea","boden","kiruna",
+];
+
 const SEO_SOURCES = [
   { table: "seo_breeds", base: "/raser", priority: "0.8" },
   { table: "seo_problems", base: "/problem", priority: "0.8" },
@@ -68,6 +86,7 @@ Deno.serve(async (req) => {
     { loc: "/blogg", priority: "0.9", changefreq: "daily" },
     { loc: "/om-oss", priority: "0.7", changefreq: "monthly" },
     { loc: "/verktyg/aggkalkylator", priority: "0.8", changefreq: "monthly" },
+    { loc: "/salja-agg", priority: "0.9", changefreq: "weekly" },
   ];
 
   const now = new Date().toISOString().split("T")[0];
