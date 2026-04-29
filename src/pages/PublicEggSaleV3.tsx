@@ -78,6 +78,25 @@ export default function PublicEggSaleV3() {
     onError: (e: any) => toast({ title: 'Kunde inte skicka förfrågan', description: e.message, variant: 'destructive' }),
   });
 
+  const waitlistMutation = useMutation({
+    mutationFn: async () => {
+      if (!listing?.id || !listing?.user_id) throw new Error('Kan inte anmäla intresse just nu.');
+      if (!wlName.trim()) throw new Error('Skriv ditt namn.');
+      if (!wlEmail.trim() && !wlPhone.trim()) throw new Error('Lämna e-post eller telefon så vi kan höra av oss.');
+      const { error } = await (supabase as any).from('egg_sale_waitlist').insert({
+        listing_id: listing.id,
+        seller_user_id: listing.user_id,
+        customer_name: wlName.trim(),
+        customer_email: wlEmail.trim() || null,
+        customer_phone: wlPhone.trim() || null,
+        packs_wanted: Math.max(1, Number(wlPacks) || 1),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { setWlName(''); setWlEmail(''); setWlPhone(''); setWlPacks('1'); toast({ title: 'Du är på väntelistan 🔔', description: 'Vi mejlar dig så fort det finns ägg i lager igen.' }); },
+    onError: (e: any) => toast({ title: 'Kunde inte anmäla intresse', description: e.message, variant: 'destructive' }),
+  });
+
   const share = async () => { if (navigator.share) await navigator.share({ title: sale.title, text: shareText, url: window.location.href }).catch(() => undefined); else copy(`${shareText}\n\n${window.location.href}`); };
 
   if (isLoading) return <main className="min-h-screen noise-bg px-4 py-8 flex items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></main>;
