@@ -35,7 +35,7 @@ const flockNav = [
 const financeNav = [
   { title: 'Foder', url: '/app/feed', icon: Package, premium: true },
   { title: 'Ekonomi', url: '/app/finance', icon: Coins, premium: true },
-  { title: 'Agda sälj', url: '/app/egg-sales', icon: ReceiptText, premium: true },
+  { title: 'Agdas Bod', url: '/app/egg-sales', icon: ReceiptText, premium: true },
   { title: 'Statistik', url: '/app/statistics', icon: BarChart3, premium: true },
 ];
 
