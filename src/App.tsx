@@ -31,6 +31,7 @@ const Admin = React.lazy(() => import("./pages/Admin"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const HenProfile = React.lazy(() => import("./pages/HenProfile"));
 const WeeklyReport = React.lazy(() => import("./pages/WeeklyReport"));
+const SmartFarmReport = React.lazy(() => import("./pages/SmartFarmReport"));
 const Guides = React.lazy(() => import("./pages/Guides"));
 const GuideArticle = React.lazy(() => import("./pages/GuideArticle"));
 const BlogCategory = React.lazy(() => import("./pages/BlogCategory"));
@@ -154,6 +155,7 @@ const AppRoutes = () => (
           <Route path="admin" element={<Admin />} />
           <Route path="hens/:henId" element={<HenProfile />} />
           <Route path="weekly-report" element={<WeeklyReport />} />
+          <Route path="smart-report" element={<SmartFarmReport />} />
           <Route path="agda" element={<Agda />} />
           <Route path="import" element={<Import />} />
           <Route path="calendar" element={<SeasonalCalendar />} />
