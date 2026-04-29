@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Sparkles, CheckCheck, ArrowRight, Newspaper, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format, formatDistanceToNow, isAfter, subDays } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
