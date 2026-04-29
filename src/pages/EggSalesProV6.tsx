@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
   AlertCircle,
+  BellRing,
   Camera,
   CheckCircle2,
   CircleDollarSign,
@@ -25,6 +26,7 @@ import {
   PauseCircle,
   PlayCircle,
   Plus,
+  Send,
   Share2,
   ShoppingBasket,
   Store,
