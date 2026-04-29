@@ -23,6 +23,10 @@ export default function PublicEggSaleV3() {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [packs, setPacks] = useState('1');
+  const [wlName, setWlName] = useState('');
+  const [wlEmail, setWlEmail] = useState('');
+  const [wlPhone, setWlPhone] = useState('');
+  const [wlPacks, setWlPacks] = useState('1');
 
   const { data: listing, isLoading: queryLoading, isFetching } = useQuery({
     queryKey: ['public-egg-sale-listing-v3', slug],
