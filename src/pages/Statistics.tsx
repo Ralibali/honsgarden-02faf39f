@@ -89,6 +89,44 @@ export default function Statistics() {
           <>
             <SmartStatisticsOverview />
 
+            {insights && insights.tips && (() => {
+              const tips = (Array.isArray(insights.tips) ? insights.tips : [insights.tips]).filter(Boolean);
+              const PREVIEW_COUNT = 3;
+              const visible = showAllInsights ? tips : tips.slice(0, PREVIEW_COUNT);
+              const hiddenCount = tips.length - PREVIEW_COUNT;
+              return (
+                <Card className="bg-card border-border shadow-sm">
+                  <CardHeader className="px-4 sm:px-6">
+                    <CardTitle className="font-serif text-base sm:text-lg">📈 Fler insikter</CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 sm:px-6 pb-4">
+                    <ul className="space-y-2">
+                      {visible.map((tip: string, i: number) => (
+                        <li key={i} className="flex gap-2 items-start text-sm text-foreground">
+                          <span className="text-primary mt-1 shrink-0">•</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {hiddenCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllInsights((v) => !v)}
+                        className="mt-3 w-full rounded-xl text-primary hover:text-primary"
+                      >
+                        {showAllInsights ? (
+                          <><ChevronUp className="h-4 w-4 mr-1" /> Visa mindre</>
+                        ) : (
+                          <><ChevronDown className="h-4 w-4 mr-1" /> Visa {hiddenCount} till</>
+                        )}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })()}
+
             <Card className="bg-gradient-to-br from-primary/10 via-card to-accent/5 border-primary/20 shadow-sm overflow-hidden">
               <CardContent className="p-4 sm:p-5">
                 <div className="flex items-start gap-3">
