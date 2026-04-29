@@ -44,7 +44,7 @@ const Overview = React.lazy(() => import("./pages/Overview"));
 const Import = React.lazy(() => import("./pages/Import"));
 const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
-const EggSales = React.lazy(() => import("./pages/EggSalesProV6"));
+const EggSales = React.lazy(() => import("./pages/EggSalesProV7"));
 const PublicEggSale = React.lazy(() => import("./pages/PublicEggSaleV3"));
 const PublicReview = React.lazy(() => import("./pages/PublicReview"));
 const News = React.lazy(() => import("./pages/News"));
