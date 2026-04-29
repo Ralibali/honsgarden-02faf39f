@@ -28,6 +28,7 @@ import {
   PlayCircle,
   Plus,
   Send,
+  Star,
   Share2,
   ShoppingBasket,
   Store,
