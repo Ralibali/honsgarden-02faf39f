@@ -157,7 +157,9 @@ export default function SaljaAgg() {
     description:
       'Sälja ägg från egna höns? Skapa en gratis säljsida med bokning och Swish-betalning på 2 minuter. Få stamkunder, hantera lager och äggförsäljning enkelt med Hönsgården.',
     path: '/salja-agg',
-    
+    ogType: 'website',
+    ogImage: '/og-image.jpg',
+    ogImageAlt: 'Sälja ägg lokalt med Swish – gratis säljsida från Hönsgården',
     jsonLd,
   });
 
