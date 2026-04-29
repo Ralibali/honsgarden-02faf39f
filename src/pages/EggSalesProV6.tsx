@@ -300,6 +300,45 @@ export default function EggSalesProV6() {
     };
   }, [bookings, listingById]);
 
+  const regularThreshold = useMemo(() => {
+    const t = (listings as Listing[])[0]?.regular_customer_threshold;
+    return Math.max(2, Number(t || 4));
+  }, [listings]);
+
+  type Customer = { key: string; name: string; phone: string | null; orders: number; packs: number; amount: number; lastDate: string | null; lastListingId: string | null; isRegular: boolean };
+  const customers = useMemo<Customer[]>(() => {
+    const map = new Map<string, Customer>();
+    (bookings as Booking[]).forEach((b) => {
+      if (b.status === 'cancelled') return;
+      const phone = (b.customer_phone || '').trim();
+      const name = (b.customer_name || '').trim();
+      const key = phone ? `p:${phone.replace(/\s+/g, '')}` : `n:${name.toLowerCase()}`;
+      if (!key || key === 'n:') return;
+      const listing = listingById[b.listing_id];
+      const amount = Number(b.packs || 0) * Number(listing?.price_per_pack || 0);
+      const existing = map.get(key);
+      if (existing) {
+        existing.orders += 1;
+        existing.packs += Number(b.packs || 0);
+        existing.amount += amount;
+        if (!existing.lastDate || (b.created_at && b.created_at > existing.lastDate)) {
+          existing.lastDate = b.created_at;
+          existing.lastListingId = b.listing_id;
+        }
+        if (!existing.phone && phone) existing.phone = phone;
+        if ((!existing.name || existing.name.length < name.length) && name) existing.name = name;
+      } else {
+        map.set(key, { key, name: name || phone, phone: phone || null, orders: 1, packs: Number(b.packs || 0), amount, lastDate: b.created_at || null, lastListingId: b.listing_id, isRegular: false });
+      }
+    });
+    const arr = Array.from(map.values()).map((c) => ({ ...c, isRegular: c.orders >= regularThreshold }));
+    arr.sort((a, b) => (b.isRegular ? 1 : 0) - (a.isRegular ? 1 : 0) || b.orders - a.orders || b.amount - a.amount);
+    return arr;
+  }, [bookings, listingById, regularThreshold]);
+
+  const [customerFilter, setCustomerFilter] = useState<'all' | 'regulars'>('all');
+  const visibleCustomers = useMemo(() => customerFilter === 'regulars' ? customers.filter((c) => c.isRegular) : customers, [customers, customerFilter]);
+
   const texts = useMemo<MarketingTexts>(() => {
     if (generatedTexts) return generatedTexts;
     const place = location.trim() || 'lokalt i området';
