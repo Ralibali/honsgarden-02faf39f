@@ -320,7 +320,18 @@ export default function EggSalesProV6() {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-listings-v6'] }),
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-bookings-v6'] }),
+      qc.invalidateQueries({ queryKey: ['my-egg-sale-waitlist-v6'] }),
     ]);
+  };
+
+  const triggerWaitlistNotify = async (listingId: string) => {
+    try {
+      const { data } = await (supabase as any).functions.invoke('notify-waitlist', { body: { listing_id: listingId } });
+      const n = Number(data?.notified ?? 0);
+      if (n > 0) toast({ title: `Väntelistan är notifierad 🔔`, description: `${n} intresserade fick mejl om att lagret är påfyllt.` });
+    } catch {
+      // tyst – notifiering är best-effort
+    }
   };
 
   const loadListing = (l: Listing) => {
