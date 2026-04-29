@@ -13,7 +13,18 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ORTER, getOrt } from '@/data/saljaAggOrter';
-import { buildOrtContent, buildOrtFaq, buildOrtMeta } from '@/data/saljaAggOrtContent';
+import { buildOrtContent, buildOrtFaq, buildOrtMeta, buildOrtImages, buildOrtHenImage } from '@/data/saljaAggOrtContent';
+import heroCoop from '@/assets/hero-coop.jpg';
+import heroFarm from '@/assets/hero-farm.jpg';
+import eggsBasket from '@/assets/eggs-basket.jpg';
+import henPortrait from '@/assets/hen-portrait.jpg';
+
+const ASSET_BY_KEY: Record<'coop' | 'farm' | 'eggs' | 'hen', string> = {
+  coop: heroCoop,
+  farm: heroFarm,
+  eggs: eggsBasket,
+  hen: henPortrait,
+};
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 
