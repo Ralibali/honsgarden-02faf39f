@@ -317,3 +317,115 @@ export function buildOrtMeta(ort: Ort): OrtMeta {
     ],
   };
 }
+
+// ===== Bilder per ort (alt-text + caption) =====
+// Roterar deterministiskt mellan befintliga assetbilder, men ger unik
+// alt-text och caption per ort så bilderna också bidrar till unik SEO.
+
+export type OrtImage = {
+  src: string;          // import-path (löses i sidan)
+  assetKey: 'coop' | 'farm' | 'eggs' | 'hen';
+  alt: string;          // unik alt-text per ort
+  caption: string;      // kort rubrik under bilden
+};
+
+const COOP_ALT = [
+  (n: string, l: string) => `Hönshus med utehage hos lokal hönsägare i ${n}, ${l}`,
+  (n: string) => `Frigående höns vid hönshuset på en gård utanför ${n}`,
+  (n: string) => `Lantligt hönshus med plats för värphöns i ${n}`,
+  (n: string, l: string) => `Småskaligt hönseri i ${n} (${l}) med utomhusvistelse`,
+];
+const COOP_CAP = [
+  (n: string) => `Hönshus i trakten av ${n}`,
+  (n: string) => `Frigående höns nära ${n}`,
+  (n: string) => `Lokalt hönseri i ${n}`,
+  (n: string) => `Utehage hos hönsägare i ${n}`,
+];
+
+const FARM_ALT = [
+  (n: string) => `Karta över hämtplats för färska ägg i ${n}`,
+  (n: string, l: string) => `Lokal äggleverans från gård i ${n}, ${l}`,
+  (n: string) => `Gårdsbutik och hämtning av ägg i ${n}`,
+  (n: string) => `Vy från gård som säljer ägg lokalt i ${n}`,
+];
+const FARM_CAP = [
+  (n: string) => `Hämtning på gården nära ${n}`,
+  (n: string) => `Lokal leverans i ${n}`,
+  (n: string) => `Hämtplats i ${n}`,
+  (n: string) => `Gårdens läge utanför ${n}`,
+];
+
+const EGGS_ALT = [
+  (n: string) => `Färska ägg i kartong från höns i ${n}`,
+  (n: string, l: string) => `Karta med sex frigående ägg från ${n} (${l})`,
+  (n: string) => `Nyvärpta ägg från lokal producent i ${n}`,
+  (n: string) => `Färdigpackade kartor med ägg från ${n} redo för Swish-hämtning`,
+];
+const EGGS_CAP = [
+  (n: string) => `Färska ägg från ${n}`,
+  (n: string) => `Karta med sex ägg, värpt i ${n}`,
+  (n: string) => `Nyplockade ägg i ${n}`,
+  (n: string) => `Klart för hämtning i ${n}`,
+];
+
+const HEN_ALT = [
+  (n: string) => `Värphöna hos lokal hönsägare i ${n}`,
+  (n: string, l: string) => `Höna av brun ras hos småskalig producent i ${n}, ${l}`,
+  (n: string) => `Frigående höna i utehagen utanför ${n}`,
+  (n: string) => `Höna nyligen ute ur värpredet på gård i ${n}`,
+];
+const HEN_CAP = [
+  (n: string) => `Värphöna nära ${n}`,
+  (n: string) => `Frigående höna i ${n}`,
+  (n: string) => `Hos hönsägaren i ${n}`,
+  (n: string) => `En av flockens höns i ${n}`,
+];
+
+const ASSET_PATHS: Record<OrtImage['assetKey'], string> = {
+  coop: '/src/assets/hero-coop.jpg',
+  farm: '/src/assets/hero-farm.jpg',
+  eggs: '/src/assets/eggs-basket.jpg',
+  hen: '/src/assets/hen-portrait.jpg',
+};
+
+function pickFn<T>(slug: string, salt: string, arr: T[]): T {
+  return arr[seed(slug + salt) % arr.length];
+}
+
+export function buildOrtImages(ort: Ort): { coop: OrtImage; farm: OrtImage; eggs: OrtImage } {
+  const n = ort.name;
+  const l = ort.lan;
+
+  return {
+    coop: {
+      src: ASSET_PATHS.coop,
+      assetKey: 'coop',
+      alt: pickFn(ort.slug, 'coop-alt', COOP_ALT)(n, l),
+      caption: pickFn(ort.slug, 'coop-cap', COOP_CAP)(n),
+    },
+    farm: {
+      src: ASSET_PATHS.farm,
+      assetKey: 'farm',
+      alt: pickFn(ort.slug, 'farm-alt', FARM_ALT)(n, l),
+      caption: pickFn(ort.slug, 'farm-cap', FARM_CAP)(n),
+    },
+    eggs: {
+      src: ASSET_PATHS.eggs,
+      assetKey: 'eggs',
+      alt: pickFn(ort.slug, 'eggs-alt', EGGS_ALT)(n, l),
+      caption: pickFn(ort.slug, 'eggs-cap', EGGS_CAP)(n),
+    },
+  };
+}
+
+// Behövs för enstaka bonusbild om vi vill (höna)
+export function buildOrtHenImage(ort: Ort): OrtImage {
+  const n = ort.name;
+  const l = ort.lan;
+  return {
+    src: ASSET_PATHS.hen,
+    assetKey: 'hen',
+    alt: pickFn(ort.slug, 'hen-alt', HEN_ALT)(n, l),
+    caption: pickFn(ort.slug, 'hen-cap', HEN_CAP)(n),
+  };
+}
