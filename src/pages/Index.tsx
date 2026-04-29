@@ -55,7 +55,7 @@ const staggerItem = {
 const features = [
   { icon: Egg, title: 'Äggloggning', desc: 'Logga dagens ägg på några sekunder och se hur värpningen förändras över tid.', href: '/agglogg' },
   { icon: Bird, title: 'Flock och hönsprofiler', desc: 'Samla namn, ras, bild, anteckningar och historik för varje höna i flocken.', href: '/app-for-honsagare' },
-  { icon: ReceiptText, title: 'Agda-säljgenerator', desc: 'Skapa egna säljsidor för ägg med bild, Swish, bokningsförfrågningar, lager och delningslänk.', href: '/login?mode=register', badge: 'NYHET' },
+  { icon: ReceiptText, title: 'Agdas Bod', desc: 'Din digitala gårdsbutik – skapa säljsidor med bild, Swish, bokningar, lager och delningslänk. Öppet för alla just nu.', href: '/login?mode=register', badge: 'NYHET' },
   { icon: CalendarDays, title: 'Hönskalender', desc: 'Håll koll på rutiner, rengöring, kvalsterkontroll, ruggning och säsong.', href: '/honskalender' },
   { icon: Wheat, title: 'Foderkostnad', desc: 'Registrera foderinköp och förstå vad dina ägg faktiskt kostar att producera.', href: '/foderkostnad-hons' },
   { icon: Egg, title: 'Kläckningskalender', desc: 'Följ dag 1 till 21 med milstolpar för lysning, vändning och kläckning.', href: '/klackningskalender' },
@@ -92,9 +92,9 @@ const testimonials = [
 ];
 
 const faqs = [
-  { q: 'Vad är Hönsgården?', a: 'Hönsgården är en svensk app för hobbyhönsägare. Du kan logga ägg, följa hönor och flockar, skapa rutiner, räkna foderkostnad, sälja ägg via Agda-säljgeneratorn och få bättre koll på hönsgårdens vardag.' },
-  { q: 'Vad är Agda-säljgeneratorn?', a: 'Agda-säljgeneratorn hjälper dig skapa en egen försäljningssida för ägg. Du kan lägga upp bild, pris, Swish, hämtinformation och låta köpare skicka bokningsförfrågningar via en enkel länk.' },
-  { q: 'Kan jag se vem som beställt ägg?', a: 'Ja. Bokningsförfrågningar visas inne i appen under Agda sälj. Du ser kundnamn, kontakt, antal kartor, säljlista, summa, status och kan markera betald, hämtad eller avbokad.' },
+  { q: 'Vad är Hönsgården?', a: 'Hönsgården är en svensk app för hobbyhönsägare. Du kan logga ägg, följa hönor och flockar, skapa rutiner, räkna foderkostnad, sälja ägg via Agdas Bod (vår gårdsbutik) och få bättre koll på hönsgårdens vardag.' },
+  { q: 'Vad är Agdas Bod?', a: 'Agdas Bod är din digitala gårdsbutik. Du skapar en egen säljsida för ägg med bild, pris, Swish, hämtinformation och låter köpare boka direkt via en enkel länk. Just nu är Agdas Bod öppet för alla – snart blir det en Plus-funktion.' },
+  { q: 'Kan jag se vem som beställt ägg?', a: 'Ja. Bokningar visas inne i appen under Agdas Bod. Du ser kundnamn, kontakt, antal kartor, säljlista, summa, status och kan markera betald, hämtad eller avbokad.' },
   { q: 'Kan jag exportera beställningar?', a: 'Ja. Du kan kopiera kundlista och exportera bokningar som CSV, så att de kan öppnas i Excel eller Google Sheets.' },
   { q: 'Varför är det bättre än anteckningsbok eller Excel?', a: 'Anteckningar är bra, men de räknar inte åt dig. Hönsgården gör historiken användbar: du får trender, statistik, påminnelser, kostnad per ägg, säljsidor och tydligare överblick.' },
   { q: 'Är Hönsgården gratis?', a: 'Ja, du kan börja gratis. Vissa mer avancerade funktioner, som AI, ekonomi, foder och utökade säljfunktioner kan ingå i Plus.' },
@@ -102,7 +102,7 @@ const faqs = [
 ];
 
 const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Fungerar i mobilen'];
-const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'Agda AI', 'Agda-säljgenerator', 'Bokningsförfrågningar', 'Foder och ekonomi', 'Smarta påminnelser', 'Kläckningsstöd'];
+const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'Agda AI', 'Agdas Bod (gårdsbutik)', 'Bokningar och kundregister', 'Foder och ekonomi', 'Smarta påminnelser', 'Kläckningsstöd'];
 
 export default function Index() {
   useSeo({
@@ -146,7 +146,7 @@ export default function Index() {
                   Svensk app för hobbyhönsägare
                 </Badge>
                 <Badge variant="secondary" className="bg-warning/15 text-warning-foreground border-warning/30 text-xs px-3 py-1">
-                  Nyhet: Agda-säljgenerator
+                  Nyhet: Agdas Bod
                 </Badge>
                 <Badge variant="secondary" className="bg-background/70 text-foreground border-border text-xs px-3 py-1">
                   Gratis att börja
@@ -164,7 +164,7 @@ export default function Index() {
                 {...fadeUp(0.08)}
                 className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-5 sm:mb-6"
               >
-                Hönsgården hjälper dig logga ägg, följa flocken, räkna foderkostnad och hantera vardagen i hönshuset. Med Agda-säljgeneratorn kan du dessutom skapa egna säljsidor med bild, Swish, bokningsförfrågningar och lagerkoll.
+                Hönsgården hjälper dig logga ägg, följa flocken, räkna foderkostnad och hantera vardagen i hönshuset. Med <strong>Agdas Bod</strong> – din digitala gårdsbutik – skapar du dessutom egna säljsidor med bild, Swish, bokningar och lagerkoll.
               </motion.p>
 
               <motion.div {...fadeUp(0.12)} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-5">
@@ -175,7 +175,7 @@ export default function Index() {
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="h-12 sm:h-13 px-8 text-base border-primary/30 text-primary hover:bg-primary/5">
-                  <a href="/login?mode=register">Testa Agda sälj</a>
+                  <a href="/login?mode=register">Öppna Agdas Bod</a>
                 </Button>
               </motion.div>
 
@@ -253,7 +253,7 @@ export default function Index() {
         <div className="container max-w-6xl mx-auto px-5 sm:px-6">
           <motion.div {...fadeUp()} className="text-center max-w-3xl mx-auto mb-12">
             <Badge className="mb-3 bg-primary/10 text-primary border-primary/20">Nyhet</Badge>
-            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Agda-säljgeneratorn gör äggförsäljning enklare</h2>
+            <h2 className="font-serif text-2xl sm:text-4xl text-foreground mb-3">Agdas Bod – din digitala gårdsbutik för ägg</h2>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Skapa en egen säljsida för dina ägg, dela länken i en lokal grupp och samla bokningsförfrågningar direkt i Hönsgården.
             </p>
