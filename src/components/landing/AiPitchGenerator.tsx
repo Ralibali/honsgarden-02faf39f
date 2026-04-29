@@ -240,6 +240,60 @@ export default function AiPitchGenerator() {
                     Vi sparar din text så du kan publicera direkt efter registrering – tar 30 sekunder.
                   </p>
                 </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25, duration: 0.4 }}
+                  className="mt-6 rounded-2xl border border-border/50 bg-background p-5"
+                >
+                  {leadSent ? (
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <Check className="h-4 w-4 text-primary" />
+                      Tack! Vi skickar tips, mallar och säljknep till dig.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-2 mb-3">
+                        <Mail className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            Vill du ha fler säljtexter & tips?
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Lämna e-post eller telefon så skickar vi mallar, prisguider och knep för
+                            att sälja slut snabbare. Inga utskick varje dag – lovat.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Input
+                          type="text"
+                          inputMode="email"
+                          placeholder="din@epost.se eller 070-123 45 67"
+                          value={contact}
+                          onChange={(e) => setContact(e.target.value)}
+                          className="flex-1"
+                          aria-label="E-post eller telefonnummer"
+                        />
+                        <Button
+                          onClick={submitLead}
+                          disabled={leadLoading}
+                          className="h-10 sm:w-auto w-full"
+                        >
+                          {leadLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Skicka mig tips'
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-2">
+                        Vi delar aldrig dina uppgifter. Avregistrera när du vill.
+                      </p>
+                    </>
+                  )}
+                </motion.div>
               </motion.div>
             )}
           </CardContent>
