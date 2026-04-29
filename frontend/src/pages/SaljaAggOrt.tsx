@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useMemo } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSeo } from '@/hooks/useSeo';
 import LandingNavbar from '@/components/LandingNavbar';
@@ -46,64 +46,68 @@ export default function SaljaAggOrt() {
   const { ort: ortSlug } = useParams<{ ort: string }>();
   const ort = ortSlug ? getOrt(ortSlug) : undefined;
 
-  if (!ortSlug || !ort) {
-    return <Navigate to="/salja-agg" replace />;
-  }
+  const meta = ort ? buildOrtMeta(ort) : null;
+  const title = meta?.title ?? 'Sälja ägg lokalt i Sverige | Hönsgården';
+  const description = meta?.description ?? '';
 
-  const meta = buildOrtMeta(ort);
-  const title = meta.title;
-  const description = meta.description;
+  const faq = useMemo(() => (ort ? buildOrtFaq(ort) : []), [ort]);
 
-  const faq = buildOrtFaq(ort);
-
-  const jsonLd = [
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Hönsgården', item: 'https://honsgarden.se/' },
-        { '@type': 'ListItem', position: 2, name: 'Sälja ägg', item: 'https://honsgarden.se/salja-agg' },
-        { '@type': 'ListItem', position: 3, name: ort.name, item: `https://honsgarden.se/salja-agg/${ort.slug}` },
-      ],
-    },
-    {
-      '@type': 'Service',
-      name: `Sälja ägg i ${ort.name}`,
-      areaServed: { '@type': 'City', name: ort.name, address: { '@type': 'PostalAddress', addressRegion: ort.lan, addressCountry: 'SE' } },
-      provider: { '@type': 'Organization', name: 'Hönsgården', url: 'https://honsgarden.se' },
-      description,
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
-    },
-    {
-      '@type': 'FAQPage',
-      mainEntity: faq.map((f) => ({
-        '@type': 'Question',
-        name: f.question,
-        acceptedAnswer: { '@type': 'Answer', text: f.answer },
-      })),
-    },
-    {
-      '@type': 'SiteNavigationElement',
-      name: `Sälja ägg i orter nära ${ort.name}`,
-      hasPart: (ort.narliggande ?? [])
-        .map((s) => getOrt(s))
-        .filter((o): o is NonNullable<ReturnType<typeof getOrt>> => Boolean(o))
-        .map((o) => ({
-          '@type': 'SiteNavigationElement',
-          name: `Sälja ägg i ${o.name}`,
-          url: `https://honsgarden.se/salja-agg/${o.slug}`,
+  const jsonLd = useMemo(() => {
+    if (!ort) return undefined;
+    return [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hönsgården', item: 'https://honsgarden.se/' },
+          { '@type': 'ListItem', position: 2, name: 'Sälja ägg', item: 'https://honsgarden.se/salja-agg' },
+          { '@type': 'ListItem', position: 3, name: ort.name, item: `https://honsgarden.se/salja-agg/${ort.slug}` },
+        ],
+      },
+      {
+        '@type': 'Service',
+        name: `Sälja ägg i ${ort.name}`,
+        areaServed: { '@type': 'City', name: ort.name, address: { '@type': 'PostalAddress', addressRegion: ort.lan, addressCountry: 'SE' } },
+        provider: { '@type': 'Organization', name: 'Hönsgården', url: 'https://honsgarden.se' },
+        description,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
         })),
-    },
-  ];
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: `Sälja ägg i orter nära ${ort.name}`,
+        hasPart: (ort.narliggande ?? [])
+          .map((s) => getOrt(s))
+          .filter((o): o is NonNullable<ReturnType<typeof getOrt>> => Boolean(o))
+          .map((o) => ({
+            '@type': 'SiteNavigationElement',
+            name: `Sälja ägg i ${o.name}`,
+            url: `https://honsgarden.se/salja-agg/${o.slug}`,
+          })),
+      },
+    ];
+  }, [ort, faq, description]);
 
   useSeo({
     title,
     description,
-    path: `/salja-agg/${ort.slug}`,
+    path: ort ? `/salja-agg/${ort.slug}` : '/salja-agg',
     ogType: 'website',
     ogImage: '/og-image.jpg',
-    ogImageAlt: `Sälja ägg lokalt i ${ort.name}`,
+    ogImageAlt: ort ? `Sälja ägg lokalt i ${ort.name}` : 'Sälja ägg lokalt i Sverige',
+    noindex: !ort,
     jsonLd,
   });
+
+  if (!ortSlug || !ort) {
+    return <Navigate to="/salja-agg" replace />;
+  }
 
   const narliggande = (ort.narliggande ?? [])
     .map((s) => getOrt(s))

@@ -11,6 +11,7 @@ import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Win
 import { toast } from 'sonner';
 import WeatherAlertSettings from '@/components/WeatherAlertSettings';
 import WeatherImpactCard from '@/components/WeatherImpactCard';
+import { reverseGeocodeCity } from '@/lib/reverseGeocode';
 
 const WEATHER_ICONS: Record<string, string> = {
   '0': '☀️', '1': '🌤️', '2': '⛅', '3': '☁️',
@@ -39,21 +40,14 @@ function getCoords(): Promise<{ lat: number; lon: number }> {
 
 async function fetchWeatherFull() {
   const { lat, lon } = await getCoords();
-  const [wRes, gRes] = await Promise.all([
+  const [wRes, city] = await Promise.all([
     fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum,wind_speed_10m_max&timezone=auto&forecast_days=10`,
     ),
-    fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=sv`,
-    ).catch(() => null),
+    reverseGeocodeCity(lat, lon),
   ]);
   if (!wRes.ok) throw new Error('Väderhämtning misslyckades');
   const weather = await wRes.json();
-  let city: string | null = null;
-  if (gRes?.ok) {
-    const g = await gRes.json();
-    city = g.address?.city || g.address?.town || g.address?.village || g.address?.municipality || null;
-  }
   return { lat, lon, city, weather, fetchedAt: new Date().toISOString() };
 }
 

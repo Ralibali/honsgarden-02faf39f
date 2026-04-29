@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Crown, Check, Bell, BarChart3, Download, TrendingUp, Star, Calculator, Camera, ClipboardCheck, Baby, Loader2, Settings, Sparkles, ArrowRight, CalendarDays, Users, HeartHandshake, ShieldCheck, Bot, ReceiptText, HeartPulse, Wheat } from 'lucide-react';
@@ -78,6 +78,32 @@ export default function Premium() {
   const [searchParams] = useSearchParams();
   const isPremium = user?.subscription_status === 'premium' || user?.is_premium;
 
+  const premiumJsonLd = useMemo(() => ({
+    '@type': 'Product',
+    name: 'Hönsgården Plus',
+    description:
+      'Premiumabonnemang för Hönsgården med AI-coach, veckorapport, ekonomi och avancerade insikter för hönsgårdar.',
+    brand: { '@type': 'Brand', name: 'Hönsgården' },
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Hönsgården Plus – månad',
+        price: '19',
+        priceCurrency: 'SEK',
+        availability: 'https://schema.org/InStock',
+        url: 'https://honsgarden.se/app/premium',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Hönsgården Plus – år',
+        price: '149',
+        priceCurrency: 'SEK',
+        availability: 'https://schema.org/InStock',
+        url: 'https://honsgarden.se/app/premium',
+      },
+    ],
+  }), []);
+
   useSeo({
     title: 'Hönsgården Plus – AI-coach, ekonomi & insikter för hönsgården',
     description:
@@ -87,31 +113,7 @@ export default function Premium() {
     ogImage: '/og-image.jpg',
     ogImageAlt: 'Hönsgården Plus – AI och ekonomi för hönsgårdar',
     noindex: true,
-    jsonLd: {
-      '@type': 'Product',
-      name: 'Hönsgården Plus',
-      description:
-        'Premiumabonnemang för Hönsgården med AI-coach, veckorapport, ekonomi och avancerade insikter för hönsgårdar.',
-      brand: { '@type': 'Brand', name: 'Hönsgården' },
-      offers: [
-        {
-          '@type': 'Offer',
-          name: 'Hönsgården Plus – månad',
-          price: '19',
-          priceCurrency: 'SEK',
-          availability: 'https://schema.org/InStock',
-          url: 'https://honsgarden.se/app/premium',
-        },
-        {
-          '@type': 'Offer',
-          name: 'Hönsgården Plus – år',
-          price: '149',
-          priceCurrency: 'SEK',
-          availability: 'https://schema.org/InStock',
-          url: 'https://honsgarden.se/app/premium',
-        },
-      ],
-    },
+    jsonLd: premiumJsonLd,
   });
 
   useEffect(() => {
@@ -128,7 +130,9 @@ export default function Premium() {
             window.location.replace('/app/premium');
             return;
           }
-        } catch {}
+        } catch (err) {
+          console.warn('[Premium] check-subscription polling fel, försöker igen:', err);
+        }
         if (attempt < 10) await new Promise((r) => setTimeout(r, 2000));
       }
       if (!cancelled) toast({ title: 'Betalningen behandlas', description: 'Det kan ta en liten stund. Tryck på Synka premiumstatus om sidan inte uppdateras.' });

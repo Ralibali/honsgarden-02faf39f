@@ -88,7 +88,9 @@ async function streamAgda({
       try {
         const errData = await resp.json();
         errMsg = errData.error || errMsg;
-      } catch {}
+      } catch (parseErr) {
+        console.warn('[Agda] Kunde inte tolka felsvar:', parseErr);
+      }
       onError(errMsg);
       return;
     }

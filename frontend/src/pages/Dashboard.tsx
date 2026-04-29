@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { reverseGeocodeCity } from '@/lib/reverseGeocode';
 import { DailySummaryModal } from '@/components/DailySummaryModal';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -71,17 +72,12 @@ async function getUserCoords(): Promise<{ lat: number; lon: number }> {
 
 async function fetchWeather() {
   const { lat, lon } = await getUserCoords();
-  const [weatherRes, geoRes] = await Promise.all([
+  const [weatherRes, cityName] = await Promise.all([
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=5`),
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=sv`).catch(() => null),
+    reverseGeocodeCity(lat, lon),
   ]);
   if (!weatherRes.ok) throw new Error('Weather fetch failed');
   const weather = await weatherRes.json();
-  let cityName: string | null = null;
-  if (geoRes?.ok) {
-    const geo = await geoRes.json();
-    cityName = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.municipality || null;
-  }
   return { ...weather, cityName };
 }
 
