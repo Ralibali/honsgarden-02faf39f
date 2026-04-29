@@ -309,6 +309,12 @@ export default function Weather() {
             </CardContent>
           </Card>
 
+          <WeatherAlertSettings
+            latitude={w.lat}
+            longitude={w.lon}
+            cityName={w.city}
+          />
+
           <p className="text-[10px] text-muted-foreground text-center">
             Väderdata från Open-Meteo • AI-råd genereras dagligen av Agda
           </p>
