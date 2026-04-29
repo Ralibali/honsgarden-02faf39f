@@ -406,20 +406,7 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* ─── 2. Dagens hönsgård (quick stats) ─── */}
-      <div className="grid grid-cols-4 gap-2.5 stagger-children">
-        {stats.map(({ icon: Icon, value, label, color, bg }, i) => (
-          <Card key={i} className="border-border/50 shadow-sm card-hover overflow-hidden active:scale-[0.97] transition-transform">
-            <CardContent className="p-3.5 text-center relative">
-              <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
-                <Icon className={`h-4 w-4 ${color}`} />
-              </div>
-              <p className="stat-number text-xl text-foreground leading-none">{value}</p>
-              <p className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1">{label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* (Dagens hönsgård + 4-stats renderas av DashboardFocusPanel via portal — undviker dubblerade siffror) */}
 
       {/* ─── Customize entry (Plus only) ─── */}
       {isPlus && (
