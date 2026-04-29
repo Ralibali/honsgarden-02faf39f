@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import EmptyState from '@/components/EmptyState';
+import { logModerationAction } from '@/lib/communityModerationLog';
 import {
   AlertTriangle,
   Camera,
