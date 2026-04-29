@@ -157,6 +157,7 @@ const AppRoutes = () => (
           <Route path="calendar" element={<SeasonalCalendar />} />
           <Route path="news" element={<News />} />
           <Route path="weather" element={<Weather />} />
+          <Route path="weather/history/:date" element={<WeatherHistoryDetail />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
