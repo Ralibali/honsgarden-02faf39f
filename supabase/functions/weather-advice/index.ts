@@ -253,6 +253,8 @@ Generera en sammanfattning, en produktionsprognos och tre korta råd som JSON vi
       longitude,
       city_name: city_name ?? null,
       weather_snapshot: weather,
+      summary: args.summary ?? "",
+      production_forecast: args.production_forecast ?? "",
       today_advice: args.today_advice ?? "",
       week_advice: args.week_advice ?? "",
       history_insight: args.history_insight ?? "",
