@@ -53,14 +53,16 @@ export default function WeatherHistoryDetail() {
 
       // Hämta äggproduktion samma dag
       const { data: farmIds } = await supabase.rpc('get_user_farm_ids', { _uid: user.id });
-      const ids = (farmIds ?? []).map((r: any) => r.get_user_farm_ids ?? r);
+      const ids: string[] = (farmIds ?? []).map((r: any) =>
+        typeof r === 'string' ? r : r.get_user_farm_ids ?? r,
+      );
       if (ids.length) {
-        const { data: eggs } = await supabase
+        const { data: eggs } = await (supabase as any)
           .from('eggs')
           .select('count')
           .in('farm_id', ids)
           .eq('date', date);
-        setEggsThatDay((eggs ?? []).reduce((s, e: any) => s + (e.count ?? 0), 0));
+        setEggsThatDay((eggs ?? []).reduce((s: number, e: any) => s + (e.count ?? 0), 0));
       }
       setLoading(false);
     })();
