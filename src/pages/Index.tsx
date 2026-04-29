@@ -175,7 +175,7 @@ export default function Index() {
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="h-12 sm:h-13 px-8 text-base border-primary/30 text-primary hover:bg-primary/5">
-                  <a href="/login?mode=register">Öppna Agdas Bod</a>
+                  <a href="/login?mode=register&redirect=/app/egg-sales">Öppna Agdas Bod</a>
                 </Button>
               </motion.div>
 
