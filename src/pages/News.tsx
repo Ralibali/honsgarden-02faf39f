@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { Helmet } from 'react-helmet-async';
+import { useEffect as useTitleEffect } from 'react';
 
 interface Notification {
   id: string;
