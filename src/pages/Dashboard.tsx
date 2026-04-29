@@ -299,6 +299,22 @@ export default function Dashboard() {
   }, [chores]);
   const pastDueChores = upcomingChores.filter((c: any) => new Date(c.next_due_at) < new Date());
 
+  // ─── Customizable widgets (Plus only) ───
+  const isPlus = !!user?.is_premium;
+  const widgetMeta: DashboardWidgetMeta[] = [
+    { id: 'egg-goals', label: 'Veckomål för ägg', description: 'Progressring mot ditt mål' },
+    { id: 'ai-coach', label: 'AI-coach', description: 'Hönsgården tolkar dina data' },
+    { id: 'ai-alerts', label: 'Avvikelsevarningar', description: 'AI flaggar ovanliga mönster' },
+    { id: 'streak-tophen', label: 'Streak & topphöna', description: 'Loggningssvit och veckans bästa' },
+    { id: 'chores', label: 'Förfallande sysslor', description: 'Visas när något är på väg' },
+    { id: 'daily-tip', label: 'Dagens tips', description: 'Väder, AI eller säsong' },
+    { id: 'calendar', label: 'Äggkalender', description: 'Månadsvy med dina ägg' },
+    { id: 'diary', label: 'Dagbok', description: 'Senaste anteckningarna' },
+    { id: 'more', label: '"Visa mer"-sektion', description: 'Achievements, dela, referral' },
+  ];
+  const widgetIds = widgetMeta.map((w) => w.id);
+  const { layout, isHidden, setOrder, toggleHidden, reset } = useDashboardLayout(widgetIds);
+
   return (
     <motion.div
       className="max-w-2xl mx-auto space-y-5 pb-8"
