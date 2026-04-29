@@ -107,8 +107,11 @@ export default function SmartStatisticsOverview() {
       items.push({ title: `${topHen.name} leder topplistan`, text: `${topHen.name} har ${Number(topHen.total_eggs || 0)} ägg loggade totalt. Det här gör hönsprofilerna mer levande och användbara.`, icon: Target, path: `/app/hens/${topHen.id}`, cta: 'Öppna profil', tone: 'good' });
     }
 
-    return items.slice(0, 4);
+    return items;
   }, [stats, period, activeHens.length, costPerEgg, topHen]);
+
+  const [showAllInsights, setShowAllInsights] = useState(false);
+  const visibleInsights = showAllInsights ? insights : insights.slice(0, 2);
 
   return (
     <section className="space-y-3 sm:space-y-4" aria-label="Smart statistiköversikt">
