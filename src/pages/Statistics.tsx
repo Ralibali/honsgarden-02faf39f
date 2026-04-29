@@ -15,6 +15,7 @@ export default function Statistics() {
   const [showAllInsights, setShowAllInsights] = useState(false);
   const [showAllHens, setShowAllHens] = useState(false);
   const [showAllBreeds, setShowAllBreeds] = useState(false);
+  const [showAllFlocks, setShowAllFlocks] = useState(false);
   const { data: summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['stats-summary'],
     queryFn: () => api.getSummaryStats().catch(() => null),
@@ -194,7 +195,7 @@ export default function Statistics() {
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6 pb-4">
                   <div className="space-y-4">
-                    {flocks.map((flock: any) => (
+                    {(showAllFlocks ? flocks : flocks.slice(0, 5)).map((flock: any) => (
                       <div key={flock.id} className="space-y-1.5 rounded-2xl border border-border/40 bg-muted/15 p-3 sm:border-0 sm:bg-transparent sm:p-0">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                           <div className="flex items-center gap-2 min-w-0">
@@ -227,6 +228,14 @@ export default function Statistics() {
                         </div>
                       </div>
                     ))}
+                    {flocks.length > 5 && (
+                      <button
+                        onClick={() => setShowAllFlocks((v) => !v)}
+                        className="w-full text-xs font-medium text-primary hover:text-primary/80 transition-colors py-2 rounded-xl hover:bg-muted/40"
+                      >
+                        {showAllFlocks ? 'Visa mindre' : `Visa ${flocks.length - 5} till`}
+                      </button>
+                    )}
                     {unassignedEggs > 0 && (
                       <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
                         <span className="text-muted-foreground italic">Ej tilldelade</span>
