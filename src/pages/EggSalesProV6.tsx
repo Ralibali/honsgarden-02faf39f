@@ -13,6 +13,7 @@ import {
   Camera,
   CheckCircle2,
   CircleDollarSign,
+  Crown,
   Copy,
   Download,
   Edit3,
@@ -27,6 +28,7 @@ import {
   PlayCircle,
   Plus,
   Send,
+  Star,
   Share2,
   ShoppingBasket,
   Store,
@@ -238,6 +240,35 @@ export default function EggSalesProV6() {
     refetchInterval: 60_000,
   });
 
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+    queryKey: ['my-egg-sale-reviews-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any)
+        .from('egg_sale_reviews')
+        .select('*')
+        .eq('seller_user_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
+
+  const { data: reviewTokens = [] } = useQuery({
+    queryKey: ['my-egg-sale-review-tokens-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const { data, error } = await (supabase as any)
+        .from('egg_sale_review_tokens')
+        .select('*')
+        .eq('seller_user_id', userId);
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
+
   const listingById = useMemo(() => {
     const map: Record<string, Listing> = {};
     (listings as Listing[]).forEach((l) => { map[l.id] = l; });
@@ -300,6 +331,45 @@ export default function EggSalesProV6() {
     };
   }, [bookings, listingById]);
 
+  const regularThreshold = useMemo(() => {
+    const t = (listings as Listing[])[0]?.regular_customer_threshold;
+    return Math.max(2, Number(t || 4));
+  }, [listings]);
+
+  type Customer = { key: string; name: string; phone: string | null; orders: number; packs: number; amount: number; lastDate: string | null; lastListingId: string | null; isRegular: boolean };
+  const customers = useMemo<Customer[]>(() => {
+    const map = new Map<string, Customer>();
+    (bookings as Booking[]).forEach((b) => {
+      if (b.status === 'cancelled') return;
+      const phone = (b.customer_phone || '').trim();
+      const name = (b.customer_name || '').trim();
+      const key = phone ? `p:${phone.replace(/\s+/g, '')}` : `n:${name.toLowerCase()}`;
+      if (!key || key === 'n:') return;
+      const listing = listingById[b.listing_id];
+      const amount = Number(b.packs || 0) * Number(listing?.price_per_pack || 0);
+      const existing = map.get(key);
+      if (existing) {
+        existing.orders += 1;
+        existing.packs += Number(b.packs || 0);
+        existing.amount += amount;
+        if (!existing.lastDate || (b.created_at && b.created_at > existing.lastDate)) {
+          existing.lastDate = b.created_at;
+          existing.lastListingId = b.listing_id;
+        }
+        if (!existing.phone && phone) existing.phone = phone;
+        if ((!existing.name || existing.name.length < name.length) && name) existing.name = name;
+      } else {
+        map.set(key, { key, name: name || phone, phone: phone || null, orders: 1, packs: Number(b.packs || 0), amount, lastDate: b.created_at || null, lastListingId: b.listing_id, isRegular: false });
+      }
+    });
+    const arr = Array.from(map.values()).map((c) => ({ ...c, isRegular: c.orders >= regularThreshold }));
+    arr.sort((a, b) => (b.isRegular ? 1 : 0) - (a.isRegular ? 1 : 0) || b.orders - a.orders || b.amount - a.amount);
+    return arr;
+  }, [bookings, listingById, regularThreshold]);
+
+  const [customerFilter, setCustomerFilter] = useState<'all' | 'regulars'>('all');
+  const visibleCustomers = useMemo(() => customerFilter === 'regulars' ? customers.filter((c) => c.isRegular) : customers, [customers, customerFilter]);
+
   const texts = useMemo<MarketingTexts>(() => {
     if (generatedTexts) return generatedTexts;
     const place = location.trim() || 'lokalt i området';
@@ -321,6 +391,8 @@ export default function EggSalesProV6() {
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-listings-v6'] }),
       qc.invalidateQueries({ queryKey: ['my-public-egg-sale-bookings-v6'] }),
       qc.invalidateQueries({ queryKey: ['my-egg-sale-waitlist-v6'] }),
+      qc.invalidateQueries({ queryKey: ['my-egg-sale-reviews-v6'] }),
+      qc.invalidateQueries({ queryKey: ['my-egg-sale-review-tokens-v6'] }),
     ]);
   };
 
@@ -471,6 +543,16 @@ export default function EggSalesProV6() {
     if (error) return toast({ title: 'Kunde inte uppdatera bokningen', description: error.message, variant: 'destructive' });
     await invalidateAgda();
     toast({ title: status === 'paid' ? 'Bokningen är markerad som betald' : status === 'picked_up' ? 'Bokningen är markerad som hämtad' : 'Bokningen är uppdaterad' });
+    // Auto-skicka recensions-länk när bokningen markeras som hämtad
+    if (status === 'picked_up' && current?.status !== 'picked_up') {
+      try {
+        const { data } = await (supabase as any).functions.invoke('send-review-request', { body: { booking_id: id } });
+        if (data?.review_url) {
+          try { await navigator.clipboard?.writeText(data.review_url); } catch { /* ignore */ }
+          toast({ title: 'Recensions-länk skapad ⭐', description: 'Länken är kopierad – skicka till kunden via SMS eller mejl.' });
+        }
+      } catch { /* tyst */ }
+    }
   };
 
   const generateWithAI = async () => {
@@ -809,6 +891,109 @@ export default function EggSalesProV6() {
                     );
                   })}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif text-lg flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Stamkunder</h2>
+                <div className="flex gap-1">
+                  <Button size="sm" variant={customerFilter === 'all' ? 'default' : 'outline'} className="rounded-xl h-7 text-xs" onClick={() => setCustomerFilter('all')}>Alla ({customers.length})</Button>
+                  <Button size="sm" variant={customerFilter === 'regulars' ? 'default' : 'outline'} className="rounded-xl h-7 text-xs" onClick={() => setCustomerFilter('regulars')}><Crown className="h-3 w-3 mr-1" /> Stam ({customers.filter((c) => c.isRegular).length})</Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Räknas som stamkund vid {regularThreshold}+ köp. Slås ihop på telefonnummer (eller namn).</p>
+              {visibleCustomers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Inga kunder att visa ännu. När bokningar börjar trilla in syns de här.</p>
+              ) : (
+                <div className="space-y-2">
+                  {visibleCustomers.slice(0, 15).map((c) => {
+                    const lastListing = c.lastListingId ? listingById[c.lastListingId] : null;
+                    const greeting = encode(`Hej ${c.name.split(' ')[0]}! Tack för att du handlar ägg av oss${lastListing ? ` (${lastListing.title})` : ''}. Hör gärna av dig om du vill ha en ny leverans.`);
+                    return (
+                      <div key={c.key} className={`rounded-2xl border p-3 space-y-2 ${c.isRegular ? 'bg-amber-50/50 border-amber-200' : ''}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate flex items-center gap-1.5">{c.isRegular && <Crown className="h-3.5 w-3.5 text-amber-600 shrink-0" />}{c.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{c.phone || 'Inget telefonnummer'} · senast {c.lastDate ? new Date(c.lastDate).toLocaleDateString('sv-SE') : '–'}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="stat-number text-base text-primary">{c.orders}</p>
+                            <p className="text-[10px] data-label">köp</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
+                          <div className="rounded-lg bg-muted/40 p-1.5"><p className="font-semibold">{c.packs}</p><p className="text-[9px] text-muted-foreground">kartor</p></div>
+                          <div className="rounded-lg bg-muted/40 p-1.5"><p className="font-semibold">{Math.round(c.amount)} kr</p><p className="text-[9px] text-muted-foreground">totalt</p></div>
+                          <div className="rounded-lg bg-muted/40 p-1.5"><p className="font-semibold">{c.orders >= regularThreshold ? 'Stam' : `${regularThreshold - c.orders} kvar`}</p><p className="text-[9px] text-muted-foreground">status</p></div>
+                        </div>
+                        {c.phone && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.open(`sms:${c.phone}?body=${greeting}`, '_blank')}><MessageCircle className="h-3.5 w-3.5 mr-1" /> SMS</Button>
+                            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.open(`tel:${c.phone}`, '_blank')}><Send className="h-3.5 w-3.5 mr-1" /> Ring</Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif text-lg flex items-center gap-2"><Star className="h-4 w-4 text-amber-500" /> Recensioner</h2>
+                <Badge variant="outline">{(reviews as any[]).length} st</Badge>
+              </div>
+              {reviewsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (reviews as any[]).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Recensioner skapas automatiskt när du markerar en bokning som "Hämtad" – kunden får ett mejl med länk att lämna betyg.</p>
+              ) : (
+                <>
+                  {(() => {
+                    const visible = (reviews as any[]).filter((r) => r.is_published);
+                    const avg = visible.length ? visible.reduce((s, r) => s + Number(r.rating || 0), 0) / visible.length : 0;
+                    return visible.length > 0 ? (
+                      <div className="rounded-2xl border bg-amber-50/50 border-amber-200 p-3 flex items-center gap-3">
+                        <p className="stat-number text-2xl text-amber-700">{avg.toFixed(1)}</p>
+                        <div>
+                          <div className="flex">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`h-3.5 w-3.5 ${n <= Math.round(avg) ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'}`} />)}</div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{visible.length} publicerade</p>
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                  <div className="space-y-2">
+                    {(reviews as any[]).slice(0, 10).map((r: any) => {
+                      const l = listingById[r.listing_id];
+                      return (
+                        <div key={r.id} className={`rounded-2xl border p-3 space-y-1.5 ${!r.is_published ? 'opacity-60 border-dashed' : ''}`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">{r.customer_name}</p>
+                              <div className="flex items-center gap-2">
+                                <div className="flex">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`h-3 w-3 ${n <= Number(r.rating) ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'}`} />)}</div>
+                                <span className="text-[10px] text-muted-foreground truncate">{l?.title || ''} · {new Date(r.created_at).toLocaleDateString('sv-SE')}</span>
+                              </div>
+                            </div>
+                            {!r.is_published && <Badge variant="outline" className="text-[10px]">Dold</Badge>}
+                          </div>
+                          {r.comment && <p className="text-sm text-muted-foreground italic">"{r.comment}"</p>}
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            <Button size="sm" variant="outline" className="rounded-xl h-8 text-xs" onClick={async () => { const { error } = await (supabase as any).from('egg_sale_reviews').update({ is_published: !r.is_published }).eq('id', r.id); if (error) return toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' }); await invalidateAgda(); toast({ title: r.is_published ? 'Recensionen är dold' : 'Recensionen visas igen' }); }}>{r.is_published ? 'Dölj' : 'Visa'}</Button>
+                            <Button size="sm" variant="ghost" className="rounded-xl h-8 text-xs text-destructive hover:text-destructive" onClick={async () => { if (!confirm('Ta bort recensionen?')) return; const { error } = await (supabase as any).from('egg_sale_reviews').delete().eq('id', r.id); if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' }); await invalidateAgda(); toast({ title: 'Borttagen' }); }}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {(reviewTokens as any[]).filter((t: any) => !t.used_at).length > 0 && (
+                    <p className="text-xs text-muted-foreground border-t pt-2">⏳ {(reviewTokens as any[]).filter((t: any) => !t.used_at).length} kund(er) har fått recensions-länk men inte svarat ännu.</p>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
