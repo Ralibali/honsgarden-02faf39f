@@ -643,19 +643,72 @@ export default function EggSalesProV6() {
     copyText(text || 'Inga bokningar ännu', 'Kundlistan');
   };
 
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('agdas-bod-onboarding-dismissed') !== '1';
+  });
+  const dismissOnboarding = () => {
+    localStorage.setItem('agdas-bod-onboarding-dismissed', '1');
+    setShowOnboarding(false);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-5 pb-8 animate-fade-in">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
         <div>
           <p className="data-label mb-1">Sälj ägg</p>
           <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Agdas Bod 🥚</h1>
-          <p className="text-sm text-muted-foreground mt-1">Skapa säljlistor, ta emot bokningsförfrågningar, visa Swish och håll koll på lagret.</p>
+          <p className="text-sm text-muted-foreground mt-1">Din digitala gårdsbutik – publicera säljsidor för dina ägg, ta emot bokningar från kunder och håll koll på lager och Swish-betalningar på ett ställe.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={newListing} className="rounded-xl gap-2"><Plus className="h-4 w-4" /> Ny lista</Button>
           <Button onClick={publishListing} disabled={publishing} className="rounded-xl gap-2">{publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />} {editingId ? 'Uppdatera' : 'Publicera'}</Button>
         </div>
       </div>
+
+      {showOnboarding && (
+        <Card className="border-primary/30 bg-gradient-to-br from-accent/20 via-card to-primary/10 shadow-sm relative overflow-hidden animate-fade-in">
+          <CardContent className="p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Wand2 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-serif text-lg leading-tight">Välkommen till Agdas Bod!</h2>
+                  <p className="text-xs text-muted-foreground">Så här kommer du igång på 1 minut.</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={dismissOnboarding} className="text-xs h-8 rounded-lg">Stäng</Button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <p className="data-label mb-2">Exempel på vad du kan sälja</p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex gap-2"><span>🥚</span><span><strong>Färska ägg</strong> – t.ex. "6-pack blandade gårdsägg, 45 kr"</span></li>
+                  <li className="flex gap-2"><span>🌿</span><span><strong>Påsk- eller blåa ägg</strong> – "Cream Legbar, 10-pack 80 kr"</span></li>
+                  <li className="flex gap-2"><span>🐣</span><span><strong>Kläckägg eller kycklingar</strong> – säsongsbaserat</span></li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="data-label mb-2">Så funkar bokningen</p>
+                <ol className="space-y-2 text-sm">
+                  <li className="flex gap-2"><span className="font-serif text-primary">1.</span><span>Klicka <strong>Ny lista</strong> och beskriv vad du säljer, antal och pris.</span></li>
+                  <li className="flex gap-2"><span className="font-serif text-primary">2.</span><span>Dela din publika länk på Facebook, SMS eller anslagstavlan.</span></li>
+                  <li className="flex gap-2"><span className="font-serif text-primary">3.</span><span>Kunden bokar med namn, telefon och e-post – du markerar <strong>Hämtad</strong> när de hämtat.</span></li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button onClick={() => { newListing(); dismissOnboarding(); }} size="sm" className="rounded-xl gap-2"><Plus className="h-4 w-4" /> Skapa min första lista</Button>
+              <Button variant="outline" size="sm" onClick={dismissOnboarding} className="rounded-xl">Jag fixar själv</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-primary/25 bg-gradient-to-br from-primary/10 via-card to-accent/10 shadow-sm">
         <CardContent className="p-4 sm:p-5 space-y-4">
