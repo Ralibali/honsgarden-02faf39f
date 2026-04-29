@@ -13,6 +13,7 @@ import {
   Camera,
   CheckCircle2,
   CircleDollarSign,
+  Crown,
   Copy,
   Download,
   Edit3,
