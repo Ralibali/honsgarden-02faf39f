@@ -2429,6 +2429,87 @@ export type Database = {
         }
         Relationships: []
       }
+      weather_alert_preferences: {
+        Row: {
+          city_name: string | null
+          cold_threshold_c: number
+          created_at: string
+          enabled: boolean
+          heat_threshold_c: number
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notify_email: boolean
+          notify_in_app: boolean
+          rain_threshold_mm: number
+          updated_at: string
+          user_id: string
+          wind_threshold_ms: number
+        }
+        Insert: {
+          city_name?: string | null
+          cold_threshold_c?: number
+          created_at?: string
+          enabled?: boolean
+          heat_threshold_c?: number
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notify_email?: boolean
+          notify_in_app?: boolean
+          rain_threshold_mm?: number
+          updated_at?: string
+          user_id: string
+          wind_threshold_ms?: number
+        }
+        Update: {
+          city_name?: string | null
+          cold_threshold_c?: number
+          created_at?: string
+          enabled?: boolean
+          heat_threshold_c?: number
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notify_email?: boolean
+          notify_in_app?: boolean
+          rain_threshold_mm?: number
+          updated_at?: string
+          user_id?: string
+          wind_threshold_ms?: number
+        }
+        Relationships: []
+      }
+      weather_alerts_sent: {
+        Row: {
+          alert_date: string
+          alert_type: string
+          created_at: string
+          details: Json | null
+          forecast_date: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          alert_date: string
+          alert_type: string
+          created_at?: string
+          details?: Json | null
+          forecast_date: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          alert_date?: string
+          alert_type?: string
+          created_at?: string
+          details?: Json | null
+          forecast_date?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       advertiser_config: {
