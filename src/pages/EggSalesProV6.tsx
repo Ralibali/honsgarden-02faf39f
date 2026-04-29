@@ -267,6 +267,8 @@ export default function EggSalesProV6() {
     },
     refetchInterval: 60_000,
   });
+
+  const listingById = useMemo(() => {
     const map: Record<string, Listing> = {};
     (listings as Listing[]).forEach((l) => { map[l.id] = l; });
     return map;
