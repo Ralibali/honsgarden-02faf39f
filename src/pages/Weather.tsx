@@ -88,6 +88,20 @@ export default function Weather() {
     enabled: !!isPremium,
   });
 
+  const { data: history } = useQuery({
+    queryKey: ['weather-history', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('weather_advice_cache')
+        .select('cache_date, city_name, weather_snapshot, summary')
+        .eq('user_id', user!.id)
+        .order('cache_date', { ascending: false })
+        .limit(30);
+      return data ?? [];
+    },
+    enabled: !!user?.id && !!isPremium,
+  });
+
   async function loadAdvice(force = false) {
     if (!w) return;
     setAdviceLoading(true);
