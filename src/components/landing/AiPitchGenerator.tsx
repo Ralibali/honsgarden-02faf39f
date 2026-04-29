@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Sparkles, Copy, Check, Loader2, ArrowRight } from 'lucide-react';
+import { Sparkles, Copy, Check, Loader2, ArrowRight, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -17,6 +17,9 @@ export default function AiPitchGenerator() {
   const [pitch, setPitch] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [contact, setContact] = useState('');
+  const [leadLoading, setLeadLoading] = useState(false);
+  const [leadSent, setLeadSent] = useState(false);
 
   const generate = async () => {
     setLoading(true);
@@ -60,6 +63,51 @@ export default function AiPitchGenerator() {
     setCopied(true);
     toast.success('Texten är kopierad!');
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const submitLead = async () => {
+    const value = contact.trim();
+    if (!value) {
+      toast.error('Fyll i e-post eller telefon.');
+      return;
+    }
+    const isEmail = value.includes('@');
+    const isPhone = /^[+0-9 ()\-]{6,20}$/.test(value);
+    if (!isEmail && !isPhone) {
+      toast.error('Ange en giltig e-post eller telefonnummer.');
+      return;
+    }
+    setLeadLoading(true);
+    try {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-pitch-lead`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          email: isEmail ? value : '',
+          phone: !isEmail ? value : '',
+          pitch,
+          price,
+          packs,
+          location,
+        }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        toast.error(data?.error || 'Kunde inte spara just nu.');
+        return;
+      }
+      setLeadSent(true);
+      toast.success('Tack! Vi hör av oss med tips och mallar.');
+    } catch (e) {
+      console.error(e);
+      toast.error('Något gick fel. Försök igen.');
+    } finally {
+      setLeadLoading(false);
+    }
   };
 
   return (
