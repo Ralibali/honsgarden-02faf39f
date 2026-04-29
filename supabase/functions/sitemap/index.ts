@@ -123,6 +123,19 @@ Deno.serve(async (req) => {
 `;
   }
 
+  // Lokala ortsidor – /salja-agg/[ort]
+  for (const slug of SALJA_AGG_ORTER) {
+    xml += `  <url>
+    <loc>${BASE_URL}/salja-agg/${slug}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="sv" href="${BASE_URL}/salja-agg/${slug}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${BASE_URL}/salja-agg/${slug}" />
+  </url>
+`;
+  }
+
   // Tag pages
   for (const tag of allTags) {
     const encoded = encodeURIComponent(tag);
