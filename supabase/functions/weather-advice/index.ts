@@ -190,6 +190,16 @@ Generera en sammanfattning, en produktionsprognos och tre korta råd som JSON vi
               parameters: {
                 type: "object",
                 properties: {
+                  summary: {
+                    type: "string",
+                    description:
+                      "1-2 meningar som sammanfattar vädret, säsongen och hur det troligen påverkar gården just nu. Skriv personligt och varmt, som om du pratar med ägaren.",
+                  },
+                  production_forecast: {
+                    type: "string",
+                    description:
+                      "Kort prognos (1-2 meningar) på hur äggproduktionen sannolikt utvecklas kommande 7 dagar givet väder, säsong och historik. Nämn gärna ungefärligt antal ägg/dag om historiken tillåter.",
+                  },
                   today_advice: {
                     type: "string",
                     description:
@@ -206,7 +216,7 @@ Generera en sammanfattning, en produktionsprognos och tre korta råd som JSON vi
                       "En observation om hur vädret kan ha påverkat äggproduktionen senaste tiden, eller säsongsmönster för månaden.",
                   },
                 },
-                required: ["today_advice", "week_advice", "history_insight"],
+                required: ["summary", "production_forecast", "today_advice", "week_advice", "history_insight"],
                 additionalProperties: false,
               },
             },
