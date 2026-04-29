@@ -2385,6 +2385,8 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           model: string | null
+          production_forecast: string | null
+          summary: string | null
           today_advice: string | null
           updated_at: string
           user_id: string
@@ -2400,6 +2402,8 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           model?: string | null
+          production_forecast?: string | null
+          summary?: string | null
           today_advice?: string | null
           updated_at?: string
           user_id: string
@@ -2415,6 +2419,8 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           model?: string | null
+          production_forecast?: string | null
+          summary?: string | null
           today_advice?: string | null
           updated_at?: string
           user_id?: string
