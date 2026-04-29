@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Wind, Droplets, CalendarDays, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Wind, Droplets, CalendarDays, Lightbulb, TrendingUp, Egg } from 'lucide-react';
 import { toast } from 'sonner';
 
 const WEATHER_ICONS: Record<string, string> = {
