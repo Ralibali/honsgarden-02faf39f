@@ -159,10 +159,29 @@ export default function EggSalesProV6() {
   const [publishing, setPublishing] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [generatedTexts, setGeneratedTexts] = useState<MarketingTexts | null>(null);
+  const [stockPacks, setStockPacks] = useState('0');
+  const [stockSource, setStockSource] = useState<'manual' | 'egg_log'>('manual');
+  const [autoPublish, setAutoPublish] = useState(true);
 
   useEffect(() => {
     document.title = 'Agda sälj | Hönsgården';
   }, []);
+
+  // Hämta tillgängliga ägg (från äggloggen senaste 14 dagarna minus redan sålt)
+  const { data: eggLogStock = 0 } = useQuery({
+    queryKey: ['egg-log-stock-v6'],
+    queryFn: async () => {
+      const userId = await getCurrentUserId();
+      const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const [{ data: logs }, { data: bookings }] = await Promise.all([
+        (supabase as any).from('egg_logs').select('count').eq('user_id', userId).gte('date', since),
+        (supabase as any).from('public_egg_sale_bookings').select('packs').eq('seller_user_id', userId).neq('status', 'cancelled').gte('created_at', since),
+      ]);
+      const totalEggs = (logs || []).reduce((s: number, r: any) => s + Number(r.count || 0), 0);
+      const soldEggs = (bookings || []).reduce((s: number, b: any) => s + Number(b.packs || 0), 0) * Math.max(1, safeNumber(packSize, 12));
+      return Math.max(0, Math.floor((totalEggs - soldEggs) / Math.max(1, safeNumber(packSize, 12))));
+    },
+  });
 
   const packCount = Math.max(1, safeNumber(salePacks, 1));
   const eggsPerPack = Math.max(1, safeNumber(packSize, 12));
@@ -303,6 +322,9 @@ export default function EggSalesProV6() {
     setSwishNumber(l.swish_number || '');
     setSwishName(l.swish_name || '');
     setSwishMessage(l.swish_message || 'Ägg');
+    setStockPacks(String(l.stock_packs ?? 0));
+    setStockSource((l.stock_source as 'manual' | 'egg_log') || 'manual');
+    setAutoPublish(l.auto_publish !== false);
     setGeneratedTexts(null);
     toast({ title: 'Säljlistan är öppnad för redigering' });
   };
@@ -368,6 +390,9 @@ export default function EggSalesProV6() {
         p12_price: p12,
         p30_price: p30,
         is_active: true,
+        stock_packs: Math.max(0, safeNumber(stockPacks, 0)),
+        stock_source: stockSource,
+        auto_publish: autoPublish,
       };
       const result = editingId
         ? await (supabase as any).from('public_egg_sale_listings').update(row).eq('id', editingId).select('id, slug').single()
@@ -646,6 +671,65 @@ export default function EggSalesProV6() {
                 <Field label="Swishnamn" value={swishName} setValue={setSwishName} />
                 <Field label="Swish-meddelande" value={swishMessage} setValue={setSwishMessage} />
               </div>
+
+              <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-primary" />
+                    <p className="font-serif text-sm">Lager & autopublicering</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">Butiks-läge</Badge>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="space-y-1.5">
+                    <span className="text-xs text-muted-foreground">Lagerkälla</span>
+                    <select
+                      value={stockSource}
+                      onChange={(e) => setStockSource(e.target.value as 'manual' | 'egg_log')}
+                      className="w-full h-11 rounded-xl border border-input bg-background px-3 text-sm"
+                    >
+                      <option value="manual">Manuellt antal</option>
+                      <option value="egg_log">Räkna från äggloggen</option>
+                    </select>
+                  </label>
+
+                  {stockSource === 'manual' ? (
+                    <Field label="Antal kartor i lager" value={stockPacks} setValue={setStockPacks} type="number" />
+                  ) : (
+                    <div className="space-y-1.5">
+                      <span className="text-xs text-muted-foreground">Beräknat från äggloggen (14 d)</span>
+                      <div className="h-11 rounded-xl border border-input bg-muted/30 px-3 flex items-center text-sm">
+                        <Package className="h-3.5 w-3.5 mr-2 text-primary" />
+                        <strong>{eggLogStock}</strong>&nbsp;kartor tillgängliga
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autoPublish}
+                    onChange={(e) => setAutoPublish(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-input"
+                  />
+                  <span>
+                    <span className="font-medium">Autopublicering</span>
+                    <span className="block text-xs text-muted-foreground">
+                      Pausa annonsen automatiskt när lagret är slut, och återaktivera när du fyller på.
+                    </span>
+                  </span>
+                </label>
+
+                {stockSource === 'manual' && Number(stockPacks) === 0 && autoPublish && (
+                  <div className="flex items-start gap-2 rounded-xl bg-amber-100 border border-amber-300 p-2 text-xs text-amber-900">
+                    <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                    <span>Lagret är tomt – annonsen markeras som slutsåld vid publicering.</span>
+                  </div>
+                )}
+              </div>
+
               <div className="rounded-2xl bg-muted/25 border p-4 space-y-3"><p className="text-sm break-all">{saleUrl}</p><div className="grid grid-cols-1 sm:grid-cols-3 gap-2"><Button onClick={publishListing} disabled={publishing} className="rounded-xl">{editingId ? 'Uppdatera' : 'Publicera'}</Button><Button variant="outline" onClick={() => copyText(saleUrl, 'Säljlänken')} className="rounded-xl">Kopiera</Button><Button variant="outline" onClick={() => window.open(saleUrl, '_blank')} className="rounded-xl">Visa</Button></div></div>
             </CardContent>
           </Card>
@@ -656,7 +740,7 @@ export default function EggSalesProV6() {
         <div className="space-y-5">
           <Card className="overflow-hidden shadow-sm">{imageUrl ? <img src={imageUrl} className="h-48 w-full object-cover" /> : <div className="h-40 bg-muted/30 flex items-center justify-center"><ImageIcon className="h-8 w-8 text-muted-foreground" /></div>}<CardContent className="p-4 space-y-3"><Badge>Förhandsvisning</Badge><h2 className="font-serif text-2xl">{title}</h2><p className="text-sm text-muted-foreground">{description}</p><div className="grid grid-cols-3 gap-2 text-center"><MiniStat label="Kartor" value={packCount} /><MiniStat label="Ägg" value={eggsPerPack} /><MiniStat label="Pris" value={`${price} kr`} /></div><div className="rounded-2xl border bg-muted/20 p-4 text-sm space-y-1"><PriceRow label="6-pack" value={`${p6} kr`} /><PriceRow label="12-pack" value={`${p12} kr`} /><PriceRow label="30-pack" value={`${p30} kr`} /></div><div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm"><Wallet className="h-4 w-4 inline mr-1 text-primary" /> {swishNumber || 'Swishnummer visas här'}</div></CardContent></Card>
 
-          <Card className="shadow-sm"><CardContent className="p-4 space-y-3"><h2 className="font-serif text-lg">Mina säljlistor</h2>{listingsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (listings as Listing[]).length === 0 ? <p className="text-sm text-muted-foreground">Inga publicerade säljlistor ännu.</p> : <div className="space-y-2">{(listings as Listing[]).slice(0, 8).map((l) => { const booked = bookingCounts[l.id] || 0; const left = Math.max(0, Number(l.packs_available || 0) - booked); return <div key={l.id} className="rounded-2xl border p-3 space-y-2"><div><p className="font-medium text-sm truncate">{l.title}</p><p className="text-xs text-muted-foreground truncate">{PUBLIC_BASE_URL}/s/{l.slug}</p></div><div className="flex flex-wrap gap-1"><Badge variant={l.is_active ? 'default' : 'secondary'}>{l.is_active ? 'Aktiv' : 'Pausad'}</Badge>{l.sold_out_manually && <Badge variant="destructive">Slutsåld</Badge>}<Badge variant="outline">{left} kvar</Badge></div><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="outline" className="rounded-xl" onClick={() => loadListing(l)}><Edit3 className="h-3.5 w-3.5 mr-1" /> Redigera</Button><Button size="sm" variant="ghost" className="rounded-xl" onClick={() => window.open(`${PUBLIC_BASE_URL}/s/${l.slug}`, '_blank')}><ExternalLink className="h-3.5 w-3.5 mr-1" /> Visa</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => duplicateListing(l)}><Copy className="h-3.5 w-3.5 mr-1" /> Duplicera</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { is_active: !l.is_active }, l.is_active ? 'Säljlistan är pausad' : 'Säljlistan är aktiv igen')}>{l.is_active ? <PauseCircle className="h-3.5 w-3.5 mr-1" /> : <PlayCircle className="h-3.5 w-3.5 mr-1" />}{l.is_active ? 'Pausa' : 'Aktivera'}</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { sold_out_manually: !l.sold_out_manually }, l.sold_out_manually ? 'Säljlistan är inte längre slutsåld' : 'Säljlistan är markerad som slutsåld')}>{l.sold_out_manually ? 'Öppna' : 'Slutsåld'}</Button><Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive" onClick={() => deleteListing(l)}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button></div></div>; })}</div>}</CardContent></Card>
+          <Card className="shadow-sm"><CardContent className="p-4 space-y-3"><h2 className="font-serif text-lg">Mina säljlistor</h2>{listingsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (listings as Listing[]).length === 0 ? <p className="text-sm text-muted-foreground">Inga publicerade säljlistor ännu.</p> : <div className="space-y-2">{(listings as Listing[]).slice(0, 8).map((l) => { const booked = bookingCounts[l.id] || 0; const left = Math.max(0, Number(l.packs_available || 0) - booked); const stockLeft = Number(l.stock_packs ?? 0); const isAuto = l.auto_publish !== false; return <div key={l.id} className="rounded-2xl border p-3 space-y-2"><div><p className="font-medium text-sm truncate">{l.title}</p><p className="text-xs text-muted-foreground truncate">{PUBLIC_BASE_URL}/s/{l.slug}</p></div><div className="flex flex-wrap gap-1"><Badge variant={l.is_active ? 'default' : 'secondary'}>{l.is_active ? 'Aktiv' : 'Pausad'}</Badge>{l.sold_out_manually && <Badge variant="destructive">Slutsåld</Badge>}<Badge variant="outline" className={stockLeft === 0 ? 'border-destructive text-destructive' : stockLeft <= 3 ? 'border-amber-500 text-amber-700' : 'border-emerald-500 text-emerald-700'}><Package className="h-3 w-3 mr-1" />{stockLeft} i lager</Badge>{isAuto && <Badge variant="outline" className="text-xs">Auto</Badge>}<Badge variant="outline">{left} kvar (bokn.)</Badge></div><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="outline" className="rounded-xl" onClick={() => loadListing(l)}><Edit3 className="h-3.5 w-3.5 mr-1" /> Redigera</Button><Button size="sm" variant="ghost" className="rounded-xl" onClick={() => window.open(`${PUBLIC_BASE_URL}/s/${l.slug}`, '_blank')}><ExternalLink className="h-3.5 w-3.5 mr-1" /> Visa</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => duplicateListing(l)}><Copy className="h-3.5 w-3.5 mr-1" /> Duplicera</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { is_active: !l.is_active }, l.is_active ? 'Säljlistan är pausad' : 'Säljlistan är aktiv igen')}>{l.is_active ? <PauseCircle className="h-3.5 w-3.5 mr-1" /> : <PlayCircle className="h-3.5 w-3.5 mr-1" />}{l.is_active ? 'Pausa' : 'Aktivera'}</Button><Button size="sm" variant="outline" className="rounded-xl" onClick={() => updateListingState(l.id, { sold_out_manually: !l.sold_out_manually }, l.sold_out_manually ? 'Säljlistan är inte längre slutsåld' : 'Säljlistan är markerad som slutsåld')}>{l.sold_out_manually ? 'Öppna' : 'Slutsåld'}</Button><Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:text-destructive" onClick={() => deleteListing(l)}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button></div></div>; })}</div>}</CardContent></Card>
         </div>
       </div>
     </div>
