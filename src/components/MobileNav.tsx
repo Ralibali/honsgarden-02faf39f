@@ -21,6 +21,7 @@ import {
   Newspaper,
   CloudSun,
   MessageCircle,
+  Sparkles,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useState, useEffect } from 'react';
@@ -40,6 +41,7 @@ const moreGroups = [
     label: 'Dagligt',
     items: [
       { title: 'Dashboard', url: '/app', icon: Home },
+      { title: 'Smart rapport', url: '/app/smart-report', icon: Sparkles, premium: true },
       { title: 'Logga ägg', url: '/app/eggs', icon: Egg },
       { title: 'Uppgifter', url: '/app/tasks', icon: ClipboardCheck },
       { title: 'Påminnelser', url: '/app/reminders', icon: Syringe },
