@@ -210,11 +210,23 @@ export default function EggSales() {
 
   const shareNative = async () => {
     const text = `${marketingTexts.facebook}\n\nBoka/läs mer: ${saleUrl}`;
-    if (navigator.share) {
-      await navigator.share({ title: 'Färska ägg till salu', text, url: saleUrl }).catch(() => undefined);
-      return;
+    // Web Share API kräver https + (oftast) mobil. Försök bara om den finns.
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: 'Färska ägg till salu', text, url: saleUrl });
+        return;
+      } catch (err: any) {
+        // AbortError = användaren stängde dialogen, ingen toast
+        if (err?.name === 'AbortError') return;
+        // Annars fall tillbaka till kopiera
+      }
     }
-    copyText(text, 'Delningstexten');
+    // Fallback: kopiera till urklipp och visa toast
+    await copyText(text, 'Delningstexten');
+    toast({
+      title: 'Delning inte tillgänglig här',
+      description: 'Texten är kopierad — klistra in i Facebook, Messenger eller SMS.',
+    });
   };
 
   const addSale = async () => {
