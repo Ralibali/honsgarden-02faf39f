@@ -97,6 +97,19 @@ export default function SaljaAggOrt() {
     .map((s) => getOrt(s))
     .filter((o): o is NonNullable<typeof o> => Boolean(o));
 
+  // Andra orter i samma län (exkl. nuvarande och redan listade närliggande)
+  const narliggandeSlugs = new Set(narliggande.map((n) => n.slug));
+  const sammaLan = ORTER
+    .filter((o) => o.lan === ort.lan && o.slug !== ort.slug && !narliggandeSlugs.has(o.slug))
+    .slice(0, 10);
+
+  // Populära storstäder för cross-län-länkning (exkl. nuvarande län)
+  const STORSTADER_SLUGS = ['stockholm', 'goteborg', 'malmo', 'uppsala', 'linkoping', 'orebro', 'vasteras', 'jonkoping', 'umea', 'lund'];
+  const storstader = STORSTADER_SLUGS
+    .map((s) => getOrt(s))
+    .filter((o): o is NonNullable<typeof o> => Boolean(o) && o!.slug !== ort.slug && o!.lan !== ort.lan)
+    .slice(0, 6);
+
   const content = buildOrtContent(ort);
   const images = buildOrtImages(ort);
   const henImg = buildOrtHenImage(ort);
