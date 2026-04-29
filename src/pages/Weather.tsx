@@ -232,6 +232,24 @@ export default function Weather() {
                 </div>
               ) : advice ? (
                 <div className="space-y-4">
+                  {advice.summary && (
+                    <div className="rounded-xl bg-primary/10 border border-primary/20 p-4">
+                      <p className="text-sm leading-relaxed text-foreground font-medium">
+                        {advice.summary}
+                      </p>
+                    </div>
+                  )}
+                  {advice.production_forecast && (
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground mb-1.5">
+                        <TrendingUp className="h-3 w-3" /> Produktionsprognos kommande vecka
+                      </div>
+                      <p className="text-sm leading-relaxed text-foreground flex gap-2">
+                        <Egg className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span>{advice.production_forecast}</span>
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground mb-1.5">
                       <Thermometer className="h-3 w-3" /> För dina höns idag
