@@ -161,7 +161,9 @@ export default function DashboardFocusPanel() {
 
   const weekInsight = getWeekInsight(eggs as any[]);
   const hasLoggedToday = todayEggs > 0;
-  const weekEggs = sumEggsSince(eggs as any[], daysAgo(7));
+  const weekEggs = sumEggsSince(eggs as any[], startOfIsoWeek(new Date()));
+  const hasImportant = importantChores.length > 0;
+  const statBoxes = hasImportant ? 4 : 3;
 
   const openAction = (path: string) => {
     setDetailsOpen(false);
