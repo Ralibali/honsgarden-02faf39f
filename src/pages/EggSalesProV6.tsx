@@ -883,6 +883,109 @@ export default function EggSalesProV6() {
               )}
             </CardContent>
           </Card>
+
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif text-lg flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Stamkunder</h2>
+                <div className="flex gap-1">
+                  <Button size="sm" variant={customerFilter === 'all' ? 'default' : 'outline'} className="rounded-xl h-7 text-xs" onClick={() => setCustomerFilter('all')}>Alla ({customers.length})</Button>
+                  <Button size="sm" variant={customerFilter === 'regulars' ? 'default' : 'outline'} className="rounded-xl h-7 text-xs" onClick={() => setCustomerFilter('regulars')}><Crown className="h-3 w-3 mr-1" /> Stam ({customers.filter((c) => c.isRegular).length})</Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Räknas som stamkund vid {regularThreshold}+ köp. Slås ihop på telefonnummer (eller namn).</p>
+              {visibleCustomers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Inga kunder att visa ännu. När bokningar börjar trilla in syns de här.</p>
+              ) : (
+                <div className="space-y-2">
+                  {visibleCustomers.slice(0, 15).map((c) => {
+                    const lastListing = c.lastListingId ? listingById[c.lastListingId] : null;
+                    const greeting = encode(`Hej ${c.name.split(' ')[0]}! Tack för att du handlar ägg av oss${lastListing ? ` (${lastListing.title})` : ''}. Hör gärna av dig om du vill ha en ny leverans.`);
+                    return (
+                      <div key={c.key} className={`rounded-2xl border p-3 space-y-2 ${c.isRegular ? 'bg-amber-50/50 border-amber-200' : ''}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate flex items-center gap-1.5">{c.isRegular && <Crown className="h-3.5 w-3.5 text-amber-600 shrink-0" />}{c.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{c.phone || 'Inget telefonnummer'} · senast {c.lastDate ? new Date(c.lastDate).toLocaleDateString('sv-SE') : '–'}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="stat-number text-base text-primary">{c.orders}</p>
+                            <p className="text-[10px] data-label">köp</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
+                          <div className="rounded-lg bg-muted/40 p-1.5"><p className="font-semibold">{c.packs}</p><p className="text-[9px] text-muted-foreground">kartor</p></div>
+                          <div className="rounded-lg bg-muted/40 p-1.5"><p className="font-semibold">{Math.round(c.amount)} kr</p><p className="text-[9px] text-muted-foreground">totalt</p></div>
+                          <div className="rounded-lg bg-muted/40 p-1.5"><p className="font-semibold">{c.orders >= regularThreshold ? 'Stam' : `${regularThreshold - c.orders} kvar`}</p><p className="text-[9px] text-muted-foreground">status</p></div>
+                        </div>
+                        {c.phone && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.open(`sms:${c.phone}?body=${greeting}`, '_blank')}><MessageCircle className="h-3.5 w-3.5 mr-1" /> SMS</Button>
+                            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.open(`tel:${c.phone}`, '_blank')}><Send className="h-3.5 w-3.5 mr-1" /> Ring</Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-serif text-lg flex items-center gap-2"><Star className="h-4 w-4 text-amber-500" /> Recensioner</h2>
+                <Badge variant="outline">{(reviews as any[]).length} st</Badge>
+              </div>
+              {reviewsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (reviews as any[]).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Recensioner skapas automatiskt när du markerar en bokning som "Hämtad" – kunden får ett mejl med länk att lämna betyg.</p>
+              ) : (
+                <>
+                  {(() => {
+                    const visible = (reviews as any[]).filter((r) => r.is_published);
+                    const avg = visible.length ? visible.reduce((s, r) => s + Number(r.rating || 0), 0) / visible.length : 0;
+                    return visible.length > 0 ? (
+                      <div className="rounded-2xl border bg-amber-50/50 border-amber-200 p-3 flex items-center gap-3">
+                        <p className="stat-number text-2xl text-amber-700">{avg.toFixed(1)}</p>
+                        <div>
+                          <div className="flex">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`h-3.5 w-3.5 ${n <= Math.round(avg) ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'}`} />)}</div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{visible.length} publicerade</p>
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                  <div className="space-y-2">
+                    {(reviews as any[]).slice(0, 10).map((r: any) => {
+                      const l = listingById[r.listing_id];
+                      return (
+                        <div key={r.id} className={`rounded-2xl border p-3 space-y-1.5 ${!r.is_published ? 'opacity-60 border-dashed' : ''}`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">{r.customer_name}</p>
+                              <div className="flex items-center gap-2">
+                                <div className="flex">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`h-3 w-3 ${n <= Number(r.rating) ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'}`} />)}</div>
+                                <span className="text-[10px] text-muted-foreground truncate">{l?.title || ''} · {new Date(r.created_at).toLocaleDateString('sv-SE')}</span>
+                              </div>
+                            </div>
+                            {!r.is_published && <Badge variant="outline" className="text-[10px]">Dold</Badge>}
+                          </div>
+                          {r.comment && <p className="text-sm text-muted-foreground italic">"{r.comment}"</p>}
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            <Button size="sm" variant="outline" className="rounded-xl h-8 text-xs" onClick={async () => { const { error } = await (supabase as any).from('egg_sale_reviews').update({ is_published: !r.is_published }).eq('id', r.id); if (error) return toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' }); await invalidateAgda(); toast({ title: r.is_published ? 'Recensionen är dold' : 'Recensionen visas igen' }); }}>{r.is_published ? 'Dölj' : 'Visa'}</Button>
+                            <Button size="sm" variant="ghost" className="rounded-xl h-8 text-xs text-destructive hover:text-destructive" onClick={async () => { if (!confirm('Ta bort recensionen?')) return; const { error } = await (supabase as any).from('egg_sale_reviews').delete().eq('id', r.id); if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' }); await invalidateAgda(); toast({ title: 'Borttagen' }); }}><Trash2 className="h-3.5 w-3.5 mr-1" /> Ta bort</Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {(reviewTokens as any[]).filter((t: any) => !t.used_at).length > 0 && (
+                    <p className="text-xs text-muted-foreground border-t pt-2">⏳ {(reviewTokens as any[]).filter((t: any) => !t.used_at).length} kund(er) har fått recensions-länk men inte svarat ännu.</p>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
