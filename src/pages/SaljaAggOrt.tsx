@@ -192,6 +192,20 @@ export default function SaljaAggOrt() {
                 </ul>
               </div>
 
+              <figure className="rounded-2xl overflow-hidden border border-border/50 bg-background">
+                <img
+                  src={ASSET_BY_KEY[images.eggs.assetKey]}
+                  alt={images.eggs.alt}
+                  loading="lazy"
+                  width={1200}
+                  height={675}
+                  className="w-full h-auto object-cover aspect-[16/9]"
+                />
+                <figcaption className="px-4 py-2.5 text-xs text-muted-foreground bg-muted/30 border-t border-border/40">
+                  {images.eggs.caption}
+                </figcaption>
+              </figure>
+
               <div className="space-y-4">
                 <h2 className="font-serif text-2xl sm:text-3xl">Så får du fler kunder i {ort.name}</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.saSäljerDuMer}</p>
