@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSearchParams } from 'react-router-dom';
+import { useSeo } from '@/hooks/useSeo';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -76,6 +77,42 @@ export default function Premium() {
   const [syncing, setSyncing] = useState(false);
   const [searchParams] = useSearchParams();
   const isPremium = user?.subscription_status === 'premium' || user?.is_premium;
+
+  useSeo({
+    title: 'Hönsgården Plus – AI-coach, ekonomi & insikter för hönsgården',
+    description:
+      'Uppgradera till Hönsgården Plus för AI-coach, veckorapporter, avvikelsevarningar, ekonomiverktyg och kläckningskalender. 19 kr/mån eller 149 kr/år – avsluta när du vill.',
+    path: '/app/premium',
+    ogType: 'website',
+    ogImage: '/og-image.jpg',
+    ogImageAlt: 'Hönsgården Plus – AI och ekonomi för hönsgårdar',
+    noindex: true,
+    jsonLd: {
+      '@type': 'Product',
+      name: 'Hönsgården Plus',
+      description:
+        'Premiumabonnemang för Hönsgården med AI-coach, veckorapport, ekonomi och avancerade insikter för hönsgårdar.',
+      brand: { '@type': 'Brand', name: 'Hönsgården' },
+      offers: [
+        {
+          '@type': 'Offer',
+          name: 'Hönsgården Plus – månad',
+          price: '19',
+          priceCurrency: 'SEK',
+          availability: 'https://schema.org/InStock',
+          url: 'https://honsgarden.se/app/premium',
+        },
+        {
+          '@type': 'Offer',
+          name: 'Hönsgården Plus – år',
+          price: '149',
+          priceCurrency: 'SEK',
+          availability: 'https://schema.org/InStock',
+          url: 'https://honsgarden.se/app/premium',
+        },
+      ],
+    },
+  });
 
   useEffect(() => {
     if (searchParams.get('success') !== 'true') return;
