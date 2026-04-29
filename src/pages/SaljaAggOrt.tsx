@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ORTER, getOrt } from '@/data/saljaAggOrter';
+import { buildOrtContent } from '@/data/saljaAggOrtContent';
 
 const LandingFooter = lazy(() => import('@/components/LandingFooter'));
 
@@ -99,6 +100,8 @@ export default function SaljaAggOrt() {
   const narliggande = (ort.narliggande ?? [])
     .map((s) => getOrt(s))
     .filter((o): o is NonNullable<typeof o> => Boolean(o));
+
+  const content = buildOrtContent(ort);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
