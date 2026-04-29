@@ -81,6 +81,18 @@ export default function SaljaAggOrt() {
         acceptedAnswer: { '@type': 'Answer', text: f.answer },
       })),
     },
+    {
+      '@type': 'SiteNavigationElement',
+      name: `Sälja ägg i orter nära ${ort.name}`,
+      hasPart: (ort.narliggande ?? [])
+        .map((s) => getOrt(s))
+        .filter((o): o is NonNullable<ReturnType<typeof getOrt>> => Boolean(o))
+        .map((o) => ({
+          '@type': 'SiteNavigationElement',
+          name: `Sälja ägg i ${o.name}`,
+          url: `https://honsgarden.se/salja-agg/${o.slug}`,
+        })),
+    },
   ];
 
   useSeo({
@@ -96,6 +108,19 @@ export default function SaljaAggOrt() {
   const narliggande = (ort.narliggande ?? [])
     .map((s) => getOrt(s))
     .filter((o): o is NonNullable<typeof o> => Boolean(o));
+
+  // Andra orter i samma län (exkl. nuvarande och redan listade närliggande)
+  const narliggandeSlugs = new Set(narliggande.map((n) => n.slug));
+  const sammaLan = ORTER
+    .filter((o) => o.lan === ort.lan && o.slug !== ort.slug && !narliggandeSlugs.has(o.slug))
+    .slice(0, 10);
+
+  // Populära storstäder för cross-län-länkning (exkl. nuvarande län)
+  const STORSTADER_SLUGS = ['stockholm', 'goteborg', 'malmo', 'uppsala', 'linkoping', 'orebro', 'vasteras', 'jonkoping', 'umea', 'lund'];
+  const storstader = STORSTADER_SLUGS
+    .map((s) => getOrt(s))
+    .filter((o): o is NonNullable<typeof o> => Boolean(o) && o!.slug !== ort.slug && o!.lan !== ort.lan)
+    .slice(0, 6);
 
   const content = buildOrtContent(ort);
   const images = buildOrtImages(ort);
@@ -356,29 +381,101 @@ export default function SaljaAggOrt() {
           </div>
         </section>
 
-        {/* Närliggande orter */}
-        {narliggande.length > 0 && (
-          <section className="py-12 sm:py-16 bg-muted/20 border-y border-border/40">
-            <div className="container max-w-5xl mx-auto px-5 sm:px-6">
-              <h2 className="font-serif text-xl sm:text-2xl mb-4">Säljer du ägg i området kring {ort.name}?</h2>
-              <p className="text-sm text-muted-foreground mb-5 max-w-xl">
-                Hönsgården funkar lika bra i hela {ort.lan}. Här är några närliggande orter där andra
-                hönsägare redan tagit emot bokningar:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {narliggande.map((n) => (
-                  <Link
-                    key={n.slug}
-                    to={`/salja-agg/${n.slug}`}
-                    className="inline-flex items-center gap-1.5 text-sm rounded-full border border-border/60 bg-background hover:border-primary/40 hover:text-primary px-3.5 py-1.5 transition-colors"
-                  >
-                    <MapPin className="h-3.5 w-3.5" /> Sälja ägg i {n.name}
-                  </Link>
-                ))}
+        {/* Intern länkning – närliggande orter, samma län & populära storstäder */}
+        <nav
+          aria-label={`Sälja ägg i orter nära ${ort.name}`}
+          className="py-12 sm:py-16 bg-muted/20 border-y border-border/40"
+        >
+          <div className="container max-w-5xl mx-auto px-5 sm:px-6 space-y-10">
+            {narliggande.length > 0 && (
+              <div>
+                <h2 className="font-serif text-xl sm:text-2xl mb-2">
+                  Sälja ägg i grannstäder nära {ort.name}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5 max-w-2xl">
+                  Bor du i utkanten av {ort.name} eller pendlar in från en grannort? Hönsgården funkar
+                  lika bra i hela {ort.lan}. Klicka vidare till en lokal säljsida för en närliggande ort:
+                </p>
+                <ul className="flex flex-wrap gap-2 list-none p-0">
+                  {narliggande.map((n) => (
+                    <li key={n.slug}>
+                      <Link
+                        to={`/salja-agg/${n.slug}`}
+                        title={`Sälja ägg i ${n.name} (${n.lan})`}
+                        className="inline-flex items-center gap-1.5 text-sm rounded-full border border-border/60 bg-background hover:border-primary/40 hover:text-primary px-3.5 py-1.5 transition-colors"
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        Sälja ägg i {n.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
+            )}
+
+            {sammaLan.length > 0 && (
+              <div>
+                <h2 className="font-serif text-xl sm:text-2xl mb-2">
+                  Fler orter i {ort.lan}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5 max-w-2xl">
+                  Vi har lokala säljsidor för fler orter i {ort.lan} – jämför priser och efterfrågan
+                  i området innan du sätter ditt eget pris i {ort.name}:
+                </p>
+                <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 list-none p-0">
+                  {sammaLan.map((n) => (
+                    <li key={n.slug}>
+                      <Link
+                        to={`/salja-agg/${n.slug}`}
+                        title={`Sälja ägg lokalt i ${n.name}`}
+                        className="text-sm text-muted-foreground hover:text-primary inline-flex items-center gap-1.5"
+                      >
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        Sälja ägg i {n.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {storstader.length > 0 && (
+              <div>
+                <h2 className="font-serif text-xl sm:text-2xl mb-2">
+                  Populära orter i hela Sverige
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5 max-w-2xl">
+                  Sälja ägg är populärt i hela landet. Se hur efterfrågan ser ut i några av Sveriges
+                  största städer:
+                </p>
+                <ul className="flex flex-wrap gap-2 list-none p-0">
+                  {storstader.map((n) => (
+                    <li key={n.slug}>
+                      <Link
+                        to={`/salja-agg/${n.slug}`}
+                        title={`Sälja ägg i ${n.name}`}
+                        className="inline-flex items-center gap-1.5 text-sm rounded-full border border-border/60 bg-background hover:border-primary/40 hover:text-primary px-3.5 py-1.5 transition-colors"
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        {n.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="pt-2">
+              <Link
+                to="/salja-agg"
+                className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+              >
+                Se alla orter där du kan sälja ägg <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
-          </section>
-        )}
+          </div>
+        </nav>
+
 
         {/* FAQ */}
         <section className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
