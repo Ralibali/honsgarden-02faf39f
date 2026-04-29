@@ -17,6 +17,10 @@ import {
   MapPin,
   Megaphone,
   TrendingUp,
+  Quote,
+  Lock,
+  Heart,
+  Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -294,6 +298,99 @@ export default function SaljaAgg() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* KUNDCASE */}
+        <section className="py-16 sm:py-24 bg-muted/20 border-y border-border/40">
+          <div className="container max-w-6xl mx-auto px-5 sm:px-6">
+            <motion.div {...fadeUp()} className="text-center mb-12">
+              <Badge className="mb-3 bg-primary/10 text-primary border-primary/20">Riktiga hönsägare</Badge>
+              <h2 className="font-serif text-3xl sm:text-4xl text-foreground mb-3">
+                Så har andra fått igång sin äggförsäljning
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Tre vanliga vardagsexempel från hönsgårdar runt om i Sverige – inga säljpitchar, bara
+                hur det faktiskt brukar gå.
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
+              {[
+                {
+                  name: 'Karin, 4 höns i Småland',
+                  result: 'Sålde slut på 12 kartor första helgen',
+                  story:
+                    '"Jag delade bara länken i bygdens Facebook-grupp på fredagen. På söndag kväll var det tomt i kylen och tre nya stamkunder bokade in nästa vecka."',
+                },
+                {
+                  name: 'Linda & Per, 14 höns i Skåne',
+                  result: 'Slipper sms-pinglandet helt',
+                  story:
+                    '"Förut fick vi 30 sms i veckan om vem som ville hämta när. Nu bokar de själva i kalendern och vi får bara notisen när det är dags att packa."',
+                },
+                {
+                  name: 'Marcus, 22 höns i Värmland',
+                  result: '+1 200 kr/mån utan extra jobb',
+                  story:
+                    '"Jag hade alltid överskott men ingen ork att maila runt. Nu går säljsidan av sig själv och Swish-betalningen ligger på kontot innan kunden ens hunnit hem."',
+                },
+              ].map((c, i) => (
+                <motion.div key={c.name} {...fadeUp(i * 0.07)}>
+                  <Card className="h-full border-border/50 rounded-2xl bg-background hover:shadow-md transition-shadow">
+                    <CardContent className="p-6 sm:p-7 flex flex-col h-full">
+                      <Quote className="h-7 w-7 text-primary/30 mb-3" />
+                      <p className="text-sm sm:text-[15px] text-foreground leading-relaxed mb-5 flex-1">
+                        {c.story}
+                      </p>
+                      <div className="pt-4 border-t border-border/40">
+                        <p className="text-xs text-primary font-medium mb-0.5">{c.result}</p>
+                        <p className="text-xs text-muted-foreground">{c.name}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TROVÄRDIGHET */}
+        <section className="py-14 sm:py-16">
+          <div className="container max-w-5xl mx-auto px-5 sm:px-6">
+            <motion.div
+              {...fadeUp()}
+              className="rounded-3xl bg-gradient-to-br from-primary/[0.06] via-background to-warning/[0.04] border border-border/50 p-6 sm:p-10"
+            >
+              <div className="grid sm:grid-cols-3 gap-6 sm:gap-4 mb-8">
+                {[
+                  { value: '0 kr', label: 'Inga avgifter, inga provisioner' },
+                  { value: '2 min', label: 'Från registrering till första bokning' },
+                  { value: '100 %', label: 'Pengarna går direkt till din Swish' },
+                ].map((s) => (
+                  <div key={s.label} className="text-center">
+                    <p className="font-serif text-3xl sm:text-4xl text-primary mb-1">{s.value}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-tight">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto">
+                {[
+                  { icon: Lock, text: 'Vi säljer aldrig dina eller dina kunders uppgifter – GDPR-säkert.' },
+                  { icon: ShieldCheck, text: 'Ingen mellanhand. Du behåller hela försäljningen.' },
+                  { icon: Heart, text: 'Byggt i Sverige för svenska hönsgårdar. Support på svenska.' },
+                  { icon: Zap, text: 'Du kan avsluta eller pausa din säljsida när du vill, inga bindningar.' },
+                ].map((t) => (
+                  <div key={t.text} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <t.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="text-sm text-foreground leading-relaxed">{t.text}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </section>
 
