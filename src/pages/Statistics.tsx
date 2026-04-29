@@ -290,22 +290,31 @@ export default function Statistics() {
                   <CardTitle className="font-serif text-base sm:text-lg">Rasfördelning</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6 pb-4">
-                  {hensWithEggs.length > 0 ? (
-                    <div className="space-y-2">
-                      {Object.entries(
-                        hensWithEggs.reduce((acc: Record<string, number>, hen: any) => {
-                          const breed = hen.breed || 'Okänd';
-                          acc[breed] = (acc[breed] || 0) + 1;
-                          return acc;
-                        }, {})
-                      ).map(([breed, count]) => (
-                        <div key={breed} className="flex items-center justify-between gap-3 text-sm rounded-xl bg-muted/20 px-3 py-2">
-                          <span className="text-foreground truncate">{breed}</span>
-                          <span className="stat-number text-muted-foreground shrink-0">{count as number} st</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
+                  {hensWithEggs.length > 0 ? (() => {
+                    const breedEntries = Object.entries(
+                      hensWithEggs.reduce((acc: Record<string, number>, hen: any) => {
+                        const breed = hen.breed || 'Okänd';
+                        acc[breed] = (acc[breed] || 0) + 1;
+                        return acc;
+                      }, {})
+                    ).sort((a, b) => (b[1] as number) - (a[1] as number));
+                    const visibleBreeds = showAllBreeds ? breedEntries : breedEntries.slice(0, 5);
+                    return (
+                      <div className="space-y-2">
+                        {visibleBreeds.map(([breed, count]) => (
+                          <div key={breed} className="flex items-center justify-between gap-3 text-sm rounded-xl bg-muted/20 px-3 py-2">
+                            <span className="text-foreground truncate">{breed}</span>
+                            <span className="stat-number text-muted-foreground shrink-0">{count as number} st</span>
+                          </div>
+                        ))}
+                        {breedEntries.length > 5 && (
+                          <Button variant="ghost" size="sm" className="w-full mt-1" onClick={() => setShowAllBreeds(v => !v)}>
+                            {showAllBreeds ? 'Visa mindre' : `Visa ${breedEntries.length - 5} till`}
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })() : (
                     <EmptyState
                       emoji="🌿"
                       title="Ingen rasdata ännu"
