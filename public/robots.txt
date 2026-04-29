@@ -4,5 +4,7 @@ Disallow: /app/
 Disallow: /login
 Disallow: /reset-password
 Disallow: /inbjudan/
+Disallow: /r/
+Disallow: /s/
 
 Sitemap: https://honsgarden.se/sitemap.xml
