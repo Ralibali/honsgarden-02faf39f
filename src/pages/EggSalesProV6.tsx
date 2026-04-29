@@ -399,6 +399,8 @@ export default function EggSalesProV6() {
       const userId = await getCurrentUserId();
       const requestedSlug = publishedSlug || customSlug || draftSlug;
       const slug = await getUniqueSlug(requestedSlug, editingId);
+      const newStock = Math.max(0, safeNumber(stockPacks, 0));
+      const prevStock = editingId ? Number((listings as Listing[]).find((x) => x.id === editingId)?.stock_packs ?? 0) : 0;
       const row = {
         user_id: userId,
         slug,
@@ -418,7 +420,7 @@ export default function EggSalesProV6() {
         p12_price: p12,
         p30_price: p30,
         is_active: true,
-        stock_packs: Math.max(0, safeNumber(stockPacks, 0)),
+        stock_packs: newStock,
         stock_source: stockSource,
         auto_publish: autoPublish,
       };
@@ -432,6 +434,10 @@ export default function EggSalesProV6() {
       await invalidateAgda();
       toast({ title: editingId ? 'Säljlistan är uppdaterad ✨' : 'Säljlistan är publicerad ✨', description: `${PUBLIC_BASE_URL}/s/${result.data.slug}` });
       if (slug !== requestedSlug) toast({ title: 'Länken justerades automatiskt', description: `Den blev /s/${slug} eftersom önskad länk var upptagen.` });
+      // Notifiera väntelistan om lager precis fyllts på (manuellt lager)
+      if (stockSource === 'manual' && prevStock <= 0 && newStock > 0) {
+        await triggerWaitlistNotify(result.data.id);
+      }
     } catch (e: any) {
       toast({ title: 'Kunde inte publicera', description: e.message, variant: 'destructive' });
     } finally {
