@@ -167,3 +167,86 @@ export function buildOrtContent(ort: Ort): OrtSeoContent {
     ],
   };
 }
+
+export type FaqItem = { question: string; answer: string };
+
+// 14 frågesvars-mallar – 8–12 plockas deterministiskt per ort.
+// Skrivna med naturligt språk + lokala signaler för rich results.
+function FAQ_TEMPLATES(ort: Ort): FaqItem[] {
+  const n = ort.name;
+  const lan = ort.lan;
+  const region = ort.region;
+  const lower = n.toLowerCase();
+  return [
+    {
+      question: `Hur säljer jag ägg lokalt i ${n}?`,
+      answer: `Det enklaste sättet att sälja ägg i ${n} är att skapa en gratis säljsida på Hönsgården. Du anger pris, antal kartor och hämtadress – sedan delar du länken i lokala Facebook-grupper, på anslagstavlor eller via QR-kod vid vägen. Köpare i ${n} bokar själva, väljer hämtdag och betalar via Swish när de hämtar. Hela processen tar runt två minuter att sätta upp.`,
+    },
+    {
+      question: `Vad får man för ägg i ${n}?`,
+      answer: `Priset på lokalt sålda ägg i ${n} ligger oftast mellan 35 och 60 kronor per karta om sex ägg. Frigående ägg från gård kan ofta säljas för 45–55 kr, medan ekologiska eller specialraser ibland tar 60–70 kr. Du sätter alltid själv ditt pris på Hönsgården – du behåller hela summan och betalar ingen provision.`,
+    },
+    {
+      question: `Krävs det tillstånd för att sälja ägg från sina höns i ${lan}?`,
+      answer: `För småskalig försäljning direkt från gården (under 350 värphöns) i ${lan} räcker det i de flesta fall att registrera primärproduktion hos Länsstyrelsen. Du behöver inte stämpla varje ägg eller söka livsmedelstillstånd. Säljer du till butik eller restaurang gäller andra regler – kontakta då kommunens miljökontor i ${n}.`,
+    },
+    {
+      question: `Hur länge håller färska ägg från gården?`,
+      answer: `Otvättade ägg från frigående höns håller minst 28 dagar i rumstemperatur tack vare det naturliga skyddshinna som finns på skalet. I kylskåp håller de 6–8 veckor utan problem. Märk gärna varje karta med värpdatum så köparen i ${n} vet exakt hur färska äggen är.`,
+    },
+    {
+      question: `Behöver jag tvätta äggen innan försäljning?`,
+      answer: `Nej, äggen ska helst inte tvättas. Det naturliga skyddshinnet (kutikulan) håller ute bakterier och förlänger hållbarheten. Om ett ägg är synligt smutsigt – borsta torrt, eller skölj snabbt i ljummet vatten precis innan det levereras till köparen.`,
+    },
+    {
+      question: `Hur tar jag betalt – fungerar Swish?`,
+      answer: `Swish är det absolut vanligaste betalsättet vid äggförsäljning i ${n}. På din säljsida på Hönsgården kan du visa ditt Swish-nummer eller en QR-kod, och köparen Swishar antingen vid bokning eller vid hämtning. Du slipper helt mellanhänder, kortavgifter och utbetalningstider.`,
+    },
+    {
+      question: `Hur skaffar jag fler kunder i ${n}?`,
+      answer: `De flesta lokala hönsägare i ${n} får sina första kunder via lokala Facebook-grupper (t.ex. "Köp och sälj ${n}"), genom anslag på ICA eller bygdegården, samt via en QR-skylt vid vägen ut till tomten. När du har en länk till en riktig säljsida (istället för bara ett telefonnummer) blir det mycket enklare att dela – och dina inlägg ser mer professionella ut.`,
+    },
+    {
+      question: `Kan jag begränsa hur många kartor varje köpare får boka?`,
+      answer: `Ja, på Hönsgården kan du sätta både max antal per bokning och totalt veckolager. Det är användbart för dig i ${n} som vill säkerställa att fler kunder får chans att handla, snarare än att en enda köpare bokar hela veckans produktion.`,
+    },
+    {
+      question: `Vad händer om värpningen sjunker under vintern?`,
+      answer: `I ${region} sjunker värpningen naturligt när dagsljuset minskar i november–februari. Du kan enkelt pausa lagret i Hönsgården eller skriva en kort notis på säljsidan om att du har vinterpaus eller färre kartor per vecka. Många köpare i ${n} uppskattar transparensen och kommer tillbaka när säsongen drar igång igen.`,
+    },
+    {
+      question: `Kan kunder i ${n} prenumerera på ägg varje vecka?`,
+      answer: `Många hönsägare löser det genom att lägga upp återkommande hämtdagar (t.ex. varje fredag) där lojala köpare kan boka i förväg. Du kan också föra en intresselista direkt i Hönsgården, så att stamkunder i ${n} alltid får erbjudande först innan veckans kartor läggs ut publikt.`,
+    },
+    {
+      question: `Är det skattepliktigt att sälja ägg i liten skala?`,
+      answer: `Hobbyförsäljning av ägg räknas i Sverige normalt som hobbyverksamhet upp till en viss inkomstgräns. Om dina sammanlagda hobbyinkomster överstiger 50 000 kr per år bör du registrera enskild firma. Hönsgården ger dig en tydlig översikt över intäkter så du enkelt kan deklarera korrekt – kontrollera alltid aktuella regler hos Skatteverket.`,
+    },
+    {
+      question: `Hur märker och förpackar jag äggen?`,
+      answer: `Använd hela, rena äggkartonger – gärna återanvända så länge de är torra och utan sprickor. Märk med värpdatum eller åtminstone vecka, samt gärna ditt gårds- eller hönserinamn. Det skapar förtroende hos köpare i ${n} och gör att återkommande kunder enkelt känner igen din kartong.`,
+    },
+    {
+      question: `Vad gör jag om någon klagar på äggen?`,
+      answer: `Det händer sällan, men om en köpare i ${n} hör av sig om ett trasigt eller dåligt ägg är det god ton att erbjuda byte vid nästa hämtning. Genom att svara snabbt och vänligt vänder du oftast situationen till en lojal kund. Spara köpkontakten i Hönsgården så har du historiken nära till hands.`,
+    },
+    {
+      question: `Behöver jag en hemsida om jag använder Hönsgården?`,
+      answer: `Nej. Din säljsida på Hönsgården fungerar som en mini-hemsida med pris, antal lediga kartor, hämtinfo och bokning. Många hönsägare i ${n} och resten av ${lan} använder enbart länken till sin Hönsgården-sida i sina Facebook-inlägg, sin Instagram-bio och sina QR-koder.`,
+    },
+  ];
+}
+
+export function buildOrtFaq(ort: Ort): FaqItem[] {
+  const all = FAQ_TEMPLATES(ort);
+  // Plocka 8–12 frågor deterministiskt baserat på slug
+  const count = 8 + (seed(ort.slug + 'faqcount') % 5); // 8..12
+  const indices: number[] = [];
+  let i = 0;
+  while (indices.length < count && i < all.length * 4) {
+    const idx = seed(ort.slug + 'faq' + i) % all.length;
+    if (!indices.includes(idx)) indices.push(idx);
+    i++;
+  }
+  return indices.map((idx) => all[idx]);
+}
