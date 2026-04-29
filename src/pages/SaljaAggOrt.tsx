@@ -308,6 +308,36 @@ export default function SaljaAggOrt() {
           </section>
         )}
 
+        {/* FAQ */}
+        <section className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
+          <div className="container max-w-3xl mx-auto px-5 sm:px-6">
+            <motion.div {...fadeUp()} className="text-center mb-8">
+              <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 inline-flex items-center gap-1.5">
+                <HelpCircle className="h-3 w-3" /> Vanliga frågor
+              </Badge>
+              <h2 className="font-serif text-2xl sm:text-3xl mb-2">
+                Vanliga frågor om att sälja ägg i {ort.name}
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                Snabba svar på det hönsägare i {ort.lan} oftast undrar innan de börjar sälja sina ägg lokalt.
+              </p>
+            </motion.div>
+
+            <Accordion type="single" collapsible className="rounded-2xl border border-border/50 bg-background divide-y divide-border/40">
+              {faq.map((f, i) => (
+                <AccordionItem key={i} value={`faq-${i}`} className="border-0 px-5 sm:px-6">
+                  <AccordionTrigger className="text-left text-[15px] sm:text-base font-medium py-4 hover:no-underline">
+                    {f.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-[15px] text-muted-foreground leading-relaxed pb-5">
+                    {f.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+
         {/* Slut-CTA */}
         <section className="py-16 sm:py-24">
           <div className="container max-w-3xl mx-auto px-5 sm:px-6 text-center">
