@@ -13,7 +13,7 @@ import Index from "./pages/IndexUpdated";
 import Login from "./pages/Login";
 
 const AppLayout = React.lazy(() => import("./components/AppLayout"));
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const Dashboard = React.lazy(() => import("./pages/DashboardV2"));
 const Eggs = React.lazy(() => import("./pages/Eggs"));
 const Hens = React.lazy(() => import("./pages/Hens"));
 const Finance = React.lazy(() => import("./pages/Finance"));
