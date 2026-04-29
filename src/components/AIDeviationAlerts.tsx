@@ -9,6 +9,8 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { api, type DeviationAlert, type DeviationAlertResponse, type DeviationAlertLevel } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
+import { readScoped, writeScoped } from '@/lib/userScopedStorage';
 
 type Signal = { key: string; data?: Record<string, unknown> };
 
