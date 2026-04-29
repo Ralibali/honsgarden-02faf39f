@@ -101,8 +101,8 @@ const faqs = [
   { q: 'Fungerar appen i mobilen och på dator?', a: 'Ja. Hönsgården är byggd för mobil, tablet och dator. Du kan logga ute vid hönshuset och hantera säljlistor eller export på större skärm.' },
 ];
 
-const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Fungerar i mobilen'];
-const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'Agda AI', 'Agdas Bod (gårdsbutik)', 'Bokningar och kundregister', 'Foder och ekonomi', 'Smarta påminnelser', 'Kläckningsstöd'];
+const freeFeatures = ['Äggloggning', 'Upp till 10 hönor', 'Hälsologg', 'Grundstatistik', 'Dagbok', 'Community-forum', 'Agdas Bod – sälj ägg lokalt', 'Fungerar i mobilen'];
+const plusFeatures = ['Allt i Gratis', 'Obegränsat antal hönor', 'Agda AI-konsult', 'Väder & AI-råd', 'Foderspårning & kostnad/ägg', 'Ekonomi, intäkter & export', 'Avancerad statistik & trender', 'Kläckningskalender', 'Anpassad dashboard', 'Smarta påminnelser & veckorapport'];
 
 export default function Index() {
   useSeo({
