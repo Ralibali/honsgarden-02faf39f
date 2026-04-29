@@ -204,7 +204,7 @@ export default function SaljaAggOrt() {
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.vardagsexempel}</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="priser">
                 <h2 className="font-serif text-2xl sm:text-3xl">Vad får man för ägg i {ort.name}?</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.prisIOrt}</p>
                 <ul className="space-y-2.5 pt-2">
@@ -236,7 +236,7 @@ export default function SaljaAggOrt() {
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.saSäljerDuMer}</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="leverans">
                 <h2 className="font-serif text-2xl sm:text-3xl">Hämtning, leverans och logistik i {ort.name}</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
                   En av de vanligaste orsakerna till att hönsägare i {ort.name} tappar köpare är otydlig logistik.
@@ -281,7 +281,7 @@ export default function SaljaAggOrt() {
                 </figcaption>
               </figure>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="regler">
                 <h2 className="font-serif text-2xl sm:text-3xl">Hygien, märkning och regler i korthet</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
                   För småskalig försäljning av ägg direkt från gård i Sverige (under 350 värphöns) räcker det i
@@ -300,7 +300,7 @@ export default function SaljaAggOrt() {
                 </ul>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4" id="sasong">
                 <h2 className="font-serif text-2xl sm:text-3xl">Säsong och klimat i {ort.region}</h2>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">{content.klimatNot}</p>
                 <p className="text-[15px] leading-relaxed text-muted-foreground">
@@ -465,6 +465,35 @@ export default function SaljaAggOrt() {
               </div>
             )}
 
+            {/* Se även – kategorier per län (jump-länkar inom sidan) */}
+            <div className="pt-2 border-t border-border/40">
+              <h2 className="font-serif text-xl sm:text-2xl mb-2">
+                Se även: kategorier för {ort.lan}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                Hoppa direkt till en specifik del av guiden för {ort.name} och {ort.lan}:
+              </p>
+              <ul className="flex flex-wrap gap-2 list-none p-0">
+                {[
+                  { hash: 'priser', label: `Priser i ${ort.lan}` },
+                  { hash: 'leverans', label: `Leverans i ${ort.lan}` },
+                  { hash: 'regler', label: `Regler i ${ort.lan}` },
+                  { hash: 'sasong', label: `Säsong i ${ort.region}` },
+                  { hash: 'faq', label: `Vanliga frågor – ${ort.name}` },
+                ].map((c) => (
+                  <li key={c.hash}>
+                    <a
+                      href={`#${c.hash}`}
+                      title={c.label}
+                      className="inline-flex items-center gap-1.5 text-sm rounded-full border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 px-3.5 py-1.5 transition-colors"
+                    >
+                      {c.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div className="pt-2">
               <Link
                 to="/salja-agg"
@@ -478,7 +507,7 @@ export default function SaljaAggOrt() {
 
 
         {/* FAQ */}
-        <section className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
+        <section id="faq" className="py-14 sm:py-20 bg-muted/20 border-y border-border/40">
           <div className="container max-w-3xl mx-auto px-5 sm:px-6">
             <motion.div {...fadeUp()} className="text-center mb-8">
               <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 inline-flex items-center gap-1.5">
