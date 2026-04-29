@@ -154,6 +154,28 @@ export default function News() {
             </Button>
           </div>
 
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Sök i titel eller text…"
+              aria-label="Sök i nyheter"
+              className="w-full rounded-xl border border-border bg-card pl-9 pr-9 py-2 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                aria-label="Rensa sökning"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrera nyheter">
             {([
               { key: 'all' as FilterKey, label: 'Alla' },
