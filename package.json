@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "optimize:images": "node scripts/optimize-blog-images.mjs",
-    "optimize:images:dry": "node scripts/optimize-blog-images.mjs --dry-run"
+    "optimize:images:dry": "node scripts/optimize-blog-images.mjs --dry-run",
+    "replace:blog-images": "node scripts/replace-blog-image-refs.mjs",
+    "replace:blog-images:dry": "node scripts/replace-blog-image-refs.mjs --dry-run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
