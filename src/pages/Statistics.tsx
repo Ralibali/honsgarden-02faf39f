@@ -308,24 +308,6 @@ export default function Statistics() {
                 </CardContent>
               </Card>
             </div>
-
-            {insights && insights.tips && (
-              <Card className="bg-card border-border shadow-sm">
-                <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="font-serif text-base sm:text-lg">📈 Fler insikter</CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6 pb-4">
-                  <ul className="space-y-2">
-                    {(Array.isArray(insights.tips) ? insights.tips : [insights.tips]).map((tip: string, i: number) => (
-                      <li key={i} className="flex gap-2 items-start text-sm text-foreground">
-                        <span className="text-primary mt-1 shrink-0">•</span>
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
           </>
         )}
       </div>
