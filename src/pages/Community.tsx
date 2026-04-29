@@ -119,6 +119,39 @@ export default function Community() {
 
   const userId = userData?.id;
 
+  const { data: isAdmin = false } = useQuery({
+    queryKey: ['community-is-admin', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId!)
+        .eq('role', 'admin')
+        .maybeSingle();
+      if (error) return false;
+      return !!data;
+    },
+  });
+
+  const togglePin = async (post: Post) => {
+    const { error } = await (supabase as any)
+      .from('community_posts')
+      .update({ is_pinned: !post.is_pinned })
+      .eq('id', post.id);
+    if (error) return toast({ title: 'Kunde inte uppdatera', description: error.message, variant: 'destructive' });
+    await qc.invalidateQueries({ queryKey: ['community-posts'] });
+    toast({ title: post.is_pinned ? 'Inlägget är inte längre fäst' : 'Inlägget är fäst högst upp 📌' });
+  };
+
+  const deleteComment = async (comment: Comment) => {
+    if (!window.confirm('Vill du ta bort kommentaren?')) return;
+    const { error } = await (supabase as any).from('community_comments').delete().eq('id', comment.id);
+    if (error) return toast({ title: 'Kunde inte ta bort', description: error.message, variant: 'destructive' });
+    await qc.invalidateQueries({ queryKey: ['community-comments'] });
+    toast({ title: 'Kommentaren är borttagen' });
+  };
+
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['community-posts'],
     queryFn: async () => {
