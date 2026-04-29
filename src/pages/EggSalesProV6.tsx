@@ -671,6 +671,65 @@ export default function EggSalesProV6() {
                 <Field label="Swishnamn" value={swishName} setValue={setSwishName} />
                 <Field label="Swish-meddelande" value={swishMessage} setValue={setSwishMessage} />
               </div>
+
+              <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-primary" />
+                    <p className="font-serif text-sm">Lager & autopublicering</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">Butiks-läge</Badge>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="space-y-1.5">
+                    <span className="text-xs text-muted-foreground">Lagerkälla</span>
+                    <select
+                      value={stockSource}
+                      onChange={(e) => setStockSource(e.target.value as 'manual' | 'egg_log')}
+                      className="w-full h-11 rounded-xl border border-input bg-background px-3 text-sm"
+                    >
+                      <option value="manual">Manuellt antal</option>
+                      <option value="egg_log">Räkna från äggloggen</option>
+                    </select>
+                  </label>
+
+                  {stockSource === 'manual' ? (
+                    <Field label="Antal kartor i lager" value={stockPacks} setValue={setStockPacks} type="number" />
+                  ) : (
+                    <div className="space-y-1.5">
+                      <span className="text-xs text-muted-foreground">Beräknat från äggloggen (14 d)</span>
+                      <div className="h-11 rounded-xl border border-input bg-muted/30 px-3 flex items-center text-sm">
+                        <Package className="h-3.5 w-3.5 mr-2 text-primary" />
+                        <strong>{eggLogStock}</strong>&nbsp;kartor tillgängliga
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autoPublish}
+                    onChange={(e) => setAutoPublish(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-input"
+                  />
+                  <span>
+                    <span className="font-medium">Autopublicering</span>
+                    <span className="block text-xs text-muted-foreground">
+                      Pausa annonsen automatiskt när lagret är slut, och återaktivera när du fyller på.
+                    </span>
+                  </span>
+                </label>
+
+                {stockSource === 'manual' && Number(stockPacks) === 0 && autoPublish && (
+                  <div className="flex items-start gap-2 rounded-xl bg-amber-100 border border-amber-300 p-2 text-xs text-amber-900">
+                    <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                    <span>Lagret är tomt – annonsen markeras som slutsåld vid publicering.</span>
+                  </div>
+                )}
+              </div>
+
               <div className="rounded-2xl bg-muted/25 border p-4 space-y-3"><p className="text-sm break-all">{saleUrl}</p><div className="grid grid-cols-1 sm:grid-cols-3 gap-2"><Button onClick={publishListing} disabled={publishing} className="rounded-xl">{editingId ? 'Uppdatera' : 'Publicera'}</Button><Button variant="outline" onClick={() => copyText(saleUrl, 'Säljlänken')} className="rounded-xl">Kopiera</Button><Button variant="outline" onClick={() => window.open(saleUrl, '_blank')} className="rounded-xl">Visa</Button></div></div>
             </CardContent>
           </Card>
