@@ -49,6 +49,7 @@ const PublicEggSale = React.lazy(() => import("./pages/PublicEggSaleV3"));
 const PublicReview = React.lazy(() => import("./pages/PublicReview"));
 const News = React.lazy(() => import("./pages/News"));
 const Weather = React.lazy(() => import("./pages/Weather"));
+const SaljaAgg = React.lazy(() => import("./pages/SaljaAgg"));
 
 const GuiderRedirect = () => {
   const { slug } = useParams<{ slug?: string }>();
@@ -114,6 +115,7 @@ const AppRoutes = () => (
         <Route path="/foderkostnad-hons" element={<SeoLandingPage pageKey="foderkostnad-hons" />} />
         <Route path="/klackningskalender" element={<SeoLandingPage pageKey="klackningskalender" />} />
         <Route path="/borja-med-hons" element={<SeoLandingPage pageKey="borja-med-hons" />} />
+        <Route path="/salja-agg" element={<SaljaAgg />} />
         <Route path="/s/agg" element={<PublicEggSale />} />
         <Route path="/s/:slug" element={<PublicEggSale />} />
         <Route path="/r/:token" element={<PublicReview />} />
