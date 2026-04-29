@@ -98,6 +98,8 @@ export default function SaljaAggOrt() {
     .filter((o): o is NonNullable<typeof o> => Boolean(o));
 
   const content = buildOrtContent(ort);
+  const images = buildOrtImages(ort);
+  const henImg = buildOrtHenImage(ort);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
