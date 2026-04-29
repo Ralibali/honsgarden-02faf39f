@@ -69,6 +69,8 @@ export default function Weather() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [advice, setAdvice] = useState<{
+    summary?: string;
+    production_forecast?: string;
     today_advice: string;
     week_advice: string;
     history_insight: string;
