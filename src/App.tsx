@@ -45,6 +45,7 @@ const SeasonalCalendar = React.lazy(() => import("./pages/SeasonalCalendar"));
 const SeoLandingPage = React.lazy(() => import("./pages/SeoLandingPage"));
 const EggSales = React.lazy(() => import("./pages/EggSalesProV6"));
 const PublicEggSale = React.lazy(() => import("./pages/PublicEggSaleV3"));
+const News = React.lazy(() => import("./pages/News"));
 
 const GuiderRedirect = () => {
   const { slug } = useParams<{ slug?: string }>();
@@ -146,6 +147,7 @@ const AppRoutes = () => (
           <Route path="agda" element={<Agda />} />
           <Route path="import" element={<Import />} />
           <Route path="calendar" element={<SeasonalCalendar />} />
+          <Route path="news" element={<News />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
