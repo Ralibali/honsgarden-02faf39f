@@ -163,7 +163,6 @@ export default function DashboardFocusPanel() {
   const hasLoggedToday = todayEggs > 0;
   const weekEggs = sumEggsSince(eggs as any[], startOfIsoWeek(new Date()));
   const hasImportant = importantChores.length > 0;
-  const statBoxes = hasImportant ? 4 : 3;
 
   const openAction = (path: string) => {
     setDetailsOpen(false);
