@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Egg, Bird, CalendarDays, Coins, Thermometer, Lightbulb,
   ArrowRight, BookOpen, Loader2, Plus, TrendingUp, Sparkles, Feather,
-  Flame, Award, Heart, Sun, CloudRain, Snowflake, Wind, ChevronDown, ChevronUp,
+  Flame, Award, Heart, Sun, CloudRain, Snowflake, Wind, ChevronDown, ChevronUp, Settings2,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -27,6 +27,9 @@ import { buildAchievements } from '@/components/Achievements';
 import EggGoalsWidget from '@/components/EggGoalsWidget';
 import DashboardAICoach from '@/components/DashboardAICoach';
 import AIDeviationAlerts from '@/components/AIDeviationAlerts';
+import DashboardCustomizeSheet, { type DashboardWidgetMeta } from '@/components/DashboardCustomizeSheet';
+import { useDashboardLayout } from '@/hooks/useDashboardLayout';
+import { Button as UIButton } from '@/components/ui/button';
 
 function getGreeting() {
   const now = new Date();
