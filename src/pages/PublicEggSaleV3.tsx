@@ -21,6 +21,7 @@ export default function PublicEggSaleV3() {
   const shouldLoadSlug = Boolean(slug && slug !== 'agg');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [packs, setPacks] = useState('1');
   const [wlName, setWlName] = useState('');
