@@ -138,10 +138,21 @@ Deno.serve(async (req) => {
       )
       .join("\n");
 
-    const eggSummary = Object.entries(eggsByDay)
+    const eggEntries = Object.entries(eggsByDay);
+    const eggSummary = eggEntries
       .slice(-14)
       .map(([d, c]) => `${d}: ${c} ägg`)
       .join("\n");
+
+    // Beräkna snitt för kontext
+    const last7 = eggEntries.slice(-7).map(([, c]) => c);
+    const prev7 = eggEntries.slice(-14, -7).map(([, c]) => c);
+    const avg = (arr: number[]) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+    const avg7 = avg(last7).toFixed(1);
+    const avgPrev7 = avg(prev7).toFixed(1);
+    const trend = eggEntries.length >= 14
+      ? `Snitt senaste 7 dagar: ${avg7} ägg/dag (föregående vecka: ${avgPrev7}).`
+      : `Otillräcklig historik för trendberäkning.`;
 
     const systemPrompt = `Du är Agda, en varm och kunnig svensk hönsexpert. Skriv på naturlig svenska, kortfattat och konkret. Inga emojis. Ge inga medicinska råd – hänvisa till veterinär vid hälsoproblem. Format: ren text utan rubriker, max 3-4 meningar per fält.`;
 
@@ -154,8 +165,9 @@ ${dailySummary}
 
 Äggproduktion senaste 14 dagarna:
 ${eggSummary || "Inga loggade ägg"}
+${trend}
 
-Generera tre korta råd som JSON via verktyget weather_advice.`;
+Generera en sammanfattning, en produktionsprognos och tre korta råd som JSON via verktyget weather_advice.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -178,6 +190,16 @@ Generera tre korta råd som JSON via verktyget weather_advice.`;
               parameters: {
                 type: "object",
                 properties: {
+                  summary: {
+                    type: "string",
+                    description:
+                      "1-2 meningar som sammanfattar vädret, säsongen och hur det troligen påverkar gården just nu. Skriv personligt och varmt, som om du pratar med ägaren.",
+                  },
+                  production_forecast: {
+                    type: "string",
+                    description:
+                      "Kort prognos (1-2 meningar) på hur äggproduktionen sannolikt utvecklas kommande 7 dagar givet väder, säsong och historik. Nämn gärna ungefärligt antal ägg/dag om historiken tillåter.",
+                  },
                   today_advice: {
                     type: "string",
                     description:
@@ -194,7 +216,7 @@ Generera tre korta råd som JSON via verktyget weather_advice.`;
                       "En observation om hur vädret kan ha påverkat äggproduktionen senaste tiden, eller säsongsmönster för månaden.",
                   },
                 },
-                required: ["today_advice", "week_advice", "history_insight"],
+                required: ["summary", "production_forecast", "today_advice", "week_advice", "history_insight"],
                 additionalProperties: false,
               },
             },
@@ -231,6 +253,8 @@ Generera tre korta råd som JSON via verktyget weather_advice.`;
       longitude,
       city_name: city_name ?? null,
       weather_snapshot: weather,
+      summary: args.summary ?? "",
+      production_forecast: args.production_forecast ?? "",
       today_advice: args.today_advice ?? "",
       week_advice: args.week_advice ?? "",
       history_insight: args.history_insight ?? "",

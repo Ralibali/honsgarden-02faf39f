@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Wind, Droplets, CalendarDays, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Cloud, Crown, Loader2, RefreshCw, Sparkles, Thermometer, Wind, Droplets, CalendarDays, Lightbulb, TrendingUp, Egg } from 'lucide-react';
 import { toast } from 'sonner';
 
 const WEATHER_ICONS: Record<string, string> = {
@@ -69,6 +69,8 @@ export default function Weather() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [advice, setAdvice] = useState<{
+    summary?: string;
+    production_forecast?: string;
     today_advice: string;
     week_advice: string;
     history_insight: string;
@@ -230,6 +232,24 @@ export default function Weather() {
                 </div>
               ) : advice ? (
                 <div className="space-y-4">
+                  {advice.summary && (
+                    <div className="rounded-xl bg-primary/10 border border-primary/20 p-4">
+                      <p className="text-sm leading-relaxed text-foreground font-medium">
+                        {advice.summary}
+                      </p>
+                    </div>
+                  )}
+                  {advice.production_forecast && (
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground mb-1.5">
+                        <TrendingUp className="h-3 w-3" /> Produktionsprognos kommande vecka
+                      </div>
+                      <p className="text-sm leading-relaxed text-foreground flex gap-2">
+                        <Egg className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span>{advice.production_forecast}</span>
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground mb-1.5">
                       <Thermometer className="h-3 w-3" /> För dina höns idag
