@@ -168,7 +168,7 @@ export default function SmartStatisticsOverview() {
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {insights.map((item) => {
+            {visibleInsights.map((item) => {
               const Icon = item.icon;
               return (
                 <div key={item.title} className={`rounded-2xl border p-4 ${item.tone === 'good' ? 'bg-success/5 border-success/20' : item.tone === 'warn' ? 'bg-warning/5 border-warning/20' : 'bg-muted/20 border-border/50'}`}>
@@ -192,6 +192,14 @@ export default function SmartStatisticsOverview() {
               );
             })}
           </div>
+          {insights.length > 2 && (
+            <button
+              onClick={() => setShowAllInsights((v) => !v)}
+              className="w-full mt-3 text-xs font-medium text-primary hover:text-primary/80 transition-colors py-2 rounded-xl hover:bg-muted/40"
+            >
+              {showAllInsights ? 'Visa mindre' : `Visa ${insights.length - 2} insikter till`}
+            </button>
+          )}
         </CardContent>
       </Card>
     </section>
